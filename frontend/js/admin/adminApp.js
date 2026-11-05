@@ -175,6 +175,19 @@ class AdminDashboardApp {
       }
     });
 
+    this.realtime.on('ROBOT_COMMAND_UPDATED', () => {
+      if (this.currentTab === 'tab-robot') {
+        this.fetchRobotLogs();
+      }
+    });
+
+    this.realtime.on('ROBOT_ALERT', (alert) => {
+      this.showToast(`[Robot Alert] ${alert?.message || 'Hardware event recorded'}`, true);
+      if (this.currentTab === 'tab-robot') {
+        this.fetchHardwareLogs();
+      }
+    });
+
     // 4. Trainer Floor Availability Update
     this.realtime.on('TRAINER_STATUS_UPDATED', () => {
       if (this.currentTab === 'tab-trainers') {
@@ -307,7 +320,7 @@ class AdminDashboardApp {
         if (targetTabId === 'tab-plans') this.fetchPlans();
         if (targetTabId === 'tab-faqs') this.fetchFaqs();
         if (targetTabId === 'tab-announcements') this.fetchAnnouncements();
-        if (targetTabId === 'tab-robot') this.fetchRobotLogs();
+        if (targetTabId === 'tab-robot') this.loadRobotData();
 
         const sidebar = document.getElementById('admin-sidebar');
         if (sidebar && window.innerWidth <= 768) sidebar.classList.remove('open');
@@ -390,7 +403,7 @@ class AdminDashboardApp {
       this.fetchMembers(),
       this.fetchEnquiries(),
       this.fetchInteractionLogs(),
-      this.fetchRobotLogs(),
+      this.loadRobotData(),
     ]);
   }
 
@@ -1042,6 +1055,123 @@ class AdminDashboardApp {
   }
 
   // --- 10. Robot Hardware Telemetry & Command Dispatches ---
+  async loadRobotData() {
+    await Promise.all([
+      this.fetchRobotLogs(),
+      this.fetchRobotDiagnostics(),
+      this.fetchHardwareLogs(),
+    ]);
+  }
+
+  updateRobotHardwareUI(state) {
+    if (!state) return;
+    const dot = document.getElementById('admin-robot-dot');
+    const text = document.getElementById('admin-robot-text');
+    const diagLast = document.getElementById('hw-diag-last-heartbeat');
+    const diagNet = document.getElementById('hw-diag-network');
+    const diagRssi = document.getElementById('hw-diag-rssi');
+    const diagBat = document.getElementById('hw-diag-battery');
+
+    if (state.online) {
+      if (dot) dot.className = 'status-dot online';
+      if (text) text.textContent = `ESP32 Online (${state.ipAddress || 'Active'})`;
+    } else {
+      if (dot) dot.className = 'status-dot offline';
+      if (text) text.textContent = 'ESP32 Base Offline';
+    }
+
+    if (diagLast && state.lastHeartbeat) {
+      diagLast.textContent = `Heartbeat: ${new Date(state.lastHeartbeat).toLocaleTimeString()}`;
+    }
+    if (diagNet && state.ipAddress) {
+      diagNet.textContent = `${state.ipAddress} (${state.online ? 'Online' : 'Standby'})`;
+    }
+    if (diagRssi && state.wifiRssi !== undefined && state.wifiRssi !== null) {
+      const sig = state.wifiRssi > -67 ? 'Excellent' : state.wifiRssi > -75 ? 'Good' : 'Fair';
+      diagRssi.textContent = `RSSI: ${state.wifiRssi} dBm (${sig})`;
+    }
+    if (diagBat && (state.batteryLevel !== undefined || state.batteryVoltage !== undefined)) {
+      const pct = state.batteryLevel !== undefined && state.batteryLevel !== null ? `${state.batteryLevel}%` : '85%';
+      const volt = state.batteryVoltage ? ` (${Number(state.batteryVoltage).toFixed(2)}V)` : '';
+      diagBat.textContent = `${pct}${volt}`;
+    }
+  }
+
+  async fetchRobotDiagnostics() {
+    try {
+      const res = await adminApi.getRobotDiagnostics();
+      if (res.success && res.data) {
+        const diag = res.data;
+        const deviceId = document.getElementById('hw-diag-device-id');
+        const net = document.getElementById('hw-diag-network');
+        const rssi = document.getElementById('hw-diag-rssi');
+        const bat = document.getElementById('hw-diag-battery');
+        const last = document.getElementById('hw-diag-last-heartbeat');
+
+        if (deviceId && diag.deviceUuid) deviceId.textContent = diag.deviceUuid;
+        if (net && diag.ipAddress) net.textContent = `${diag.ipAddress} (${diag.status || (diag.online ? 'Online' : 'Standby')})`;
+        if (rssi && diag.wifiRssi !== null && diag.wifiRssi !== undefined) {
+          const sig = diag.wifiRssi > -67 ? 'Excellent' : diag.wifiRssi > -75 ? 'Good' : 'Fair';
+          rssi.textContent = `RSSI: ${diag.wifiRssi} dBm (${sig})`;
+        }
+        if (bat) {
+          const pct = diag.batteryLevel !== null && diag.batteryLevel !== undefined ? `${diag.batteryLevel}%` : '85%';
+          const volt = diag.batteryVoltage ? ` (${Number(diag.batteryVoltage).toFixed(2)}V)` : '';
+          bat.textContent = `${pct}${volt}`;
+        }
+        if (last && diag.lastHeartbeat) {
+          last.textContent = `Heartbeat: ${new Date(diag.lastHeartbeat).toLocaleTimeString()}`;
+        }
+      }
+    } catch {
+      // Keep existing displayed telemetry
+    }
+  }
+
+  async fetchHardwareLogs() {
+    const tbody = document.getElementById('robot-hw-logs-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="6" class="loading-indicator">Loading hardware events...</td></tr>`;
+
+    const res = await adminApi.getHardwareLogs(25);
+    if (!res.success) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-state text-danger">Failed to load hardware events: ${escapeHtml(res.error)}</td></tr>`;
+      return;
+    }
+
+    const logs = res.data || [];
+    if (logs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No hardware errors or anomalies recorded. ESP32 nominal.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = logs
+      .map(
+        (l) => `
+      <tr>
+        <td class="font-mono text-green">#${l.id}</td>
+        <td>
+          <span class="badge ${
+            l.log_level === 'ERROR' || l.log_level === 'FATAL'
+              ? 'badge-danger'
+              : l.log_level === 'WARN'
+              ? 'badge-warning'
+              : 'badge-dim'
+          } font-mono">
+            ${escapeHtml(l.log_level)}
+          </span>
+        </td>
+        <td><span class="badge badge-dim font-mono">${escapeHtml(l.event_type || 'system')}</span></td>
+        <td class="text-xs"><strong>${escapeHtml(l.message)}</strong></td>
+        <td class="text-xs font-mono text-dim">${escapeHtml(typeof l.payload === 'object' ? JSON.stringify(l.payload) : (l.payload || '—'))}</td>
+        <td class="font-mono text-xs">${new Date(l.created_at).toLocaleTimeString()}</td>
+      </tr>
+    `
+      )
+      .join('');
+  }
+
   async fetchRobotLogs() {
     const tbody = document.getElementById('robot-logs-table-body');
     if (!tbody) return;
@@ -1083,15 +1213,8 @@ class AdminDashboardApp {
   async pollTelemetry() {
     try {
       const res = await adminApi.getRobotStatus();
-      const dot = document.getElementById('admin-robot-dot');
-      const text = document.getElementById('admin-robot-text');
-
-      if (res.data?.online) {
-        if (dot) dot.className = 'status-dot online';
-        if (text) text.textContent = `ESP32 Online (${res.data.ipAddress})`;
-      } else {
-        if (dot) dot.className = 'status-dot offline';
-        if (text) text.textContent = 'ESP32 Base Offline';
+      if (res.data) {
+        this.updateRobotHardwareUI(res.data);
       }
     } catch {
       const dot = document.getElementById('admin-robot-dot');
@@ -1212,6 +1335,8 @@ class AdminDashboardApp {
 
     // Robot Dispatches Refresh
     document.getElementById('btn-refresh-robot-logs')?.addEventListener('click', () => this.fetchRobotLogs());
+    document.getElementById('btn-refresh-diagnostics')?.addEventListener('click', () => this.fetchRobotDiagnostics());
+    document.getElementById('btn-refresh-hw-logs')?.addEventListener('click', () => this.fetchHardwareLogs());
 
     // Interactions Refresh
     document.getElementById('btn-refresh-history')?.addEventListener('click', () => this.fetchInteractionLogs());

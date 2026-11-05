@@ -95,49 +95,114 @@ export async function queueCommand(cmd, client) {
 }
 
 /**
- * Mark a robot command as delivered or executed
- * @param {number} commandId
- * @param {string} [status='delivered']
+ * Mark a robot command as delivered, executed, or failed with performance execution metrics
+ * @param {number|string} commandId
+ * @param {string|Object} options - Either status string or { status, executionTimeMs, errorMessage }
  * @param {import('pg').PoolClient} [client]
  */
-export async function updateCommandStatus(commandId, status = 'delivered', client) {
+export async function updateCommandStatus(commandId, options = 'delivered', client) {
+  const opts = typeof options === 'string' ? { status: options } : (options || {});
+  const { status = 'delivered', executionTimeMs = null, errorMessage = null } = opts;
+
   const executor = client || { query };
-  await executor.query(`UPDATE robot_commands SET status = $1 WHERE id = $2;`, [status, commandId]);
+  const sql = `
+    UPDATE robot_commands
+    SET status = $1,
+        execution_time_ms = COALESCE($2, execution_time_ms),
+        error_message = COALESCE($3, error_message),
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $4
+    RETURNING id, device_id, command_type, gesture_name, status, execution_time_ms, error_message, updated_at;
+  `;
+
+  const res = await executor.query(sql, [status, executionTimeMs, errorMessage, commandId]);
+
   try {
-    await executor.query(`UPDATE robot_command_logs SET status = $1 WHERE id = $2;`, [status, commandId]);
+    await executor.query(
+      `UPDATE robot_command_logs
+       SET status = $1,
+           execution_time_ms = COALESCE($2, execution_time_ms),
+           error_message = COALESCE($3, error_message)
+       WHERE id = $4;`,
+      [status, executionTimeMs, errorMessage, commandId]
+    );
   } catch (e) {
-    // Ignored
+    // Ignored for legacy table
   }
+
+  return res.rows[0] || null;
 }
 
 /**
  * Log a hardware or runtime diagnostic event to robot_logs
- * @param {Object} logData
+ * @param {Object} logData - { deviceId, logLevel, eventType, message, payload }
  * @param {import('pg').PoolClient} [client]
  */
 export async function logRobotEvent(logData, client) {
   const {
     deviceId = 1,
-    logLevel = 'info',
-    category = 'hardware',
+    logLevel = 'INFO',
+    eventType = 'hardware',
     message,
-    metadata = {},
+    payload = {},
   } = logData;
 
+  const validLevel = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'].includes(String(logLevel).toUpperCase())
+    ? String(logLevel).toUpperCase()
+    : 'INFO';
+
   const sql = `
-    INSERT INTO robot_logs (device_id, log_level, category, message, metadata)
+    INSERT INTO robot_logs (device_id, log_level, event_type, message, payload)
     VALUES ($1, $2, $3, $4, $5)
-    RETURNING id, device_id, log_level, category, message, created_at;
+    RETURNING id, device_id, log_level, event_type, message, payload, created_at;
   `;
+
   const executor = client || { query };
   const res = await executor.query(sql, [
     deviceId,
-    logLevel,
-    category,
+    validLevel,
+    eventType || 'hardware',
     message,
-    JSON.stringify(metadata),
+    JSON.stringify(payload || {}),
   ]);
   return res.rows[0];
+}
+
+/**
+ * Retrieve recent robot hardware diagnostic logs
+ * @param {number} [limit=20]
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function getRecentRobotLogs(limit = 20, client) {
+  const sql = `
+    SELECT id, device_id, log_level, event_type, message, payload, created_at
+    FROM robot_logs
+    ORDER BY id DESC
+    LIMIT $1;
+  `;
+  const executor = client || { query };
+  const res = await executor.query(sql, [limit]);
+  return res.rows;
+}
+
+/**
+ * Retrieve full robot hardware diagnostics and device profile
+ * Secure: Strips api_key_hash from response
+ * @param {string} [deviceUuid='ESP32_RECEPTION_01']
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function getDeviceDiagnostics(deviceUuid = 'ESP32_RECEPTION_01', client) {
+  const sql = `
+    SELECT id, device_uuid, device_name, mac_address, ip_address, status,
+           firmware_version, head_pan_pin, head_tilt_pin, arm_wave_pin,
+           battery_level, wifi_rssi, is_enabled, last_heartbeat, created_at, updated_at
+    FROM robot_devices
+    WHERE device_uuid = $1
+    LIMIT 1;
+  `;
+  const executor = client || { query };
+  const res = await executor.query(sql, [deviceUuid]);
+  return res.rows[0] || null;
 }
 
 /**
@@ -147,7 +212,7 @@ export async function logRobotEvent(logData, client) {
  */
 export async function getRecentCommands(limit = 20, client) {
   const sql = `
-    SELECT id, device_id, command_type, gesture_name, servo_payload, status, priority, triggered_by, created_at
+    SELECT id, device_id, command_type, gesture_name, servo_payload, status, priority, triggered_by, execution_time_ms, error_message, created_at
     FROM robot_commands
     ORDER BY id DESC
     LIMIT $1;

@@ -588,4 +588,26 @@ export const adminApi = {
       return { success: false, error: err.message };
     }
   },
+
+  async getRobotDiagnostics() {
+    try {
+      const res = await fetch(`${BASE_URL}/robot/diagnostics`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getHardwareLogs(limit = 20) {
+    try {
+      const res = await fetch(`${BASE_URL}/robot/hardware-logs?limit=${limit}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
 };

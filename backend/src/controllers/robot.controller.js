@@ -86,6 +86,9 @@ export async function postHeartbeat(req, res, next) {
       deviceUuid: req.robotDevice?.device_uuid || req.body.deviceUuid,
       ipAddress: req.body.ipAddress || req.ip,
       servos: req.body.servos,
+      wifiRssi: req.body.wifiRssi ?? req.body.rssi ?? null,
+      batteryLevel: req.body.batteryLevel ?? req.body.battery ?? null,
+      batteryVoltage: req.body.batteryVoltage ?? req.body.voltage ?? null,
     };
 
     const state = await robotService.updateRobotTelemetry(telemetry);
@@ -93,6 +96,105 @@ export async function postHeartbeat(req, res, next) {
     res.json({
       success: true,
       data: state,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/v1/robot/commands/:id/ack
+ * Acknowledge command completion from hardware
+ */
+export async function acknowledgeCommand(req, res, next) {
+  try {
+    const commandId = req.params.id;
+    const { status = 'executed', executionTimeMs, errorMessage } = req.body;
+
+    const result = await robotService.acknowledgeCommand(commandId, {
+      status,
+      executionTimeMs: executionTimeMs !== undefined ? Number(executionTimeMs) : null,
+      errorMessage: errorMessage || null,
+    });
+
+    broadcast('ROBOT_COMMAND_UPDATED', result, { channel: 'all' });
+
+    res.json({
+      success: true,
+      message: 'Command execution acknowledged.',
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/v1/robot/errors or /logs
+ * Record hardware error or telemetry anomaly from ESP32
+ */
+export async function postErrorLog(req, res, next) {
+  try {
+    const deviceId = req.robotDevice?.id || req.body.deviceId || 1;
+    const { logLevel = 'INFO', eventType = 'hardware', message, payload } = req.body;
+
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Message string is required for hardware log.',
+      });
+    }
+
+    const logRecord = await robotService.logHardwareEvent({
+      deviceId,
+      logLevel,
+      eventType,
+      message,
+      payload,
+    });
+
+    if (['ERROR', 'WARN', 'FATAL'].includes(String(logLevel).toUpperCase())) {
+      broadcast('ROBOT_ALERT', { logLevel, eventType, message }, { channel: 'admin' });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Hardware log recorded successfully.',
+      data: logRecord,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/robot/diagnostics
+ * Return comprehensive hardware diagnostic report for Admin Console
+ */
+export async function getDiagnostics(req, res, next) {
+  try {
+    const data = await robotService.getDiagnostics();
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/robot/hardware-logs
+ * Retrieve raw hardware diagnostic/error logs
+ */
+export async function getHardwareLogs(req, res, next) {
+  try {
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const logs = await robotService.getHardwareLogs(limit);
+    res.json({
+      success: true,
+      count: logs.length,
+      data: logs,
     });
   } catch (err) {
     next(err);

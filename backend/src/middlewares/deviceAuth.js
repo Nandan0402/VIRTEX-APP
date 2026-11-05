@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { config } from '../config/env.js';
 import { query, isDatabaseConnected } from '../config/database.js';
+import { authenticateToken } from './auth.js';
 
 /**
  * Constant-time string comparison to prevent timing attacks on hardware API keys
@@ -89,5 +90,15 @@ export async function authenticateRobotDevice(req, res, next) {
       error: 'Hardware authentication service error.',
     });
   }
+}
+
+/**
+ * Flexible Authenticator: Accepts either ESP32 device headers or Staff JWT Authorization Bearer
+ */
+export async function authenticateRobotOrStaff(req, res, next) {
+  if (req.headers['x-robot-device-id'] || req.headers['x-device-id']) {
+    return authenticateRobotDevice(req, res, next);
+  }
+  return authenticateToken(req, res, next);
 }
 

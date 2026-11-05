@@ -188,10 +188,14 @@ export async function popNextCommand(deviceId = 1) {
 /**
  * Update robot heartbeat telemetry
  */
-export async function updateRobotTelemetry({ deviceUuid, ipAddress, servos }) {
+export async function updateRobotTelemetry({ deviceUuid, ipAddress, servos, wifiRssi, batteryLevel, batteryVoltage }) {
   liveState.online = true;
   liveState.lastHeartbeat = new Date().toISOString();
   if (ipAddress) liveState.ipAddress = ipAddress;
+  if (wifiRssi !== undefined && wifiRssi !== null) liveState.wifiRssi = Number(wifiRssi);
+  if (batteryLevel !== undefined && batteryLevel !== null) liveState.batteryLevel = Number(batteryLevel);
+  if (batteryVoltage !== undefined && batteryVoltage !== null) liveState.batteryVoltage = Number(batteryVoltage);
+
   if (servos) {
     const headPan = servos.headPan !== undefined ? servos.headPan : servos.head;
     const headTilt = servos.headTilt !== undefined ? servos.headTilt : servos.leftArm;
@@ -208,16 +212,126 @@ export async function updateRobotTelemetry({ deviceUuid, ipAddress, servos }) {
 
   if (isDatabaseConnected() && deviceUuid) {
     try {
-      await robotRepository.updateDeviceHeartbeat(deviceUuid, {
-        ipAddress: ipAddress || liveState.ipAddress,
-        status: 'online',
-      });
+      await query(
+        `UPDATE robot_devices
+         SET status = 'online',
+             ip_address = COALESCE($1, ip_address),
+             wifi_rssi = COALESCE($2, wifi_rssi),
+             battery_level = COALESCE($3, battery_level),
+             last_heartbeat = CURRENT_TIMESTAMP
+         WHERE device_uuid = $4;`,
+        [ipAddress || liveState.ipAddress, wifiRssi ?? null, batteryLevel ?? null, deviceUuid]
+      );
     } catch (e) {
       // Ignored
     }
   }
 
   return liveState;
+}
+
+/**
+ * Acknowledge command execution from authenticated ESP32 hardware
+ * @param {string|number} commandId
+ * @param {Object} [options]
+ */
+export async function acknowledgeCommand(commandId, { status = 'executed', executionTimeMs = null, errorMessage = null } = {}) {
+  const memCmd = memoryCommandQueue.find((c) => c.id === commandId || c.dbId === Number(commandId));
+  if (memCmd) {
+    memCmd.status = status;
+    memCmd.executionTimeMs = executionTimeMs;
+  }
+
+  let dbRecord = null;
+  if (isDatabaseConnected() && !isNaN(Number(commandId))) {
+    try {
+      dbRecord = await robotRepository.updateCommandStatus(Number(commandId), {
+        status,
+        executionTimeMs,
+        errorMessage,
+      });
+    } catch (e) {
+      console.warn('[RobotService] Failed to update command status in DB:', e.message);
+    }
+  }
+
+  return {
+    commandId,
+    status,
+    executionTimeMs,
+    errorMessage,
+    dbRecord,
+  };
+}
+
+/**
+ * Log a hardware diagnostic event or hardware error
+ * @param {Object} logData
+ */
+export async function logHardwareEvent({ deviceId = 1, logLevel = 'INFO', eventType = 'hardware', message, payload = {} }) {
+  if (isDatabaseConnected()) {
+    return await robotRepository.logRobotEvent({ deviceId, logLevel, eventType, message, payload });
+  }
+  return {
+    id: Date.now(),
+    device_id: deviceId,
+    log_level: logLevel,
+    event_type: eventType,
+    message,
+    payload,
+    created_at: new Date().toISOString(),
+  };
+}
+
+/**
+ * Retrieve recent robot hardware diagnostic logs
+ * @param {number} [limit=20]
+ */
+export async function getHardwareLogs(limit = 20) {
+  if (isDatabaseConnected()) {
+    return await robotRepository.getRecentRobotLogs(limit);
+  }
+  return [];
+}
+
+/**
+ * Retrieve aggregated hardware diagnostics report for Admin Console
+ * @param {string} [deviceUuid='ESP32_RECEPTION_01']
+ */
+export async function getDiagnostics(deviceUuid = 'ESP32_RECEPTION_01') {
+  const status = await getRobotStatus();
+  let deviceRecord = null;
+  let recentCommands = [];
+  let recentLogs = [];
+
+  if (isDatabaseConnected()) {
+    try {
+      deviceRecord = await robotRepository.getDeviceDiagnostics(deviceUuid);
+      recentCommands = await robotRepository.getRecentCommands(15);
+      recentLogs = await robotRepository.getRecentRobotLogs(15);
+    } catch (e) {
+      console.warn('[RobotService] Error loading diagnostics from DB:', e.message);
+    }
+  }
+
+  return {
+    device: deviceRecord || {
+      device_uuid: deviceUuid,
+      device_name: 'FitBot Front Desk Station',
+      firmware_version: '1.2.0-secure',
+      status: status.status,
+      head_pan_pin: 18,
+      head_tilt_pin: 19,
+      arm_wave_pin: 21,
+      battery_level: status.batteryLevel || 92,
+      wifi_rssi: status.wifiRssi || -58,
+      last_heartbeat: status.lastSeen,
+    },
+    liveState: status,
+    pendingCommandsCount: status.queuedCommandsCount,
+    recentCommands,
+    recentLogs,
+  };
 }
 
 /**

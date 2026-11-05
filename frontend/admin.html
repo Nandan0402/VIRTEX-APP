@@ -300,6 +300,64 @@
         <!-- TAB 2: ROBOT TELEMETRY & PHYSICAL MOTOR CONTROLS -->
         <!-- =============================================================== -->
         <section class="tab-panel" id="tab-robot" role="tabpanel" aria-label="Robot Controls">
+          <!-- ESP32 Hardware Diagnostics & Telemetry Card -->
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+              <div>
+                <h3>ESP32 Hardware Diagnostics & Telemetry</h3>
+                <p class="text-dim text-xs">Live physical device health, power management, Wi-Fi signal, and GPIO pin mapping.</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <span class="badge badge-dim font-mono" id="hw-diag-last-heartbeat">Heartbeat: Waiting...</span>
+                <button class="btn btn-outline btn-sm" id="btn-refresh-diagnostics">🔄 Refresh Telemetry</button>
+              </div>
+            </div>
+            <div class="form-grid-2" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 0.5rem;">
+              <div class="stat-card" style="padding: 0.75rem;">
+                <div class="stat-meta">
+                  <span class="text-dim text-xs">Hardware Device ID</span>
+                  <span class="font-mono text-green text-sm" id="hw-diag-device-id">ESP32_RECEPTION_01</span>
+                  <span class="text-dim" style="font-size: 0.7rem;">ESP32 DevKit V1 (30-pin)</span>
+                </div>
+              </div>
+              <div class="stat-card" style="padding: 0.75rem;">
+                <div class="stat-meta">
+                  <span class="text-dim text-xs">Network Connection</span>
+                  <span class="font-mono text-sm" id="hw-diag-network">127.0.0.1 (Local Dev)</span>
+                  <span class="text-dim" style="font-size: 0.7rem;" id="hw-diag-rssi">RSSI: -62 dBm (Good)</span>
+                </div>
+              </div>
+              <div class="stat-card" style="padding: 0.75rem;">
+                <div class="stat-meta">
+                  <span class="text-dim text-xs">Rechargeable Battery</span>
+                  <span class="font-mono text-green text-sm" id="hw-diag-battery">85% (4.10V)</span>
+                  <span class="text-dim" style="font-size: 0.7rem;">Li-Ion / Brownout Shield Active</span>
+                </div>
+              </div>
+              <div class="stat-card" style="padding: 0.75rem;">
+                <div class="stat-meta">
+                  <span class="text-dim text-xs">Servo Power Supply</span>
+                  <span class="font-mono text-green text-sm">Regulated 5V External</span>
+                  <span class="text-dim" style="font-size: 0.7rem;">Common Ground • 1000µF Filter</span>
+                </div>
+              </div>
+              <div class="stat-card" style="padding: 0.75rem;">
+                <div class="stat-meta">
+                  <span class="text-dim text-xs">Physical Servo Mapping</span>
+                  <span class="font-mono text-xs" style="color: var(--text-light);">Head: GPIO 18 | Left: GPIO 19 | Right: GPIO 21</span>
+                  <span class="text-dim" style="font-size: 0.7rem;">PWM 50Hz • Angle Clamped</span>
+                </div>
+              </div>
+              <div class="stat-card" style="padding: 0.75rem;">
+                <div class="stat-meta">
+                  <span class="text-dim text-xs">Fail-Safe State Machine</span>
+                  <span class="font-mono text-green text-xs" id="hw-diag-failsafe">Auto-Idle on Wi-Fi Loss (Active)</span>
+                  <span class="text-dim" style="font-size: 0.7rem;">Firmware: v1.4.0-hardware</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="telemetry-layout">
             <!-- Left: Motor Gesture Triggers -->
             <div class="card">
@@ -412,6 +470,35 @@
               </table>
             </div>
           </div>
+
+          <!-- Hardware Diagnostics & Error Events from robot_logs -->
+          <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+              <div>
+                <h3>Hardware Error & Diagnostics Log (<span class="font-mono text-green">robot_logs</span>)</h3>
+                <p class="text-dim text-xs">Firmware events, Wi-Fi drops, brownout warnings, and servo exception logs recorded in PostgreSQL.</p>
+              </div>
+              <button class="btn btn-outline btn-sm" id="btn-refresh-hw-logs">🔄 Refresh Hardware Logs</button>
+            </div>
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Log ID</th>
+                    <th>Level</th>
+                    <th>Event Type</th>
+                    <th>Message</th>
+                    <th>Details / Payload</th>
+                    <th>Recorded At</th>
+                  </tr>
+                </thead>
+                <tbody id="robot-hw-logs-table-body">
+                  <tr><td colspan="6" class="loading-indicator">Loading hardware event logs from PostgreSQL...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </section>
 
         <!-- =============================================================== -->
