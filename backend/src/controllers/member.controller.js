@@ -185,3 +185,35 @@ export async function lookupMember(req, res, next) {
   }
 }
 
+/**
+ * GET /api/v1/members/history/:memberId
+ * Retrieve check-in and membership history for a specific member
+ * RBAC: Members can only access their own history; Trainers/Managers/Owners can access any
+ */
+export async function getMemberHistory(req, res, next) {
+  try {
+    const memberId = Number(req.params.memberId);
+    const member = await memberService.getMemberById(memberId);
+    if (!member) {
+      return res.status(404).json({ success: false, error: 'Member not found.' });
+    }
+
+    const checkIns = await memberService.getRecentCheckIns(20);
+    const memberCheckIns = checkIns.filter(
+      (c) => c.member_id === memberId || c.member_code === member.member_code
+    );
+
+    res.json({
+      success: true,
+      data: {
+        member:
+          req.user && ['owner', 'manager', 'trainer', 'superadmin'].includes(req.user.role)
+            ? member
+            : maskMemberPII(member),
+        history: memberCheckIns,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}

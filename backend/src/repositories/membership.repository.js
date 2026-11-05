@@ -109,3 +109,4 @@ export async function findMembershipsByMemberId(memberId, client) {
   const result = await executor.query(sql, [memberId]);
   return result.rows;
 }
+

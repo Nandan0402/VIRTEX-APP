@@ -73,3 +73,4 @@ export async function updateGymSettings(settings, client) {
 
   return result.rows[0] || null;
 }
+

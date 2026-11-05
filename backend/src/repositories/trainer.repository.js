@@ -97,3 +97,4 @@ export async function updateTrainerStatus(id, status, client) {
   const res = await executor.query(sql, [status, id]);
   return res.rows[0] || null;
 }
+

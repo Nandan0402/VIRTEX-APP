@@ -72,14 +72,16 @@ async function main() {
       console.log('[Migrate] Applying non-destructive shared schema migrations...');
       await runSqlFile(path.join(migrationsDir, '001_shared_schema_upgrade.sql'));
       await runSqlFile(path.join(migrationsDir, '002_shared_seed_data.sql'));
+      await runSqlFile(path.join(migrationsDir, '003_auth_rbac_upgrade.sql'));
       const ok = await verifyTables();
       if (ok) {
-        console.log('\n[Migrate] 🎉 All 17 required shared tables verified successfully!');
+        console.log('\n[Migrate] 🎉 All 17 required shared tables and auth extensions verified successfully!');
       } else {
         console.warn('\n[Migrate] ⚠️ Some required tables are missing.');
       }
     } else if (command === 'down') {
       console.log('[Migrate] Rolling back shared schema migrations...');
+      await runSqlFile(path.join(migrationsDir, '003_auth_rbac_upgrade_down.sql'));
       await runSqlFile(path.join(migrationsDir, '002_shared_seed_data_down.sql'));
       await runSqlFile(path.join(migrationsDir, '001_shared_schema_upgrade_down.sql'));
       console.log('\n[Migrate] ✓ Rollback completed.');

@@ -6,11 +6,13 @@ import { validateLogin } from '../middlewares/validator.js';
 
 const router = Router();
 
-// POST /api/auth/login
+// POST /api/v1/auth/login
 router.post('/login', authRateLimiter, validateLogin, authController.login);
 
-// GET /api/auth/me (Protected by JWT)
+// POST /api/v1/auth/logout (Protected by JWT)
+router.post('/logout', authenticateToken, authController.logout);
+
+// GET /api/v1/auth/me (Protected by JWT)
 router.get('/me', authenticateToken, authController.getMe);
 
 export default router;
-

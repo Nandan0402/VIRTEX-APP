@@ -1,13 +1,16 @@
 import * as authService from '../services/auth.service.js';
 
 /**
- * POST /api/auth/login
- * Authenticates admin or trainer credentials, returns JWT bearer token
+ * POST /api/v1/auth/login
+ * Authenticates user credentials, generates signed JWT token with RBAC claims
  */
 export async function login(req, res, next) {
   try {
     const { username, password } = req.body;
-    const authResult = await authService.loginUser(username, password);
+    const authResult = await authService.loginUser(username, password, {
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
 
     res.json({
       success: true,
@@ -23,7 +26,29 @@ export async function login(req, res, next) {
 }
 
 /**
- * GET /api/auth/me
+ * POST /api/v1/auth/logout
+ * Revokes active JWT session token and logs audit event
+ */
+export async function logout(req, res, next) {
+  try {
+    const result = await authService.logoutUser({
+      token: req.rawToken,
+      user: req.user,
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+    });
+
+    res.json({
+      success: true,
+      message: result.message,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/auth/me
  * Returns authenticated user session details
  */
 export async function getMe(req, res, next) {
@@ -44,4 +69,3 @@ export async function getMe(req, res, next) {
     next(err);
   }
 }
-

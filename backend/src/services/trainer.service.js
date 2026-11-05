@@ -52,3 +52,21 @@ export async function getTrainers({ status } = {}) {
     return true;
   });
 }
+
+/**
+ * Update a trainer's on-floor status
+ * @param {number} trainerId
+ * @param {string} status - 'on_floor' | 'in_session' | 'off_duty'
+ */
+export async function updateTrainerStatus(trainerId, status) {
+  if (isDatabaseConnected()) {
+    return await trainerRepository.updateTrainerStatus(trainerId, status);
+  }
+
+  const trainer = MOCK_TRAINERS.find((t) => t.id === Number(trainerId));
+  if (trainer) {
+    trainer.status = status;
+    return trainer;
+  }
+  return null;
+}

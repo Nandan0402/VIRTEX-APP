@@ -170,3 +170,4 @@ export async function getRecentEnquiries(limit = 20, client) {
   const res = await executor.query(sql, [limit]);
   return res.rows;
 }
+

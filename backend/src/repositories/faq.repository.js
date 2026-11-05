@@ -97,3 +97,4 @@ export async function createFaq(faqData, client) {
   ]);
   return result.rows[0];
 }
+

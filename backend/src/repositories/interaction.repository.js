@@ -60,3 +60,4 @@ export async function getRecentLogs(limit = 50, client) {
   const result = await executor.query(sql, [limit]);
   return result.rows;
 }
+

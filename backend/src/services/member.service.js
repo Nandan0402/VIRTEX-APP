@@ -83,6 +83,18 @@ export async function getRecentEnquiries(limit = 20) {
 }
 
 /**
+ * Find gym member by ID
+ * @param {number} id
+ */
+export async function getMemberById(id) {
+  const numericId = Number(id);
+  if (isDatabaseConnected()) {
+    return await memberRepository.findById(numericId);
+  }
+  return mockMembers.find((m) => m.id === numericId) || null;
+}
+
+/**
  * Find gym member by code or phone number
  * @param {string} identifier - Member code (e.g. GYM001) or 10-digit phone number
  */
