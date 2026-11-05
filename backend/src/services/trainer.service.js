@@ -1,4 +1,5 @@
-import { query, isDatabaseConnected } from '../config/database.js';
+import { isDatabaseConnected } from '../config/database.js';
+import * as trainerRepository from '../repositories/trainer.repository.js';
 
 const MOCK_TRAINERS = [
   {
@@ -42,45 +43,12 @@ const MOCK_TRAINERS = [
  */
 export async function getTrainers({ status } = {}) {
   if (isDatabaseConnected()) {
-    const params = [];
-    let statusClause = '';
-
-    if (status) {
-      statusClause = 'WHERE t.status = $1';
-      params.push(status);
-    }
-
-    const sql = `
-      SELECT 
-        t.id, 
-        t.trainer_code, 
-        t.full_name, 
-        t.specialty, 
-        t.phone, 
-        t.email, 
-        t.bio, 
-        t.certifications, 
-        t.status,
-        s.shift_start, 
-        s.shift_end
-      FROM trainers t
-      LEFT JOIN trainer_schedules s 
-        ON t.id = s.trainer_id 
-        AND s.day_of_week = EXTRACT(DOW FROM CURRENT_TIMESTAMP)::smallint
-      ${statusClause}
-      ORDER BY 
-        CASE t.status 
-          WHEN 'on_floor' THEN 1 
-          WHEN 'in_session' THEN 2 
-          ELSE 3 
-        END,
-        t.full_name ASC;
-    `;
-    const result = await query(sql, params);
-    return result.rows;
+    return await trainerRepository.findTrainers({ status });
   }
 
-  // Fallback mock
-  return MOCK_TRAINERS.filter((t) => (!status ? true : t.status === status));
+  // Fallback mock filtering
+  return MOCK_TRAINERS.filter((t) => {
+    if (status && t.status !== status) return false;
+    return true;
+  });
 }
-

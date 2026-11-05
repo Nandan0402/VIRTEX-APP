@@ -1,4 +1,6 @@
-import { query, isDatabaseConnected } from '../config/database.js';
+import { isDatabaseConnected, withTransaction } from '../config/database.js';
+import * as memberRepository from '../repositories/member.repository.js';
+import * as membershipRepository from '../repositories/membership.repository.js';
 
 // In-memory mock data store used when PostgreSQL is offline during development
 const mockMembers = [
@@ -41,23 +43,17 @@ const mockEnquiries = [];
  * Record a membership enquiry / lead from the Kiosk
  * @param {Object} enquiry
  */
-export async function recordEnquiry({ fullName, phone, email, planName, preferredTiming, notes }) {
+export async function recordEnquiry({ fullName, phone, email, planName, preferredTiming, notes, assignedTrainerId }) {
   if (isDatabaseConnected()) {
-    const sql = `
-      INSERT INTO member_enquiries (
-        full_name, phone, email, plan_name, preferred_timing, notes, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, 'new')
-      RETURNING id, full_name, phone, email, plan_name, preferred_timing, notes, status, created_at;
-    `;
-    const res = await query(sql, [
+    return await memberRepository.createEnquiry({
       fullName,
       phone,
-      email || null,
-      planName || null,
-      preferredTiming || null,
-      notes || null,
-    ]);
-    return res.rows[0];
+      email,
+      planName,
+      preferredTiming,
+      notes,
+      assignedTrainerId,
+    });
   }
 
   const mockRecord = {
@@ -81,14 +77,7 @@ export async function recordEnquiry({ fullName, phone, email, planName, preferre
  */
 export async function getRecentEnquiries(limit = 20) {
   if (isDatabaseConnected()) {
-    const sql = `
-      SELECT id, full_name, phone, email, plan_name, preferred_timing, notes, status, created_at
-      FROM member_enquiries
-      ORDER BY created_at DESC
-      LIMIT $1;
-    `;
-    const res = await query(sql, [limit]);
-    return res.rows;
+    return await memberRepository.getRecentEnquiries(limit);
   }
   return mockEnquiries.slice(0, limit);
 }
@@ -101,14 +90,7 @@ export async function findMemberByIdentifier(identifier) {
   const cleanId = String(identifier).trim();
 
   if (isDatabaseConnected()) {
-    const sql = `
-      SELECT id, member_code, full_name, phone, email, plan_name, status, preferred_language, created_at
-      FROM members
-      WHERE member_code = $1 OR phone = $1
-      LIMIT 1;
-    `;
-    const res = await query(sql, [cleanId]);
-    return res.rows[0] || null;
+    return await memberRepository.findByIdentifier(cleanId);
   }
 
   // Fallback to mock data
@@ -124,13 +106,7 @@ export async function findMemberByIdentifier(identifier) {
  */
 export async function recordCheckIn(memberId) {
   if (isDatabaseConnected()) {
-    const sql = `
-      INSERT INTO check_ins (member_id, check_in_time)
-      VALUES ($1, NOW())
-      RETURNING id, member_id, check_in_time;
-    `;
-    const res = await query(sql, [memberId]);
-    return res.rows[0];
+    return await memberRepository.recordCheckIn(memberId);
   }
 
   // Fallback mock check-in
@@ -149,15 +125,7 @@ export async function recordCheckIn(memberId) {
  */
 export async function getRecentCheckIns(limit = 10) {
   if (isDatabaseConnected()) {
-    const sql = `
-      SELECT c.id, c.check_in_time, m.member_code, m.full_name, m.plan_name, m.preferred_language
-      FROM check_ins c
-      JOIN members m ON m.id = c.member_id
-      ORDER BY c.check_in_time DESC
-      LIMIT $1;
-    `;
-    const res = await query(sql, [limit]);
-    return res.rows;
+    return await memberRepository.getRecentCheckIns(limit);
   }
 
   return mockCheckIns.slice(0, limit).map((c) => {
@@ -172,3 +140,78 @@ export async function getRecentCheckIns(limit = 10) {
   });
 }
 
+/**
+ * Transactional: Register a new member and create their initial membership contract atomically
+ * Demonstrates PostgreSQL transaction safety with automatic ROLLBACK on failure
+ * @param {Object} data - { memberData, planId, pricePaid, startDate, endDate }
+ */
+export async function registerMemberWithPlan(data) {
+  const { memberData, planId, pricePaid, startDate = new Date(), endDate } = data;
+
+  if (isDatabaseConnected()) {
+    return await withTransaction(async (client) => {
+      // 1. Resolve membership plan details
+      const plan = await membershipRepository.findPlanById(planId, client);
+      if (!plan) {
+        throw new Error(`Membership plan with ID ${planId} does not exist.`);
+      }
+
+      // 2. Create the member record
+      const member = await memberRepository.createMember(
+        {
+          ...memberData,
+          planId: plan.id,
+          planName: plan.name,
+        },
+        client
+      );
+
+      // Calculate end date based on duration_months if not specified
+      const computedEndDate = endDate || new Date(new Date(startDate).setMonth(new Date(startDate).getMonth() + plan.duration_months));
+
+      // 3. Create the active membership contract
+      const membership = await membershipRepository.createMembership(
+        {
+          memberId: member.id,
+          planId: plan.id,
+          startDate,
+          endDate: computedEndDate,
+          pricePaid: pricePaid !== undefined ? pricePaid : plan.price_inr,
+          paymentStatus: 'paid',
+          status: 'active',
+          autoRenew: false,
+        },
+        client
+      );
+
+      return {
+        member,
+        membership,
+      };
+    });
+  }
+
+  // Mock in-memory registration fallback
+  const mockId = mockMembers.length + 1;
+  const newMember = {
+    id: mockId,
+    member_code: memberData.memberCode || `GYM00${mockId}`,
+    full_name: memberData.fullName,
+    phone: memberData.phone,
+    email: memberData.email,
+    plan_name: 'Custom Mock Plan',
+    status: 'active',
+    preferred_language: memberData.preferredLanguage || 'en-IN',
+  };
+  mockMembers.push(newMember);
+
+  return {
+    member: newMember,
+    membership: {
+      id: mockId,
+      member_id: mockId,
+      plan_id: planId,
+      status: 'active',
+    },
+  };
+}

@@ -1,4 +1,5 @@
-import { query, isDatabaseConnected } from '../config/database.js';
+import { isDatabaseConnected } from '../config/database.js';
+import * as membershipRepository from '../repositories/membership.repository.js';
 
 const MOCK_PLANS = [
   {
@@ -38,18 +39,9 @@ const MOCK_PLANS = [
  */
 export async function getMembershipPlans({ activeOnly = true } = {}) {
   if (isDatabaseConnected()) {
-    const conditions = activeOnly ? 'WHERE is_active = TRUE' : '';
-    const sql = `
-      SELECT id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks
-      FROM membership_plans
-      ${conditions}
-      ORDER BY price_inr ASC;
-    `;
-    const result = await query(sql);
-    return result.rows;
+    return await membershipRepository.findPlans({ activeOnly });
   }
 
   // Fallback mock
   return MOCK_PLANS;
 }
-

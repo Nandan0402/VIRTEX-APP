@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query, isDatabaseConnected } from '../config/database.js';
 import { config } from '../config/env.js';
+import * as userRepository from '../repositories/user.repository.js';
 
 // Fallback in-memory development credentials when PostgreSQL is offline
 const MOCK_USERS = [
@@ -34,17 +35,7 @@ export async function loginUser(username, password) {
   let user = null;
 
   if (isDatabaseConnected()) {
-    // Parameterized lookup in admin_users
-    const sql = `
-      SELECT id, username, email, password_hash, full_name, role, is_active
-      FROM admin_users
-      WHERE (username = $1 OR email = $1)
-      LIMIT 1;
-    `;
-    const result = await query(sql, [username.trim()]);
-    if (result.rowCount > 0) {
-      user = result.rows[0];
-    }
+    user = await userRepository.findByUsernameOrEmail(username.trim());
   } else {
     user = MOCK_USERS.find(
       (u) => u.username.toLowerCase() === username.trim().toLowerCase() || u.email === username.trim()
@@ -67,9 +58,13 @@ export async function loginUser(username, password) {
   } catch (err) {
     // If pgcrypto blew fish format difference, test query with crypt()
     if (isDatabaseConnected()) {
-      const verifySql = `SELECT (password_hash = crypt($1, password_hash)) AS is_match FROM admin_users WHERE id = $2;`;
-      const verifyRes = await query(verifySql, [password, user.id]);
-      isPasswordValid = Boolean(verifyRes.rows[0]?.is_match);
+      try {
+        const verifySql = `SELECT (password_hash = crypt($1, password_hash)) AS is_match FROM admin_users WHERE id = $2;`;
+        const verifyRes = await query(verifySql, [password, user.id]);
+        isPasswordValid = Boolean(verifyRes.rows[0]?.is_match);
+      } catch (e) {
+        isPasswordValid = false;
+      }
     }
   }
 
@@ -79,7 +74,7 @@ export async function loginUser(username, password) {
 
   // Update last_login_at timestamp
   if (isDatabaseConnected()) {
-    query('UPDATE admin_users SET last_login_at = CURRENT_TIMESTAMP WHERE id = $1;', [user.id]).catch(() => {});
+    userRepository.updateLastLogin(user.id).catch(() => {});
   }
 
   // Generate JWT token with user context
@@ -114,25 +109,20 @@ export async function loginUser(username, password) {
  */
 export async function getUserProfile(userId) {
   if (isDatabaseConnected()) {
-    const sql = `
-      SELECT id, username, email, full_name, role, is_active, last_login_at, created_at
-      FROM admin_users
-      WHERE id = $1
-      LIMIT 1;
-    `;
-    const result = await query(sql, [userId]);
-    return result.rows[0] || null;
+    const user = await userRepository.findById(userId);
+    if (user) return user;
   }
 
-  const u = MOCK_USERS.find((x) => x.id === userId);
-  if (!u) return null;
+  const mock = MOCK_USERS.find((u) => u.id === Number(userId));
+  if (!mock) return null;
+
   return {
-    id: u.id,
-    username: u.username,
-    email: u.email,
-    fullName: u.full_name,
-    role: u.role,
-    is_active: u.is_active,
+    id: mock.id,
+    username: mock.username,
+    email: mock.email,
+    full_name: mock.full_name,
+    role: mock.role,
+    is_active: mock.is_active,
+    created_at: new Date().toISOString(),
   };
 }
-

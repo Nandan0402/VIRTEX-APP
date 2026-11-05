@@ -21,6 +21,11 @@ router.get('/health', async (req, res) => {
       timestamp: new Date().toISOString(),
       uptimeSeconds: Math.floor(process.uptime()),
       database: dbStatus.ok ? 'connected' : `disconnected (${dbStatus.error})`,
+      diagnostics: {
+        latencyMs: dbStatus.latencyMs,
+        pgVersion: dbStatus.pgVersion,
+        pool: dbStatus.pool,
+      },
     });
   } catch (err) {
     res.status(200).json({

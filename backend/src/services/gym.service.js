@@ -1,4 +1,5 @@
-import { query, isDatabaseConnected } from '../config/database.js';
+import { isDatabaseConnected } from '../config/database.js';
+import * as gymRepository from '../repositories/gym.repository.js';
 
 const MOCK_GYM_INFO = {
   gym_name: 'PulseCore Fitness',
@@ -26,19 +27,12 @@ const MOCK_GYM_INFO = {
  */
 export async function getGymProfile() {
   if (isDatabaseConnected()) {
-    const sql = `
-      SELECT gym_name, tagline, phone, email, address, operating_hours, default_language, supported_languages, speech_rate, speech_pitch, updated_at
-      FROM gym_settings
-      WHERE id = 1
-      LIMIT 1;
-    `;
-    const result = await query(sql);
-    if (result.rowCount > 0) {
-      return result.rows[0];
+    const profile = await gymRepository.getGymSettings();
+    if (profile) {
+      return profile;
     }
   }
 
   // Fallback mock
   return MOCK_GYM_INFO;
 }
-

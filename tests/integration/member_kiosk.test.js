@@ -148,3 +148,4 @@ describe('Member Reception Kiosk Integration Tests', () => {
     assert.ok(Array.isArray(body.data));
   });
 });
+

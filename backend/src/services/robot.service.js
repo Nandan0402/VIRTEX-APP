@@ -1,4 +1,5 @@
 import { query, isDatabaseConnected } from '../config/database.js';
+import * as robotRepository from '../repositories/robot.repository.js';
 
 // Pre-defined Choreographed Gestures (Only WAVE, NOD, IDLE permitted)
 export const GESTURES = {
@@ -134,22 +135,17 @@ export async function queueRobotCommand({
   // Push to memory queue for immediate polling response
   memoryCommandQueue.push(command);
 
-  // If PostgreSQL is connected, record in robot_command_logs
+  // If PostgreSQL is connected, record in robot_commands and robot_command_logs
   if (isDatabaseConnected()) {
     try {
-      const sql = `
-        INSERT INTO robot_command_logs (device_id, command_type, gesture_name, servo_payload, status, triggered_by)
-        VALUES ($1, $2, $3, $4, 'pending', $5)
-        RETURNING id, device_id, command_type, gesture_name, status, created_at;
-      `;
-      const result = await query(sql, [
+      const persisted = await robotRepository.queueCommand({
         deviceId,
         commandType,
         gestureName,
-        JSON.stringify(steps),
+        servoPayload: steps,
         triggeredBy,
-      ]);
-      command.dbId = result.rows[0].id;
+      });
+      command.dbId = persisted.id;
     } catch (e) {
       console.warn('[RobotService] Could not persist command log to PostgreSQL:', e.message);
     }
@@ -179,10 +175,7 @@ export async function popNextCommand(deviceId = 1) {
   // Update status in PostgreSQL if persisted
   if (cmd.dbId && isDatabaseConnected()) {
     try {
-      await query(
-        "UPDATE robot_command_logs SET status = 'delivered' WHERE id = $1;",
-        [cmd.dbId]
-      );
+      await robotRepository.updateCommandStatus(cmd.dbId, 'delivered');
     } catch (e) {
       // Ignored
     }
@@ -214,12 +207,10 @@ export async function updateRobotTelemetry({ deviceUuid, ipAddress, servos }) {
 
   if (isDatabaseConnected() && deviceUuid) {
     try {
-      const sql = `
-        UPDATE robot_devices
-        SET status = 'online', ip_address = $1, last_heartbeat = CURRENT_TIMESTAMP
-        WHERE device_uuid = $2;
-      `;
-      await query(sql, [ipAddress || liveState.ipAddress, deviceUuid]);
+      await robotRepository.updateDeviceHeartbeat(deviceUuid, {
+        ipAddress: ipAddress || liveState.ipAddress,
+        status: 'online',
+      });
     } catch (e) {
       // Ignored
     }

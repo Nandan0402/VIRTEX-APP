@@ -1,6 +1,6 @@
 import { createApp } from './app.js';
 import { config } from './config/env.js';
-import { checkDatabaseConnection } from './config/database.js';
+import { checkDatabaseConnection, closePool } from './config/database.js';
 
 async function bootstrap() {
   const app = createApp();
@@ -9,7 +9,9 @@ async function bootstrap() {
   console.log('[Bootstrap] Testing PostgreSQL connectivity...');
   const dbHealth = await checkDatabaseConnection();
   if (dbHealth.ok) {
-    console.log('[Bootstrap] PostgreSQL connection verified successfully.');
+    console.log(
+      `[Bootstrap] PostgreSQL connection verified successfully (${dbHealth.pgVersion}, latency: ${dbHealth.latencyMs}ms).`
+    );
   } else {
     console.warn(
       `[Bootstrap] PostgreSQL not reachable (${dbHealth.error}). Operating in development mock fallback mode.`
@@ -28,20 +30,27 @@ async function bootstrap() {
   });
 
   // Graceful shutdown
-  const shutdown = () => {
-    console.log('\n[Shutdown] Closing server and cleanup...');
-    server.close(() => {
-      console.log('[Shutdown] Server closed successfully.');
+  const shutdown = async (signal) => {
+    console.log(`\n[Shutdown] Received ${signal}. Closing HTTP server and draining database connections...`);
+    server.close(async () => {
+      console.log('[Shutdown] HTTP server closed.');
+      await closePool(5000);
+      console.log('[Shutdown] All resources released successfully.');
       process.exit(0);
     });
+
+    // Timeout safety fallback
+    setTimeout(() => {
+      console.error('[Shutdown] Forced termination after timeout.');
+      process.exit(1);
+    }, 10000).unref();
   };
 
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
 bootstrap().catch((err) => {
   console.error('[Bootstrap Error] Failed to start server:', err);
   process.exit(1);
 });
-

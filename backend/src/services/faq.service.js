@@ -1,4 +1,5 @@
-import { query, isDatabaseConnected } from '../config/database.js';
+import { isDatabaseConnected } from '../config/database.js';
+import * as faqRepository from '../repositories/faq.repository.js';
 
 const MOCK_FAQS = [
   {
@@ -54,36 +55,7 @@ const MOCK_FAQS = [
  */
 export async function getFaqs({ language, category, q } = {}) {
   if (isDatabaseConnected()) {
-    const conditions = ['is_active = TRUE'];
-    const params = [];
-    let paramIndex = 1;
-
-    if (language) {
-      conditions.push(`language = $${paramIndex++}`);
-      params.push(language);
-    }
-
-    if (category) {
-      conditions.push(`category = $${paramIndex++}`);
-      params.push(category);
-    }
-
-    if (q) {
-      conditions.push(`(question ILIKE $${paramIndex} OR answer ILIKE $${paramIndex} OR $${paramIndex + 1} = ANY(keywords))`);
-      params.push(`%${q}%`);
-      params.push(q.toLowerCase().trim());
-      paramIndex += 2;
-    }
-
-    const sql = `
-      SELECT id, question, answer, language, category, suggested_gesture, keywords, display_order
-      FROM faqs
-      WHERE ${conditions.join(' AND ')}
-      ORDER BY display_order ASC, id ASC;
-    `;
-
-    const result = await query(sql, params);
-    return result.rows;
+    return await faqRepository.findFaqs({ language, category, q });
   }
 
   // Fallback mock filtering
@@ -100,4 +72,3 @@ export async function getFaqs({ language, category, q } = {}) {
     return true;
   });
 }
-
