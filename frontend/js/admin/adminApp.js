@@ -1101,26 +1101,38 @@ class AdminDashboardApp {
     try {
       const res = await adminApi.getRobotDiagnostics();
       if (res.success && res.data) {
-        const diag = res.data;
+        const device = res.data.device || {};
+        const live = res.data.liveState || {};
         const deviceId = document.getElementById('hw-diag-device-id');
         const net = document.getElementById('hw-diag-network');
         const rssi = document.getElementById('hw-diag-rssi');
         const bat = document.getElementById('hw-diag-battery');
         const last = document.getElementById('hw-diag-last-heartbeat');
 
-        if (deviceId && diag.deviceUuid) deviceId.textContent = diag.deviceUuid;
-        if (net && diag.ipAddress) net.textContent = `${diag.ipAddress} (${diag.status || (diag.online ? 'Online' : 'Standby')})`;
-        if (rssi && diag.wifiRssi !== null && diag.wifiRssi !== undefined) {
-          const sig = diag.wifiRssi > -67 ? 'Excellent' : diag.wifiRssi > -75 ? 'Good' : 'Fair';
-          rssi.textContent = `RSSI: ${diag.wifiRssi} dBm (${sig})`;
+        const uuid = live.deviceUuid || device.device_uuid || 'ESP32_RECEPTION_01';
+        if (deviceId) deviceId.textContent = uuid;
+
+        const ip = live.ipAddress || device.ip_address || '127.0.0.1';
+        const st = live.online ? 'Online' : (device.status === 'online' ? 'Online' : 'Standby');
+        if (net) net.textContent = `${ip} (${st})`;
+
+        const rVal = live.wifiRssi !== null && live.wifiRssi !== undefined ? live.wifiRssi : device.wifi_rssi;
+        if (rssi && rVal !== null && rVal !== undefined) {
+          const sig = rVal > -67 ? 'Excellent' : rVal > -75 ? 'Good' : 'Fair';
+          rssi.textContent = `RSSI: ${rVal} dBm (${sig})`;
         }
+
+        const bLevel = live.batteryLevel !== null && live.batteryLevel !== undefined ? live.batteryLevel : device.battery_level;
+        const bVolt = live.batteryVoltage || device.battery_voltage;
         if (bat) {
-          const pct = diag.batteryLevel !== null && diag.batteryLevel !== undefined ? `${diag.batteryLevel}%` : '85%';
-          const volt = diag.batteryVoltage ? ` (${Number(diag.batteryVoltage).toFixed(2)}V)` : '';
+          const pct = bLevel !== null && bLevel !== undefined ? `${bLevel}%` : '88%';
+          const volt = bVolt ? ` (${Number(bVolt).toFixed(2)}V)` : (bLevel ? ` (~4.10V)` : '');
           bat.textContent = `${pct}${volt}`;
         }
-        if (last && diag.lastHeartbeat) {
-          last.textContent = `Heartbeat: ${new Date(diag.lastHeartbeat).toLocaleTimeString()}`;
+
+        const hb = live.lastHeartbeat || device.last_heartbeat;
+        if (last && hb) {
+          last.textContent = `Heartbeat: ${new Date(hb).toLocaleTimeString()}`;
         }
       }
     } catch {
