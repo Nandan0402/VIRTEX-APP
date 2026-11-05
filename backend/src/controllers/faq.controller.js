@@ -1,4 +1,5 @@
 import * as faqService from '../services/faq.service.js';
+import { broadcast } from '../services/realtime.service.js';
 
 /**
  * GET /api/faqs
@@ -35,6 +36,7 @@ export async function createFaq(req, res, next) {
       keywords: Array.isArray(keywords) ? keywords : keywords ? keywords.split(',').map((k) => k.trim()) : [],
     });
 
+    broadcast('FAQ_CREATED', created, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.status(201).json({
       success: true,
       message: 'FAQ created successfully.',
@@ -53,6 +55,7 @@ export async function updateFaq(req, res, next) {
       return res.status(404).json({ success: false, error: 'FAQ not found.' });
     }
 
+    broadcast('FAQ_UPDATED', updated, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'FAQ updated successfully.',
@@ -67,6 +70,7 @@ export async function deleteFaq(req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
     await faqService.deleteFaq(id);
+    broadcast('FAQ_DELETED', { id }, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'FAQ deleted successfully.',

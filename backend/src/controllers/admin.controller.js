@@ -4,6 +4,7 @@ import * as gymRepository from '../repositories/gym.repository.js';
 import * as memberRepository from '../repositories/member.repository.js';
 import * as robotService from '../services/robot.service.js';
 import * as authService from '../services/auth.service.js';
+import { broadcast, getRecentSyncLogs } from '../services/realtime.service.js';
 
 /**
  * GET /api/v1/admin/dashboard
@@ -97,10 +98,28 @@ export async function createUser(req, res, next) {
 export async function updateSettings(req, res, next) {
   try {
     const updated = await gymRepository.updateGymSettings(req.body);
+    broadcast('GYM_INFO_UPDATED', updated, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'Facility settings updated successfully.',
       data: updated,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/admin/sync-logs
+ * Real-time event synchronization audit logs
+ */
+export async function getSyncLogs(req, res, next) {
+  try {
+    const limit = parseInt(req.query.limit, 10) || 50;
+    const logs = await getRecentSyncLogs(limit);
+    res.json({
+      success: true,
+      data: logs,
     });
   } catch (err) {
     next(err);

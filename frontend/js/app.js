@@ -14,6 +14,7 @@ import { MembershipSectionComponent } from './components/membershipSection.js';
 import { TrainerSectionComponent } from './components/trainerSection.js';
 import { AnnouncementsSectionComponent } from './components/announcementsSection.js';
 import { FaqSectionComponent } from './components/faqSection.js';
+import { RealtimeClient } from './services/realtimeClient.js';
 import { LOCALIZED_CONTENT } from './services/mockData.js';
 
 class GymReceptionistApp {
@@ -63,6 +64,12 @@ class GymReceptionistApp {
       onAskQuestion: (question) => this.handleSendMessage(question),
       onSpeakAnswer: (text, lang) => this.speakAloud(text, lang),
     });
+
+    // Real-Time WebSocket Synchronization Client
+    this.realtime = new RealtimeClient({
+      channel: 'kiosk',
+      onStatusChange: (status) => this.handleRealtimeStatusChange(status),
+    });
   }
 
   async init() {
@@ -84,6 +91,7 @@ class GymReceptionistApp {
     this.setupGlobalSpeakButton();
     this.setupCheckInForm();
     this.renderPromptChips();
+    this.setupRealtimeListeners();
 
     // 3. Load Live PostgreSQL Backend Data
     await this.loadGymBranding();
@@ -133,6 +141,87 @@ class GymReceptionistApp {
       }
     } catch (err) {
       console.warn('[App] Could not synchronize gym branding:', err);
+    }
+  }
+
+  setupRealtimeListeners() {
+    // 1. Membership Plan Updates from Admin
+    const handlePlansChange = () => {
+      console.log('[Realtime] Plans changed on server, refreshing live tiers...');
+      this.membershipSection.loadData();
+    };
+    this.realtime.on('PLAN_CREATED', handlePlansChange);
+    this.realtime.on('PLAN_UPDATED', handlePlansChange);
+    this.realtime.on('PLAN_DELETED', handlePlansChange);
+    this.realtime.on('PLAN_STATUS_CHANGED', handlePlansChange);
+
+    // 2. Gym Profile & Operating Hours from Admin
+    this.realtime.on('GYM_INFO_UPDATED', (data) => {
+      console.log('[Realtime] Gym profile/hours updated on server, refreshing...');
+      this.loadGymBranding();
+      this.membershipSection.loadData();
+    });
+
+    // 3. Trainer Availability & Shifts from Admin/Trainer Console
+    const handleTrainerChange = () => {
+      console.log('[Realtime] Trainer status updated on server, refreshing floor board...');
+      this.trainerSection.loadTrainers();
+    };
+    this.realtime.on('TRAINER_STATUS_UPDATED', handleTrainerChange);
+    this.realtime.on('TRAINER_CREATED', handleTrainerChange);
+    this.realtime.on('TRAINER_UPDATED', handleTrainerChange);
+    this.realtime.on('TRAINER_DELETED', handleTrainerChange);
+
+    // 4. Announcements Noticeboard from Admin
+    const handleAnnouncementChange = () => {
+      console.log('[Realtime] Noticeboard updated on server, refreshing announcements...');
+      this.announcementsSection.loadAnnouncements();
+    };
+    this.realtime.on('ANNOUNCEMENT_CREATED', handleAnnouncementChange);
+    this.realtime.on('ANNOUNCEMENT_UPDATED', handleAnnouncementChange);
+    this.realtime.on('ANNOUNCEMENT_DELETED', handleAnnouncementChange);
+
+    // 5. FAQs Knowledge Base from Admin
+    const handleFaqChange = () => {
+      console.log('[Realtime] FAQs updated on server, refreshing knowledge base...');
+      this.faqSection.loadFaqs();
+    };
+    this.realtime.on('FAQ_CREATED', handleFaqChange);
+    this.realtime.on('FAQ_UPDATED', handleFaqChange);
+    this.realtime.on('FAQ_DELETED', handleFaqChange);
+
+    // 6. Robot Hardware Telemetry & Command Dispatches
+    this.realtime.on('ROBOT_STATUS_CHANGED', (state) => {
+      if (state) {
+        this.robotStatus.render(state);
+      }
+    });
+
+    // 7. Member Check-ins (Feed Update)
+    this.realtime.on('MEMBER_CHECKED_IN', () => {
+      this.refreshRecentCheckIns();
+    });
+
+    // 8. Reconnection State: Re-sync state with PostgreSQL
+    this.realtime.on('RECONNECTED', () => {
+      console.log('[Realtime] WebSocket reconnected. Re-synchronizing all state with PostgreSQL...');
+      this.refreshSystemHealth();
+      this.refreshRobotStatus();
+      this.refreshRecentCheckIns();
+      this.membershipSection.loadData();
+      this.trainerSection.loadTrainers();
+      this.announcementsSection.loadAnnouncements();
+      this.faqSection.loadFaqs();
+    });
+  }
+
+  handleRealtimeStatusChange(status) {
+    const text = document.getElementById('health-status-text');
+    if (!text) return;
+    if (status === 'connected') {
+      text.textContent = 'Server Online • DB Connected • Live Sync ⚡';
+    } else if (status === 'reconnecting') {
+      text.textContent = 'Server Online • Reconnecting Sync...';
     }
   }
 

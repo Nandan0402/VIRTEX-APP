@@ -1,4 +1,5 @@
 import * as robotService from '../services/robot.service.js';
+import { broadcast } from '../services/realtime.service.js';
 
 /**
  * GET /api/robot/status
@@ -40,6 +41,8 @@ export async function postCommand(req, res, next) {
       servoPayload,
       triggeredBy: req.user ? `${req.user.role}:${req.user.username}` : (req.body.triggeredBy || 'api_client'),
     });
+
+    broadcast('ROBOT_COMMAND_QUEUED', { command, gesture: targetGesture, servoPayload }, { channel: 'all', triggeredBy: command.triggered_by || 'system' });
 
     res.status(201).json({
       success: true,
@@ -86,6 +89,7 @@ export async function postHeartbeat(req, res, next) {
     };
 
     const state = await robotService.updateRobotTelemetry(telemetry);
+    broadcast('ROBOT_STATUS_CHANGED', state, { channel: 'all' });
     res.json({
       success: true,
       data: state,

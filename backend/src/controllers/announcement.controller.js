@@ -1,4 +1,5 @@
 import * as announcementService from '../services/announcement.service.js';
+import { broadcast } from '../services/realtime.service.js';
 
 export async function getAnnouncements(req, res, next) {
   try {
@@ -34,6 +35,7 @@ export async function createAnnouncement(req, res, next) {
       createdBy,
     });
 
+    broadcast('ANNOUNCEMENT_CREATED', created, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.status(201).json({
       success: true,
       message: 'Announcement published successfully.',
@@ -52,6 +54,7 @@ export async function updateAnnouncement(req, res, next) {
       return res.status(404).json({ success: false, error: 'Announcement not found.' });
     }
 
+    broadcast('ANNOUNCEMENT_UPDATED', updated, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'Announcement updated successfully.',
@@ -66,6 +69,7 @@ export async function deleteAnnouncement(req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
     await announcementService.deleteAnnouncement(id);
+    broadcast('ANNOUNCEMENT_DELETED', { id }, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'Announcement deleted successfully.',

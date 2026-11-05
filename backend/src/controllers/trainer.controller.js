@@ -1,4 +1,5 @@
 import * as trainerService from '../services/trainer.service.js';
+import { broadcast } from '../services/realtime.service.js';
 
 /**
  * GET /api/v1/trainers
@@ -43,6 +44,7 @@ export async function updateStatus(req, res, next) {
       });
     }
 
+    broadcast('TRAINER_STATUS_UPDATED', updated, { channel: 'all', triggeredBy: req.user?.username || 'trainer' });
     res.json({
       success: true,
       message: `Trainer status successfully updated to '${status}'.`,
@@ -84,6 +86,7 @@ export async function createTrainer(req, res, next) {
       status: req.body.status || 'on_floor',
     });
 
+    broadcast('TRAINER_CREATED', created, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.status(201).json({
       success: true,
       message: 'Trainer created successfully.',
@@ -102,6 +105,7 @@ export async function updateTrainer(req, res, next) {
       return res.status(404).json({ success: false, error: 'Trainer not found.' });
     }
 
+    broadcast('TRAINER_UPDATED', updated, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'Trainer updated successfully.',
@@ -116,6 +120,7 @@ export async function deleteTrainer(req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
     await trainerService.deleteTrainer(id);
+    broadcast('TRAINER_DELETED', { id }, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'Trainer deleted successfully.',

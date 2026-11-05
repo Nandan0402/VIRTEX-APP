@@ -227,3 +227,4 @@ export class FaqSectionComponent {
       .replace(/'/g, '&#039;');
   }
 }
+

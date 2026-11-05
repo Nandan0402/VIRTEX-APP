@@ -1,4 +1,5 @@
 import * as membershipService from '../services/membership.service.js';
+import { broadcast } from '../services/realtime.service.js';
 
 /**
  * GET /api/membership-plans
@@ -34,6 +35,7 @@ export async function createPlan(req, res, next) {
       planCode,
     });
 
+    broadcast('PLAN_CREATED', created, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.status(201).json({
       success: true,
       message: 'Plan created successfully.',
@@ -52,6 +54,7 @@ export async function updatePlan(req, res, next) {
       return res.status(404).json({ success: false, error: 'Plan not found.' });
     }
 
+    broadcast('PLAN_UPDATED', updated, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'Plan updated successfully.',
@@ -70,6 +73,7 @@ export async function togglePlan(req, res, next) {
       return res.status(404).json({ success: false, error: 'Plan not found.' });
     }
 
+    broadcast('PLAN_STATUS_CHANGED', toggled, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: `Plan ${toggled.is_active ? 'activated' : 'deactivated'} successfully.`,
@@ -84,6 +88,7 @@ export async function deletePlan(req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
     await membershipService.deletePlan(id);
+    broadcast('PLAN_DELETED', { id }, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'Plan deleted successfully.',

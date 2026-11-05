@@ -24,6 +24,7 @@ router.post('/users', requireRole('owner'), adminController.createUser);
 
 // Security & Authentication Audit Logs: Strictly Owner only
 router.get('/audit-logs', requireRole('owner'), adminController.getAuditLogs);
+router.get('/sync-logs', requireRole('owner', 'manager'), adminController.getSyncLogs);
 
 export default router;
 

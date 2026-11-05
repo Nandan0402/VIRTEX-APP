@@ -1,6 +1,7 @@
 import { createApp } from './app.js';
 import { config } from './config/env.js';
 import { checkDatabaseConnection, closePool } from './config/database.js';
+import { initRealtime, closeRealtime } from './services/realtime.service.js';
 
 async function bootstrap() {
   const app = createApp();
@@ -25,13 +26,18 @@ async function bootstrap() {
     console.log(`🌐 Local Web UI & API: http://localhost:${config.port}`);
     console.log(`📡 Network Host:       http://${config.host}:${config.port}`);
     console.log(`🩺 Health Endpoint:    http://localhost:${config.port}/api/v1/health`);
+    console.log(`⚡ WebSocket Realtime: ws://localhost:${config.port}/ws`);
     console.log('🔑 ESP32 Hardware Auth: Active (Headers: x-robot-device-id, x-robot-api-key)');
     console.log('====================================================');
   });
 
+  // Attach WebSocket Real-Time Synchronization Engine
+  initRealtime(server);
+
   // Graceful shutdown
   const shutdown = async (signal) => {
     console.log(`\n[Shutdown] Received ${signal}. Closing HTTP server and draining database connections...`);
+    await closeRealtime();
     server.close(async () => {
       console.log('[Shutdown] HTTP server closed.');
       await closePool(5000);

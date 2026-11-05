@@ -15,6 +15,7 @@
 
 import { adminState } from './adminState.js';
 import { adminApi } from './adminApi.js';
+import { RealtimeClient } from '../services/realtimeClient.js';
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
@@ -105,7 +106,103 @@ class AdminDashboardApp {
     if (user) {
       adminState.setUser(user);
       this.updateTopbarUser();
+      this.setupRealtimeSync(adminApi.getToken());
     }
+  }
+
+  setupRealtimeSync(token) {
+    if (this.realtime) {
+      this.realtime.setToken(token);
+      return;
+    }
+
+    this.realtime = new RealtimeClient({
+      channel: 'admin',
+      token,
+      onStatusChange: (status) => {
+        const indicator = document.getElementById('topbar-live-sync-pill');
+        if (indicator) {
+          if (status === 'connected') {
+            indicator.className = 'badge badge-green font-mono';
+            indicator.textContent = '● Live Sync';
+          } else if (status === 'reconnecting') {
+            indicator.className = 'badge badge-warning font-mono';
+            indicator.textContent = '○ Reconnecting...';
+          } else {
+            indicator.className = 'badge badge-muted font-mono';
+            indicator.textContent = '○ Offline';
+          }
+        }
+      },
+    });
+
+    // 1. Live Member Check-In Event from Kiosk
+    this.realtime.on('MEMBER_CHECKED_IN', (data) => {
+      const memberName = data.member?.full_name || 'Gym Member';
+      const code = data.member?.member_code || '';
+      this.showToast(`⚡ Live Check-In: ${memberName} (${code}) granted entry.`);
+
+      if (this.currentTab === 'tab-overview') {
+        this.loadDashboardData();
+      } else if (this.currentTab === 'tab-members') {
+        this.loadMembersData();
+      }
+    });
+
+    // 2. Live Enquiry / Kiosk Lead Captured
+    this.realtime.on('ENQUIRY_RECEIVED', (data) => {
+      const leadName = data.full_name || data.fullName || 'Prospective Member';
+      const plan = data.plan_name || data.planName || 'Membership';
+      this.showToast(`📬 New Kiosk Enquiry: ${leadName} for [${plan}]!`);
+
+      if (this.currentTab === 'tab-enquiries') {
+        this.loadEnquiriesData();
+      } else if (this.currentTab === 'tab-overview') {
+        this.loadDashboardData();
+      }
+    });
+
+    // 3. Robot Hardware Telemetry & Command Logs
+    this.realtime.on('ROBOT_STATUS_CHANGED', (state) => {
+      if (state) {
+        this.updateRobotHardwareUI(state);
+      }
+    });
+
+    this.realtime.on('ROBOT_COMMAND_QUEUED', () => {
+      if (this.currentTab === 'tab-robot') {
+        this.loadRobotData();
+      }
+    });
+
+    // 4. Trainer Floor Availability Update
+    this.realtime.on('TRAINER_STATUS_UPDATED', () => {
+      if (this.currentTab === 'tab-trainers') {
+        this.loadTrainersData();
+      }
+    });
+
+    // 5. Membership Plan Update
+    this.realtime.on('PLAN_UPDATED', () => {
+      if (this.currentTab === 'tab-plans') this.loadPlansData();
+    });
+    this.realtime.on('PLAN_STATUS_CHANGED', () => {
+      if (this.currentTab === 'tab-plans') this.loadPlansData();
+    });
+
+    // 6. Announcement & FAQ Updates
+    this.realtime.on('ANNOUNCEMENT_UPDATED', () => {
+      if (this.currentTab === 'tab-announcements') this.loadAnnouncementsData();
+    });
+    this.realtime.on('FAQ_UPDATED', () => {
+      if (this.currentTab === 'tab-faqs') this.loadFaqsData();
+    });
+
+    // 7. Reconnection Re-sync with PostgreSQL
+    this.realtime.on('RECONNECTED', () => {
+      console.log('[AdminApp] WebSocket reconnected. Re-syncing tab data...');
+      this.loadAllData();
+    });
   }
 
   updateTopbarUser() {
@@ -1412,6 +1509,7 @@ class AdminDashboardApp {
 
         if (res.success) {
           adminState.setUser(res.data.user);
+          this.setupRealtimeSync(res.data.token);
           this.closeModal('modal-role-switcher');
           this.showToast(`Switched account: ${res.data.user.fullName} (${res.data.user.role.toUpperCase()})`);
           await this.loadAllData();

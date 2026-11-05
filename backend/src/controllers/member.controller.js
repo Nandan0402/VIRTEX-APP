@@ -1,6 +1,7 @@
 import * as memberService from '../services/member.service.js';
 import * as robotService from '../services/robot.service.js';
 import { getWelcomeMessage, getLanguageMetadata } from '../services/voice.service.js';
+import { broadcast } from '../services/realtime.service.js';
 
 /**
  * Mask sensitive member PII for public reception display
@@ -68,11 +69,14 @@ export async function checkIn(req, res, next) {
     const welcomeSpeech = getWelcomeMessage(targetLang, member.full_name);
     const voiceMeta = getLanguageMetadata(targetLang);
 
+    const maskedMember = maskMemberPII(member);
+    broadcast('MEMBER_CHECKED_IN', { checkIn: checkInRecord, member: maskedMember }, { channel: 'all', triggeredBy: 'kiosk' });
+
     res.json({
       success: true,
       message: 'Check-in successful!',
       data: {
-        member: maskMemberPII(member),
+        member: maskedMember,
         checkIn: checkInRecord,
         welcomeSpeech,
         voiceMeta,
@@ -119,6 +123,8 @@ export async function createEnquiry(req, res, next) {
 
     // Robot acknowledges enquiry with an affirmative nod
     robotService.queueGesture('NOD_YES');
+
+    broadcast('ENQUIRY_RECEIVED', enquiry, { channel: 'admin', triggeredBy: 'kiosk' });
 
     res.status(201).json({
       success: true,
@@ -292,6 +298,7 @@ export async function updateMember(req, res, next) {
       return res.status(404).json({ success: false, error: 'Member not found.' });
     }
 
+    broadcast('MEMBER_UPDATED', updated, { channel: 'admin', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'Member updated successfully.',
@@ -311,6 +318,7 @@ export async function deleteMember(req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
     await memberService.deleteMember(id);
+    broadcast('MEMBER_DELETED', { id }, { channel: 'admin', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'Member deleted successfully.',
@@ -334,6 +342,7 @@ export async function updateEnquiry(req, res, next) {
       return res.status(404).json({ success: false, error: 'Enquiry not found.' });
     }
 
+    broadcast('ENQUIRY_UPDATED', updated, { channel: 'admin', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'Enquiry status updated successfully.',
