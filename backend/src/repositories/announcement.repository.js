@@ -11,7 +11,7 @@ export async function findAnnouncements({ activeOnly = false, priority, limit = 
   let paramIdx = 1;
 
   if (activeOnly) {
-    conditions.push('is_active = TRUE AND start_date <= CURRENT_DATE AND end_date >= CURRENT_DATE');
+    conditions.push('(is_active = TRUE AND (start_date IS NULL OR start_date <= CURRENT_DATE) AND (end_date IS NULL OR end_date >= CURRENT_DATE))');
   }
 
   if (priority) {
@@ -148,3 +148,4 @@ export async function deleteAnnouncement(id, client) {
   const res = await executor.query(sql, [id]);
   return res.rows[0] || null;
 }
+

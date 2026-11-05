@@ -22,8 +22,8 @@
           </svg>
         </div>
         <div class="brand-text">
-          <h1 class="brand-title">PULSECORE <span class="text-green">FITNESS</span></h1>
-          <p class="brand-subtitle">AI Receptionist Robot Station</p>
+          <h1 class="brand-title" id="gym-brand-title">PULSECORE <span class="text-green">FITNESS</span></h1>
+          <p class="brand-subtitle" id="gym-brand-subtitle">AI Receptionist Robot Station</p>
         </div>
       </div>
 
@@ -130,6 +130,11 @@
         </div>
       </section>
 
+      <!-- Section: Announcements Noticeboard (Dynamic) -->
+      <section class="announcements-section-container" id="announcements-section" aria-label="Gym Noticeboard" style="display: none;">
+        <div id="announcements-container"></div>
+      </section>
+
       <!-- Section 2: Quick Member Check-in & Hardware Base Telemetry -->
       <section class="operations-grid" aria-label="Operations and Hardware Telemetry">
         <!-- Quick Member Check-In -->
@@ -173,7 +178,12 @@
         </div>
       </section>
 
-      <!-- Section 3: Membership Plans & Enquiry Grid -->
+      <!-- Section 3: Trainer Floor Availability Board -->
+      <section class="trainer-roster-section" id="trainer-roster-section" aria-label="Trainer Roster & Availability">
+        <div id="trainers-container"></div>
+      </section>
+
+      <!-- Section 4: Membership Plans & Enquiry Grid -->
       <section class="membership-section" aria-label="Gym Membership Plans">
         <div class="section-title-wrap">
           <span class="section-pill text-green font-mono">UPGRADE YOUR FITNESS</span>
@@ -184,7 +194,12 @@
         <div id="membership-plans-grid" class="plans-grid"></div>
       </section>
 
-      <!-- Section 4: Operating Hours & Facility Contact Details -->
+      <!-- Section 5: Interactive Knowledge Base & FAQs -->
+      <section class="faq-knowledge-section" id="faq-knowledge-section" aria-label="Knowledge Base and FAQs">
+        <div id="faqs-container"></div>
+      </section>
+
+      <!-- Section 6: Operating Hours & Facility Contact Details -->
       <section class="facility-info-grid" aria-label="Facility Hours and Location">
         <div id="hours-container"></div>
         <div id="contact-container"></div>
@@ -235,7 +250,7 @@
     <!-- Application Footer -->
     <footer class="app-footer" role="contentinfo">
       <div class="footer-inner">
-        <p class="footer-copy">© 2026 PulseCore Fitness • AI Gym Receptionist Robot Base (ESP32 DevKit V1 + 3x SG90 Servos)</p>
+        <p class="footer-copy" id="footer-copy-text">© 2026 PulseCore Fitness • AI Gym Receptionist Robot Base (ESP32 DevKit V1 + 3x SG90 Servos)</p>
         <p class="footer-stack font-mono text-xs">Node.js Express • PostgreSQL • Web Speech API (EN / KN / HI)</p>
       </div>
     </footer>

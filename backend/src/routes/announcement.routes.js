@@ -13,3 +13,4 @@ router.put('/:id', authenticateToken, requireRole('owner', 'manager'), announcem
 router.delete('/:id', authenticateToken, requireRole('owner', 'manager'), announcementController.deleteAnnouncement);
 
 export default router;
+

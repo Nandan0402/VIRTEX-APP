@@ -1,70 +1,10 @@
 /**
- * mockData.js - Public Gym Information, Membership Plans, and Localized Content
- * Note: No private member data is hardcoded here.
+ * mockData.js - Localized UI Text and Prompts for Voice/Chat (EN, KN, HI)
+ * 
+ * NOTE: All gym business data (plans, pricing, operating hours, trainers, announcements,
+ * and FAQs) has been removed from this file and is loaded dynamically from PostgreSQL 
+ * backend APIs via frontend/js/services/api.js.
  */
-
-export const GYM_INFO = {
-  name: 'PULSECORE FITNESS',
-  tagline: 'AI-Powered Smart Fitness Reception',
-  phone: '+91 98765 43210',
-  email: 'reception@pulsecorefitness.in',
-  address: '42, 100 Feet Road, Indiranagar, Bengaluru, Karnataka 560038',
-  hours: [
-    { days: 'Monday – Friday', timing: '06:00 AM – 10:00 PM', status: 'Open' },
-    { days: 'Saturday', timing: '06:00 AM – 09:00 PM', status: 'Open' },
-    { days: 'Sunday', timing: '07:00 AM – 01:00 PM', status: 'Half Day' },
-  ],
-};
-
-export const MEMBERSHIP_PLANS = [
-  {
-    id: 'plan_silver',
-    name: 'Silver Monthly',
-    duration: '1 Month',
-    price: '₹2,499',
-    period: '/month',
-    badge: 'Popular',
-    featured: false,
-    perks: [
-      'Full Gym Floor & Cardio Access',
-      'Locker & Shower Facilities',
-      'Free Fitness Assessment',
-      'Standard Mobile App Access',
-    ],
-  },
-  {
-    id: 'plan_gold',
-    name: 'Gold Quarterly',
-    duration: '3 Months',
-    price: '₹5,999',
-    period: '/quarter',
-    badge: 'Best Value',
-    featured: true,
-    perks: [
-      'Everything in Silver Monthly',
-      '2 Personal Trainer Consultations',
-      'Nutrition & Macro Guidance',
-      'Steam & Sauna Access (2x/wk)',
-      '1 Free Guest Pass per month',
-    ],
-  },
-  {
-    id: 'plan_platinum',
-    name: 'Platinum Annual',
-    duration: '12 Months',
-    price: '₹18,999',
-    period: '/year',
-    badge: 'VIP Elite',
-    featured: false,
-    perks: [
-      'Unlimited 24/7 Access',
-      'Monthly 1-on-1 Trainer Session',
-      'Full Steam, Sauna & Recovery Lounge',
-      'Complimentary Gym Merchandise Kit',
-      'Free Locker Rental for 1 Year',
-    ],
-  },
-];
 
 export const LOCALIZED_CONTENT = {
   'en-IN': {
@@ -113,4 +53,3 @@ export const LOCALIZED_CONTENT = {
     statusOffline: 'ईएसपी32 ऑफलाइन है',
   },
 };
-

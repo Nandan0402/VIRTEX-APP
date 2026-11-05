@@ -43,6 +43,7 @@ router.get('/health', async (req, res) => {
 router.use('/gym', gymRoutes);
 router.use('/faqs', faqRoutes);
 router.use('/membership-plans', membershipRoutes);
+router.use('/memberships', membershipRoutes);
 router.use('/trainers', trainerRoutes);
 router.use('/robot', robotRoutes);
 router.use('/interactions', interactionRoutes);

@@ -1,8 +1,7 @@
 /**
- * membershipSection.js - Renders Membership Plans, Enquiry Form, Opening Hours, and Contact Cards
+ * membershipSection.js - Renders Live PostgreSQL Membership Plans, Operating Hours, and Facility Contact
  */
 
-import { MEMBERSHIP_PLANS, GYM_INFO } from '../services/mockData.js';
 import { api } from '../services/api.js';
 
 export class MembershipSectionComponent {
@@ -12,40 +11,90 @@ export class MembershipSectionComponent {
     this.contactContainer = document.getElementById(contactContainerId);
     this.enquiryModal = document.getElementById(enquiryModalId);
     this.onEnquirySubmitted = onEnquirySubmitted;
-    this.selectedPlan = null;
+    this.plans = [];
+    this.gymProfile = null;
   }
 
-  init() {
-    this.renderPlans();
-    this.renderHours();
-    this.renderContact();
+  async init() {
     this.setupEnquiryModal();
+    await this.loadData();
+  }
+
+  async loadData() {
+    // Show loading state if containers exist
+    if (this.plansContainer) {
+      this.plansContainer.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #a1a1aa;">
+          <span style="display: inline-block; animation: spin 1s linear infinite; margin-right: 8px;">⏳</span> Loading live membership tiers...
+        </div>
+      `;
+    }
+
+    try {
+      const [plansRes, gymRes] = await Promise.all([
+        api.getMembershipPlans({ activeOnly: true }),
+        api.getGymInfo(),
+      ]);
+
+      this.plans = (plansRes.success && plansRes.data) ? plansRes.data : [];
+      this.gymProfile = (gymRes.success && gymRes.data) ? gymRes.data : (gymRes.data || null);
+
+      this.renderPlans();
+      this.renderHours();
+      this.renderContact();
+    } catch (err) {
+      console.warn('[MembershipSection] Error loading live data:', err);
+      this.renderPlans();
+      this.renderHours();
+      this.renderContact();
+    }
   }
 
   renderPlans() {
     if (!this.plansContainer) return;
 
-    this.plansContainer.innerHTML = MEMBERSHIP_PLANS.map(
-      (plan) => `
-      <div class="plan-card ${plan.featured ? 'plan-featured' : ''}" role="article" aria-label="${plan.name} Plan">
-        ${plan.badge ? `<div class="plan-badge">${plan.badge}</div>` : ''}
-        <h4 class="plan-name">${plan.name}</h4>
-        <div class="plan-price-wrap">
-          <span class="plan-currency font-mono">${plan.price}</span>
-          <span class="plan-period">${plan.period}</span>
+    if (!this.plans || this.plans.length === 0) {
+      this.plansContainer.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #a1a1aa; background: #12141a; border-radius: 12px; border: 1px dashed #27272a;">
+          <p>No active membership plans found. Please enquire at the front desk desk.</p>
+          <button class="btn btn-green btn-enquire-plan" data-plan-name="General Membership" style="margin-top: 12px;">
+            Submit General Enquiry
+          </button>
         </div>
-        <p class="plan-duration">Validity: ${plan.duration}</p>
+      `;
+      const btn = this.plansContainer.querySelector('.btn-enquire-plan');
+      if (btn) btn.addEventListener('click', () => this.openEnquiryModal('General Membership'));
+      return;
+    }
 
-        <ul class="plan-perks-list">
-          ${plan.perks.map((perk) => `<li><span class="perk-check">✓</span> ${perk}</li>`).join('')}
-        </ul>
+    this.plansContainer.innerHTML = this.plans.map((plan) => {
+      const priceNum = typeof plan.price_inr === 'number' ? plan.price_inr : parseFloat(plan.price_inr || 0);
+      const formattedPrice = `₹${priceNum.toLocaleString('en-IN')}`;
+      const durationText = plan.duration_months === 1 ? '1 Month' : `${plan.duration_months} Months`;
+      const periodText = plan.duration_months === 1 ? '/month' : plan.duration_months === 3 ? '/quarter' : plan.duration_months === 12 ? '/year' : `/${plan.duration_months} mos`;
+      const badge = plan.badge_label || (plan.is_featured ? 'Popular' : null);
+      const perks = Array.isArray(plan.perks) ? plan.perks : (typeof plan.perks === 'string' ? plan.perks.split(',').map(p => p.trim()) : []);
 
-        <button class="btn btn-green btn-block btn-enquire-plan" data-plan-id="${plan.id}" data-plan-name="${plan.name}">
-          Enquire About ${plan.name}
-        </button>
-      </div>
-    `
-    ).join('');
+      return `
+        <div class="plan-card ${plan.is_featured ? 'plan-featured' : ''}" role="article" aria-label="${plan.name} Plan">
+          ${badge ? `<div class="plan-badge">${badge}</div>` : ''}
+          <h4 class="plan-name">${plan.name}</h4>
+          <div class="plan-price-wrap">
+            <span class="plan-currency font-mono">${formattedPrice}</span>
+            <span class="plan-period">${periodText}</span>
+          </div>
+          <p class="plan-duration">Validity: ${durationText}</p>
+
+          <ul class="plan-perks-list">
+            ${perks.map((perk) => `<li><span class="perk-check">✓</span> ${perk}</li>`).join('')}
+          </ul>
+
+          <button class="btn btn-green btn-block btn-enquire-plan" data-plan-id="${plan.id}" data-plan-name="${plan.name}">
+            Enquire About ${plan.name}
+          </button>
+        </div>
+      `;
+    }).join('');
 
     // Attach click listeners to plan buttons
     this.plansContainer.querySelectorAll('.btn-enquire-plan').forEach((btn) => {
@@ -59,6 +108,46 @@ export class MembershipSectionComponent {
   renderHours() {
     if (!this.hoursContainer) return;
 
+    const profile = this.gymProfile;
+    let hoursListHtml = '';
+
+    if (profile?.operating_hours && Array.isArray(profile.operating_hours)) {
+      hoursListHtml = profile.operating_hours.map((h) => {
+        const dayLabel = h.day || h.days || 'Day';
+        let timingLabel = '';
+        let statusLabel = 'Open';
+        let statusClass = 'text-green';
+
+        if (h.is_closed) {
+          timingLabel = 'Closed';
+          statusLabel = 'Closed';
+          statusClass = 'text-warning';
+        } else if (h.open && h.close) {
+          timingLabel = `${this.formatTime(h.open)} – ${this.formatTime(h.close)}`;
+          statusLabel = h.close === '13:00' ? 'Half Day' : 'Open';
+        } else if (h.timing) {
+          timingLabel = h.timing;
+          statusLabel = h.status || 'Open';
+        } else {
+          timingLabel = '06:00 AM – 10:00 PM';
+        }
+
+        return `
+          <li class="hours-row">
+            <span class="hours-days">${dayLabel}</span>
+            <span class="hours-timing font-mono">${timingLabel}</span>
+            <span class="hours-status ${statusClass} font-semibold">${statusLabel}</span>
+          </li>
+        `;
+      }).join('');
+    } else {
+      hoursListHtml = `
+        <li class="hours-row"><span class="hours-days">Monday – Friday</span><span class="hours-timing font-mono">06:00 AM – 10:00 PM</span><span class="hours-status text-green font-semibold">Open</span></li>
+        <li class="hours-row"><span class="hours-days">Saturday</span><span class="hours-timing font-mono">06:00 AM – 09:00 PM</span><span class="hours-status text-green font-semibold">Open</span></li>
+        <li class="hours-row"><span class="hours-days">Sunday</span><span class="hours-timing font-mono">07:00 AM – 01:00 PM</span><span class="hours-status text-warning font-semibold">Half Day</span></li>
+      `;
+    }
+
     this.hoursContainer.innerHTML = `
       <div class="card hours-card" aria-label="Facility Operating Hours">
         <div class="card-header">
@@ -70,27 +159,30 @@ export class MembershipSectionComponent {
         </div>
 
         <ul class="hours-timetable">
-          ${GYM_INFO.hours
-            .map(
-              (h) => `
-            <li class="hours-row">
-              <span class="hours-days">${h.days}</span>
-              <span class="hours-timing font-mono">${h.timing}</span>
-              <span class="hours-status ${h.status === 'Open' ? 'text-green' : 'text-warning'} font-semibold">
-                ${h.status}
-              </span>
-            </li>
-          `
-            )
-            .join('')}
+          ${hoursListHtml}
         </ul>
         <p class="hours-note">🏋️ Members with Platinum Annual passes enjoy 24/7 keycard access.</p>
       </div>
     `;
   }
 
+  formatTime(timeStr) {
+    if (!timeStr || !timeStr.includes(':')) return timeStr;
+    const parts = timeStr.split(':');
+    let hour = parseInt(parts[0], 10);
+    const minute = parts[1] || '00';
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+    return `${hour.toString().padStart(2, '0')}:${minute} ${ampm}`;
+  }
+
   renderContact() {
     if (!this.contactContainer) return;
+
+    const profile = this.gymProfile || {};
+    const address = profile.address || '42, 100 Feet Road, Indiranagar, Bengaluru, Karnataka 560038';
+    const phone = profile.phone || '+91 98765 43210';
+    const email = profile.email || 'reception@pulsecorefitness.in';
 
     this.contactContainer.innerHTML = `
       <div class="card contact-card" aria-label="Gym Contact Details">
@@ -107,7 +199,7 @@ export class MembershipSectionComponent {
             <span class="contact-item-icon">🏢</span>
             <div>
               <strong class="contact-item-title">Location</strong>
-              <p class="contact-item-text">${GYM_INFO.address}</p>
+              <p class="contact-item-text">${address}</p>
             </div>
           </div>
 
@@ -116,7 +208,7 @@ export class MembershipSectionComponent {
             <div>
               <strong class="contact-item-title">Reception Hotline</strong>
               <p class="contact-item-text font-mono">
-                <a href="tel:${GYM_INFO.phone}" class="link-green">${GYM_INFO.phone}</a>
+                <a href="tel:${phone}" class="link-green">${phone}</a>
               </p>
             </div>
           </div>
@@ -126,7 +218,7 @@ export class MembershipSectionComponent {
             <div>
               <strong class="contact-item-title">Support Email</strong>
               <p class="contact-item-text font-mono">
-                <a href="mailto:${GYM_INFO.email}" class="link-green">${GYM_INFO.email}</a>
+                <a href="mailto:${email}" class="link-green">${email}</a>
               </p>
             </div>
           </div>
@@ -180,7 +272,7 @@ export class MembershipSectionComponent {
 
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Submit Enquiry';
+          submitBtn.textContent = 'Submit Membership Enquiry';
         }
 
         this.closeEnquiryModal();
@@ -214,4 +306,3 @@ export class MembershipSectionComponent {
     this.enquiryModal.setAttribute('aria-hidden', 'true');
   }
 }
-

@@ -15,6 +15,10 @@ function maskMemberPII(member) {
     const parts = masked.email.split('@');
     masked.email = parts[0].slice(0, 2) + '***@' + parts[1];
   }
+  delete masked.password_hash;
+  delete masked.emergency_contact_name;
+  delete masked.emergency_contact_phone;
+  delete masked.notes;
   return masked;
 }
 

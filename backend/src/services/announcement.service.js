@@ -62,3 +62,4 @@ export async function deleteAnnouncement(id) {
   if (idx !== -1) mockAnnouncements.splice(idx, 1);
   return { id };
 }
+

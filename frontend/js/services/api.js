@@ -24,6 +24,118 @@ export const api = {
   },
 
   /**
+   * Fetch public gym facility profile and operating hours
+   */
+  async getGymInfo() {
+    try {
+      const res = await fetch(`${BASE_URL}/gym/info`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('[API] Could not fetch live gym info:', err.message);
+      return {
+        success: false,
+        data: {
+          gym_name: 'PulseCore Fitness',
+          tagline: 'AI-Powered Smart Fitness Reception',
+          phone: '+91 98765 43210',
+          email: 'reception@pulsecorefitness.in',
+          address: '42, 100 Feet Road, Indiranagar, Bengaluru, Karnataka 560038',
+          operating_hours: [
+            { day: 'Monday', open: '06:00', close: '22:00', is_closed: false },
+            { day: 'Tuesday', open: '06:00', close: '22:00', is_closed: false },
+            { day: 'Wednesday', open: '06:00', close: '22:00', is_closed: false },
+            { day: 'Thursday', open: '06:00', close: '22:00', is_closed: false },
+            { day: 'Friday', open: '06:00', close: '22:00', is_closed: false },
+            { day: 'Saturday', open: '06:00', close: '21:00', is_closed: false },
+            { day: 'Sunday', open: '07:00', close: '13:00', is_closed: false },
+          ],
+        },
+      };
+    }
+  },
+
+  /**
+   * Fetch live membership plans and pricing
+   * @param {object} options - { activeOnly }
+   */
+  async getMembershipPlans({ activeOnly = true } = {}) {
+    try {
+      const res = await fetch(`${BASE_URL}/membership-plans?activeOnly=${activeOnly}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('[API] Could not fetch live membership plans:', err.message);
+      return { success: false, data: [] };
+    }
+  },
+
+  /**
+   * Fetch trainers and on-floor availability
+   * @param {object} options - { status }
+   */
+  async getTrainers({ status } = {}) {
+    try {
+      const q = status ? `?status=${encodeURIComponent(status)}` : '';
+      const res = await fetch(`${BASE_URL}/trainers${q}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('[API] Could not fetch trainer roster:', err.message);
+      return { success: false, data: [] };
+    }
+  },
+
+  /**
+   * Fetch active public announcements
+   * @param {object} options - { activeOnly, priority }
+   */
+  async getAnnouncements({ activeOnly = true, priority } = {}) {
+    try {
+      const params = new URLSearchParams();
+      if (activeOnly) params.append('activeOnly', 'true');
+      if (priority) params.append('priority', priority);
+      const res = await fetch(`${BASE_URL}/announcements?${params.toString()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('[API] Could not fetch announcements:', err.message);
+      return { success: false, data: [] };
+    }
+  },
+
+  /**
+   * Fetch knowledge base FAQs with language, category, or keyword search
+   * @param {object} filter - { language, category, q }
+   */
+  async getFaqs({ language, category, q } = {}) {
+    try {
+      const params = new URLSearchParams();
+      if (language) params.append('language', language);
+      if (category && category !== 'all') params.append('category', category);
+      if (q) params.append('q', q);
+      const res = await fetch(`${BASE_URL}/faqs?${params.toString()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('[API] Could not fetch FAQs:', err.message);
+      return { success: false, data: [] };
+    }
+  },
+
+  /**
+   * Lookup member by code or phone without check-in
+   */
+  async lookupMember(identifier) {
+    try {
+      const res = await fetch(`${BASE_URL}/members/lookup/${encodeURIComponent(identifier)}`);
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  /**
    * Fetch current ESP32 hardware status and servo angles
    */
   async getRobotStatus() {

@@ -1,5 +1,6 @@
 /**
  * app.js - Main Application Coordinator for FitBot Gym Receptionist Kiosk
+ * Connects all kiosk features to the PostgreSQL backend APIs.
  */
 
 import { api } from './services/api.js';
@@ -10,12 +11,16 @@ import { ChatInterfaceComponent } from './components/chatInterface.js';
 import { MemberCardComponent } from './components/memberCard.js';
 import { RobotAvatarComponent } from './components/robotAvatar.js';
 import { MembershipSectionComponent } from './components/membershipSection.js';
-import { LOCALIZED_CONTENT, GYM_INFO } from './services/mockData.js';
+import { TrainerSectionComponent } from './components/trainerSection.js';
+import { AnnouncementsSectionComponent } from './components/announcementsSection.js';
+import { FaqSectionComponent } from './components/faqSection.js';
+import { LOCALIZED_CONTENT } from './services/mockData.js';
 
 class GymReceptionistApp {
   constructor() {
     this.currentLanguage = 'en-IN';
     this.speech = new SpeechService();
+    this.gymProfile = null;
 
     // Components
     this.robotAvatar = new RobotAvatarComponent('robot-avatar-container');
@@ -23,7 +28,10 @@ class GymReceptionistApp {
       this.handleTriggerGesture(gesture)
     );
     this.voiceVisualizer = new VoiceVisualizerComponent('voice-visualizer-container');
-    this.memberCard = new MemberCardComponent('member-card-container');
+
+    this.memberCard = new MemberCardComponent('member-card-container', {
+      onEnquireClick: (planName) => this.membershipSection.openEnquiryModal(planName),
+    });
 
     this.chatInterface = new ChatInterfaceComponent({
       containerId: 'chat-interface-container',
@@ -39,13 +47,28 @@ class GymReceptionistApp {
       enquiryModalId: 'enquiry-modal',
       onEnquirySubmitted: (msg) => this.handleEnquiryFeedback(msg),
     });
+
+    this.trainerSection = new TrainerSectionComponent({
+      containerId: 'trainers-container',
+      onTrainerConsult: (trainerName) => this.handleTrainerConsult(trainerName),
+    });
+
+    this.announcementsSection = new AnnouncementsSectionComponent({
+      containerId: 'announcements-container',
+      onSpeakAnnouncement: (text) => this.speakAloud(text),
+    });
+
+    this.faqSection = new FaqSectionComponent({
+      containerId: 'faqs-container',
+      onAskQuestion: (question) => this.handleSendMessage(question),
+      onSpeakAnswer: (text, lang) => this.speakAloud(text, lang),
+    });
   }
 
   async init() {
-    console.log('[App] Bootstrapping PulseCore FitBot UI...');
+    console.log('[App] Bootstrapping PulseCore FitBot Receptionist Kiosk...');
 
-    // 1. Initial Views Render
-    this.membershipSection.init();
+    // 1. Initial State
     this.voiceVisualizer.setState('idle', LOCALIZED_CONTENT['en-IN'].idleText);
     this.memberCard.renderMember(null);
 
@@ -62,7 +85,16 @@ class GymReceptionistApp {
     this.setupCheckInForm();
     this.renderPromptChips();
 
-    // 3. Periodic Telemetry and Health Polls
+    // 3. Load Live PostgreSQL Backend Data
+    await this.loadGymBranding();
+    await Promise.allSettled([
+      this.membershipSection.init(),
+      this.trainerSection.init(),
+      this.announcementsSection.init(),
+      this.faqSection.init(this.currentLanguage),
+    ]);
+
+    // 4. Periodic Telemetry and Health Polls
     await this.refreshSystemHealth();
     await this.refreshRobotStatus();
     await this.refreshRecentCheckIns();
@@ -71,6 +103,37 @@ class GymReceptionistApp {
     setInterval(() => this.refreshSystemHealth(), 5000);
     setInterval(() => this.refreshRobotStatus(), 3000);
     setInterval(() => this.refreshRecentCheckIns(), 10000);
+  }
+
+  async loadGymBranding() {
+    try {
+      const res = await api.getGymInfo();
+      if (res.data) {
+        this.gymProfile = res.data;
+        const brandTitle = document.getElementById('gym-brand-title');
+        const brandSubtitle = document.getElementById('gym-brand-subtitle');
+        const footerCopy = document.getElementById('footer-copy-text');
+
+        if (brandTitle && res.data.gym_name) {
+          const nameParts = res.data.gym_name.split(' ');
+          if (nameParts.length > 1) {
+            brandTitle.innerHTML = `${nameParts[0]} <span class="text-green">${nameParts.slice(1).join(' ')}</span>`;
+          } else {
+            brandTitle.textContent = res.data.gym_name;
+          }
+        }
+
+        if (brandSubtitle && res.data.tagline) {
+          brandSubtitle.textContent = res.data.tagline;
+        }
+
+        if (footerCopy && res.data.gym_name) {
+          footerCopy.textContent = `© 2026 ${res.data.gym_name} • AI Gym Receptionist Robot Base (ESP32 DevKit V1 + 3x SG90 Servos)`;
+        }
+      }
+    } catch (err) {
+      console.warn('[App] Could not synchronize gym branding:', err);
+    }
   }
 
   setupLanguageSwitcher() {
@@ -100,6 +163,9 @@ class GymReceptionistApp {
     const input = document.getElementById('chat-text-input');
     if (input) input.placeholder = localized.placeholder;
     this.renderPromptChips();
+
+    // Reload FAQs in the selected language
+    this.faqSection.setLanguage(this.currentLanguage);
 
     // Announce language change
     let switchNotice = 'Language switched to English.';
@@ -249,20 +315,44 @@ class GymReceptionistApp {
 
       try {
         const res = await api.checkInMember(identifier, this.currentLanguage);
-        if (res.success) {
+
+        if (res.success && res.data) {
+          // 1. Success (HTTP 200 - Active Member)
           checkInInput.value = '';
-          this.memberCard.renderMember(res.data.member, res.data.checkIn);
-          this.chatInterface.addMessage('robot', res.data.welcomeSpeech, res.data.gesture, this.currentLanguage);
-          this.robotAvatar.setState('speaking', res.data.gesture);
-          this.speakAloud(res.data.welcomeSpeech, res.data.voiceMeta?.bcp47 || this.currentLanguage);
+          const member = res.data.member;
+          const targetLang = res.data.voiceMeta?.bcp47 || member?.preferred_language || this.currentLanguage;
+
+          this.memberCard.renderMember(member, res.data.checkIn);
+          this.chatInterface.addMessage('robot', res.data.welcomeSpeech, res.data.gesture || 'GREET_WAVE', targetLang);
+          this.robotAvatar.setState('speaking', res.data.gesture || 'GREET_WAVE');
+          this.speakAloud(res.data.welcomeSpeech, targetLang);
           this.refreshRecentCheckIns();
-        } else {
-          this.chatInterface.addMessage('robot', res.error || 'Member not found. Please verify details.', 'SHAKE_NO');
+        } else if (res.duplicate) {
+          // 2. Duplicate Check-in (HTTP 409)
+          const msg = res.error || 'You have already checked in recently. Please proceed to the workout floor!';
+          this.memberCard.renderMember(null, null, { errorState: 'duplicate', message: msg });
+          this.chatInterface.addMessage('robot', msg, 'NOD_YES', this.currentLanguage);
+          this.robotAvatar.setState('idle', 'NOD_YES');
+          this.speakAloud(msg, this.currentLanguage);
+        } else if (res.member) {
+          // 3. Inactive / Frozen / Expired Member (HTTP 403)
+          this.memberCard.renderMember(res.member, null);
+          const msg = res.error || `Your membership is currently ${res.member.status}. Please visit the front desk manager.`;
+          this.chatInterface.addMessage('robot', msg, 'SHAKE_NO', this.currentLanguage);
           this.robotAvatar.setState('idle', 'SHAKE_NO');
-          this.speakAloud(res.error || 'Member not found.', this.currentLanguage);
+          this.speakAloud(msg, this.currentLanguage);
+        } else {
+          // 4. Invalid ID / Unregistered Visitor (HTTP 404)
+          this.memberCard.renderMember(null, null, { errorState: 'not_found', identifier });
+          const msg = res.error || 'Member not found. Please verify your phone number or Member ID, or submit a visitor enquiry.';
+          this.chatInterface.addMessage('robot', msg, 'SHAKE_NO', this.currentLanguage);
+          this.robotAvatar.setState('idle', 'SHAKE_NO');
+          this.speakAloud(msg, this.currentLanguage);
         }
       } catch (err) {
         console.error('[Check-in Error]', err);
+        this.memberCard.renderMember(null, null, { errorState: 'not_found', identifier });
+        this.chatInterface.addMessage('robot', 'System error verifying member. Please consult the front desk.', 'SHAKE_NO');
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -277,18 +367,23 @@ class GymReceptionistApp {
 
     try {
       const res = await api.sendChatMessage(text, this.currentLanguage);
-      if (res.success) {
+      if (res.success && res.data) {
         const { reply, gesture, language, voiceMeta } = res.data;
         const targetLang = voiceMeta?.bcp47 || language || this.currentLanguage;
 
-        this.chatInterface.addMessage('robot', reply, gesture, targetLang);
-        this.robotAvatar.setState('speaking', gesture);
+        this.chatInterface.addMessage('robot', reply, gesture || 'NOD', targetLang);
+        this.robotAvatar.setState('speaking', gesture || 'NOD');
         this.speakAloud(reply, targetLang);
       }
     } catch (err) {
       console.error('[Chat Error]', err);
       this.chatInterface.addMessage('robot', 'I had trouble processing that request. Please try again.', 'SHAKE_NO');
     }
+  }
+
+  handleTrainerConsult(trainerName) {
+    const question = `Is trainer ${trainerName} available right now?`;
+    this.handleSendMessage(question);
   }
 
   async handleTriggerGesture(gesture) {
