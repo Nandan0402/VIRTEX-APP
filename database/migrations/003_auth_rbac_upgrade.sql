@@ -69,3 +69,4 @@ ON CONFLICT (username) DO UPDATE SET
 UPDATE users
 SET trainer_id = 1, role_id = (SELECT id FROM roles WHERE role_code = 'trainer')
 WHERE username = 'head_trainer';
+

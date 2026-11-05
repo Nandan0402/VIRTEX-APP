@@ -53,9 +53,9 @@ const MOCK_FAQS = [
  * Fetch FAQs with optional language, category, and keyword search filters
  * @param {object} filter - { language, category, q }
  */
-export async function getFaqs({ language, category, q } = {}) {
+export async function getFaqs({ language, category, q, activeOnly = true } = {}) {
   if (isDatabaseConnected()) {
-    return await faqRepository.findFaqs({ language, category, q });
+    return await faqRepository.findFaqs({ language, category, q, activeOnly });
   }
 
   // Fallback mock filtering
@@ -72,3 +72,35 @@ export async function getFaqs({ language, category, q } = {}) {
     return true;
   });
 }
+
+export async function createFaq(data) {
+  if (isDatabaseConnected()) {
+    return await faqRepository.createFaq(data);
+  }
+  const newFaq = {
+    id: MOCK_FAQS.length + 1,
+    ...data,
+    keywords: Array.isArray(data.keywords) ? data.keywords : [],
+  };
+  MOCK_FAQS.push(newFaq);
+  return newFaq;
+}
+
+export async function updateFaq(id, data) {
+  if (isDatabaseConnected()) {
+    return await faqRepository.updateFaq(id, data);
+  }
+  const faq = MOCK_FAQS.find((f) => f.id === Number(id));
+  if (faq) Object.assign(faq, data);
+  return faq || null;
+}
+
+export async function deleteFaq(id) {
+  if (isDatabaseConnected()) {
+    return await faqRepository.deleteFaq(id);
+  }
+  const idx = MOCK_FAQS.findIndex((f) => f.id === Number(id));
+  if (idx !== -1) MOCK_FAQS.splice(idx, 1);
+  return { id };
+}
+

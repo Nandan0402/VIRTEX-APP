@@ -45,3 +45,40 @@ export async function getMembershipPlans({ activeOnly = true } = {}) {
   // Fallback mock
   return MOCK_PLANS;
 }
+
+export async function createPlan(data) {
+  if (isDatabaseConnected()) {
+    return await membershipRepository.createPlan(data);
+  }
+  const newPlan = { id: MOCK_PLANS.length + 1, ...data };
+  MOCK_PLANS.push(newPlan);
+  return newPlan;
+}
+
+export async function updatePlan(id, data) {
+  if (isDatabaseConnected()) {
+    return await membershipRepository.updatePlan(id, data);
+  }
+  const plan = MOCK_PLANS.find((p) => p.id === Number(id));
+  if (plan) Object.assign(plan, data);
+  return plan || null;
+}
+
+export async function togglePlanStatus(id) {
+  if (isDatabaseConnected()) {
+    return await membershipRepository.togglePlanStatus(id);
+  }
+  const plan = MOCK_PLANS.find((p) => p.id === Number(id));
+  if (plan) plan.is_active = !plan.is_active;
+  return plan || null;
+}
+
+export async function deletePlan(id) {
+  if (isDatabaseConnected()) {
+    return await membershipRepository.deletePlan(id);
+  }
+  const idx = MOCK_PLANS.findIndex((p) => p.id === Number(id));
+  if (idx !== -1) MOCK_PLANS.splice(idx, 1);
+  return { id };
+}
+

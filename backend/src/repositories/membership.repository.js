@@ -110,3 +110,113 @@ export async function findMembershipsByMemberId(memberId, client) {
   return result.rows;
 }
 
+/**
+ * Create a new membership plan
+ * @param {Object} planData
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function createPlan(planData, client) {
+  const {
+    planCode = `PLAN-${Date.now().toString().slice(-4)}`,
+    name,
+    durationMonths = 1,
+    priceInr,
+    badgeLabel = 'Standard',
+    isFeatured = false,
+    isActive = true,
+    perks = [],
+  } = planData;
+
+  const sql = `
+    INSERT INTO membership_plans (
+      plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    RETURNING id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks, created_at;
+  `;
+
+  const executor = client || { query };
+  const result = await executor.query(sql, [
+    planCode,
+    name,
+    durationMonths,
+    priceInr,
+    badgeLabel,
+    isFeatured,
+    isActive,
+    perks,
+  ]);
+  return result.rows[0];
+}
+
+/**
+ * Update an existing membership plan
+ * @param {number} id
+ * @param {Object} planData
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function updatePlan(id, planData, client) {
+  const { name, durationMonths, priceInr, badgeLabel, isFeatured, isActive, perks } = planData;
+
+  const sql = `
+    UPDATE membership_plans
+    SET name = COALESCE($1, name),
+        duration_months = COALESCE($2, duration_months),
+        price_inr = COALESCE($3, price_inr),
+        badge_label = COALESCE($4, badge_label),
+        is_featured = COALESCE($5, is_featured),
+        is_active = COALESCE($6, is_active),
+        perks = COALESCE($7, perks),
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $8
+    RETURNING id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks, updated_at;
+  `;
+
+  const executor = client || { query };
+  const result = await executor.query(sql, [
+    name,
+    durationMonths,
+    priceInr,
+    badgeLabel,
+    isFeatured,
+    isActive,
+    perks,
+    id,
+  ]);
+  return result.rows[0] || null;
+}
+
+/**
+ * Toggle plan active status
+ * @param {number} id
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function togglePlanStatus(id, client) {
+  const sql = `
+    UPDATE membership_plans
+    SET is_active = NOT is_active,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $1
+    RETURNING id, plan_code, name, is_active, updated_at;
+  `;
+  const executor = client || { query };
+  const result = await executor.query(sql, [id]);
+  return result.rows[0] || null;
+}
+
+/**
+ * Delete a membership plan
+ * @param {number} id
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function deletePlan(id, client) {
+  const sql = `
+    DELETE FROM membership_plans
+    WHERE id = $1
+    RETURNING id;
+  `;
+  const executor = client || { query };
+  const result = await executor.query(sql, [id]);
+  return result.rows[0] || null;
+}
+
+

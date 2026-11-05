@@ -251,6 +251,13 @@ export function queueDirectAngles(angles) {
   return queueRobotCommand({ servoPayload: angles, commandType: 'DIRECT_ANGLES' });
 }
 
+export async function getRecentCommands(limit = 20) {
+  if (isDatabaseConnected()) {
+    return await robotRepository.getRecentCommands(limit);
+  }
+  return memoryCommandQueue.slice(0, limit);
+}
+
 export function getRobotState() {
   return getRobotStatus();
 }

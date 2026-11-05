@@ -28,8 +28,11 @@
         <button class="nav-item-btn active" data-tab="tab-overview" aria-current="page">
           <span class="nav-icon" aria-hidden="true">📊</span> Overview & Stats
         </button>
-        <button class="nav-item-btn" data-tab="tab-robot">
-          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
+        <button class="nav-item-btn" data-tab="tab-members">
+          <span class="nav-icon" aria-hidden="true">👥</span> Members Directory
+        </button>
+        <button class="nav-item-btn" data-tab="tab-enquiries">
+          <span class="nav-icon" aria-hidden="true">📩</span> Enquiries & Leads
         </button>
         <button class="nav-item-btn" data-tab="tab-trainers">
           <span class="nav-icon" aria-hidden="true">🏋️</span> Trainers & Floor Shifts
@@ -43,6 +46,9 @@
         <button class="nav-item-btn" data-tab="tab-announcements">
           <span class="nav-icon" aria-hidden="true">📢</span> Noticeboard Announcements
         </button>
+        <button class="nav-item-btn" data-tab="tab-robot">
+          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
+        </button>
         <button class="nav-item-btn" data-tab="tab-profile">
           <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile & Hours
         </button>
@@ -54,12 +60,17 @@
       <!-- Explicit Session & Pre-Auth Status (No Fake Auth) -->
       <div class="sidebar-footer">
         <div class="session-indicator">
-          <span class="session-role-pill">DEV SESSION ACTIVE</span>
-          <p class="session-notice">Auth Notice: Pre-authenticated local administrative session. Production JWT/OAuth pending integration.</p>
+          <span class="session-role-pill" id="sidebar-role-pill">OWNER SESSION ACTIVE</span>
+          <p class="session-notice" id="sidebar-session-desc">Authenticated via PostgreSQL RBAC & JWT.</p>
         </div>
-        <button class="btn-logout" id="btn-logout" aria-label="End active session">
-          🚪 Logout / Reset Session
-        </button>
+        <div style="display: flex; gap: 6px; margin-top: 6px;">
+          <button class="role-switcher-btn" id="btn-sidebar-role-switch" style="flex: 1;" aria-label="Switch RBAC Test Role">
+            🔄 Switch Role
+          </button>
+          <button class="btn-logout" id="btn-logout" style="flex: 1;" aria-label="End active session">
+            🚪 Logout
+          </button>
+        </div>
       </div>
     </aside>
 
@@ -73,6 +84,13 @@
         </div>
 
         <div class="topbar-right">
+          <!-- Active Authenticated User & RBAC Role Pill -->
+          <div class="user-profile-badge" id="topbar-user-badge">
+            <span class="role-tag owner" id="topbar-role-tag">OWNER</span>
+            <span id="topbar-username" class="font-mono" style="font-size: 0.8rem; font-weight: 600;">owner_manju</span>
+            <button class="role-switcher-btn" id="btn-topbar-switch-role" title="Switch RBAC Test Account">Switch</button>
+          </div>
+
           <!-- ESP32 Hardware Status Indicator -->
           <div class="status-pill" id="admin-robot-status-pill" title="ESP32 Hardware Base Link">
             <span class="status-dot offline" id="admin-robot-dot" aria-hidden="true"></span>
@@ -166,6 +184,114 @@
         </section>
 
         <!-- =============================================================== -->
+        <!-- TAB: MEMBERS DIRECTORY -->
+        <!-- =============================================================== -->
+        <section class="tab-panel" id="tab-members" role="tabpanel" aria-label="Members Directory">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Gym Members Directory</h3>
+                <p class="text-dim text-xs">Registered members with biometric/voice kiosk access and subscription status.</p>
+              </div>
+              <button class="btn btn-green btn-sm" id="btn-open-member-modal">+ Register Member</button>
+            </div>
+
+            <!-- Search, Status Filter & Actions Toolbar -->
+            <div class="table-toolbar">
+              <div class="table-toolbar-left">
+                <input type="text" id="member-search-input" class="input-search" placeholder="🔍 Search name, code, phone, email..." />
+                <select id="member-status-filter" class="select-filter">
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active Members</option>
+                  <option value="frozen">Frozen</option>
+                  <option value="expired">Expired</option>
+                </select>
+                <button class="btn btn-outline btn-sm" id="btn-refresh-members">🔄 Refresh</button>
+              </div>
+              <span class="text-dim text-xs font-mono" id="member-count-label">Loading members...</span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Member ID</th>
+                    <th>Full Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Membership Plan</th>
+                    <th>Language</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="members-table-body">
+                  <tr><td colspan="8" class="loading-indicator">Loading members from PostgreSQL...</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination-bar" id="member-pagination-bar">
+              <span id="member-page-info">Page 1 of 1</span>
+              <div class="pagination-buttons">
+                <button id="btn-member-prev" disabled>◀ Previous</button>
+                <button id="btn-member-next" disabled>Next ▶</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- TAB: ENQUIRIES & LEADS -->
+        <!-- =============================================================== -->
+        <section class="tab-panel" id="tab-enquiries" role="tabpanel" aria-label="Enquiries & Leads">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Reception Kiosk Enquiries & Leads</h3>
+                <p class="text-dim text-xs">Prospective visitors captured by FitBot at the front desk kiosk.</p>
+              </div>
+              <button class="btn btn-outline btn-sm" id="btn-refresh-enquiries">🔄 Refresh Leads</button>
+            </div>
+
+            <div class="table-toolbar">
+              <div class="table-toolbar-left">
+                <input type="text" id="enquiry-search-input" class="input-search" placeholder="🔍 Search prospect name, phone..." />
+                <select id="enquiry-status-filter" class="select-filter">
+                  <option value="all">All Statuses</option>
+                  <option value="new">New Inquiries</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="converted">Converted</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+              <span class="text-dim text-xs font-mono" id="enquiry-count-label">Loading enquiries...</span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Prospect Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Interested Plan</th>
+                    <th>Preferred Timing</th>
+                    <th>Notes</th>
+                    <th>Lead Status</th>
+                  </tr>
+                </thead>
+                <tbody id="enquiries-table-body">
+                  <tr><td colspan="8" class="loading-indicator">Loading leads from PostgreSQL...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
         <!-- TAB 2: ROBOT TELEMETRY & PHYSICAL MOTOR CONTROLS -->
         <!-- =============================================================== -->
         <section class="tab-panel" id="tab-robot" role="tabpanel" aria-label="Robot Controls">
@@ -253,6 +379,34 @@
               </button>
             </div>
           </div>
+
+          <!-- Diagnostics: Recent Hardware Commands & Dispatches -->
+          <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+              <div>
+                <h3>Hardware Motion Queue & Command History</h3>
+                <p class="text-dim text-xs">Real-time dispatches transmitted to ESP32 motor controller (GPIO 18, 19, 21).</p>
+              </div>
+              <button class="btn btn-outline btn-sm" id="btn-refresh-robot-logs">🔄 Refresh Dispatches</button>
+            </div>
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Command ID</th>
+                    <th>Type</th>
+                    <th>Gesture / Servo Payload</th>
+                    <th>Status</th>
+                    <th>Triggered By</th>
+                    <th>Dispatched Time</th>
+                  </tr>
+                </thead>
+                <tbody id="robot-logs-table-body">
+                  <tr><td colspan="6" class="loading-indicator">Loading hardware logs from PostgreSQL...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </section>
 
         <!-- =============================================================== -->
@@ -266,6 +420,21 @@
                 <p class="text-dim text-xs">FitBot announces active trainers on the workout floor to inquiring gym members.</p>
               </div>
               <button class="btn btn-green btn-sm" id="btn-open-trainer-modal">+ Add Trainer</button>
+            </div>
+
+            <!-- Search & Status Filter Toolbar -->
+            <div class="table-toolbar">
+              <div class="table-toolbar-left">
+                <input type="text" id="trainer-search-input" class="input-search" placeholder="🔍 Search trainer name, specialty, code..." />
+                <select id="trainer-status-filter" class="select-filter">
+                  <option value="all">All Statuses</option>
+                  <option value="on_floor">🟢 On Floor</option>
+                  <option value="in_session">🟡 In Session</option>
+                  <option value="off_duty">⚪ Off Duty</option>
+                </select>
+                <button class="btn btn-outline btn-sm" id="btn-refresh-trainers">🔄 Refresh</button>
+              </div>
+              <span class="text-dim text-xs font-mono" id="trainer-count-label">Loading trainers...</span>
             </div>
 
             <div class="table-responsive">
@@ -300,6 +469,14 @@
               <button class="btn btn-green btn-sm" id="btn-open-plan-modal">+ Create Plan</button>
             </div>
 
+            <div class="table-toolbar">
+              <div class="table-toolbar-left">
+                <input type="text" id="plan-search-input" class="input-search" placeholder="🔍 Search plan name, code..." />
+                <button class="btn btn-outline btn-sm" id="btn-refresh-plans">🔄 Refresh</button>
+              </div>
+              <span class="text-dim text-xs font-mono" id="plan-count-label">Loading plans...</span>
+            </div>
+
             <div class="table-responsive">
               <table class="admin-table">
                 <thead>
@@ -332,6 +509,20 @@
               <button class="btn btn-green btn-sm" id="btn-open-faq-modal">+ Add FAQ</button>
             </div>
 
+            <div class="table-toolbar">
+              <div class="table-toolbar-left">
+                <input type="text" id="faq-search-input" class="input-search" placeholder="🔍 Search question or answer keyword..." />
+                <select id="faq-lang-filter" class="select-filter">
+                  <option value="all">All Languages</option>
+                  <option value="en-IN">English (en-IN)</option>
+                  <option value="kn-IN">Kannada (kn-IN)</option>
+                  <option value="hi-IN">Hindi (hi-IN)</option>
+                </select>
+                <button class="btn btn-outline btn-sm" id="btn-refresh-faqs">🔄 Refresh</button>
+              </div>
+              <span class="text-dim text-xs font-mono" id="faq-count-label">Loading FAQs...</span>
+            </div>
+
             <div class="table-responsive">
               <table class="admin-table">
                 <thead>
@@ -361,6 +552,13 @@
                 <p class="text-dim text-xs">Notices highlighted by the receptionist robot at member check-in.</p>
               </div>
               <button class="btn btn-green btn-sm" id="btn-open-ann-modal">+ New Notice</button>
+            </div>
+
+            <div class="table-toolbar">
+              <div class="table-toolbar-left">
+                <button class="btn btn-outline btn-sm" id="btn-refresh-ann">🔄 Refresh Notices</button>
+              </div>
+              <span class="text-dim text-xs font-mono" id="ann-count-label">Loading notices...</span>
             </div>
 
             <div class="table-responsive">
@@ -655,25 +853,165 @@
   </div>
 
   <!-- ================================================================= -->
+  <!-- MODAL: REGISTER GYM MEMBER -->
+  <!-- ================================================================= -->
+  <div class="modal-backdrop" id="modal-member" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Register Gym Member</h3>
+        <button class="modal-close-btn" data-close-modal="modal-member">✕</button>
+      </div>
+      <form id="form-add-member">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="mem-name">Full Name *</label>
+            <input type="text" id="mem-name" required placeholder="e.g. Anand Murthy" />
+          </div>
+          <div class="form-group">
+            <label for="mem-phone">Phone Number (10 Digits) *</label>
+            <input type="tel" id="mem-phone" pattern="[0-9]{10}" required placeholder="9876543210" />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="mem-email">Email Address</label>
+            <input type="email" id="mem-email" placeholder="anand@example.com" />
+          </div>
+          <div class="form-group">
+            <label for="mem-lang">Preferred Language</label>
+            <select id="mem-lang">
+              <option value="en-IN">English (en-IN)</option>
+              <option value="kn-IN">Kannada (kn-IN)</option>
+              <option value="hi-IN">Hindi (hi-IN)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="mem-plan">Initial Membership Plan</label>
+            <select id="mem-plan">
+              <option value="">Select a Plan...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="mem-status">Membership Status</label>
+            <select id="mem-status">
+              <option value="active">Active</option>
+              <option value="frozen">Frozen</option>
+              <option value="expired">Expired</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="mem-notes">Notes / Health Cautions</label>
+          <input type="text" id="mem-notes" placeholder="e.g. Knee injury rehab, morning workout preference" />
+        </div>
+
+        <button type="submit" class="btn btn-green btn-block">Register Member to Database</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: MEMBER CHECK-IN HISTORY -->
+  <!-- ================================================================= -->
+  <div class="modal-backdrop" id="modal-member-history" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="history-modal-title">Member Check-In History</h3>
+          <span class="text-dim text-xs font-mono" id="history-modal-subtitle"></span>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-member-history">✕</button>
+      </div>
+      <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Method</th>
+              <th>Plan</th>
+            </tr>
+          </thead>
+          <tbody id="member-history-table-body">
+            <tr><td colspan="3" class="loading-indicator">Loading history...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top: 1rem; text-align: right;">
+        <button class="btn btn-outline btn-sm" data-close-modal="modal-member-history">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: ROLE SWITCHER (RBAC DEMO & TESTING) -->
+  <!-- ================================================================= -->
+  <div class="modal-backdrop" id="modal-role-switcher" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Switch Role-Based Access Account</h3>
+          <p class="text-dim text-xs">Test server-side authorization and view UI permission gates.</p>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-role-switcher">✕</button>
+      </div>
+      <div class="role-select-card">
+        <button class="role-option-btn" data-account="owner_manju">
+          <div>
+            <strong>Manjunath (Owner)</strong>
+            <p class="text-dim text-xs">Full authority (*): Financials, facility settings, user provisioning, hardware.</p>
+          </div>
+          <span class="role-tag owner">OWNER</span>
+        </button>
+
+        <button class="role-option-btn" data-account="manager_priya">
+          <div>
+            <strong>Priya (Manager)</strong>
+            <p class="text-dim text-xs">Operations: Members, trainer schedules, lead inquiries, robot gestures.</p>
+          </div>
+          <span class="role-tag manager">MANAGER</span>
+        </button>
+
+        <button class="role-option-btn" data-account="head_trainer">
+          <div>
+            <strong>Arjun Patel (Trainer)</strong>
+            <p class="text-dim text-xs">Trainer: Update personal floor status, view permitted members, robot telemetry.</p>
+          </div>
+          <span class="role-tag trainer">TRAINER</span>
+        </button>
+
+        <button class="role-option-btn" data-account="admin">
+          <div>
+            <strong>SuperAdmin (Legacy)</strong>
+            <p class="text-dim text-xs">Legacy administrative credentials (AdminPass2026!).</p>
+          </div>
+          <span class="role-tag owner">SUPERADMIN</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
   <!-- MODAL: LOGOUT / AUTH NOTICE MODAL -->
   <!-- ================================================================= -->
   <div class="modal-backdrop" id="modal-logout" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Administrative Session</h3>
+        <h3>Administrative Session Logout</h3>
         <button class="modal-close-btn" data-close-modal="modal-logout">✕</button>
       </div>
       <div style="margin-bottom: 1.25rem; font-size: 0.9rem; color: var(--text-gray);">
         <p style="margin-bottom: 8px;">
-          You are currently in a <strong>Local Administrative Session (Development Mode)</strong>.
-        </p>
-        <p>
-          Authentication safeguards (JWT / Session cookies / Role-Based Access Control) are prepared in the architecture but not yet enforced on endpoints to ease embedded debugging.
+          Logging out will invalidate your cryptographic JWT token in PostgreSQL <code class="font-mono text-green">token_blacklist</code> and record an audit log entry.
         </p>
       </div>
       <div style="display: flex; gap: 10px;">
         <button class="btn btn-outline" style="flex: 1;" data-close-modal="modal-logout">Stay Signed In</button>
-        <button class="btn btn-green" style="flex: 1;" id="btn-confirm-reset-session">Reset Local State</button>
+        <button class="btn btn-green" style="flex: 1;" id="btn-confirm-logout">Confirm Logout</button>
       </div>
     </div>
   </div>

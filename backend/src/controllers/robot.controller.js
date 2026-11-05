@@ -103,3 +103,21 @@ export async function triggerGesture(req, res, next) {
 export async function setDirectAngles(req, res, next) {
   return postCommand(req, res, next);
 }
+
+/**
+ * GET /api/v1/robot/logs
+ * Retrieve recent robot command and diagnostics logs
+ */
+export async function getCommandLogs(req, res, next) {
+  try {
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const logs = await robotService.getRecentCommands(limit);
+    res.json({
+      success: true,
+      data: logs,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+

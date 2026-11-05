@@ -98,3 +98,112 @@ export async function updateTrainerStatus(id, status, client) {
   return res.rows[0] || null;
 }
 
+/**
+ * Create a new trainer
+ * @param {Object} data
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function createTrainer(data, client) {
+  const {
+    fullName,
+    specialty,
+    phone,
+    email,
+    bio,
+    certifications,
+    status = 'on_floor',
+    trainerCode = `TRN${Date.now().toString().slice(-4)}`,
+    shiftStart = '06:00:00',
+    shiftEnd = '14:00:00',
+  } = data;
+
+  const sql = `
+    INSERT INTO trainers (
+      trainer_code, full_name, specialty, phone, email, bio, certifications, status
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    RETURNING id, trainer_code, full_name, specialty, phone, email, bio, certifications, status, created_at;
+  `;
+
+  const executor = client || { query };
+  const certs = Array.isArray(certifications)
+    ? certifications
+    : certifications
+    ? certifications.split(',').map((c) => c.trim())
+    : [];
+
+  const res = await executor.query(sql, [
+    trainerCode,
+    fullName,
+    specialty,
+    phone,
+    email || null,
+    bio || null,
+    certs,
+    status,
+  ]);
+  const newTrainer = res.rows[0];
+
+  // Insert standard shifts for Mon-Sat (1 to 6)
+  if (newTrainer && shiftStart && shiftEnd) {
+    for (let day = 1; day <= 6; day++) {
+      await executor.query(
+        `INSERT INTO trainer_schedules (trainer_id, day_of_week, shift_start, shift_end, is_available)
+         VALUES ($1, $2, $3, $4, TRUE);`,
+        [newTrainer.id, day, shiftStart, shiftEnd]
+      );
+    }
+  }
+
+  return newTrainer;
+}
+
+/**
+ * Update trainer information
+ * @param {number} id
+ * @param {Object} data
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function updateTrainer(id, data, client) {
+  const { fullName, specialty, phone, email, bio, certifications, status } = data;
+
+  const sql = `
+    UPDATE trainers
+    SET full_name = COALESCE($1, full_name),
+        specialty = COALESCE($2, specialty),
+        phone = COALESCE($3, phone),
+        email = COALESCE($4, email),
+        bio = COALESCE($5, bio),
+        certifications = COALESCE($6, certifications),
+        status = COALESCE($7, status),
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $8
+    RETURNING id, trainer_code, full_name, specialty, phone, email, bio, certifications, status, updated_at;
+  `;
+
+  const executor = client || { query };
+  const res = await executor.query(sql, [
+    fullName,
+    specialty,
+    phone,
+    email,
+    bio,
+    certifications,
+    status,
+    id,
+  ]);
+  return res.rows[0] || null;
+}
+
+/**
+ * Delete a trainer record
+ * @param {number} id
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function deleteTrainer(id, client) {
+  const executor = client || { query };
+  await executor.query('DELETE FROM trainer_schedules WHERE trainer_id = $1;', [id]);
+  const res = await executor.query('DELETE FROM trainers WHERE id = $1 RETURNING id;', [id]);
+  return res.rows[0] || null;
+}
+
+

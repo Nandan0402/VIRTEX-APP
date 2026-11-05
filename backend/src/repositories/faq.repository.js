@@ -98,3 +98,59 @@ export async function createFaq(faqData, client) {
   return result.rows[0];
 }
 
+/**
+ * Update an existing FAQ entry
+ * @param {number} id
+ * @param {Object} faqData
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function updateFaq(id, faqData, client) {
+  const { question, answer, language, category, suggestedGesture, keywords, displayOrder, isActive } = faqData;
+
+  const sql = `
+    UPDATE faqs
+    SET question = COALESCE($1, question),
+        answer = COALESCE($2, answer),
+        language = COALESCE($3, language),
+        category = COALESCE($4, category),
+        suggested_gesture = COALESCE($5, suggested_gesture),
+        keywords = COALESCE($6, keywords),
+        display_order = COALESCE($7, display_order),
+        is_active = COALESCE($8, is_active),
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $9
+    RETURNING id, question, answer, language, category, suggested_gesture, keywords, display_order, is_active, updated_at;
+  `;
+
+  const executor = client || { query };
+  const result = await executor.query(sql, [
+    question,
+    answer,
+    language,
+    category,
+    suggestedGesture,
+    keywords,
+    displayOrder,
+    isActive,
+    id,
+  ]);
+  return result.rows[0] || null;
+}
+
+/**
+ * Delete an FAQ entry
+ * @param {number} id
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function deleteFaq(id, client) {
+  const sql = `
+    DELETE FROM faqs
+    WHERE id = $1
+    RETURNING id;
+  `;
+  const executor = client || { query };
+  const result = await executor.query(sql, [id]);
+  return result.rows[0] || null;
+}
+
+

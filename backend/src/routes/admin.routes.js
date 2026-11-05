@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as adminController from '../controllers/admin.controller.js';
+import * as memberController from '../controllers/member.controller.js';
 import { authenticateToken, requireRole } from '../middlewares/auth.js';
 
 const router = Router();
@@ -15,6 +16,7 @@ router.put('/settings', requireRole('owner', 'manager'), adminController.updateS
 
 // Lead Management: Accessible to Owner and Manager
 router.get('/enquiries', requireRole('owner', 'manager'), adminController.getEnquiries);
+router.patch('/enquiries/:id', requireRole('owner', 'manager'), memberController.updateEnquiry);
 
 // Staff User Provisioning: Strictly Owner only
 router.get('/users', requireRole('owner'), adminController.getUsers);
@@ -24,3 +26,4 @@ router.post('/users', requireRole('owner'), adminController.createUser);
 router.get('/audit-logs', requireRole('owner'), adminController.getAuditLogs);
 
 export default router;
+

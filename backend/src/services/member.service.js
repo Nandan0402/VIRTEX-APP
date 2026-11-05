@@ -83,6 +83,91 @@ export async function getRecentEnquiries(limit = 20) {
 }
 
 /**
+ * List members with search, status filter, and pagination
+ * @param {Object} options
+ */
+export async function listMembers({ search, status, page = 1, limit = 10 } = {}) {
+  if (isDatabaseConnected()) {
+    return await memberRepository.listMembers({ search, status, page, limit });
+  }
+
+  let filtered = [...mockMembers];
+  if (status && status !== 'all') {
+    filtered = filtered.filter((m) => m.status === status);
+  }
+  if (search && search.trim()) {
+    const q = search.toLowerCase().trim();
+    filtered = filtered.filter(
+      (m) =>
+        m.full_name.toLowerCase().includes(q) ||
+        m.member_code.toLowerCase().includes(q) ||
+        m.phone.includes(q)
+    );
+  }
+
+  const total = filtered.length;
+  const offset = (page - 1) * limit;
+  const paged = filtered.slice(offset, offset + limit);
+
+  return {
+    members: paged,
+    pagination: {
+      total,
+      page: Number(page),
+      limit: Number(limit),
+      totalPages: Math.ceil(total / limit) || 1,
+    },
+  };
+}
+
+export async function createMember(data) {
+  if (isDatabaseConnected()) {
+    return await memberRepository.createMember(data);
+  }
+  const id = mockMembers.length + 1;
+  const newMember = {
+    id,
+    member_code: data.memberCode || `GYM00${id}`,
+    full_name: data.fullName,
+    phone: data.phone,
+    email: data.email,
+    plan_name: data.planName || 'Standard',
+    status: data.status || 'active',
+    preferred_language: data.preferredLanguage || 'en-IN',
+  };
+  mockMembers.push(newMember);
+  return newMember;
+}
+
+export async function updateMember(id, data) {
+  if (isDatabaseConnected()) {
+    return await memberRepository.updateMember(id, data);
+  }
+  const member = mockMembers.find((m) => m.id === Number(id));
+  if (member) Object.assign(member, data);
+  return member || null;
+}
+
+export async function deleteMember(id) {
+  if (isDatabaseConnected()) {
+    return await memberRepository.deleteMember(id);
+  }
+  const idx = mockMembers.findIndex((m) => m.id === Number(id));
+  if (idx !== -1) mockMembers.splice(idx, 1);
+  return { id };
+}
+
+export async function updateEnquiry(id, data) {
+  if (isDatabaseConnected()) {
+    return await memberRepository.updateEnquiry(id, data);
+  }
+  const enquiry = mockEnquiries.find((e) => e.id === Number(id));
+  if (enquiry) Object.assign(enquiry, data);
+  return enquiry || null;
+}
+
+
+/**
  * Find gym member by ID
  * @param {number} id
  */

@@ -17,4 +17,9 @@ router.patch(
   trainerController.updateStatus
 );
 
+// RBAC Protected Management: Owner, Manager
+router.post('/', authenticateToken, requireRole('owner', 'manager'), trainerController.createTrainer);
+router.put('/:id', authenticateToken, requireRole('owner', 'manager'), trainerController.updateTrainer);
+router.delete('/:id', authenticateToken, requireRole('owner', 'manager'), trainerController.deleteTrainer);
+
 export default router;

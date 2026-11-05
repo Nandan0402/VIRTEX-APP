@@ -70,3 +70,35 @@ export async function updateTrainerStatus(trainerId, status) {
   }
   return null;
 }
+
+export async function createTrainer(data) {
+  if (isDatabaseConnected()) {
+    return await trainerRepository.createTrainer(data);
+  }
+  const newTrainer = {
+    id: MOCK_TRAINERS.length + 1,
+    trainer_code: `TRN00${MOCK_TRAINERS.length + 1}`,
+    ...data,
+  };
+  MOCK_TRAINERS.push(newTrainer);
+  return newTrainer;
+}
+
+export async function updateTrainer(id, data) {
+  if (isDatabaseConnected()) {
+    return await trainerRepository.updateTrainer(id, data);
+  }
+  const trainer = MOCK_TRAINERS.find((t) => t.id === Number(id));
+  if (trainer) Object.assign(trainer, data);
+  return trainer || null;
+}
+
+export async function deleteTrainer(id) {
+  if (isDatabaseConnected()) {
+    return await trainerRepository.deleteTrainer(id);
+  }
+  const idx = MOCK_TRAINERS.findIndex((t) => t.id === Number(id));
+  if (idx !== -1) MOCK_TRAINERS.splice(idx, 1);
+  return { id };
+}
+

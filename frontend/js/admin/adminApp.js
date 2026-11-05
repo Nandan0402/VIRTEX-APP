@@ -1,13 +1,21 @@
 /**
- * adminApp.js - Main Application Controller for Trainer & Admin Dashboard
+ * adminApp.js - Main Application Controller for PulseCore Admin Console
+ * Connects all modules to live PostgreSQL APIs:
+ * 1. Gym profile/hours
+ * 2. Membership plans (CRUD)
+ * 3. Members directory (CRUD + Search + Filter + Pagination)
+ * 4. Trainer profiles & schedules (CRUD)
+ * 5. On Floor/In Session/Off Duty availability
+ * 6. Announcements noticeboard (CRUD)
+ * 7. FAQ / Knowledge base (CRUD + Search + Lang Filter)
+ * 8. Enquiries / Kiosk leads (Status update + Filter)
+ * 9. Interaction logs audit feed
+ * 10. Robot motor controls & diagnostics logs
  */
 
 import { adminState } from './adminState.js';
 import { adminApi } from './adminApi.js';
 
-/**
- * Sanitize untrusted text before insertion into the DOM to eliminate XSS vectors
- */
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
   return String(str)
@@ -21,42 +29,132 @@ function escapeHtml(str) {
 class AdminDashboardApp {
   constructor() {
     this.currentTab = 'tab-overview';
+    this.telemetryInterval = null;
+    this.searchDebounceTimer = null;
   }
 
-  init() {
-    console.log('[AdminApp] Bootstrapping Trainer/Admin Console...');
+  async init() {
+    console.log('[AdminApp] Bootstrapping PulseCore Admin Console...');
 
-    // 1. Setup Navigation & Modals
+    // 1. Authenticate / Verify Session
+    await this.initSession();
+
+    // 2. Setup Navigation & Modals
     this.setupTabNavigation();
     this.setupMobileSidebar();
     this.setupModals();
 
-    // 2. Setup Form Listeners
-    this.setupProfileForm();
-    this.setupSettingsForm();
+    // 3. Setup Form Handlers (CRUD operations)
+    this.setupMemberForm();
     this.setupTrainerForm();
     this.setupPlanForm();
     this.setupFaqForm();
     this.setupAnnouncementForm();
+    this.setupProfileForm();
+    this.setupSettingsForm();
+    this.setupRoleSwitcher();
     this.setupLogoutModal();
 
-    // 3. Setup Robot Motor Sliders & Controls
+    // 4. Setup Search & Filter Toolbars
+    this.setupSearchAndFilters();
+
+    // 5. Setup Robot Motor Sliders & Gestures
     this.setupRobotMotorControls();
 
-    // 4. Initial Render of All Views
-    this.renderAll();
+    // 6. Fetch all real data from PostgreSQL
+    await this.loadAllData();
 
-    // 5. Subscribe to State Changes
+    // 7. Subscribe to state changes for UI updates
     adminState.subscribe(() => {
-      this.renderAll();
+      this.updateTopbarUser();
+      this.applyRbacGates();
     });
 
-    // 6. Polling for Live Hardware & Server Health
+    // 8. Start telemetry heartbeat polling (every 3 seconds)
     this.pollTelemetry();
-    setInterval(() => this.pollTelemetry(), 3000);
+    this.telemetryInterval = setInterval(() => this.pollTelemetry(), 3000);
   }
 
-  // --- UI Toast Notification ---
+  // =========================================================================
+  // AUTHENTICATION & INITIALIZATION
+  // =========================================================================
+
+  async initSession() {
+    let user = adminApi.getStoredUser();
+    let token = adminApi.getToken();
+
+    // If no token exists, authenticate automatically as Owner for seamless local development
+    if (!token || !user) {
+      console.log('[AdminApp] No active session found. Logging in as default Owner (owner_manju)...');
+      const loginRes = await adminApi.login('owner_manju', 'OwnerPass2026!');
+      if (loginRes.success) {
+        user = loginRes.data.user;
+      }
+    } else {
+      // Validate existing token with server
+      const meRes = await adminApi.getCurrentUser();
+      if (meRes.success) {
+        user = meRes.data;
+      } else {
+        // Token expired or invalid, re-login
+        const loginRes = await adminApi.login('owner_manju', 'OwnerPass2026!');
+        if (loginRes.success) user = loginRes.data.user;
+      }
+    }
+
+    if (user) {
+      adminState.setUser(user);
+      this.updateTopbarUser();
+    }
+  }
+
+  updateTopbarUser() {
+    const user = adminState.state.user;
+    if (!user) return;
+
+    const tag = document.getElementById('topbar-role-tag');
+    const username = document.getElementById('topbar-username');
+    const sidebarPill = document.getElementById('sidebar-role-pill');
+    const sidebarDesc = document.getElementById('sidebar-session-desc');
+
+    const roleName = (user.role || 'owner').toUpperCase();
+
+    if (tag) {
+      tag.textContent = roleName;
+      tag.className = `role-tag ${(user.role || 'owner').toLowerCase()}`;
+    }
+    if (username) {
+      username.textContent = user.username || user.fullName || 'Admin';
+    }
+    if (sidebarPill) {
+      sidebarPill.textContent = `${roleName} SESSION ACTIVE`;
+    }
+    if (sidebarDesc) {
+      sidebarDesc.textContent = `User: ${user.fullName || user.username} (${user.role})`;
+    }
+  }
+
+  applyRbacGates() {
+    const role = (adminState.state.user?.role || 'owner').toLowerCase();
+
+    // Nav items
+    const profileBtn = document.querySelector('[data-tab="tab-profile"]');
+    const settingsBtn = document.querySelector('[data-tab="tab-settings"]');
+    const plansBtn = document.querySelector('[data-tab="tab-plans"]');
+    const faqsBtn = document.querySelector('[data-tab="tab-faqs"]');
+    const annBtn = document.querySelector('[data-tab="tab-announcements"]');
+
+    if (role === 'trainer') {
+      if (profileBtn) profileBtn.classList.add('disabled-role');
+      if (settingsBtn) settingsBtn.classList.add('disabled-role');
+      if (plansBtn) plansBtn.classList.add('disabled-role');
+      if (faqsBtn) faqsBtn.classList.add('disabled-role');
+      if (annBtn) annBtn.classList.add('disabled-role');
+    } else {
+      document.querySelectorAll('.disabled-role').forEach((el) => el.classList.remove('disabled-role'));
+    }
+  }
+
   showToast(message, isError = false) {
     const toast = document.getElementById('toast-banner');
     if (!toast) return;
@@ -70,13 +168,25 @@ class AdminDashboardApp {
     }, 3500);
   }
 
-  // --- Navigation Tabs ---
+  // =========================================================================
+  // NAVIGATION & MODALS
+  // =========================================================================
+
   setupTabNavigation() {
     const navButtons = document.querySelectorAll('.nav-item-btn');
     const pageTitle = document.getElementById('page-title');
 
     navButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
+        const targetTabId = btn.dataset.tab;
+
+        // RBAC check
+        const role = (adminState.state.user?.role || 'owner').toLowerCase();
+        if (role === 'trainer' && ['tab-profile', 'tab-settings', 'tab-plans', 'tab-faqs', 'tab-announcements'].includes(targetTabId)) {
+          this.showToast(`Access Restricted: ${role.toUpperCase()} role does not have permission for this section.`, true);
+          return;
+        }
+
         navButtons.forEach((b) => {
           b.classList.remove('active');
           b.removeAttribute('aria-current');
@@ -85,28 +195,25 @@ class AdminDashboardApp {
         btn.classList.add('active');
         btn.setAttribute('aria-current', 'page');
 
-        const targetTabId = btn.dataset.tab;
         this.currentTab = targetTabId;
 
-        // Hide all tabs & activate target
-        document.querySelectorAll('.tab-panel').forEach((panel) => {
-          panel.classList.remove('active');
-        });
-
+        document.querySelectorAll('.tab-panel').forEach((panel) => panel.classList.remove('active'));
         const activePanel = document.getElementById(targetTabId);
-        if (activePanel) {
-          activePanel.classList.add('active');
-        }
+        if (activePanel) activePanel.classList.add('active');
 
-        if (pageTitle) {
-          pageTitle.textContent = btn.innerText.trim();
-        }
+        if (pageTitle) pageTitle.textContent = btn.innerText.trim();
 
-        // Close sidebar on mobile upon tab selection
+        // Refresh specific tab data on activation
+        if (targetTabId === 'tab-members') this.fetchMembers();
+        if (targetTabId === 'tab-enquiries') this.fetchEnquiries();
+        if (targetTabId === 'tab-trainers') this.fetchTrainers();
+        if (targetTabId === 'tab-plans') this.fetchPlans();
+        if (targetTabId === 'tab-faqs') this.fetchFaqs();
+        if (targetTabId === 'tab-announcements') this.fetchAnnouncements();
+        if (targetTabId === 'tab-robot') this.fetchRobotLogs();
+
         const sidebar = document.getElementById('admin-sidebar');
-        if (sidebar && window.innerWidth <= 768) {
-          sidebar.classList.remove('open');
-        }
+        if (sidebar && window.innerWidth <= 768) sidebar.classList.remove('open');
       });
     });
   }
@@ -114,17 +221,13 @@ class AdminDashboardApp {
   setupMobileSidebar() {
     const toggleBtn = document.getElementById('btn-sidebar-toggle');
     const sidebar = document.getElementById('admin-sidebar');
-
-    if (toggleBtn && sidebar) {
-      toggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-      });
-    }
+    toggleBtn?.addEventListener('click', () => sidebar?.classList.toggle('open'));
   }
 
-  // --- Modal Helpers ---
   setupModals() {
-    // Open modal buttons
+    document.getElementById('btn-open-member-modal')?.addEventListener('click', () => {
+      this.openModal('modal-member');
+    });
     document.getElementById('btn-open-trainer-modal')?.addEventListener('click', () => {
       this.openModal('modal-trainer');
     });
@@ -138,30 +241,22 @@ class AdminDashboardApp {
       this.openModal('modal-ann');
     });
 
-    // Close modal buttons
     document.querySelectorAll('[data-close-modal]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        const modalId = btn.dataset.closeModal;
-        this.closeModal(modalId);
+        this.closeModal(btn.dataset.closeModal);
       });
     });
 
-    // Close on backdrop click
     document.querySelectorAll('.modal-backdrop').forEach((modal) => {
       modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.classList.remove('active');
-          modal.setAttribute('aria-hidden', 'true');
-        }
+        if (e.target === modal) this.closeModal(modal.id);
       });
     });
 
-    // Close on ESC
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal-backdrop.active').forEach((modal) => {
-          modal.classList.remove('active');
-          modal.setAttribute('aria-hidden', 'true');
+          this.closeModal(modal.id);
         });
       }
     });
@@ -183,413 +278,76 @@ class AdminDashboardApp {
     modal.setAttribute('aria-hidden', 'true');
   }
 
-  // --- Robot Controls & Sliders ---
-  setupRobotMotorControls() {
-    // 1. Gesture Buttons
-    document.querySelectorAll('.btn-gesture').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const gesture = btn.dataset.gesture;
-        this.showToast(`Transmitting gesture [${gesture}] to ESP32...`);
-        const res = await adminApi.triggerGesture(gesture);
-        if (res.success) {
-          this.showToast(`Gesture [${gesture}] successfully queued on robot base.`);
+  // =========================================================================
+  // DATA FETCHING & RENDERING (PostgreSQL Connected)
+  // =========================================================================
+
+  async loadAllData() {
+    await Promise.all([
+      this.fetchDashboardStats(),
+      this.fetchGymProfile(),
+      this.fetchPlans(),
+      this.fetchTrainers(),
+      this.fetchFaqs(),
+      this.fetchAnnouncements(),
+      this.fetchMembers(),
+      this.fetchEnquiries(),
+      this.fetchInteractionLogs(),
+      this.fetchRobotLogs(),
+    ]);
+  }
+
+  // --- 1. Dashboard Stats & Speech Languages ---
+  async fetchDashboardStats() {
+    try {
+      const res = await adminApi.getDashboardStats();
+      if (res.success && res.data) {
+        adminState.state.stats = { ...adminState.state.stats, ...res.data };
+
+        const elToday = document.getElementById('stat-daily-checkins');
+        const elTotal = document.getElementById('stat-total-members');
+        const elLeads = document.getElementById('stat-queries-handled');
+        const elRobot = document.getElementById('stat-robot-uptime');
+
+        if (elToday) elToday.textContent = res.data.todayCheckIns ?? 0;
+        if (elTotal) elTotal.textContent = res.data.totalMembers ?? 0;
+        if (elLeads) elLeads.textContent = (res.data.pendingLeads ?? 0) + ' Leads';
+        if (elRobot) {
+          elRobot.textContent = res.data.robotOnline ? '100% Online' : 'Standby';
+          elRobot.className = `stat-val font-mono ${res.data.robotOnline ? 'text-green' : 'text-warning'}`;
         }
-      });
-    });
-
-    // 2. Direct Sliders
-    const sliderPan = document.getElementById('slider-pan');
-    const sliderTilt = document.getElementById('slider-tilt');
-    const sliderArm = document.getElementById('slider-arm');
-
-    const valPan = document.getElementById('val-slider-pan');
-    const valTilt = document.getElementById('val-slider-tilt');
-    const valArm = document.getElementById('val-slider-arm');
-
-    sliderPan?.addEventListener('input', () => (valPan.textContent = `${sliderPan.value}°`));
-    sliderTilt?.addEventListener('input', () => (valTilt.textContent = `${sliderTilt.value}°`));
-    sliderArm?.addEventListener('input', () => (valArm.textContent = `${sliderArm.value}°`));
-
-    document.getElementById('btn-apply-direct-angles')?.addEventListener('click', async () => {
-      const pan = parseInt(sliderPan.value, 10);
-      const tilt = parseInt(sliderTilt.value, 10);
-      const arm = parseInt(sliderArm.value, 10);
-
-      this.showToast(`Transmitting angles (Pan: ${pan}°, Tilt: ${tilt}°, Arm: ${arm}°)...`);
-      const res = await adminApi.setServos(pan, tilt, arm);
-      if (res.success) {
-        this.showToast('Direct servo angles transmitted to ESP32!');
       }
-    });
-  }
-
-  // --- Form Handlers ---
-  setupTrainerForm() {
-    const form = document.getElementById('form-add-trainer');
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      try {
-        const trainerData = {
-          name: document.getElementById('trn-name').value.trim(),
-          specialty: document.getElementById('trn-specialty').value.trim(),
-          phone: document.getElementById('trn-phone').value.trim(),
-          shift: document.getElementById('trn-shift').value.trim(),
-          status: 'on_floor',
-        };
-        adminState.addTrainer(trainerData);
-        this.closeModal('modal-trainer');
-        form.reset();
-        this.showToast(`Trainer ${trainerData.name} added to floor roster!`);
-      } catch (err) {
-        this.showToast(err.message, true);
-      }
-    });
-  }
-
-  setupPlanForm() {
-    const form = document.getElementById('form-add-plan');
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      try {
-        const rawPerks = document.getElementById('plan-perks').value.trim();
-        const planData = {
-          name: document.getElementById('plan-name').value.trim(),
-          price: Number(document.getElementById('plan-price').value),
-          duration: document.getElementById('plan-duration').value.trim(),
-          badge: 'New',
-          perks: rawPerks ? rawPerks.split(',').map((p) => p.trim()) : ['Full Gym Access'],
-        };
-        adminState.addPlan(planData);
-        this.closeModal('modal-plan');
-        form.reset();
-        this.showToast(`Plan "${planData.name}" published!`);
-      } catch (err) {
-        this.showToast(err.message, true);
-      }
-    });
-  }
-
-  setupFaqForm() {
-    const form = document.getElementById('form-add-faq');
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      try {
-        const faqData = {
-          language: document.getElementById('faq-lang').value,
-          gesture: document.getElementById('faq-gesture').value,
-          question: document.getElementById('faq-q').value.trim(),
-          answer: document.getElementById('faq-a').value.trim(),
-          category: 'general',
-        };
-        adminState.addFaq(faqData);
-        this.closeModal('modal-faq');
-        form.reset();
-        this.showToast('New FAQ saved to receptionist knowledge base!');
-      } catch (err) {
-        this.showToast(err.message, true);
-      }
-    });
-  }
-
-  setupAnnouncementForm() {
-    const form = document.getElementById('form-add-ann');
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      try {
-        const annData = {
-          title: document.getElementById('ann-title').value.trim(),
-          priority: document.getElementById('ann-priority').value,
-          message: document.getElementById('ann-msg').value.trim(),
-        };
-        adminState.addAnnouncement(annData);
-        this.closeModal('modal-ann');
-        form.reset();
-        this.showToast(`Notice "${annData.title}" broadcasted!`);
-      } catch (err) {
-        this.showToast(err.message, true);
-      }
-    });
-  }
-
-  setupProfileForm() {
-    const form = document.getElementById('form-gym-profile');
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      try {
-        const profileData = {
-          name: document.getElementById('prof-name').value.trim(),
-          tagline: document.getElementById('prof-tagline').value.trim(),
-          phone: document.getElementById('prof-phone').value.trim(),
-          email: document.getElementById('prof-email').value.trim(),
-          address: document.getElementById('prof-address').value.trim(),
-          hours: [
-            {
-              days: 'Monday – Friday',
-              open: document.getElementById('prof-weekday-open').value,
-              close: document.getElementById('prof-weekday-close').value,
-              status: 'Open',
-            },
-            {
-              days: 'Saturday',
-              open: document.getElementById('prof-sat-open').value,
-              close: document.getElementById('prof-sat-close').value,
-              status: 'Open',
-            },
-            {
-              days: 'Sunday',
-              open: document.getElementById('prof-sun-open').value,
-              close: document.getElementById('prof-sun-close').value,
-              status: 'Half Day',
-            },
-          ],
-        };
-        adminState.updateGymProfile(profileData);
-        adminApi.syncProfileToServer(profileData);
-        this.showToast('Gym Profile & Operating Hours updated!');
-      } catch (err) {
-        this.showToast(err.message, true);
-      }
-    });
-  }
-
-  setupSettingsForm() {
-    const form = document.getElementById('form-settings');
-    const rateSlider = document.getElementById('setting-speech-rate');
-    const pitchSlider = document.getElementById('setting-speech-pitch');
-    const rateVal = document.getElementById('val-speech-rate');
-    const pitchVal = document.getElementById('val-speech-pitch');
-
-    rateSlider?.addEventListener('input', () => (rateVal.textContent = `${rateSlider.value}x`));
-    pitchSlider?.addEventListener('input', () => (pitchVal.textContent = pitchSlider.value));
-
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const settingsData = {
-        defaultLanguage: document.getElementById('setting-default-lang').value,
-        speechRate: parseFloat(rateSlider.value),
-        speechPitch: parseFloat(pitchSlider.value),
-      };
-      adminState.updateSettings(settingsData);
-      this.showToast('Voice & Receptionist settings saved!');
-    });
-  }
-
-  setupLogoutModal() {
-    document.getElementById('btn-logout')?.addEventListener('click', () => {
-      this.openModal('modal-logout');
-    });
-
-    document.getElementById('btn-confirm-reset-session')?.addEventListener('click', () => {
-      localStorage.removeItem('pulsecore_admin_state_v1');
-      window.location.reload();
-    });
-  }
-
-  // --- Rendering Methods ---
-  renderAll() {
-    this.renderStats();
-    this.renderTrainersTable();
-    this.renderPlansTable();
-    this.renderFaqsTable();
-    this.renderAnnouncementsTable();
-    this.populateProfileForm();
-    this.populateSettingsForm();
-    this.renderInteractionHistory();
-  }
-
-  renderStats() {
-    const stats = adminState.state.stats;
-    const langBarsContainer = document.getElementById('lang-stats-bars');
-
-    const totalQueries =
-      (stats.languagesCount['en-IN'] || 0) +
-      (stats.languagesCount['kn-IN'] || 0) +
-      (stats.languagesCount['hi-IN'] || 0) || 1;
-
-    if (langBarsContainer) {
-      langBarsContainer.innerHTML = `
-        <div class="lang-bar-card">
-          <div class="lang-bar-header">
-            <span>🇬🇧 English (en-IN)</span>
-            <span class="font-mono text-green">${stats.languagesCount['en-IN']} (${Math.round((stats.languagesCount['en-IN'] / totalQueries) * 100)}%)</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" style="width: ${(stats.languagesCount['en-IN'] / totalQueries) * 100}%"></div>
-          </div>
-        </div>
-
-        <div class="lang-bar-card">
-          <div class="lang-bar-header">
-            <span>🇮🇳 Kannada (kn-IN)</span>
-            <span class="font-mono text-green">${stats.languagesCount['kn-IN']} (${Math.round((stats.languagesCount['kn-IN'] / totalQueries) * 100)}%)</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" style="width: ${(stats.languagesCount['kn-IN'] / totalQueries) * 100}%"></div>
-          </div>
-        </div>
-
-        <div class="lang-bar-card">
-          <div class="lang-bar-header">
-            <span>🇮🇳 Hindi (hi-IN)</span>
-            <span class="font-mono text-green">${stats.languagesCount['hi-IN']} (${Math.round((stats.languagesCount['hi-IN'] / totalQueries) * 100)}%)</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" style="width: ${(stats.languagesCount['hi-IN'] / totalQueries) * 100}%"></div>
-          </div>
-        </div>
-      `;
+    } catch (err) {
+      console.warn('[AdminApp] Dashboard stats error:', err);
     }
   }
 
-  renderTrainersTable() {
-    const tbody = document.getElementById('trainers-table-body');
-    if (!tbody) return;
+  // --- 2. Gym Profile & Settings ---
+  async fetchGymProfile() {
+    try {
+      const res = await adminApi.getGymProfile();
+      if (res.success && res.data) {
+        const d = res.data;
+        adminState.state.gymProfile = {
+          name: d.gym_name || d.name,
+          tagline: d.tagline,
+          phone: d.phone,
+          email: d.email,
+          address: d.address,
+          hours: d.operating_hours || [],
+        };
+        adminState.state.settings = {
+          defaultLanguage: d.default_language || 'en-IN',
+          speechRate: d.speech_rate || 1.0,
+          speechPitch: d.speech_pitch || 1.0,
+        };
 
-    tbody.innerHTML = adminState.state.trainers
-      .map(
-        (t) => `
-      <tr>
-        <td class="font-mono text-green">${escapeHtml(t.code)}</td>
-        <td><strong>${escapeHtml(t.name)}</strong></td>
-        <td>${escapeHtml(t.specialty)}</td>
-        <td class="font-mono text-xs">${escapeHtml(t.shift)}</td>
-        <td class="font-mono text-xs">${escapeHtml(t.phone)}</td>
-        <td>
-          <select class="status-select" data-trainer-id="${escapeHtml(t.id)}">
-            <option value="on_floor" ${t.status === 'on_floor' ? 'selected' : ''}>🟢 On Floor</option>
-            <option value="in_session" ${t.status === 'in_session' ? 'selected' : ''}>🟡 In Session</option>
-            <option value="off_duty" ${t.status === 'off_duty' ? 'selected' : ''}>⚪ Off Duty</option>
-          </select>
-        </td>
-        <td>
-          <button class="btn-table-action btn-del-trainer" data-id="${escapeHtml(t.id)}" title="Remove Trainer">🗑️</button>
-        </td>
-      </tr>
-    `
-      )
-      .join('');
-
-    tbody.querySelectorAll('.status-select').forEach((sel) => {
-      sel.addEventListener('change', (e) => {
-        const trnId = sel.dataset.trainerId;
-        adminState.updateTrainerStatus(trnId, e.target.value);
-        this.showToast('Trainer floor status updated.');
-      });
-    });
-
-    tbody.querySelectorAll('.btn-del-trainer').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to remove this trainer?')) {
-          adminState.deleteTrainer(btn.dataset.id);
-          this.showToast('Trainer removed from roster.');
-        }
-      });
-    });
-  }
-
-  renderPlansTable() {
-    const tbody = document.getElementById('plans-table-body');
-    if (!tbody) return;
-
-    tbody.innerHTML = adminState.state.plans
-      .map(
-        (p) => `
-      <tr>
-        <td><strong>${escapeHtml(p.name)}</strong></td>
-        <td>${escapeHtml(p.duration)}</td>
-        <td class="font-mono font-semibold text-green">₹${p.price.toLocaleString()}</td>
-        <td><span class="badge badge-dim">${escapeHtml(p.badge || 'Standard')}</span></td>
-        <td class="text-xs text-dim">${p.perks.map(escapeHtml).join(' • ')}</td>
-        <td>
-          <span class="badge ${p.active ? 'badge-green' : 'badge-dim'}">${p.active ? 'Active' : 'Archived'}</span>
-        </td>
-        <td>
-          <button class="btn-table-action btn-toggle-plan" data-id="${escapeHtml(p.id)}" title="Toggle Plan Status">
-            ${p.active ? '⏸️' : '▶️'}
-          </button>
-          <button class="btn-table-action btn-del-plan" data-id="${escapeHtml(p.id)}" title="Delete Plan">🗑️</button>
-        </td>
-      </tr>
-    `
-      )
-      .join('');
-
-    tbody.querySelectorAll('.btn-toggle-plan').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        adminState.togglePlanStatus(btn.dataset.id);
-        this.showToast('Plan status toggled.');
-      });
-    });
-
-    tbody.querySelectorAll('.btn-del-plan').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        if (confirm('Delete this membership plan?')) {
-          adminState.deletePlan(btn.dataset.id);
-          this.showToast('Plan deleted.');
-        }
-      });
-    });
-  }
-
-  renderFaqsTable() {
-    const tbody = document.getElementById('faqs-table-body');
-    if (!tbody) return;
-
-    tbody.innerHTML = adminState.state.faqs
-      .map(
-        (f) => `
-      <tr>
-        <td><span class="badge badge-dim font-mono">${escapeHtml(f.language)}</span></td>
-        <td><span class="badge badge-dim">${escapeHtml(f.category)}</span></td>
-        <td><strong>${escapeHtml(f.question)}</strong></td>
-        <td class="text-xs">${escapeHtml(f.answer)}</td>
-        <td><span class="badge badge-green font-mono">${escapeHtml(f.gesture)}</span></td>
-        <td>
-          <button class="btn-table-action btn-del-faq" data-id="${escapeHtml(f.id)}" title="Delete FAQ">🗑️</button>
-        </td>
-      </tr>
-    `
-      )
-      .join('');
-
-    tbody.querySelectorAll('.btn-del-faq').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        adminState.deleteFaq(btn.dataset.id);
-        this.showToast('FAQ deleted.');
-      });
-    });
-  }
-
-  renderAnnouncementsTable() {
-    const tbody = document.getElementById('announcements-table-body');
-    if (!tbody) return;
-
-    tbody.innerHTML = adminState.state.announcements
-      .map(
-        (a) => `
-      <tr>
-        <td class="font-mono text-xs">${escapeHtml(a.date)}</td>
-        <td><strong>${escapeHtml(a.title)}</strong></td>
-        <td class="text-xs">${escapeHtml(a.message)}</td>
-        <td>
-          <span class="badge ${a.priority === 'urgent' ? 'badge-danger' : a.priority === 'event' ? 'badge-green' : 'badge-warning'}">
-            ${escapeHtml(a.priority.toUpperCase())}
-          </span>
-        </td>
-        <td>
-          <button class="btn-table-action btn-del-ann" data-id="${escapeHtml(a.id)}" title="Delete Announcement">🗑️</button>
-        </td>
-      </tr>
-    `
-      )
-      .join('');
-
-    tbody.querySelectorAll('.btn-del-ann').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        adminState.deleteAnnouncement(btn.dataset.id);
-        this.showToast('Notice removed.');
-      });
-    });
+        this.populateProfileForm();
+        this.populateSettingsForm();
+      }
+    } catch (err) {
+      console.warn('[AdminApp] Profile fetch error:', err);
+    }
   }
 
   populateProfileForm() {
@@ -602,12 +360,6 @@ class AdminDashboardApp {
     document.getElementById('prof-phone').value = prof.phone || '';
     document.getElementById('prof-email').value = prof.email || '';
     document.getElementById('prof-address').value = prof.address || '';
-
-    const weekdayHours = prof.hours?.find((h) => h.days.includes('Monday'));
-    if (weekdayHours) {
-      document.getElementById('prof-weekday-open').value = weekdayHours.open || '06:00';
-      document.getElementById('prof-weekday-close').value = weekdayHours.close || '22:00';
-    }
   }
 
   populateSettingsForm() {
@@ -622,55 +374,613 @@ class AdminDashboardApp {
     document.getElementById('val-speech-pitch').textContent = s.speechPitch || 1.0;
   }
 
-  async renderInteractionHistory() {
-    const tbody = document.getElementById('history-table-body');
+  // --- 3. Members Directory (Search + Filter + Pagination) ---
+  async fetchMembers() {
+    const tbody = document.getElementById('members-table-body');
     if (!tbody) return;
 
-    try {
-      const res = await adminApi.getRecentCheckIns();
-      const recentCheckins = res.data || [];
+    tbody.innerHTML = `<tr><td colspan="8" class="loading-indicator">Loading members from PostgreSQL...</td></tr>`;
 
-      // Combine checkins and mock receptionist questions for the interaction audit log
-      const logs = [
-        {
-          time: new Date(Date.now() - 3 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          inquiry: 'Member Check-In: GYM001 (Rahul Sharma)',
-          response: 'Welcome back Rahul! Access Granted.',
-          lang: 'kn-IN',
-          gesture: 'GREET_WAVE',
-        },
-        {
-          time: new Date(Date.now() - 12 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          inquiry: 'What are your gym operating hours?',
-          response: 'Open Mon-Sat 6 AM to 10 PM, Sun 7 AM to 1 PM.',
-          lang: 'en-IN',
-          gesture: 'NOD_YES',
-        },
-        {
-          time: new Date(Date.now() - 28 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          inquiry: 'Member Check-In: GYM002 (Priya Patel)',
-          response: 'नमस्ते प्रिया! आपका वर्कआउट शानदार रहे!',
-          lang: 'hi-IN',
-          gesture: 'GREET_WAVE',
-        },
-      ];
+    const { search, status } = adminState.state.memberFilter;
+    const { page, limit } = adminState.state.memberPagination;
 
-      tbody.innerHTML = logs
+    const res = await adminApi.getMembers({ search, status, page, limit });
+
+    if (!res.success) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty-state text-danger">Failed to load members: ${escapeHtml(res.error)}</td></tr>`;
+      return;
+    }
+
+    const members = res.data || [];
+    const pagination = res.pagination || { total: members.length, page: 1, totalPages: 1 };
+    adminState.state.members = members;
+    adminState.state.memberPagination = pagination;
+
+    const countLabel = document.getElementById('member-count-label');
+    if (countLabel) countLabel.textContent = `Total: ${pagination.total} member${pagination.total !== 1 ? 's' : ''}`;
+
+    const pageInfo = document.getElementById('member-page-info');
+    if (pageInfo) pageInfo.textContent = `Page ${pagination.page} of ${pagination.totalPages}`;
+
+    const prevBtn = document.getElementById('btn-member-prev');
+    const nextBtn = document.getElementById('btn-member-next');
+    if (prevBtn) prevBtn.disabled = pagination.page <= 1;
+    if (nextBtn) nextBtn.disabled = pagination.page >= pagination.totalPages;
+
+    if (members.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No gym members match the selected criteria.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = members
+      .map(
+        (m) => `
+      <tr>
+        <td class="font-mono text-green font-semibold">${escapeHtml(m.member_code)}</td>
+        <td><strong>${escapeHtml(m.full_name)}</strong></td>
+        <td class="font-mono text-xs">${escapeHtml(m.phone)}</td>
+        <td class="text-xs text-dim">${escapeHtml(m.email || '—')}</td>
+        <td><span class="badge badge-dim">${escapeHtml(m.plan_name || 'Standard')}</span></td>
+        <td><span class="badge badge-dim font-mono">${escapeHtml(m.preferred_language || 'en-IN')}</span></td>
+        <td>
+          <span class="badge ${m.status === 'active' ? 'badge-green' : m.status === 'frozen' ? 'badge-warning' : 'badge-danger'}">
+            ${escapeHtml(m.status)}
+          </span>
+        </td>
+        <td>
+          <button class="btn-table-action btn-view-history" data-id="${m.id}" data-name="${escapeHtml(m.full_name)}" data-code="${escapeHtml(m.member_code)}" title="View Check-In History">📋</button>
+          <button class="btn-table-action btn-toggle-member" data-id="${m.id}" data-status="${m.status}" title="Toggle Active/Frozen">⏸️</button>
+          <button class="btn-table-action btn-del-member" data-id="${m.id}" title="Remove Member">🗑️</button>
+        </td>
+      </tr>
+    `
+      )
+      .join('');
+
+    // Attach actions
+    tbody.querySelectorAll('.btn-view-history').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        this.openMemberHistoryModal(btn.dataset.id, btn.dataset.name, btn.dataset.code);
+      });
+    });
+
+    tbody.querySelectorAll('.btn-toggle-member').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const newStatus = btn.dataset.status === 'active' ? 'frozen' : 'active';
+        const res = await adminApi.updateMember(btn.dataset.id, { status: newStatus });
+        if (res.success) {
+          this.showToast(`Member status set to ${newStatus}`);
+          this.fetchMembers();
+        } else {
+          this.showToast(res.error || 'Failed to update member status', true);
+        }
+      });
+    });
+
+    tbody.querySelectorAll('.btn-del-member').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (confirm('Delete this member and associated records?')) {
+          const res = await adminApi.deleteMember(btn.dataset.id);
+          if (res.success) {
+            this.showToast('Member removed from database.');
+            this.fetchMembers();
+          } else {
+            this.showToast(res.error || 'Failed to delete member', true);
+          }
+        }
+      });
+    });
+  }
+
+  async openMemberHistoryModal(memberId, fullName, memberCode) {
+    const title = document.getElementById('history-modal-title');
+    const subtitle = document.getElementById('history-modal-subtitle');
+    const tbody = document.getElementById('member-history-table-body');
+
+    if (title) title.textContent = `Check-In History: ${fullName}`;
+    if (subtitle) subtitle.textContent = `Code: ${memberCode} • ID: ${memberId}`;
+    if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="loading-indicator">Loading history records...</td></tr>`;
+
+    this.openModal('modal-member-history');
+
+    const res = await adminApi.getMemberHistory(memberId);
+    if (!res.success || !res.data) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="empty-state text-danger">${escapeHtml(res.error || 'Unable to retrieve history.')}</td></tr>`;
+      return;
+    }
+
+    const history = res.data.history || [];
+    if (history.length === 0) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="empty-state">No check-in entries logged yet.</td></tr>`;
+      return;
+    }
+
+    if (tbody) {
+      tbody.innerHTML = history
         .map(
-          (l) => `
+          (h) => `
         <tr>
-          <td class="font-mono text-xs text-dim">${escapeHtml(l.time)}</td>
-          <td><strong>${escapeHtml(l.inquiry)}</strong></td>
-          <td class="text-xs">${escapeHtml(l.response)}</td>
-          <td><span class="badge badge-dim font-mono">${escapeHtml(l.lang)}</span></td>
-          <td><span class="badge badge-green font-mono">${escapeHtml(l.gesture)}</span></td>
+          <td class="font-mono text-xs">${new Date(h.check_in_time).toLocaleString()}</td>
+          <td><span class="badge badge-green font-mono">${escapeHtml(h.check_in_method || 'voice_kiosk')}</span></td>
+          <td class="text-xs text-dim">${escapeHtml(h.plan_name || 'Active Contract')}</td>
         </tr>
       `
         )
         .join('');
-    } catch {
-      // Fallback
     }
+  }
+
+  // --- 4. Enquiries & Leads ---
+  async fetchEnquiries() {
+    const tbody = document.getElementById('enquiries-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="8" class="loading-indicator">Loading leads from PostgreSQL...</td></tr>`;
+
+    const res = await adminApi.getEnquiries(50);
+    if (!res.success) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty-state text-danger">Failed to load leads: ${escapeHtml(res.error)}</td></tr>`;
+      return;
+    }
+
+    let leads = res.data || [];
+    const filter = adminState.state.enquiryFilter;
+
+    if (filter.status && filter.status !== 'all') {
+      leads = leads.filter((l) => l.status === filter.status);
+    }
+    if (filter.search && filter.search.trim()) {
+      const q = filter.search.toLowerCase().trim();
+      leads = leads.filter(
+        (l) =>
+          l.full_name.toLowerCase().includes(q) ||
+          l.phone.includes(q) ||
+          (l.plan_name && l.plan_name.toLowerCase().includes(q))
+      );
+    }
+
+    const countLabel = document.getElementById('enquiry-count-label');
+    if (countLabel) countLabel.textContent = `Total: ${leads.length} lead${leads.length !== 1 ? 's' : ''}`;
+
+    if (leads.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No enquiries match the current filter.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = leads
+      .map(
+        (l) => `
+      <tr>
+        <td class="font-mono text-xs text-dim">${new Date(l.created_at).toLocaleDateString()}</td>
+        <td><strong>${escapeHtml(l.full_name)}</strong></td>
+        <td class="font-mono text-xs">${escapeHtml(l.phone)}</td>
+        <td class="text-xs text-dim">${escapeHtml(l.email || '—')}</td>
+        <td><span class="badge badge-dim">${escapeHtml(l.plan_name || 'Inquiry')}</span></td>
+        <td class="text-xs font-mono">${escapeHtml(l.preferred_timing || 'Flexible')}</td>
+        <td class="text-xs">${escapeHtml(l.notes || '—')}</td>
+        <td>
+          <select class="status-select enquiry-status-select" data-id="${l.id}">
+            <option value="new" ${l.status === 'new' ? 'selected' : ''}>🔵 New</option>
+            <option value="contacted" ${l.status === 'contacted' ? 'selected' : ''}>🟡 Contacted</option>
+            <option value="converted" ${l.status === 'converted' ? 'selected' : ''}>🟢 Converted</option>
+            <option value="closed" ${l.status === 'closed' ? 'selected' : ''}>⚪ Closed</option>
+          </select>
+        </td>
+      </tr>
+    `
+      )
+      .join('');
+
+    tbody.querySelectorAll('.enquiry-status-select').forEach((sel) => {
+      sel.addEventListener('change', async (e) => {
+        const id = sel.dataset.id;
+        const newStatus = e.target.value;
+        const updateRes = await adminApi.updateEnquiryStatus(id, { status: newStatus });
+        if (updateRes.success) {
+          this.showToast(`Lead #${id} status updated to [${newStatus}]`);
+        } else {
+          this.showToast(updateRes.error || 'Failed to update enquiry status', true);
+        }
+      });
+    });
+  }
+
+  // --- 5. Trainers & Floor Availability ---
+  async fetchTrainers() {
+    const tbody = document.getElementById('trainers-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="7" class="loading-indicator">Loading trainers from PostgreSQL...</td></tr>`;
+
+    const { status, search } = adminState.state.trainerFilter;
+    const res = await adminApi.getTrainers(status);
+
+    if (!res.success) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-state text-danger">Failed to load trainers: ${escapeHtml(res.error)}</td></tr>`;
+      return;
+    }
+
+    let trainers = res.data || [];
+    if (search && search.trim()) {
+      const q = search.toLowerCase().trim();
+      trainers = trainers.filter(
+        (t) =>
+          t.full_name.toLowerCase().includes(q) ||
+          t.specialty.toLowerCase().includes(q) ||
+          t.trainer_code.toLowerCase().includes(q)
+      );
+    }
+
+    const countLabel = document.getElementById('trainer-count-label');
+    if (countLabel) countLabel.textContent = `Total: ${trainers.length} trainer${trainers.length !== 1 ? 's' : ''}`;
+
+    if (trainers.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No trainers match your filter.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = trainers
+      .map(
+        (t) => `
+      <tr>
+        <td class="font-mono text-green">${escapeHtml(t.trainer_code)}</td>
+        <td><strong>${escapeHtml(t.full_name)}</strong></td>
+        <td>${escapeHtml(t.specialty)}</td>
+        <td class="font-mono text-xs">${escapeHtml(t.shift_start ? `${t.shift_start} - ${t.shift_end}` : '06:00 - 14:00')}</td>
+        <td class="font-mono text-xs">${escapeHtml(t.phone)}</td>
+        <td>
+          <select class="status-select trainer-status-select" data-id="${t.id}">
+            <option value="on_floor" ${t.status === 'on_floor' ? 'selected' : ''}>🟢 On Floor</option>
+            <option value="in_session" ${t.status === 'in_session' ? 'selected' : ''}>🟡 In Session</option>
+            <option value="off_duty" ${t.status === 'off_duty' ? 'selected' : ''}>⚪ Off Duty</option>
+          </select>
+        </td>
+        <td>
+          <button class="btn-table-action btn-del-trainer" data-id="${t.id}" title="Remove Trainer">🗑️</button>
+        </td>
+      </tr>
+    `
+      )
+      .join('');
+
+    tbody.querySelectorAll('.trainer-status-select').forEach((sel) => {
+      sel.addEventListener('change', async (e) => {
+        const id = sel.dataset.id;
+        const newStatus = e.target.value;
+        const res = await adminApi.updateTrainerStatus(id, newStatus);
+        if (res.success) {
+          this.showToast(`Trainer floor status updated to '${newStatus}'.`);
+        } else {
+          this.showToast(res.error || 'Failed to update trainer status', true);
+        }
+      });
+    });
+
+    tbody.querySelectorAll('.btn-del-trainer').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (confirm('Are you sure you want to remove this trainer from the floor roster?')) {
+          const res = await adminApi.deleteTrainer(btn.dataset.id);
+          if (res.success) {
+            this.showToast('Trainer removed from roster.');
+            this.fetchTrainers();
+          } else {
+            this.showToast(res.error || 'Failed to remove trainer', true);
+          }
+        }
+      });
+    });
+  }
+
+  // --- 6. Membership Plans ---
+  async fetchPlans() {
+    const tbody = document.getElementById('plans-table-body');
+    const planSelect = document.getElementById('mem-plan');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="7" class="loading-indicator">Loading plans from PostgreSQL...</td></tr>`;
+
+    const res = await adminApi.getPlans(true);
+    if (!res.success) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-state text-danger">Failed to load plans: ${escapeHtml(res.error)}</td></tr>`;
+      return;
+    }
+
+    const plans = res.data || [];
+    adminState.state.plans = plans;
+
+    // Populate plan select in member modal
+    if (planSelect) {
+      planSelect.innerHTML = `<option value="">Select a Plan...</option>` +
+        plans
+          .filter((p) => p.is_active)
+          .map((p) => `<option value="${p.id}">${escapeHtml(p.name)} (₹${p.price_inr})</option>`)
+          .join('');
+    }
+
+    const countLabel = document.getElementById('plan-count-label');
+    if (countLabel) countLabel.textContent = `Total: ${plans.length} plan${plans.length !== 1 ? 's' : ''}`;
+
+    if (plans.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No membership plans found in database.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = plans
+      .map(
+        (p) => `
+      <tr>
+        <td><strong>${escapeHtml(p.name)}</strong></td>
+        <td>${p.duration_months} Month${p.duration_months > 1 ? 's' : ''}</td>
+        <td class="font-mono font-semibold text-green">₹${Number(p.price_inr).toLocaleString()}</td>
+        <td><span class="badge badge-dim">${escapeHtml(p.badge_label || 'Standard')}</span></td>
+        <td class="text-xs text-dim">${(Array.isArray(p.perks) ? p.perks : []).map(escapeHtml).join(' • ')}</td>
+        <td>
+          <span class="badge ${p.is_active ? 'badge-green' : 'badge-dim'}">${p.is_active ? 'Active' : 'Archived'}</span>
+        </td>
+        <td>
+          <button class="btn-table-action btn-toggle-plan" data-id="${p.id}" title="Toggle Plan Status">
+            ${p.is_active ? '⏸️' : '▶️'}
+          </button>
+          <button class="btn-table-action btn-del-plan" data-id="${p.id}" title="Delete Plan">🗑️</button>
+        </td>
+      </tr>
+    `
+      )
+      .join('');
+
+    tbody.querySelectorAll('.btn-toggle-plan').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const res = await adminApi.togglePlan(btn.dataset.id);
+        if (res.success) {
+          this.showToast('Plan status toggled.');
+          this.fetchPlans();
+        } else {
+          this.showToast(res.error || 'Failed to toggle plan status', true);
+        }
+      });
+    });
+
+    tbody.querySelectorAll('.btn-del-plan').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (confirm('Permanently delete this membership plan?')) {
+          const res = await adminApi.deletePlan(btn.dataset.id);
+          if (res.success) {
+            this.showToast('Plan deleted.');
+            this.fetchPlans();
+          } else {
+            this.showToast(res.error || 'Failed to delete plan', true);
+          }
+        }
+      });
+    });
+  }
+
+  // --- 7. FAQs / Knowledge Base ---
+  async fetchFaqs() {
+    const tbody = document.getElementById('faqs-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="6" class="loading-indicator">Loading FAQs from PostgreSQL...</td></tr>`;
+
+    const { language, search } = adminState.state.faqFilter;
+    const res = await adminApi.getFaqs({ language, q: search });
+
+    if (!res.success) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-state text-danger">Failed to load FAQs: ${escapeHtml(res.error)}</td></tr>`;
+      return;
+    }
+
+    const faqs = res.data || [];
+    const countLabel = document.getElementById('faq-count-label');
+    if (countLabel) countLabel.textContent = `Total: ${faqs.length} FAQ${faqs.length !== 1 ? 's' : ''}`;
+
+    if (faqs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No FAQs found matching filters.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = faqs
+      .map(
+        (f) => `
+      <tr>
+        <td><span class="badge badge-dim font-mono">${escapeHtml(f.language)}</span></td>
+        <td><span class="badge badge-dim">${escapeHtml(f.category)}</span></td>
+        <td><strong>${escapeHtml(f.question)}</strong></td>
+        <td class="text-xs">${escapeHtml(f.answer)}</td>
+        <td><span class="badge badge-green font-mono">${escapeHtml(f.suggested_gesture || 'NOD_YES')}</span></td>
+        <td>
+          <button class="btn-table-action btn-del-faq" data-id="${f.id}" title="Delete FAQ">🗑️</button>
+        </td>
+      </tr>
+    `
+      )
+      .join('');
+
+    tbody.querySelectorAll('.btn-del-faq').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (confirm('Delete this knowledge base FAQ?')) {
+          const res = await adminApi.deleteFaq(btn.dataset.id);
+          if (res.success) {
+            this.showToast('FAQ deleted.');
+            this.fetchFaqs();
+          } else {
+            this.showToast(res.error || 'Failed to delete FAQ', true);
+          }
+        }
+      });
+    });
+  }
+
+  // --- 8. Announcements Noticeboard ---
+  async fetchAnnouncements() {
+    const tbody = document.getElementById('announcements-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="5" class="loading-indicator">Loading announcements from PostgreSQL...</td></tr>`;
+
+    const res = await adminApi.getAnnouncements(false);
+    if (!res.success) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-state text-danger">Failed to load notices: ${escapeHtml(res.error)}</td></tr>`;
+      return;
+    }
+
+    const notices = res.data || [];
+    const countLabel = document.getElementById('ann-count-label');
+    if (countLabel) countLabel.textContent = `Total: ${notices.length} notice${notices.length !== 1 ? 's' : ''}`;
+
+    if (notices.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No noticeboard announcements published yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = notices
+      .map(
+        (a) => `
+      <tr>
+        <td class="font-mono text-xs">${escapeHtml(a.start_date || a.created_at?.slice(0, 10))}</td>
+        <td><strong>${escapeHtml(a.title)}</strong></td>
+        <td class="text-xs">${escapeHtml(a.message)}</td>
+        <td>
+          <span class="badge ${a.priority === 'urgent' ? 'badge-danger' : a.priority === 'event' ? 'badge-green' : 'badge-warning'}">
+            ${escapeHtml((a.priority || 'NORMAL').toUpperCase())}
+          </span>
+        </td>
+        <td>
+          <button class="btn-table-action btn-del-ann" data-id="${a.id}" title="Delete Announcement">🗑️</button>
+        </td>
+      </tr>
+    `
+      )
+      .join('');
+
+    tbody.querySelectorAll('.btn-del-ann').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (confirm('Delete this noticeboard announcement?')) {
+          const res = await adminApi.deleteAnnouncement(btn.dataset.id);
+          if (res.success) {
+            this.showToast('Notice removed.');
+            this.fetchAnnouncements();
+          } else {
+            this.showToast(res.error || 'Failed to remove notice', true);
+          }
+        }
+      });
+    });
+  }
+
+  // --- 9. Interaction History Audit Table ---
+  async fetchInteractionLogs() {
+    const tbody = document.getElementById('history-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="5" class="loading-indicator">Loading interaction logs...</td></tr>`;
+
+    const res = await adminApi.getRecentInteractions(20);
+    if (!res.success) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-state text-danger">Failed to load logs: ${escapeHtml(res.error)}</td></tr>`;
+      return;
+    }
+
+    const logs = res.data || [];
+    if (logs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No speech interactions recorded yet.</td></tr>`;
+      return;
+    }
+
+    // Compute languages distribution for stats
+    let en = 0, kn = 0, hi = 0;
+    logs.forEach((l) => {
+      if (l.language === 'en-IN') en++;
+      else if (l.language === 'kn-IN') kn++;
+      else if (l.language === 'hi-IN') hi++;
+    });
+
+    const total = en + kn + hi || 1;
+    const langBars = document.getElementById('lang-stats-bars');
+    if (langBars) {
+      langBars.innerHTML = `
+        <div class="lang-bar-card">
+          <div class="lang-bar-header">
+            <span>🇬🇧 English (en-IN)</span>
+            <span class="font-mono text-green">${en} (${Math.round((en / total) * 100)}%)</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: ${(en / total) * 100}%"></div>
+          </div>
+        </div>
+        <div class="lang-bar-card">
+          <div class="lang-bar-header">
+            <span>🇮🇳 Kannada (kn-IN)</span>
+            <span class="font-mono text-green">${kn} (${Math.round((kn / total) * 100)}%)</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: ${(kn / total) * 100}%"></div>
+          </div>
+        </div>
+        <div class="lang-bar-card">
+          <div class="lang-bar-header">
+            <span>🇮🇳 Hindi (hi-IN)</span>
+            <span class="font-mono text-green">${hi} (${Math.round((hi / total) * 100)}%)</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: ${(hi / total) * 100}%"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    tbody.innerHTML = logs
+      .map(
+        (l) => `
+      <tr>
+        <td class="font-mono text-xs text-dim">${new Date(l.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+        <td><strong>${escapeHtml(l.user_query)}</strong></td>
+        <td class="text-xs">${escapeHtml(l.robot_response)}</td>
+        <td><span class="badge badge-dim font-mono">${escapeHtml(l.language)}</span></td>
+        <td><span class="badge badge-green font-mono">${escapeHtml(l.intent_detected || 'QUERY')}</span></td>
+      </tr>
+    `
+      )
+      .join('');
+  }
+
+  // --- 10. Robot Hardware Telemetry & Command Dispatches ---
+  async fetchRobotLogs() {
+    const tbody = document.getElementById('robot-logs-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="6" class="loading-indicator">Loading hardware dispatches...</td></tr>`;
+
+    const res = await adminApi.getRobotLogs(20);
+    if (!res.success) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-state text-danger">Failed to load hardware logs: ${escapeHtml(res.error)}</td></tr>`;
+      return;
+    }
+
+    const logs = res.data || [];
+    if (logs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No hardware commands queued or executed yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = logs
+      .map(
+        (c) => `
+      <tr>
+        <td class="font-mono text-green">#${c.id}</td>
+        <td><span class="badge badge-dim font-mono">${escapeHtml(c.command_type)}</span></td>
+        <td class="text-xs font-mono">${escapeHtml(c.gesture_name || JSON.stringify(c.servo_payload || ''))}</td>
+        <td>
+          <span class="badge ${c.status === 'executed' || c.status === 'delivered' ? 'badge-green' : 'badge-warning'}">
+            ${escapeHtml(c.status)}
+          </span>
+        </td>
+        <td class="text-xs text-dim">${escapeHtml(c.triggered_by || 'system')}</td>
+        <td class="font-mono text-xs">${new Date(c.created_at).toLocaleTimeString()}</td>
+      </tr>
+    `
+      )
+      .join('');
   }
 
   async pollTelemetry() {
@@ -693,11 +1003,440 @@ class AdminDashboardApp {
       if (text) text.textContent = 'ESP32 Base Offline';
     }
   }
+
+  // =========================================================================
+  // SEARCH & FILTER LISTENERS
+  // =========================================================================
+
+  setupSearchAndFilters() {
+    // Members Filter & Search
+    const memSearch = document.getElementById('member-search-input');
+    const memStatus = document.getElementById('member-status-filter');
+    const memRefresh = document.getElementById('btn-refresh-members');
+    const memPrev = document.getElementById('btn-member-prev');
+    const memNext = document.getElementById('btn-member-next');
+
+    memSearch?.addEventListener('input', (e) => {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = setTimeout(() => {
+        adminState.state.memberFilter.search = e.target.value;
+        adminState.state.memberPagination.page = 1;
+        this.fetchMembers();
+      }, 300);
+    });
+
+    memStatus?.addEventListener('change', (e) => {
+      adminState.state.memberFilter.status = e.target.value;
+      adminState.state.memberPagination.page = 1;
+      this.fetchMembers();
+    });
+
+    memRefresh?.addEventListener('click', () => this.fetchMembers());
+
+    memPrev?.addEventListener('click', () => {
+      if (adminState.state.memberPagination.page > 1) {
+        adminState.state.memberPagination.page--;
+        this.fetchMembers();
+      }
+    });
+
+    memNext?.addEventListener('click', () => {
+      if (adminState.state.memberPagination.page < adminState.state.memberPagination.totalPages) {
+        adminState.state.memberPagination.page++;
+        this.fetchMembers();
+      }
+    });
+
+    // Enquiries Filter & Search
+    const enqSearch = document.getElementById('enquiry-search-input');
+    const enqStatus = document.getElementById('enquiry-status-filter');
+    const enqRefresh = document.getElementById('btn-refresh-enquiries');
+
+    enqSearch?.addEventListener('input', (e) => {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = setTimeout(() => {
+        adminState.state.enquiryFilter.search = e.target.value;
+        this.fetchEnquiries();
+      }, 300);
+    });
+
+    enqStatus?.addEventListener('change', (e) => {
+      adminState.state.enquiryFilter.status = e.target.value;
+      this.fetchEnquiries();
+    });
+
+    enqRefresh?.addEventListener('click', () => this.fetchEnquiries());
+
+    // Trainers Filter & Search
+    const trnSearch = document.getElementById('trainer-search-input');
+    const trnStatus = document.getElementById('trainer-status-filter');
+    const trnRefresh = document.getElementById('btn-refresh-trainers');
+
+    trnSearch?.addEventListener('input', (e) => {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = setTimeout(() => {
+        adminState.state.trainerFilter.search = e.target.value;
+        this.fetchTrainers();
+      }, 300);
+    });
+
+    trnStatus?.addEventListener('change', (e) => {
+      adminState.state.trainerFilter.status = e.target.value;
+      this.fetchTrainers();
+    });
+
+    trnRefresh?.addEventListener('click', () => this.fetchTrainers());
+
+    // Plans Filter & Refresh
+    document.getElementById('btn-refresh-plans')?.addEventListener('click', () => this.fetchPlans());
+
+    // FAQs Filter & Search
+    const faqSearch = document.getElementById('faq-search-input');
+    const faqLang = document.getElementById('faq-lang-filter');
+    const faqRefresh = document.getElementById('btn-refresh-faqs');
+
+    faqSearch?.addEventListener('input', (e) => {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = setTimeout(() => {
+        adminState.state.faqFilter.search = e.target.value;
+        this.fetchFaqs();
+      }, 300);
+    });
+
+    faqLang?.addEventListener('change', (e) => {
+      adminState.state.faqFilter.language = e.target.value;
+      this.fetchFaqs();
+    });
+
+    faqRefresh?.addEventListener('click', () => this.fetchFaqs());
+
+    // Announcements Refresh
+    document.getElementById('btn-refresh-ann')?.addEventListener('click', () => this.fetchAnnouncements());
+
+    // Robot Dispatches Refresh
+    document.getElementById('btn-refresh-robot-logs')?.addEventListener('click', () => this.fetchRobotLogs());
+
+    // Interactions Refresh
+    document.getElementById('btn-refresh-history')?.addEventListener('click', () => this.fetchInteractionLogs());
+  }
+
+  // =========================================================================
+  // FORM HANDLERS (POST / PUT CRUD)
+  // =========================================================================
+
+  setupMemberForm() {
+    const form = document.getElementById('form-add-member');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const memberData = {
+        fullName: document.getElementById('mem-name').value.trim(),
+        phone: document.getElementById('mem-phone').value.trim(),
+        email: document.getElementById('mem-email').value.trim() || null,
+        planId: document.getElementById('mem-plan').value || null,
+        status: document.getElementById('mem-status').value || 'active',
+        preferredLanguage: document.getElementById('mem-lang').value || 'en-IN',
+        notes: document.getElementById('mem-notes').value.trim() || null,
+      };
+
+      const valError = adminState.validateMember(memberData);
+      if (valError) {
+        this.showToast(valError, true);
+        return;
+      }
+
+      this.showToast('Saving member to PostgreSQL...');
+      const res = await adminApi.createMember(memberData);
+      if (res.success) {
+        this.showToast(`Member ${memberData.fullName} registered successfully!`);
+        this.closeModal('modal-member');
+        form.reset();
+        await this.fetchMembers();
+      } else {
+        this.showToast(res.error || 'Failed to register member', true);
+      }
+    });
+  }
+
+  setupTrainerForm() {
+    const form = document.getElementById('form-add-trainer');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const trainerData = {
+        name: document.getElementById('trn-name').value.trim(),
+        specialty: document.getElementById('trn-specialty').value.trim(),
+        phone: document.getElementById('trn-phone').value.trim(),
+        shift: document.getElementById('trn-shift').value.trim(),
+        status: 'on_floor',
+      };
+
+      const valError = adminState.validateTrainer(trainerData);
+      if (valError) {
+        this.showToast(valError, true);
+        return;
+      }
+
+      this.showToast('Adding trainer to database...');
+      const res = await adminApi.createTrainer(trainerData);
+      if (res.success) {
+        this.showToast(`Trainer ${trainerData.name} added to floor roster!`);
+        this.closeModal('modal-trainer');
+        form.reset();
+        await this.fetchTrainers();
+      } else {
+        this.showToast(res.error || 'Failed to add trainer', true);
+      }
+    });
+  }
+
+  setupPlanForm() {
+    const form = document.getElementById('form-add-plan');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rawPerks = document.getElementById('plan-perks').value.trim();
+      const planData = {
+        name: document.getElementById('plan-name').value.trim(),
+        priceInr: Number(document.getElementById('plan-price').value),
+        durationMonths: parseInt(document.getElementById('plan-duration').value, 10) || 1,
+        badgeLabel: 'New',
+        perks: rawPerks ? rawPerks.split(',').map((p) => p.trim()) : ['Full Gym Access'],
+      };
+
+      const valError = adminState.validatePlan(planData);
+      if (valError) {
+        this.showToast(valError, true);
+        return;
+      }
+
+      this.showToast('Publishing membership plan...');
+      const res = await adminApi.createPlan(planData);
+      if (res.success) {
+        this.showToast(`Plan "${planData.name}" published!`);
+        this.closeModal('modal-plan');
+        form.reset();
+        await this.fetchPlans();
+      } else {
+        this.showToast(res.error || 'Failed to publish plan', true);
+      }
+    });
+  }
+
+  setupFaqForm() {
+    const form = document.getElementById('form-add-faq');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const faqData = {
+        language: document.getElementById('faq-lang').value,
+        gesture: document.getElementById('faq-gesture').value,
+        question: document.getElementById('faq-q').value.trim(),
+        answer: document.getElementById('faq-a').value.trim(),
+        category: 'general',
+      };
+
+      const valError = adminState.validateFaq(faqData);
+      if (valError) {
+        this.showToast(valError, true);
+        return;
+      }
+
+      this.showToast('Saving FAQ to knowledge base...');
+      const res = await adminApi.createFaq(faqData);
+      if (res.success) {
+        this.showToast('New FAQ saved to receptionist knowledge base!');
+        this.closeModal('modal-faq');
+        form.reset();
+        await this.fetchFaqs();
+      } else {
+        this.showToast(res.error || 'Failed to save FAQ', true);
+      }
+    });
+  }
+
+  setupAnnouncementForm() {
+    const form = document.getElementById('form-add-ann');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const annData = {
+        title: document.getElementById('ann-title').value.trim(),
+        priority: document.getElementById('ann-priority').value,
+        message: document.getElementById('ann-msg').value.trim(),
+      };
+
+      const valError = adminState.validateAnnouncement(annData);
+      if (valError) {
+        this.showToast(valError, true);
+        return;
+      }
+
+      this.showToast('Broadcasting notice...');
+      const res = await adminApi.createAnnouncement(annData);
+      if (res.success) {
+        this.showToast(`Notice "${annData.title}" broadcasted!`);
+        this.closeModal('modal-ann');
+        form.reset();
+        await this.fetchAnnouncements();
+      } else {
+        this.showToast(res.error || 'Failed to broadcast announcement', true);
+      }
+    });
+  }
+
+  setupProfileForm() {
+    const form = document.getElementById('form-gym-profile');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const profileData = {
+        gymName: document.getElementById('prof-name').value.trim(),
+        tagline: document.getElementById('prof-tagline').value.trim(),
+        phone: document.getElementById('prof-phone').value.trim(),
+        email: document.getElementById('prof-email').value.trim(),
+        address: document.getElementById('prof-address').value.trim(),
+      };
+
+      const valError = adminState.validateProfile(profileData);
+      if (valError) {
+        this.showToast(valError, true);
+        return;
+      }
+
+      this.showToast('Updating facility settings in PostgreSQL...');
+      const res = await adminApi.updateGymSettings(profileData);
+      if (res.success) {
+        this.showToast('Gym facility profile updated successfully!');
+      } else {
+        this.showToast(res.error || 'Failed to update profile', true);
+      }
+    });
+  }
+
+  setupSettingsForm() {
+    const form = document.getElementById('form-settings');
+    const rateSlider = document.getElementById('setting-speech-rate');
+    const pitchSlider = document.getElementById('setting-speech-pitch');
+    const rateVal = document.getElementById('val-speech-rate');
+    const pitchVal = document.getElementById('val-speech-pitch');
+
+    rateSlider?.addEventListener('input', () => (rateVal.textContent = `${rateSlider.value}x`));
+    pitchSlider?.addEventListener('input', () => (pitchVal.textContent = pitchSlider.value));
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const settingsData = {
+        defaultLanguage: document.getElementById('setting-default-lang').value,
+        speechRate: parseFloat(rateSlider.value),
+        speechPitch: parseFloat(pitchSlider.value),
+      };
+
+      this.showToast('Saving voice configuration...');
+      const res = await adminApi.updateGymSettings(settingsData);
+      if (res.success) {
+        this.showToast('Voice & Receptionist settings saved!');
+      } else {
+        this.showToast(res.error || 'Failed to update voice settings', true);
+      }
+    });
+  }
+
+  // =========================================================================
+  // ROBOT MOTOR CONTROLS
+  // =========================================================================
+
+  setupRobotMotorControls() {
+    document.querySelectorAll('.btn-gesture').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const gesture = btn.dataset.gesture;
+        this.showToast(`Queuing gesture [${gesture}] on robot base...`);
+        const res = await adminApi.triggerGesture(gesture);
+        if (res.success) {
+          this.showToast(`Gesture [${gesture}] queued successfully!`);
+          await this.fetchRobotLogs();
+        } else {
+          this.showToast(res.error || 'Failed to trigger gesture', true);
+        }
+      });
+    });
+
+    const sliderPan = document.getElementById('slider-pan');
+    const sliderTilt = document.getElementById('slider-tilt');
+    const sliderArm = document.getElementById('slider-arm');
+
+    const valPan = document.getElementById('val-slider-pan');
+    const valTilt = document.getElementById('val-slider-tilt');
+    const valArm = document.getElementById('val-slider-arm');
+
+    sliderPan?.addEventListener('input', () => (valPan.textContent = `${sliderPan.value}°`));
+    sliderTilt?.addEventListener('input', () => (valTilt.textContent = `${sliderTilt.value}°`));
+    sliderArm?.addEventListener('input', () => (valArm.textContent = `${sliderArm.value}°`));
+
+    document.getElementById('btn-apply-direct-angles')?.addEventListener('click', async () => {
+      const pan = parseInt(sliderPan.value, 10);
+      const tilt = parseInt(sliderTilt.value, 10);
+      const arm = parseInt(sliderArm.value, 10);
+
+      this.showToast(`Transmitting angles (Pan: ${pan}°, Tilt: ${tilt}°, Arm: ${arm}°)...`);
+      const res = await adminApi.setServos(pan, tilt, arm);
+      if (res.success) {
+        this.showToast('Direct servo calibration transmitted to ESP32!');
+        await this.fetchRobotLogs();
+      } else {
+        this.showToast(res.error || 'Failed to transmit servo angles', true);
+      }
+    });
+  }
+
+  // =========================================================================
+  // ROLE SWITCHER & LOGOUT
+  // =========================================================================
+
+  setupRoleSwitcher() {
+    document.getElementById('btn-topbar-switch-role')?.addEventListener('click', () => {
+      this.openModal('modal-role-switcher');
+    });
+    document.getElementById('btn-sidebar-role-switch')?.addEventListener('click', () => {
+      this.openModal('modal-role-switcher');
+    });
+
+    const roleCreds = {
+      owner_manju: 'OwnerPass2026!',
+      manager_priya: 'ManagerPass2026!',
+      head_trainer: 'TrainerPass2026!',
+      admin: 'AdminPass2026!',
+    };
+
+    document.querySelectorAll('.role-option-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const account = btn.dataset.account;
+        const password = roleCreds[account];
+
+        this.showToast(`Switching session to [${account}]...`);
+        const res = await adminApi.login(account, password);
+
+        if (res.success) {
+          adminState.setUser(res.data.user);
+          this.closeModal('modal-role-switcher');
+          this.showToast(`Switched account: ${res.data.user.fullName} (${res.data.user.role.toUpperCase()})`);
+          await this.loadAllData();
+        } else {
+          this.showToast(res.error || 'Failed to switch role', true);
+        }
+      });
+    });
+  }
+
+  setupLogoutModal() {
+    document.getElementById('btn-logout')?.addEventListener('click', () => {
+      this.openModal('modal-logout');
+    });
+
+    document.getElementById('btn-confirm-logout')?.addEventListener('click', async () => {
+      this.showToast('Revoking session token...');
+      await adminApi.logout();
+      window.location.reload();
+    });
+  }
 }
 
-// Bootstrap once DOM is loaded
+// Instantiate and boot on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   const app = new AdminDashboardApp();
   app.init();
 });
-

@@ -6,4 +6,5 @@ export * as trainerRepository from './trainer.repository.js';
 export * as robotRepository from './robot.repository.js';
 export * as interactionRepository from './interaction.repository.js';
 export * as userRepository from './user.repository.js';
+export * as announcementRepository from './announcement.repository.js';
 

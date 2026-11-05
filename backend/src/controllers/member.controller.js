@@ -217,3 +217,126 @@ export async function getMemberHistory(req, res, next) {
     next(error);
   }
 }
+
+/**
+ * GET /api/v1/members
+ * List members with search, status filter, and pagination
+ * RBAC: Owner, Manager, Trainer
+ */
+export async function listMembers(req, res, next) {
+  try {
+    const { search, status } = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+
+    const result = await memberService.listMembers({ search, status, page, limit });
+    res.json({
+      success: true,
+      data: result.members,
+      pagination: result.pagination,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/v1/members
+ * Create a new member
+ * RBAC: Owner, Manager
+ */
+export async function createMember(req, res, next) {
+  try {
+    const { fullName, phone, email, planId, planName, status, preferredLanguage, notes } = req.body;
+    if (!fullName || !phone) {
+      return res.status(400).json({ success: false, error: 'Full name and 10-digit phone number are required.' });
+    }
+
+    const created = await memberService.createMember({
+      memberCode: `GYM${Date.now().toString().slice(-4)}`,
+      fullName,
+      phone,
+      email,
+      planId: planId ? Number(planId) : null,
+      planName: planName || 'Standard',
+      status: status || 'active',
+      preferredLanguage: preferredLanguage || 'en-IN',
+      notes,
+      createdBy: req.user ? req.user.id : null,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Member registered successfully.',
+      data: created,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * PUT /api/v1/members/:id
+ * Update an existing member
+ * RBAC: Owner, Manager
+ */
+export async function updateMember(req, res, next) {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const updated = await memberService.updateMember(id, req.body);
+    if (!updated) {
+      return res.status(404).json({ success: false, error: 'Member not found.' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Member updated successfully.',
+      data: updated,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/v1/members/:id
+ * Delete a member
+ * RBAC: Owner, Manager
+ */
+export async function deleteMember(req, res, next) {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await memberService.deleteMember(id);
+    res.json({
+      success: true,
+      message: 'Member deleted successfully.',
+      data: { id },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * PATCH /api/v1/members/enquiries/:id
+ * Update enquiry status or notes
+ * RBAC: Owner, Manager
+ */
+export async function updateEnquiry(req, res, next) {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const updated = await memberService.updateEnquiry(id, req.body);
+    if (!updated) {
+      return res.status(404).json({ success: false, error: 'Enquiry not found.' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Enquiry status updated successfully.',
+      data: updated,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+

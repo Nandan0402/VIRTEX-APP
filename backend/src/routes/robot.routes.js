@@ -7,6 +7,7 @@ const router = Router();
 
 // GET /api/robot/status
 router.get('/status', robotController.getStatus);
+router.get('/logs', robotController.getCommandLogs);
 
 // POST /api/robot/commands
 router.post('/commands', validateRobotCommand, robotController.postCommand);

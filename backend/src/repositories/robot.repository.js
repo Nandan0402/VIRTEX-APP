@@ -139,3 +139,21 @@ export async function logRobotEvent(logData, client) {
   ]);
   return res.rows[0];
 }
+
+/**
+ * Retrieve recent robot commands / diagnostic history
+ * @param {number} [limit=20]
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function getRecentCommands(limit = 20, client) {
+  const sql = `
+    SELECT id, device_id, command_type, gesture_name, servo_payload, status, priority, triggered_by, created_at
+    FROM robot_commands
+    ORDER BY id DESC
+    LIMIT $1;
+  `;
+  const executor = client || { query };
+  const res = await executor.query(sql, [limit]);
+  return res.rows;
+}
+

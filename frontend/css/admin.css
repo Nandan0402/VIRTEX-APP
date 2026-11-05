@@ -767,3 +767,189 @@ body {
   }
 }
 
+/* ==============================================================================
+ * Toolbar, Filters, Pagination & State Polish
+ * ============================================================================== */
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.table-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.input-search {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-white);
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+  flex: 1;
+  max-width: 320px;
+}
+.input-search:focus {
+  outline: none;
+  border-color: var(--green);
+}
+
+.select-filter {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-white);
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+.select-filter:focus {
+  outline: none;
+  border-color: var(--green);
+}
+
+.pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--text-gray);
+}
+
+.pagination-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-buttons button {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-white);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pagination-buttons button:hover:not(:disabled) {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.pagination-buttons button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.loading-indicator {
+  padding: 2.5rem;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.88rem;
+}
+
+.user-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  font-size: 0.78rem;
+}
+
+.role-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+.role-tag.owner {
+  background: rgba(0, 230, 118, 0.2);
+  color: var(--green);
+  border: 1px solid var(--green);
+}
+.role-tag.manager {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1px solid #38bdf8;
+}
+.role-tag.trainer {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--warning);
+  border: 1px solid var(--warning);
+}
+
+.role-switcher-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-gray);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.role-switcher-btn:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.role-select-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.role-option-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0e1118;
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  color: var(--text-white);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+.role-option-btn:hover {
+  border-color: var(--green);
+  background: #13161f;
+}
+
+.nav-item-btn.disabled-role {
+  opacity: 0.45;
+  cursor: not-allowed;
+  position: relative;
+}
+.nav-item-btn.disabled-role:hover {
+  background: transparent;
+  color: var(--text-dim);
+}
+
+

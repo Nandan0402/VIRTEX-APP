@@ -326,3 +326,4 @@ describe('PulseCore Authentication & RBAC Test Suite', () => {
     assert.equal(plansRes.status, 200);
   });
 });
+

@@ -9,6 +9,7 @@ import authRoutes from './auth.routes.js';
 import chatRoutes from './chat.routes.js';
 import memberRoutes from './member.routes.js';
 import adminRoutes from './admin.routes.js';
+import announcementRoutes from './announcement.routes.js';
 import { checkDatabaseConnection } from '../config/database.js';
 
 const router = Router();
@@ -50,6 +51,7 @@ router.use('/auth', authRoutes);
 // Kiosk UI compatibility routes
 router.use('/chat', chatRoutes);
 router.use('/members', memberRoutes);
+router.use('/announcements', announcementRoutes);
 
 // Server-side protected administrative console routes
 router.use('/admin', adminRoutes);
