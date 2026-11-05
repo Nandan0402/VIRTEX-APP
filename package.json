@@ -1,0 +1,35 @@
+{
+  "name": "gym-receptionist-robot",
+  "version": "1.0.0",
+  "description": "Wi-Fi ESP32 AI Gym Receptionist Robot with Node.js, Express, PostgreSQL, and Arduino C++",
+  "type": "module",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev": "node --watch backend/src/server.js",
+    "test": "node --test tests/**/*.test.js",
+    "test:unit": "node --test tests/unit/*.test.js",
+    "test:integration": "node --test tests/integration/*.test.js"
+  },
+  "keywords": [
+    "esp32",
+    "robotics",
+    "gemini-ai",
+    "gym-receptionist",
+    "arduino",
+    "iot",
+    "nodejs",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.7.3",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.13.1"
+  }
+}

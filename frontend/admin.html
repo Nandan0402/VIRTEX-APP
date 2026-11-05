@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseCore Admin • AI Gym Receptionist Dashboard</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#13161f" stroke="#00e676" stroke-width="2"/>
+          <path d="M7 16H11L14 9L18 23L21 16H25" stroke="#00e676" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>PULSECORE</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item-btn active" data-tab="tab-overview" aria-current="page">
+          <span class="nav-icon" aria-hidden="true">📊</span> Overview & Stats
+        </button>
+        <button class="nav-item-btn" data-tab="tab-robot">
+          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
+        </button>
+        <button class="nav-item-btn" data-tab="tab-trainers">
+          <span class="nav-icon" aria-hidden="true">🏋️</span> Trainers & Floor Shifts
+        </button>
+        <button class="nav-item-btn" data-tab="tab-plans">
+          <span class="nav-icon" aria-hidden="true">💳</span> Membership Plans
+        </button>
+        <button class="nav-item-btn" data-tab="tab-faqs">
+          <span class="nav-icon" aria-hidden="true">❓</span> FAQs / Knowledge Base
+        </button>
+        <button class="nav-item-btn" data-tab="tab-announcements">
+          <span class="nav-icon" aria-hidden="true">📢</span> Noticeboard Announcements
+        </button>
+        <button class="nav-item-btn" data-tab="tab-profile">
+          <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile & Hours
+        </button>
+        <button class="nav-item-btn" data-tab="tab-settings">
+          <span class="nav-icon" aria-hidden="true">⚙️</span> Language & Settings
+        </button>
+      </nav>
+
+      <!-- Explicit Session & Pre-Auth Status (No Fake Auth) -->
+      <div class="sidebar-footer">
+        <div class="session-indicator">
+          <span class="session-role-pill">DEV SESSION ACTIVE</span>
+          <p class="session-notice">Auth Notice: Pre-authenticated local administrative session. Production JWT/OAuth pending integration.</p>
+        </div>
+        <button class="btn-logout" id="btn-logout" aria-label="End active session">
+          🚪 Logout / Reset Session
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="admin-main">
+      <!-- Top App Bar -->
+      <header class="admin-topbar" role="banner">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Sidebar Menu">☰</button>
+          <h1 class="topbar-title" id="page-title">Overview & Statistics</h1>
+        </div>
+
+        <div class="topbar-right">
+          <!-- ESP32 Hardware Status Indicator -->
+          <div class="status-pill" id="admin-robot-status-pill" title="ESP32 Hardware Base Link">
+            <span class="status-dot offline" id="admin-robot-dot" aria-hidden="true"></span>
+            <span id="admin-robot-text">ESP32 Offline</span>
+          </div>
+
+          <!-- Direct Links to Portal Gateway and Member Facing Kiosk -->
+          <a href="/" class="btn-view-kiosk" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-gray);" title="Return to Portal Landing Page">
+            🏠 Portal
+          </a>
+          <a href="/kiosk.html" target="_blank" class="btn-view-kiosk" title="Open reception kiosk in a new tab">
+            Open Kiosk UI ↗
+          </a>
+        </div>
+      </header>
+
+      <!-- Main Tab Panels Mount -->
+      <main class="admin-body" id="admin-body">
+        <!-- Toast Notification Banner -->
+        <div id="toast-banner" class="toast-banner" role="alert" aria-live="polite"></div>
+
+        <!-- =============================================================== -->
+        <!-- TAB 1: OVERVIEW & STATISTICS -->
+        <!-- =============================================================== -->
+        <section class="tab-panel active" id="tab-overview" role="tabpanel" aria-label="Overview & Stats">
+          <!-- Key Metric Cards -->
+          <div class="stats-cards-grid">
+            <div class="stat-card">
+              <div class="stat-icon" aria-hidden="true">⚡</div>
+              <div class="stat-meta">
+                <span class="stat-val font-mono" id="stat-daily-checkins">42</span>
+                <span class="stat-label">Today's Check-ins</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" aria-hidden="true">👥</div>
+              <div class="stat-meta">
+                <span class="stat-val font-mono" id="stat-total-members">310</span>
+                <span class="stat-label">Active Members</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" aria-hidden="true">💬</div>
+              <div class="stat-meta">
+                <span class="stat-val font-mono" id="stat-queries-handled">128</span>
+                <span class="stat-label">AI Queries Handled</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" aria-hidden="true">🤖</div>
+              <div class="stat-meta">
+                <span class="stat-val font-mono text-green" id="stat-robot-uptime">99.4%</span>
+                <span class="stat-label">Hardware Base Uptime</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Multilingual Voice Distribution -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Receptionist Speech Queries by Language</h3>
+              <span class="badge badge-green font-mono">Today's Ratio</span>
+            </div>
+            <div class="lang-bars-grid" id="lang-stats-bars"></div>
+          </div>
+
+          <!-- Real-Time Interaction History Audit Table -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Receptionist Interactions Log</h3>
+              <button class="btn btn-outline btn-sm" id="btn-refresh-history">🔄 Refresh Feed</button>
+            </div>
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>User Inquiry</th>
+                    <th>Robot Response</th>
+                    <th>Language</th>
+                    <th>Gesture</th>
+                  </tr>
+                </thead>
+                <tbody id="history-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- TAB 2: ROBOT TELEMETRY & PHYSICAL MOTOR CONTROLS -->
+        <!-- =============================================================== -->
+        <section class="tab-panel" id="tab-robot" role="tabpanel" aria-label="Robot Controls">
+          <div class="telemetry-layout">
+            <!-- Left: Motor Gesture Triggers -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Choreographed Physical Gestures (3x SG90)</h3>
+                <span class="badge badge-green">Immediate Trigger</span>
+              </div>
+              <p class="text-dim text-xs" style="margin-bottom: 1rem;">
+                Clicking any button commands the ESP32 DevKit V1 to execute the multi-step gesture sequence.
+              </p>
+
+              <div class="gesture-btn-grid">
+                <button class="btn-gesture" data-gesture="GREET_WAVE">
+                  <span>👋</span>
+                  <span>WAVE</span>
+                  <small class="text-dim">Right Arm Wave</small>
+                </button>
+                <button class="btn-gesture" data-gesture="NOD_YES">
+                  <span>✅</span>
+                  <span>NOD</span>
+                  <small class="text-dim">Head Tilt Affirm</small>
+                </button>
+                <button class="btn-gesture" data-gesture="SHAKE_NO">
+                  <span>❌</span>
+                  <span>SHAKE</span>
+                  <small class="text-dim">Head Pan Deny</small>
+                </button>
+                <button class="btn-gesture" data-gesture="LOOK_LEFT">
+                  <span>⬅️</span>
+                  <span>LOOK LEFT</span>
+                  <small class="text-dim">Pan 140°</small>
+                </button>
+                <button class="btn-gesture" data-gesture="LOOK_RIGHT">
+                  <span>➡️</span>
+                  <span>LOOK RIGHT</span>
+                  <small class="text-dim">Pan 40°</small>
+                </button>
+                <button class="btn-gesture btn-gesture-idle" data-gesture="RESET_IDLE">
+                  <span>🔄</span>
+                  <span>RESET TO NEUTRAL IDLE</span>
+                  <small class="text-dim">Pan 90° • Tilt 90° • Arm 10°</small>
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Direct Servo Angle Sliders -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Direct Servo Angle Calibration</h3>
+                <span class="badge badge-dim font-mono">PWM 50Hz</span>
+              </div>
+
+              <!-- Head Pan Slider -->
+              <div class="slider-group">
+                <div class="slider-label-row">
+                  <span>Head Pan (Yaw) — <span class="font-mono text-green">GPIO 18</span></span>
+                  <span class="font-mono" id="val-slider-pan">90°</span>
+                </div>
+                <input type="range" min="0" max="180" value="90" class="range-slider" id="slider-pan" />
+              </div>
+
+              <!-- Head Tilt Slider -->
+              <div class="slider-group">
+                <div class="slider-label-row">
+                  <span>Head Tilt (Pitch) — <span class="font-mono text-green">GPIO 19</span></span>
+                  <span class="font-mono" id="val-slider-tilt">90°</span>
+                </div>
+                <input type="range" min="45" max="135" value="90" class="range-slider" id="slider-tilt" />
+              </div>
+
+              <!-- Arm Wave Slider -->
+              <div class="slider-group">
+                <div class="slider-label-row">
+                  <span>Right Arm Wave — <span class="font-mono text-green">GPIO 21</span></span>
+                  <span class="font-mono" id="val-slider-arm">10°</span>
+                </div>
+                <input type="range" min="0" max="160" value="10" class="range-slider" id="slider-arm" />
+              </div>
+
+              <button class="btn btn-green btn-block" id="btn-apply-direct-angles">
+                Transmit Angles to ESP32 Base
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- TAB 3: TRAINERS & SHIFT AVAILABILITY -->
+        <!-- =============================================================== -->
+        <section class="tab-panel" id="tab-trainers" role="tabpanel" aria-label="Trainers Management">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Personal Trainer Roster & Floor Shifts</h3>
+                <p class="text-dim text-xs">FitBot announces active trainers on the workout floor to inquiring gym members.</p>
+              </div>
+              <button class="btn btn-green btn-sm" id="btn-open-trainer-modal">+ Add Trainer</button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Trainer Code</th>
+                    <th>Name</th>
+                    <th>Specialty</th>
+                    <th>Shift Hours</th>
+                    <th>Phone</th>
+                    <th>Floor Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="trainers-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- TAB 4: MEMBERSHIP PLANS & PRICING -->
+        <!-- =============================================================== -->
+        <section class="tab-panel" id="tab-plans" role="tabpanel" aria-label="Membership Plans">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Gym Membership Plans & Pricing</h3>
+                <p class="text-dim text-xs">FitBot quotes these official rates when members ask about pricing or plans.</p>
+              </div>
+              <button class="btn btn-green btn-sm" id="btn-open-plan-modal">+ Create Plan</button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Plan Name</th>
+                    <th>Duration</th>
+                    <th>Price (INR)</th>
+                    <th>Badge</th>
+                    <th>Key Perks</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="plans-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- TAB 5: FAQS & KNOWLEDGE BASE -->
+        <!-- =============================================================== -->
+        <section class="tab-panel" id="tab-faqs" role="tabpanel" aria-label="Knowledge Base FAQs">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Receptionist Knowledge Base (FAQs)</h3>
+                <p class="text-dim text-xs">Questions and answers programmed into FitBot for immediate speech responses.</p>
+              </div>
+              <button class="btn btn-green btn-sm" id="btn-open-faq-modal">+ Add FAQ</button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Language</th>
+                    <th>Category</th>
+                    <th>Question</th>
+                    <th>Answer</th>
+                    <th>Trigger Gesture</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="faqs-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- TAB 6: NOTICEBOARD ANNOUNCEMENTS -->
+        <!-- =============================================================== -->
+        <section class="tab-panel" id="tab-announcements" role="tabpanel" aria-label="Announcements">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Gym Announcements & Broadcasts</h3>
+                <p class="text-dim text-xs">Notices highlighted by the receptionist robot at member check-in.</p>
+              </div>
+              <button class="btn btn-green btn-sm" id="btn-open-ann-modal">+ New Notice</button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Message</th>
+                    <th>Priority</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="announcements-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- TAB 7: GYM PROFILE & OPENING HOURS -->
+        <!-- =============================================================== -->
+        <section class="tab-panel" id="tab-profile" role="tabpanel" aria-label="Gym Profile">
+          <div class="card">
+            <div class="card-header">
+              <h3>Gym Facility Profile</h3>
+            </div>
+
+            <form id="form-gym-profile">
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="prof-name">Gym Brand Name *</label>
+                  <input type="text" id="prof-name" required />
+                </div>
+                <div class="form-group">
+                  <label for="prof-tagline">Tagline</label>
+                  <input type="text" id="prof-tagline" />
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="prof-phone">Reception Helpline *</label>
+                  <input type="text" id="prof-phone" required />
+                </div>
+                <div class="form-group">
+                  <label for="prof-email">Contact Email *</label>
+                  <input type="email" id="prof-email" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="prof-address">Facility Address *</label>
+                <textarea id="prof-address" rows="2" required></textarea>
+              </div>
+
+              <h4 style="margin: 1.25rem 0 0.75rem; font-size: 0.95rem;">Weekly Operating Hours</h4>
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label>Mon – Fri (Open – Close)</label>
+                  <div style="display: flex; gap: 6px;">
+                    <input type="time" id="prof-weekday-open" value="06:00" />
+                    <input type="time" id="prof-weekday-close" value="22:00" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Saturday (Open – Close)</label>
+                  <div style="display: flex; gap: 6px;">
+                    <input type="time" id="prof-sat-open" value="06:00" />
+                    <input type="time" id="prof-sat-close" value="21:00" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Sunday (Open – Close)</label>
+                  <div style="display: flex; gap: 6px;">
+                    <input type="time" id="prof-sun-open" value="07:00" />
+                    <input type="time" id="prof-sun-close" value="13:00" />
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-green">Save Profile Changes</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- TAB 8: LANGUAGE & SYSTEM SETTINGS -->
+        <!-- =============================================================== -->
+        <section class="tab-panel" id="tab-settings" role="tabpanel" aria-label="System Settings">
+          <div class="card">
+            <div class="card-header">
+              <h3>Language & Voice Configuration</h3>
+            </div>
+
+            <form id="form-settings">
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="setting-default-lang">Default Receptionist Language</label>
+                  <select id="setting-default-lang">
+                    <option value="en-IN">English (India) — en-IN</option>
+                    <option value="kn-IN">Kannada — kn-IN (ಕನ್ನಡ)</option>
+                    <option value="hi-IN">Hindi — hi-IN (हिन्दी)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Active Speech Synthesis Languages</label>
+                  <div style="display: flex; gap: 14px; margin-top: 8px;">
+                    <label style="font-weight: normal;"><input type="checkbox" checked disabled /> English</label>
+                    <label style="font-weight: normal;"><input type="checkbox" checked disabled /> Kannada</label>
+                    <label style="font-weight: normal;"><input type="checkbox" checked disabled /> Hindi</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="setting-speech-rate">TTS Speech Rate: <span id="val-speech-rate" class="font-mono text-green">1.0x</span></label>
+                  <input type="range" id="setting-speech-rate" min="0.8" max="1.3" step="0.05" value="1.0" class="range-slider" />
+                </div>
+                <div class="form-group">
+                  <label for="setting-speech-pitch">TTS Voice Pitch: <span id="val-speech-pitch" class="font-mono text-green">1.0</span></label>
+                  <input type="range" id="setting-speech-pitch" min="0.8" max="1.2" step="0.05" value="1.0" class="range-slider" />
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-green">Update Voice Settings</button>
+            </form>
+          </div>
+
+          <!-- Architecture & Database Information Card -->
+          <div class="card" style="margin-top: 1.25rem;">
+            <div class="card-header">
+              <h3>Database & Hardware Link Status</h3>
+            </div>
+            <div class="form-grid-2">
+              <div>
+                <span class="text-dim text-xs">PostgreSQL Host / Port:</span>
+                <p class="font-mono text-sm">localhost:5432 / gym_robot_db</p>
+              </div>
+              <div>
+                <span class="text-dim text-xs">ESP32 Auth Secret Header:</span>
+                <p class="font-mono text-sm text-green">x-robot-api-key: configured</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: ADD TRAINER -->
+  <!-- ================================================================= -->
+  <div class="modal-backdrop" id="modal-trainer" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add Personal Trainer</h3>
+        <button class="modal-close-btn" data-close-modal="modal-trainer">✕</button>
+      </div>
+      <form id="form-add-trainer">
+        <div class="form-group">
+          <label for="trn-name">Full Name *</label>
+          <input type="text" id="trn-name" required placeholder="e.g. Ramesh Kumar" />
+        </div>
+        <div class="form-group">
+          <label for="trn-specialty">Specialization *</label>
+          <input type="text" id="trn-specialty" required placeholder="e.g. Powerlifting & Hypertrophy" />
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="trn-phone">Phone Number (10 Digits) *</label>
+            <input type="tel" id="trn-phone" pattern="[0-9]{10}" required placeholder="9876543210" />
+          </div>
+          <div class="form-group">
+            <label for="trn-shift">Shift Timings</label>
+            <input type="text" id="trn-shift" value="06:00 AM - 02:00 PM" />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-green btn-block">Save Trainer</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: CREATE MEMBERSHIP PLAN -->
+  <!-- ================================================================= -->
+  <div class="modal-backdrop" id="modal-plan" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Create Membership Plan</h3>
+        <button class="modal-close-btn" data-close-modal="modal-plan">✕</button>
+      </div>
+      <form id="form-add-plan">
+        <div class="form-group">
+          <label for="plan-name">Plan Name *</label>
+          <input type="text" id="plan-name" required placeholder="e.g. Weekend Warrior" />
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="plan-price">Price (₹ INR) *</label>
+            <input type="number" id="plan-price" min="1" required placeholder="2999" />
+          </div>
+          <div class="form-group">
+            <label for="plan-duration">Duration Label *</label>
+            <input type="text" id="plan-duration" required placeholder="e.g. 1 Month" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="plan-perks">Key Perks (Comma Separated)</label>
+          <input type="text" id="plan-perks" placeholder="Full gym floor, Sauna, 1 Trainer Session" />
+        </div>
+        <button type="submit" class="btn btn-green btn-block">Add Plan</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: ADD FAQ -->
+  <!-- ================================================================= -->
+  <div class="modal-backdrop" id="modal-faq" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add Knowledge Base FAQ</h3>
+        <button class="modal-close-btn" data-close-modal="modal-faq">✕</button>
+      </div>
+      <form id="form-add-faq">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="faq-lang">Language *</label>
+            <select id="faq-lang">
+              <option value="en-IN">English (en-IN)</option>
+              <option value="kn-IN">Kannada (kn-IN)</option>
+              <option value="hi-IN">Hindi (hi-IN)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="faq-gesture">Motor Gesture</label>
+            <select id="faq-gesture">
+              <option value="NOD_YES">NOD_YES (Affirmative)</option>
+              <option value="GREET_WAVE">GREET_WAVE (Wave)</option>
+              <option value="SHAKE_NO">SHAKE_NO (Decline)</option>
+              <option value="LOOK_RIGHT">LOOK_RIGHT (Point)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="faq-q">Question *</label>
+          <input type="text" id="faq-q" required placeholder="e.g. Do you have lockers?" />
+        </div>
+        <div class="form-group">
+          <label for="faq-a">Receptionist Answer *</label>
+          <textarea id="faq-a" rows="3" required placeholder="Yes, secure RFID lockers are available..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-green btn-block">Save FAQ</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: ADD ANNOUNCEMENT -->
+  <!-- ================================================================= -->
+  <div class="modal-backdrop" id="modal-ann" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Publish Gym Notice</h3>
+        <button class="modal-close-btn" data-close-modal="modal-ann">✕</button>
+      </div>
+      <form id="form-add-ann">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="ann-title">Notice Title *</label>
+            <input type="text" id="ann-title" required placeholder="e.g. Holiday Schedule" />
+          </div>
+          <div class="form-group">
+            <label for="ann-priority">Priority</label>
+            <select id="ann-priority">
+              <option value="normal">Normal Notice</option>
+              <option value="urgent">Urgent Alert</option>
+              <option value="event">Special Event</option>
+              <option value="maintenance">Maintenance</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ann-msg">Message *</label>
+          <textarea id="ann-msg" rows="3" required placeholder="Details for gym members..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-green btn-block">Broadcast Notice</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: LOGOUT / AUTH NOTICE MODAL -->
+  <!-- ================================================================= -->
+  <div class="modal-backdrop" id="modal-logout" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Administrative Session</h3>
+        <button class="modal-close-btn" data-close-modal="modal-logout">✕</button>
+      </div>
+      <div style="margin-bottom: 1.25rem; font-size: 0.9rem; color: var(--text-gray);">
+        <p style="margin-bottom: 8px;">
+          You are currently in a <strong>Local Administrative Session (Development Mode)</strong>.
+        </p>
+        <p>
+          Authentication safeguards (JWT / Session cookies / Role-Based Access Control) are prepared in the architecture but not yet enforced on endpoints to ease embedded debugging.
+        </p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-outline" style="flex: 1;" data-close-modal="modal-logout">Stay Signed In</button>
+        <button class="btn btn-green" style="flex: 1;" id="btn-confirm-reset-session">Reset Local State</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/admin/adminApp.js"></script>
+</body>
+</html>
+

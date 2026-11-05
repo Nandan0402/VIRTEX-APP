@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI Gym Receptionist Robot - PulseCore Fitness. Interactive voice assistant powered by ESP32, Node.js, and PostgreSQL.">
+  <title>PulseCore Fitness • AI Gym Receptionist Robot</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Navigation Header -->
+    <header class="app-header" role="banner">
+      <div class="header-brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-svg">
+            <rect width="32" height="32" rx="8" fill="#12141a" stroke="#00e676" stroke-width="2"/>
+            <path d="M7 16H11L14 9L18 23L21 16H25" stroke="#00e676" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">PULSECORE <span class="text-green">FITNESS</span></h1>
+          <p class="brand-subtitle">AI Receptionist Robot Station</p>
+        </div>
+      </div>
+
+      <!-- Center Status: Backend & Database Health -->
+      <div class="header-status-group">
+        <div id="system-health-pill" class="health-pill health-pill-loading" title="Live Server & Database Health" role="status">
+          <span class="health-dot" aria-hidden="true"></span>
+          <span id="health-status-text">Checking Backend...</span>
+        </div>
+      </div>
+
+      <!-- Language Selector -->
+      <div class="header-controls">
+        <div class="language-switch" role="group" aria-label="Select Receptionist Language">
+          <button class="lang-btn active" data-lang="en-IN" aria-pressed="true" title="Switch language to English">
+            <span class="lang-flag" aria-hidden="true">🇬🇧</span>
+            <span class="lang-text">English</span>
+          </button>
+          <button class="lang-btn" data-lang="kn-IN" aria-pressed="false" title="ಕನ್ನಡ ಭಾಷೆಗೆ ಬದಲಾಯಿಸಿ">
+            <span class="lang-flag" aria-hidden="true">🇮🇳</span>
+            <span class="lang-text">ಕನ್ನಡ</span>
+          </button>
+          <button class="lang-btn" data-lang="hi-IN" aria-pressed="false" title="हिंदी भाषा चुनें">
+            <span class="lang-flag" aria-hidden="true">🇮🇳</span>
+            <span class="lang-text">हिन्दी</span>
+          </button>
+        </div>
+
+        <!-- Quick Switch to Portal Gateway or Admin -->
+        <div class="portal-nav-links" style="display: flex; gap: 8px; margin-left: 8px;">
+          <a href="/" class="btn-portal-pill" style="text-decoration: none; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; border: 1px solid #27272a; color: #a1a1aa; background: rgba(255,255,255,0.04); display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;" title="Return to Portal Landing Page">🏠 Portal</a>
+          <a href="/admin" class="btn-portal-pill" style="text-decoration: none; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; border: 1px solid rgba(0,230,118,0.4); color: #00e676; background: rgba(0,230,118,0.08); display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;" title="Open Staff Admin Console">⚙️ Admin</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Workspace -->
+    <main class="main-container" id="main-content">
+      <!-- Section 1: Hero Interactive Receptionist Station -->
+      <section class="receptionist-hero-grid" aria-label="AI Receptionist Desk">
+        <!-- Left Column: Animated Robot Avatar & Voice Controls -->
+        <div class="card robot-kiosk-card">
+          <div class="kiosk-header">
+            <span class="kiosk-tag text-green font-mono">STATION #01 • ENTRANCE</span>
+            <button class="btn btn-icon-replay" id="global-speak-btn" aria-label="Replay receptionist answer audio" title="Speak latest answer aloud">
+              <span aria-hidden="true">🔊</span> Speak Aloud
+            </button>
+          </div>
+
+          <!-- Animated Robot Avatar Container -->
+          <div id="robot-avatar-container" class="avatar-view-mount"></div>
+
+          <!-- Real-Time Voice Waveform Visualizer -->
+          <div id="voice-visualizer-container" class="visualizer-mount"></div>
+
+          <!-- Primary Voice Microphone Action -->
+          <div class="voice-controls-bar">
+            <button id="mic-button" class="btn btn-mic-glow" aria-label="Toggle voice microphone" aria-pressed="false">
+              <span class="mic-svg-wrap" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </span>
+              <span class="mic-button-text">Tap to Speak</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Column: Conversational Dialogue & Query Input -->
+        <div class="card chat-kiosk-card">
+          <div class="card-header border-bottom">
+            <div class="header-title">
+              <span class="card-dot-indicator online" aria-hidden="true"></span>
+              <h3>Receptionist Live Dialogue</h3>
+            </div>
+            <span class="badge badge-green font-mono">Gemini AI Ready</span>
+          </div>
+
+          <!-- Chat Conversation Log -->
+          <div id="chat-interface-container" class="chat-viewport"></div>
+
+          <!-- Quick Suggestion Prompt Chips -->
+          <div class="chips-container" id="prompt-chips-wrapper" role="group" aria-label="Suggested Questions"></div>
+
+          <!-- Question Input Form -->
+          <form id="chat-input-form" class="chat-form" role="search" aria-label="Ask FitBot a question">
+            <div class="input-wrap">
+              <input 
+                type="text" 
+                id="chat-text-input" 
+                placeholder="Ask about workout plans, timings, personal trainers..." 
+                aria-label="Your question to receptionist"
+                autocomplete="off"
+              />
+              <button type="submit" class="btn btn-green btn-send" aria-label="Send message">
+                <span>Send</span>
+                <span aria-hidden="true">➤</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Section 2: Quick Member Check-in & Hardware Base Telemetry -->
+      <section class="operations-grid" aria-label="Operations and Hardware Telemetry">
+        <!-- Quick Member Check-In -->
+        <div class="column-ops">
+          <div class="card checkin-kiosk-card">
+            <div class="card-header">
+              <div class="header-title">
+                <span class="ops-icon" aria-hidden="true">⚡</span>
+                <h3>Instant Member Check-In</h3>
+              </div>
+              <span class="badge badge-outline-green">RFID / Voice / ID</span>
+            </div>
+
+            <form id="checkin-form" class="checkin-form-row">
+              <label for="checkin-input" class="sr-only">Member ID or Phone Number</label>
+              <input 
+                type="text" 
+                id="checkin-input" 
+                placeholder="Enter Member ID (e.g. GYM001) or 10-digit Phone..." 
+                required
+              />
+              <button type="submit" class="btn btn-green">Check In</button>
+            </form>
+
+            <div id="member-card-container" class="member-card-mount"></div>
+          </div>
+
+          <!-- Recent Check-Ins Live Stream -->
+          <div class="card recent-checkins-card">
+            <div class="card-header">
+              <h3>Today's Check-In Feed</h3>
+              <span class="font-mono text-muted text-xs">Live Stream</span>
+            </div>
+            <ul id="recent-checkins-list" class="recent-checkins-feed" role="list"></ul>
+          </div>
+        </div>
+
+        <!-- Hardware & Servos Telemetry Card -->
+        <div class="column-hardware">
+          <div id="robot-status-container"></div>
+        </div>
+      </section>
+
+      <!-- Section 3: Membership Plans & Enquiry Grid -->
+      <section class="membership-section" aria-label="Gym Membership Plans">
+        <div class="section-title-wrap">
+          <span class="section-pill text-green font-mono">UPGRADE YOUR FITNESS</span>
+          <h2 class="section-heading">Membership Plans & Privileges</h2>
+          <p class="section-sub">Choose the ideal fitness tier designed to empower your transformation.</p>
+        </div>
+
+        <div id="membership-plans-grid" class="plans-grid"></div>
+      </section>
+
+      <!-- Section 4: Operating Hours & Facility Contact Details -->
+      <section class="facility-info-grid" aria-label="Facility Hours and Location">
+        <div id="hours-container"></div>
+        <div id="contact-container"></div>
+      </section>
+    </main>
+
+    <!-- Membership Enquiry Modal Dialog -->
+    <div id="enquiry-modal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <span class="modal-subtitle text-green font-mono">MEMBERSHIP ENQUIRY</span>
+            <h3 id="modal-title" class="modal-title">Join <span id="modal-plan-title">PulseCore Fitness</span></h3>
+          </div>
+          <button class="modal-close-btn" aria-label="Close modal dialog">✕</button>
+        </div>
+
+        <form id="enquiry-form" class="modal-form">
+          <input type="hidden" id="enquiry-plan-input" value="General Membership" />
+
+          <div class="form-group">
+            <label for="enquiry-name">Full Name <span class="text-green">*</span></label>
+            <input type="text" id="enquiry-name" placeholder="Enter your full name" required />
+          </div>
+
+          <div class="form-group">
+            <label for="enquiry-phone">Phone Number <span class="text-green">*</span></label>
+            <input type="tel" id="enquiry-phone" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required />
+          </div>
+
+          <div class="form-group">
+            <label for="enquiry-email">Email Address</label>
+            <input type="email" id="enquiry-email" placeholder="name@example.com" />
+          </div>
+
+          <div class="form-group">
+            <label for="enquiry-notes">Fitness Goals / Questions</label>
+            <textarea id="enquiry-notes" rows="3" placeholder="Tell us your primary fitness objective (weight loss, bodybuilding, stamina)..."></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="btn btn-green btn-block">Submit Membership Enquiry</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Application Footer -->
+    <footer class="app-footer" role="contentinfo">
+      <div class="footer-inner">
+        <p class="footer-copy">© 2026 PulseCore Fitness • AI Gym Receptionist Robot Base (ESP32 DevKit V1 + 3x SG90 Servos)</p>
+        <p class="footer-stack font-mono text-xs">Node.js Express • PostgreSQL • Web Speech API (EN / KN / HI)</p>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
