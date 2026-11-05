@@ -76,6 +76,69 @@ export async function checkIn(req, res, next) {
       },
     });
   } catch (error) {
+    if (error.code === '23505' || (error.message && error.message.includes('DUPLICATE_CHECK_IN'))) {
+      robotService.queueGesture('NOD_YES');
+      return res.status(409).json({
+        success: false,
+        error: 'You have already checked in recently. Please proceed to the workout floor!',
+        duplicate: true,
+      });
+    }
+    next(error);
+  }
+}
+
+/**
+ * POST /api/v1/members/enquiry
+ * Record membership enquiry submitted from Kiosk or Website
+ */
+export async function createEnquiry(req, res, next) {
+  try {
+    const { fullName, name, phone, email, planName, plan, preferredTiming, notes } = req.body;
+    const resolvedName = fullName || name;
+
+    if (!resolvedName || !phone) {
+      return res.status(400).json({
+        success: false,
+        error: 'Full name and phone number are required for membership enquiry.',
+      });
+    }
+
+    const enquiry = await memberService.recordEnquiry({
+      fullName: resolvedName.trim(),
+      phone: String(phone).trim(),
+      email: email ? String(email).trim() : null,
+      planName: planName || plan || 'General Membership',
+      preferredTiming: preferredTiming || null,
+      notes: notes || null,
+    });
+
+    // Robot acknowledges enquiry with an affirmative nod
+    robotService.queueGesture('NOD_YES');
+
+    res.status(201).json({
+      success: true,
+      message: `Thank you, ${resolvedName}! Your enquiry for ${planName || 'membership'} has been recorded. Our team will contact you shortly.`,
+      data: enquiry,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * GET /api/v1/members/enquiries
+ * Retrieve recent enquiries (for admin desk)
+ */
+export async function getEnquiries(req, res, next) {
+  try {
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const enquiries = await memberService.getRecentEnquiries(limit);
+    res.json({
+      success: true,
+      data: enquiries,
+    });
+  } catch (error) {
     next(error);
   }
 }

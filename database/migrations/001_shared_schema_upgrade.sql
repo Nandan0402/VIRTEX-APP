@@ -548,3 +548,4 @@ LEFT JOIN membership_plans p ON p.id = m.plan_id;
 CREATE OR REPLACE VIEW v_faqs_unified AS
 SELECT id, question, answer, language, category, suggested_gesture, keywords, display_order, is_active, created_at, updated_at
 FROM gym_faqs;
+

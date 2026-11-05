@@ -9,3 +9,4 @@ DELETE FROM member_enquiries WHERE email IN ('siddharth.rao@example.com', 'neha.
 DELETE FROM trainer_availability WHERE reason IN ('Standard morning strength shift', 'Strength conditioning clinic', 'Mobility & core recovery floor duty', 'Medical leave - morning half day off', 'Evening hypertrophy & bodybuilding shift');
 DELETE FROM memberships WHERE notes LIKE '%Platinum Annual membership%' OR notes LIKE '%Gold Quarterly%' OR notes LIKE '%Silver Monthly%' OR notes LIKE '%Platinum VIP%' OR notes LIKE '%Expired membership%';
 DELETE FROM users WHERE username IN ('manager_priya', 'frontdesk_kavya');
+

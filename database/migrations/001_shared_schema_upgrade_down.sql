@@ -33,3 +33,4 @@ DROP FUNCTION IF EXISTS fn_update_timestamp() CASCADE;
 
 -- Note: Columns added to base tables (e.g. check_ins.device_id, members.notes)
 -- are intentionally retained to avoid data loss, or can be dropped if strict schema parity is needed.
+

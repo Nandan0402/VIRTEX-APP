@@ -35,6 +35,63 @@ const mockMembers = [
 ];
 
 const mockCheckIns = [];
+const mockEnquiries = [];
+
+/**
+ * Record a membership enquiry / lead from the Kiosk
+ * @param {Object} enquiry
+ */
+export async function recordEnquiry({ fullName, phone, email, planName, preferredTiming, notes }) {
+  if (isDatabaseConnected()) {
+    const sql = `
+      INSERT INTO member_enquiries (
+        full_name, phone, email, plan_name, preferred_timing, notes, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, 'new')
+      RETURNING id, full_name, phone, email, plan_name, preferred_timing, notes, status, created_at;
+    `;
+    const res = await query(sql, [
+      fullName,
+      phone,
+      email || null,
+      planName || null,
+      preferredTiming || null,
+      notes || null,
+    ]);
+    return res.rows[0];
+  }
+
+  const mockRecord = {
+    id: mockEnquiries.length + 1,
+    full_name: fullName,
+    phone,
+    email: email || null,
+    plan_name: planName || null,
+    preferred_timing: preferredTiming || null,
+    notes: notes || null,
+    status: 'new',
+    created_at: new Date().toISOString(),
+  };
+  mockEnquiries.unshift(mockRecord);
+  return mockRecord;
+}
+
+/**
+ * Retrieve recent enquiries
+ * @param {number} limit
+ */
+export async function getRecentEnquiries(limit = 20) {
+  if (isDatabaseConnected()) {
+    const sql = `
+      SELECT id, full_name, phone, email, plan_name, preferred_timing, notes, status, created_at
+      FROM member_enquiries
+      ORDER BY created_at DESC
+      LIMIT $1;
+    `;
+    const res = await query(sql, [limit]);
+    return res.rows;
+  }
+  return mockEnquiries.slice(0, limit);
+}
 
 /**
  * Find gym member by code or phone number

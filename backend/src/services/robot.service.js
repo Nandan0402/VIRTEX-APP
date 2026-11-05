@@ -28,12 +28,33 @@ export const GESTURES = {
     description: 'Returns all 3 servos to safe neutral resting positions',
     steps: [{ headPan: 90, headTilt: 90, armWave: 10, delayMs: 400 }],
   },
+  SHAKE_NO: {
+    name: 'SHAKE_NO',
+    description: 'Shakes head side-to-side horizontally',
+    steps: [
+      { headPan: 60, headTilt: 90, armWave: 10, delayMs: 200 },
+      { headPan: 120, headTilt: 90, armWave: 10, delayMs: 200 },
+      { headPan: 60, headTilt: 90, armWave: 10, delayMs: 200 },
+      { headPan: 90, headTilt: 90, armWave: 10, delayMs: 200 },
+    ],
+  },
+  LOOK_LEFT: {
+    name: 'LOOK_LEFT',
+    description: 'Pans head to the left',
+    steps: [{ headPan: 135, headTilt: 90, armWave: 10, delayMs: 300 }],
+  },
+  LOOK_RIGHT: {
+    name: 'LOOK_RIGHT',
+    description: 'Pans head to the right',
+    steps: [{ headPan: 45, headTilt: 90, armWave: 10, delayMs: 300 }],
+  },
 };
 
 // Canonical Aliases for Backward Compatibility
 GESTURES.GREET_WAVE = GESTURES.WAVE;
 GESTURES.NOD_YES = GESTURES.NOD;
 GESTURES.RESET_IDLE = GESTURES.IDLE;
+GESTURES.SHAKE = GESTURES.SHAKE_NO;
 
 export function normalizeGestureName(input) {
   if (!input || typeof input !== 'string') return null;
@@ -41,6 +62,9 @@ export function normalizeGestureName(input) {
   if (upper === 'WAVE' || upper === 'GREET_WAVE') return 'WAVE';
   if (upper === 'NOD' || upper === 'NOD_YES') return 'NOD';
   if (upper === 'IDLE' || upper === 'RESET_IDLE') return 'IDLE';
+  if (upper === 'SHAKE' || upper === 'SHAKE_NO') return 'SHAKE_NO';
+  if (upper === 'LOOK_LEFT') return 'LOOK_LEFT';
+  if (upper === 'LOOK_RIGHT') return 'LOOK_RIGHT';
   return null;
 }
 
@@ -175,7 +199,17 @@ export async function updateRobotTelemetry({ deviceUuid, ipAddress, servos }) {
   liveState.lastHeartbeat = new Date().toISOString();
   if (ipAddress) liveState.ipAddress = ipAddress;
   if (servos) {
-    liveState.servos = { ...liveState.servos, ...servos };
+    const headPan = servos.headPan !== undefined ? servos.headPan : servos.head;
+    const headTilt = servos.headTilt !== undefined ? servos.headTilt : servos.leftArm;
+    const armWave = servos.armWave !== undefined ? servos.armWave : servos.rightArm;
+
+    liveState.servos = {
+      ...liveState.servos,
+      ...(headPan !== undefined ? { headPan } : {}),
+      ...(headTilt !== undefined ? { headTilt } : {}),
+      ...(armWave !== undefined ? { armWave } : {}),
+      ...servos,
+    };
   }
 
   if (isDatabaseConnected() && deviceUuid) {

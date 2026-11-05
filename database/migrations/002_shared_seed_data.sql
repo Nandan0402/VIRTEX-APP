@@ -58,3 +58,4 @@ VALUES
     (1, 'INFO', 'servos', 'SG90 servo timers calibrated. Neutral angles initialized (90, 90, 10).', '{"servos": {"headPan": 90, "headTilt": 90, "armWave": 10}}'::jsonb),
     (1, 'WARN', 'brownout_check', 'Current spike detected during concurrent arm wave; smoothed via 470uF decoupling capacitor.', '{"current_ma_peak": 1280, "rail_voltage": 4.96}'::jsonb)
 ON CONFLICT DO NOTHING;
+

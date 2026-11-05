@@ -6,6 +6,8 @@ const router = Router();
 router.post('/check-in', memberController.checkIn);
 router.get('/recent-checkins', memberController.getRecentCheckIns);
 router.get('/lookup/:identifier', memberController.lookupMember);
+router.post('/enquiry', memberController.createEnquiry);
+router.get('/enquiries', memberController.getEnquiries);
 
 export default router;
 

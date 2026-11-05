@@ -6,9 +6,20 @@ export function validateRobotCommand(req, res, next) {
   const { commandType, gesture, gestureName, angles, headPan, headTilt, armWave } = req.body;
   const gestureCandidate = gesture || gestureName;
 
-  // 1. Strict gesture validation (Only WAVE, NOD, IDLE and standard aliases allowed)
+  // 1. Strict gesture validation (WAVE, NOD, IDLE, SHAKE, LOOK_LEFT, LOOK_RIGHT and standard aliases)
   if (gestureCandidate) {
-    const allowed = ['WAVE', 'NOD', 'IDLE', 'GREET_WAVE', 'NOD_YES', 'RESET_IDLE'];
+    const allowed = [
+      'WAVE',
+      'NOD',
+      'IDLE',
+      'GREET_WAVE',
+      'NOD_YES',
+      'RESET_IDLE',
+      'SHAKE',
+      'SHAKE_NO',
+      'LOOK_LEFT',
+      'LOOK_RIGHT',
+    ];
     if (!allowed.includes(String(gestureCandidate).toUpperCase())) {
       return res.status(400).json({
         success: false,
