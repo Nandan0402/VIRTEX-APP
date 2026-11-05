@@ -19,3 +19,4 @@ CREATE TABLE IF NOT EXISTS member_enquiries (
 
 CREATE INDEX IF NOT EXISTS idx_member_enquiries_status ON member_enquiries(status);
 CREATE INDEX IF NOT EXISTS idx_member_enquiries_created ON member_enquiries(created_at DESC);
+

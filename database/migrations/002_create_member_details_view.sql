@@ -20,3 +20,4 @@ SELECT
     m.updated_at
 FROM members m
 LEFT JOIN membership_plans p ON p.id = m.plan_id;
+
