@@ -28,19 +28,40 @@ export async function createLog(data, client) {
   `;
 
   const executor = client || { query };
-  const result = await executor.query(sql, [
-    memberId,
-    deviceId,
-    userQuery,
-    robotResponse,
-    language,
-    inputMethod,
-    intentDetected,
-    gestureCommandId,
-    latencyMs,
-  ]);
+  const validGestureId = gestureCommandId && !isNaN(Number(gestureCommandId)) ? Number(gestureCommandId) : null;
+  const validMemberId = memberId && !isNaN(Number(memberId)) ? Number(memberId) : null;
 
-  return result.rows[0];
+  try {
+    const result = await executor.query(sql, [
+      validMemberId,
+      deviceId || 1,
+      userQuery,
+      robotResponse,
+      language,
+      inputMethod,
+      intentDetected,
+      validGestureId,
+      latencyMs,
+    ]);
+    return result.rows[0];
+  } catch (err) {
+    if (err.code === '23503') {
+      // Foreign key error on gesture_command_id or member_id -> retry safely with null FKs
+      const fallbackResult = await executor.query(sql, [
+        null,
+        deviceId || 1,
+        userQuery,
+        robotResponse,
+        language,
+        inputMethod,
+        intentDetected,
+        null,
+        latencyMs,
+      ]);
+      return fallbackResult.rows[0];
+    }
+    throw err;
+  }
 }
 
 /**

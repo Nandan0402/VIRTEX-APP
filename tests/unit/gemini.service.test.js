@@ -195,5 +195,76 @@ describe('Gemini AI Service Unit & Mock-Based Tests', () => {
     assert.ok(res.reply.includes('Indiranagar, Bengaluru'));
     assert.ok(['NOD', 'NOD_YES'].includes(res.gesture));
   });
+
+  // 8. Grounding Context: Announcements, Facilities, Rules, Enquiries, and Workouts
+  test('buildGroundingContext includes active announcements, facilities, rules, enquiries, and workouts', async () => {
+    const context = await buildGroundingContext('en-IN');
+    assert.ok(context.includes('Active Announcements'), 'Contains announcements header');
+    assert.ok(context.includes('Facilities & Amenities'), 'Contains facilities header');
+    assert.ok(context.includes('Gym Rules & Floor Etiquette'), 'Contains rules header');
+    assert.ok(context.includes('Enquiries & Membership Registration'), 'Contains enquiries header');
+    assert.ok(context.includes('Workout & Fitness Guidance'), 'Contains workout guidance header');
+    assert.ok(context.includes('Clean indoor athletic shoes'), 'Specifies mandatory shoe policy');
+  });
+
+  // 9. Multilingual Fallback: Announcements across English, Kannada, and Hindi
+  test('generateFallbackResponse handles announcements across all three languages', () => {
+    const en = generateFallbackResponse({ message: 'Are there any announcements or upcoming challenges?', language: 'en-IN' });
+    assert.ok(en.reply.includes('Bootcamp') || en.reply.includes('maintenance'), 'English announcement info');
+    assert.equal(en.gesture, 'NOD_YES');
+
+    const kn = generateFallbackResponse({ message: 'ಜಿಮ್‌ನಲ್ಲಿ ಯಾವುದೇ ಹೊಸ ಸೂಚನೆ ಅಥವಾ ಕಾರ್ಯಕ್ರಮವಿದೆಯೇ?', language: 'kn-IN' });
+    assert.ok(kn.reply.includes('ಬೂಟ್‌ಕ್ಯಾಂಪ್') || kn.reply.includes('ನಿರ್ವಹಣೆ'), 'Kannada announcement info');
+    assert.equal(kn.gesture, 'NOD_YES');
+
+    const hi = generateFallbackResponse({ message: 'क्या कोई नया इवेंट या घोषणा है?', language: 'hi-IN' });
+    assert.ok(hi.reply.includes('बूटकैंप') || hi.reply.includes('रखरखाव'), 'Hindi announcement info');
+    assert.equal(hi.gesture, 'NOD_YES');
+  });
+
+  // 10. Multilingual Fallback: Enquiries and Trial Workouts across English, Kannada, and Hindi
+  test('generateFallbackResponse handles enquiries and trial memberships in English, Kannada, and Hindi', () => {
+    const en = generateFallbackResponse({ message: 'How do I join or get a trial pass?', language: 'en-IN' });
+    assert.ok(en.reply.includes('enquiry') || en.reply.includes('trial'), 'English enquiry info');
+    assert.equal(en.gesture, 'NOD_YES');
+
+    const kn = generateFallbackResponse({ message: 'ನಾನು ಜಿಮ್‌ಗೆ ಹೇಗೆ ಸೇರಬಹುದು ಅಥವಾ ಟ್ರಯಲ್ ಪಡೆಯುವುದು ಹೇಗೆ?', language: 'kn-IN' });
+    assert.ok(kn.reply.includes('ವಿಚಾರಣೆ') || kn.reply.includes('ಟ್ರಯಲ್'), 'Kannada enquiry info');
+    assert.equal(kn.gesture, 'NOD_YES');
+
+    const hi = generateFallbackResponse({ message: 'मैं जिम कैसे ज्वाइन कर सकता हूँ या ट्रायल ले सकता हूँ?', language: 'hi-IN' });
+    assert.ok(hi.reply.includes('पूछताछ') || hi.reply.includes('ट्रायल'), 'Hindi enquiry info');
+    assert.equal(hi.gesture, 'NOD_YES');
+  });
+
+  // 11. Multilingual Fallback: Safe Workout Principles across English, Kannada, and Hindi
+  test('generateFallbackResponse handles general workout guidance across all three languages', () => {
+    const en = generateFallbackResponse({ message: 'What workout routine do you recommend for muscle growth?', language: 'en-IN' });
+    assert.ok(en.reply.includes('warm-up') && en.reply.includes('trainers'), 'English workout advice');
+    assert.equal(en.gesture, 'NOD_YES');
+
+    const kn = generateFallbackResponse({ message: 'ತೂಕ ಇಳಿಸಲು ಯಾವ ವ್ಯಾಯಾಮ ಮಾಡಬೇಕು?', language: 'kn-IN' });
+    assert.ok(kn.reply.includes('ವ್ಯಾಯಾಮ') && kn.reply.includes('ತರಬೇತುದಾರ'), 'Kannada workout advice');
+    assert.equal(kn.gesture, 'NOD_YES');
+
+    const hi = generateFallbackResponse({ message: 'कसरत शुरू करने के लिए क्या सलाह है?', language: 'hi-IN' });
+    assert.ok(hi.reply.includes('वार्म-अप') && hi.reply.includes('ट्रेनर्स'), 'Hindi workout advice');
+    assert.equal(hi.gesture, 'NOD_YES');
+  });
+
+  // 12. Multilingual Fallback: Gym Rules and Dress Code across English, Kannada, and Hindi
+  test('generateFallbackResponse explains gym rules and shoes/towel etiquette in all three languages', () => {
+    const en = generateFallbackResponse({ message: 'What is your dress code and shoe rule?', language: 'en-IN' });
+    assert.ok(en.reply.includes('indoor athletic shoes') || en.reply.includes('towels'), 'English rules');
+    assert.equal(en.gesture, 'NOD_YES');
+
+    const kn = generateFallbackResponse({ message: 'ಜಿಮ್‌ನ ನಿಯಮಗಳು ಮತ್ತು ಶೂ ಧರಿಸುವ ನೀತಿ ಏನು?', language: 'kn-IN' });
+    assert.ok(kn.reply.includes('ಶೂಗಳು') || kn.reply.includes('ಟವೆಲ್'), 'Kannada rules');
+    assert.equal(kn.gesture, 'NOD_YES');
+
+    const hi = generateFallbackResponse({ message: 'जिम के क्या नियम हैं और क्या जूते अनिवार्य हैं?', language: 'hi-IN' });
+    assert.ok(hi.reply.includes('जूते') || hi.reply.includes('तौलिया'), 'Hindi rules');
+    assert.equal(hi.gesture, 'NOD_YES');
+  });
 });
 

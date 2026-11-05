@@ -31,3 +31,19 @@ export const authRateLimiter = rateLimit({
   },
 });
 
+/**
+ * Specialized AI Query Rate Limiter
+ * Protects Gemini API quota, server speech resources, and prevents token drain abuse
+ */
+export const aiChatRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute sliding window
+  max: parseInt(process.env.RATE_LIMIT_AI_MAX_REQUESTS, 10) || 60, // 60 requests/minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'AI query rate limit exceeded. Please wait a moment before asking another question.',
+  },
+});
+
+

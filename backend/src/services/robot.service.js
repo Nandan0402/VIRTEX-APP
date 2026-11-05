@@ -146,6 +146,7 @@ export async function queueRobotCommand({
         triggeredBy,
       });
       command.dbId = persisted.id;
+      command.legacyId = persisted.legacyId || persisted.id;
     } catch (e) {
       console.warn('[RobotService] Could not persist command log to PostgreSQL:', e.message);
     }
@@ -243,8 +244,8 @@ export async function getRobotStatus() {
 }
 
 // Export legacy helper functions for compatibility
-export function queueGesture(gestureName) {
-  return queueRobotCommand({ gestureName, commandType: 'GESTURE' });
+export function queueGesture(gestureName, { triggeredBy = 'system', deviceId = 1 } = {}) {
+  return queueRobotCommand({ gestureName, commandType: 'GESTURE', triggeredBy, deviceId });
 }
 
 export function queueDirectAngles(angles) {

@@ -18,3 +18,4 @@ CREATE INDEX IF NOT EXISTS idx_sync_events_channel ON sync_event_logs (channel);
 CREATE INDEX IF NOT EXISTS idx_sync_events_created_at ON sync_event_logs (created_at DESC);
 
 COMMENT ON TABLE sync_event_logs IS 'Persistent event log for real-time synchronization between Admin, Kiosk and Hardware';
+

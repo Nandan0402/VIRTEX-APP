@@ -20,14 +20,24 @@ export async function logInteraction(data) {
     latencyMs = null,
   } = data;
 
+  const validLang = ['en-IN', 'kn-IN', 'hi-IN'].includes(language)
+    ? language
+    : language?.toLowerCase().startsWith('kn')
+    ? 'kn-IN'
+    : language?.toLowerCase().startsWith('hi')
+    ? 'hi-IN'
+    : 'en-IN';
+
+  const validMethod = ['voice', 'text_kiosk', 'rfid_scan'].includes(inputMethod) ? inputMethod : 'voice';
+
   if (isDatabaseConnected()) {
     return await interactionRepository.createLog({
       memberId,
-      deviceId,
+      deviceId: deviceId || 1,
       userQuery,
       robotResponse,
-      language,
-      inputMethod,
+      language: validLang,
+      inputMethod: validMethod,
       intentDetected,
       gestureCommandId,
       latencyMs,

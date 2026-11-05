@@ -4,27 +4,37 @@ import { getGymProfile } from './gym.service.js';
 import { getMembershipPlans } from './membership.service.js';
 import { getTrainers } from './trainer.service.js';
 import { getFaqs } from './faq.service.js';
+import { getAnnouncements } from './announcement.service.js';
 
 /**
  * System prompt definition for the Gym Receptionist Robot AI
  */
 export const GYM_RECEPTIONIST_SYSTEM_PROMPT = `
 You are "FitBot", a friendly, energetic, and professional AI Gym Receptionist robot at PulseCore Fitness.
-You speak aloud to members and visitors via Text-to-Speech (TTS) and can trigger safe physical robot movements.
+You speak aloud to members and visitors via Text-to-Speech (TTS) and trigger safe physical robot movements.
 
 CRITICAL OPERATIONAL RULES:
-1. STRICT GROUNDING: Use ONLY the provided Authoritative Gym Data. NEVER invent or hallucinate prices, schedules, discounts, or trainer availability.
-2. MISSING DATA DIRECTIVE: If the requested information is not in the authoritative data, state clearly that you do not have that specific detail and politely direct the user to the front desk reception staff.
-3. CONCISE FOR SPEECH: Spoken replies must be 1 to 3 sentences maximum. Keep them punchy, polite, and natural for text-to-speech. Never use markdown, asterisks, bullet points, or tables.
-4. MULTILINGUAL ACCURACY: You must answer in the requested language:
-   - 'kn-IN': Reply in natural, conversational Kannada (ಕನ್ನಡ).
-   - 'hi-IN': Reply in natural, conversational Hindi (हिन्दी).
+1. STRICT GROUNDING: Use ONLY the provided Authoritative Gym Data. NEVER invent or hallucinate prices, schedules, discounts, trainer availability, facilities, rules, or policies.
+2. MISSING DATA DIRECTIVE: If the requested information is not in the authoritative data, state clearly in 1 to 2 polite sentences that you do not have that specific detail and refer the user to the front desk reception staff (+91 98765 43210).
+3. APPROVED TOPICS ONLY:
+   - Membership plans & prices (use exact INR figures from the data)
+   - Timings / operating hours
+   - Trainer availability and profiles
+   - Facilities and amenities (lockers, showers, steam room, Wi-Fi)
+   - Gym rules and etiquette (clean shoes, workout towels, re-racking weights)
+   - Active announcements, bootcamps, and maintenance notices
+   - Enquiries, free trials, and how to join
+   - Safe general workout guidance (warm-up, hydration, progressive overload; direct personalized/medical plans to trainers)
+4. CONCISE FOR SPEECH: Spoken replies must be 1 to 3 sentences maximum. Keep them punchy, polite, and natural for text-to-speech. Never use markdown, asterisks, bullet points, or tables.
+5. MULTILINGUAL ACCURACY: You must answer in the requested language:
+   - 'kn-IN': Reply in natural, conversational Kannada (ಕನ್ನಡ ಲಿಪಿಯಲ್ಲಿ).
+   - 'hi-IN': Reply in natural, conversational Hindi (देवनागरी लिपि में).
    - 'en-IN': Reply in natural, professional Indian English.
-5. GESTURE SEPARATION: Return your response strictly as a JSON object with:
+6. GESTURE SEPARATION: Return your response strictly as a JSON object with:
    - "reply": the concise spoken answer
    - "gesture": one of "WAVE", "NOD", "IDLE"
      * "WAVE" for greetings, hellos, welcomes, and goodbyes.
-     * "NOD" for answering questions, confirmations, explaining hours/plans/trainers/rules.
+     * "NOD" for answering questions, confirmations, explaining hours/plans/trainers/rules/announcements.
      * "IDLE" for neutral statements, uncertain queries, or when directing to reception.
 `;
 
@@ -35,11 +45,12 @@ CRITICAL OPERATIONAL RULES:
  */
 export async function buildGroundingContext(langCode = 'en-IN') {
   try {
-    const [profile, plans, trainers, faqs] = await Promise.all([
+    const [profile, plans, trainers, faqs, announcements] = await Promise.all([
       getGymProfile().catch(() => null),
       getMembershipPlans({ activeOnly: true }).catch(() => []),
       getTrainers().catch(() => []),
       getFaqs({ language: langCode }).catch(() => []),
+      getAnnouncements({ activeOnly: true }).catch(() => []),
     ]);
 
     let hoursText = '';
@@ -48,16 +59,20 @@ export async function buildGroundingContext(langCode = 'en-IN') {
         .map((h) => `${h.day}: ${h.is_closed ? 'Closed' : `${h.open} to ${h.close}`}`)
         .join(', ');
     } else {
-      hoursText = 'Monday - Saturday: 06:00 to 22:00, Sunday: 07:00 to 13:00';
+      hoursText = 'Monday - Saturday: 05:30 to 22:30, Sunday: 07:00 to 13:00';
     }
 
     const plansText = (plans || [])
-      .map((p) => `- ${p.name}: ₹${p.price_inr} (${p.duration_months} mo). Perks: ${(p.perks || []).join(', ')}`)
+      .map((p) => `- ${p.name}: ₹${Number(p.price_inr).toLocaleString('en-IN')} (${p.duration_months} mo). Perks: ${(p.perks || []).join(', ')}`)
       .join('\n');
 
     // Privacy Protection: Strip trainers' private personal phone and email!
     const trainersText = (trainers || [])
-      .map((t) => `- ${t.full_name}: ${t.specialty} (Status: ${t.status}, Shift: ${t.shift_hours})`)
+      .map((t) => `- ${t.full_name}: ${t.specialty} (Status: ${t.status || 'on_floor'}, Shift: ${t.shift_hours || 'Morning/Evening'})`)
+      .join('\n');
+
+    const announcementsText = (announcements || [])
+      .map((a) => `- ${a.title} [${a.priority.toUpperCase()}]: ${a.message}`)
       .join('\n');
 
     const faqsText = (faqs || [])
@@ -68,24 +83,44 @@ export async function buildGroundingContext(langCode = 'en-IN') {
     return `
 AUTHORITATIVE GYM DATA (DATABASE TRUTH SOURCE):
 Gym Name: ${profile?.gym_name || 'PulseCore Fitness'}
+Tagline: ${profile?.tagline || 'AI-Powered Smart Fitness Reception'}
 Contact: Phone: ${profile?.phone || '+91 98765 43210'}, Email: ${profile?.email || 'reception@pulsecorefitness.in'}
 Address: ${profile?.address || '42, 100 Feet Road, Indiranagar, Bengaluru, Karnataka 560038'}
+Guest Wi-Fi: ${profile?.wifi_ssid || 'PulseCore-Gym-Guest'}
 
 Operating Hours:
 ${hoursText}
 
 Active Membership Plans & Pricing (INR):
-${plansText || '- Silver Monthly: ₹2,499\n- Gold Quarterly: ₹5,999\n- Platinum Annual: ₹18,999'}
+${plansText || '- Silver Monthly: ₹2,499 (1 mo)\n- Gold Quarterly: ₹5,999 (3 mo)\n- Platinum Annual: ₹18,999 (12 mo)'}
 
 Trainer Roster & Availability:
-${trainersText || '- Arjun Reddy: CrossFit (on_floor)\n- Meera Rao: Yoga (in_session)\n- Karan Verma: Hypertrophy (off_duty)'}
+${trainersText || '- Arjun Reddy: CrossFit & Strength (Status: on_floor)\n- Meera Rao: Functional Yoga & Posture (Status: in_session)\n- Karan Verma: Hypertrophy & Bodybuilding (Status: off_duty)'}
 
-Facilities, Rules & FAQs:
-${faqsText || 'Digital lockers, hot showers, and steam rooms available. Clean athletic footwear and workout towels required.'}
+Active Announcements & Club Notices:
+${announcementsText || '- Diwali Transformation Challenge: Registration open for 30-Day Lean & Strong Bootcamp!\n- Steam Room Routine Maintenance: Steam room sanitization this Thursday 2:00 PM to 4:00 PM.'}
+
+Facilities & Amenities:
+- Digital biometric lockers, hot water showers, steam room, hydration stations, and high-speed Wi-Fi.
+
+Gym Rules & Floor Etiquette:
+- Clean indoor athletic shoes and workout towels are mandatory on the fitness floor.
+- Members must re-rack free weights and wipe down machines after use.
+
+Enquiries & Membership Registration:
+- Non-members and visitors can submit an enquiry form at the kiosk or speak to front desk reception.
+- Free 1-day trial workout passes are available upon consultation with staff.
+
+Workout & Fitness Guidance:
+- General safe fitness advice: Warm up for 5-10 minutes, maintain continuous hydration, use controlled form, and stretch afterwards.
+- For personalized nutrition or workout programming, consult our certified trainers on the floor. FitBot does not provide medical or prescription fitness plans.
+
+Frequently Asked Questions & Answers:
+${faqsText || 'Q: What are the locker facilities? | A: Digital lockers are free for all active members.'}
 `.trim();
   } catch (err) {
     console.warn('[GeminiService] Error building grounding context:', err.message);
-    return 'Gym: PulseCore Fitness. Hours: Mon-Sat 6:00-22:00, Sun 7:00-13:00.';
+    return 'Gym: PulseCore Fitness. Hours: Mon-Sat 5:30-22:30, Sun 7:00-13:00.';
   }
 }
 
@@ -259,7 +294,8 @@ export function generateFallbackResponse({ message, language = 'en-IN' }) {
     text.includes('ಸಮಯ') ||
     text.includes('ತೆರೆದಿರುತ್ತದೆ') ||
     text.includes('समय') ||
-    text.includes('खुलता')
+    text.includes('खुलता') ||
+    text.includes('बंद')
   ) {
     gesture = 'NOD_YES';
     switch (normLang) {
@@ -284,12 +320,15 @@ export function generateFallbackResponse({ message, language = 'en-IN' }) {
     text.includes('fee') ||
     text.includes('cost') ||
     text.includes('shulka') ||
+    text.includes('rate') ||
     text.includes('ಫೀಸ್') ||
     text.includes('ಶುಲ್ಕ') ||
     text.includes('ಸದಸ್ಯತ್ವ') ||
+    text.includes('ಪ್ಲಾನ್') ||
     text.includes('फीस') ||
     text.includes('शुल्क') ||
-    text.includes('सदस्यता')
+    text.includes('सदस्यता') ||
+    text.includes('प्लान')
   ) {
     gesture = 'NOD_YES';
     switch (normLang) {
@@ -312,11 +351,20 @@ export function generateFallbackResponse({ message, language = 'en-IN' }) {
     text.includes('coach') ||
     text.includes('personal training') ||
     text.includes('tarabethi') ||
+    text.includes('arjun') ||
+    text.includes('meera') ||
+    text.includes('karan') ||
     text.includes('ತರಬೇತುದಾರ') ||
     text.includes('ಕೋಚ್') ||
+    text.includes('ಟ್ರೈನರ್') ||
+    text.includes('ಅರ್ಜುನ್') ||
+    text.includes('ಮೀರಾ') ||
+    text.includes('करण') ||
     text.includes('ट्रेनर') ||
     text.includes('प्रशिक्षक') ||
-    text.includes('कोच')
+    text.includes('कोच') ||
+    text.includes('अर्जुन') ||
+    text.includes('मीरा')
   ) {
     gesture = 'NOD_YES';
     switch (normLang) {
@@ -333,20 +381,166 @@ export function generateFallbackResponse({ message, language = 'en-IN' }) {
     }
   }
 
-  // 5. AMENITIES, LOCKERS, SHOWERS & RULES
+  // 5. ANNOUNCEMENTS & NOTICES
+  else if (
+    text.includes('announcement') ||
+    text.includes('notice') ||
+    text.includes('event') ||
+    text.includes('challenge') ||
+    text.includes('bootcamp') ||
+    text.includes('diwali') ||
+    text.includes('maintenance') ||
+    text.includes('ಅನೌನ್ಸ್‌ಮೆಂಟ್') ||
+    text.includes('ಸೂಚನೆ') ||
+    text.includes('ಕಾರ್ಯಕ್ರಮ') ||
+    text.includes('ಸ್ಪರ್ಧೆ') ||
+    text.includes('ಬೂಟ್‌ಕ್ಯಾಂಪ್') ||
+    text.includes('ಘೋಷಣೆ') ||
+    text.includes('सूचना') ||
+    text.includes('इवेंट') ||
+    text.includes('चुनौती') ||
+    text.includes('बूटकैंप')
+  ) {
+    gesture = 'NOD_YES';
+    switch (normLang) {
+      case 'kn-IN':
+        reply = 'ನಮ್ಮಲ್ಲಿ 30 ದಿನಗಳ ಲೀನ್ & ಸ್ಟ್ರಾಂಗ್ ಬೂಟ್‌ಕ್ಯಾಂಪ್ ನೋಂದಣಿ ನಡೆಯುತ್ತಿದೆ, ಮತ್ತು ಈ ಗುರುವಾರ ಮಧ್ಯಾಹ್ನ 2 ರಿಂದ 4 ರವರೆಗೆ ಸ್ಟೀಮ್ ರೂಮ್ ನಿರ್ವಹಣೆ ಇರುತ್ತದೆ.';
+        break;
+      case 'hi-IN':
+        reply = 'हमारे 30-दिवसीय लीन एंड स्ट्रांग बूटकैंप के लिए पंजीकरण खुला है, और इस गुरुवार दोपहर 2 से 4 बजे स्टीम रूम का नियमित रखरखाव होगा।';
+        break;
+      case 'en-IN':
+      default:
+        reply = 'We have our 30-Day Lean and Strong Bootcamp challenge currently open for registration, and the steam room has routine maintenance this Thursday from 2 to 4 PM.';
+        break;
+    }
+  }
+
+  // 6. ENQUIRIES & HOW TO JOIN / TRIAL PASS
+  else if (
+    text.includes('enquiry') ||
+    text.includes('inquiry') ||
+    text.includes('join') ||
+    text.includes('trial') ||
+    text.includes('register') ||
+    text.includes('admission') ||
+    text.includes('sign up') ||
+    text.includes('pass') ||
+    text.includes('ಸೇರಲು') ||
+    text.includes('ವಿಚಾರಣೆ') ||
+    text.includes('ಟ್ರಯಲ್') ||
+    text.includes('ದಾಖಲಾತಿ') ||
+    text.includes('ನೋಂದಣಿ') ||
+    text.includes('पूछताछ') ||
+    text.includes('ज्वाइन') ||
+    text.includes('ट्रायल') ||
+    text.includes('दाखिला') ||
+    text.includes('रजिस्टर')
+  ) {
+    gesture = 'NOD_YES';
+    switch (normLang) {
+      case 'kn-IN':
+        reply = 'ನೀವು ಕಿಯೋಸ್ಕ್ ಪರದೆಯಲ್ಲೇ ಸದಸ್ಯತ್ವ ವಿಚಾರಣೆ ನಮೂದಿಸಬಹುದು ಅಥವಾ ಉಚಿತ 1 ದಿನದ ಟ್ರಯಲ್ ತರಬೇತಿಗಾಗಿ ನಮ್ಮ ರಿಸೆಪ್ಷನ್ ಸಿಬ್ಬಂದಿಯನ್ನು ಸಂಪರ್ಕಿಸಬಹುದು!';
+        break;
+      case 'hi-IN':
+        reply = 'आप कियोस्क स्क्रीन पर सदस्यता पूछताछ दर्ज कर सकते हैं या 1-दिवसीय मुफ्त ट्रायल वर्कआउट के लिए हमारे रिसेप्शन स्टाफ से संपर्क कर सकते हैं!';
+        break;
+      case 'en-IN':
+      default:
+        reply = 'You can submit a membership enquiry or request a free 1-day trial workout right here at the kiosk screen or by speaking with our front desk staff!';
+        break;
+    }
+  }
+
+  // 7. WORKOUTS & FITNESS GUIDANCE
+  else if (
+    text.includes('workout') ||
+    text.includes('exercise') ||
+    text.includes('fitness') ||
+    text.includes('routine') ||
+    text.includes('muscle') ||
+    text.includes('weight loss') ||
+    text.includes('warm up') ||
+    text.includes('warmup') ||
+    text.includes('diet') ||
+    text.includes('cardio') ||
+    text.includes('ವ್ಯಾಯಾಮ') ||
+    text.includes('ಫಿಟ್‌ನೆಸ್') ||
+    text.includes('ಕಸರತ್ತು') ||
+    text.includes('ತೂಕ') ||
+    text.includes('ವಾರಂಪ್') ||
+    text.includes('कसरत') ||
+    text.includes('व्यायाम') ||
+    text.includes('फिटनेस') ||
+    text.includes('वजन घटाने') ||
+    text.includes('वार्मअप')
+  ) {
+    gesture = 'NOD_YES';
+    switch (normLang) {
+      case 'kn-IN':
+        reply = 'ಸುರಕ್ಷಿತ ವ್ಯಾಯಾಮಕ್ಕಾಗಿ 5 ನಿಮಿಷಗಳ ವಾರ್ಮ್-ಅಪ್ ಮಾಡಿ, ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯಿರಿ ಮತ್ತು ಸರಿಯಾದ ಭಂಗಿ ಕಾಪಾಡಿಕೊಳ್ಳಿ. ವೈಯಕ್ತಿಕ ಪ್ಲಾನ್‌ಗಾಗಿ ನಮ್ಮ ಫ್ಲೋರ್ ತರಬೇತುದಾರರನ್ನು ಸಂಪರ್ಕಿಸಿ!';
+        break;
+      case 'hi-IN':
+        reply = 'सुरक्षित कसरत के लिए 5 मिनट वार्म-अप से शुरुआत करें, भरपूर पानी पिएं और सही फॉर्म बनाए रखें। व्यक्तिगत वर्कआउट प्लान के लिए हमारे ट्रेनर्स से मिलें!';
+        break;
+      case 'en-IN':
+      default:
+        reply = 'For safe workouts, start with a 5-minute warm-up, stay well-hydrated, and practice controlled form. For custom workout plans, our floor trainers will gladly guide you!';
+        break;
+    }
+  }
+
+  // 8. GYM RULES & ETIQUETTE
+  else if (
+    text.includes('rule') ||
+    text.includes('policy') ||
+    text.includes('shoe') ||
+    text.includes('towel') ||
+    text.includes('dress code') ||
+    text.includes('hygiene') ||
+    text.includes('ನಿಯಮ') ||
+    text.includes('ಶೂ') ||
+    text.includes('ಟವಲ್') ||
+    text.includes('ನಡವಳಿಕೆ') ||
+    text.includes('ನೀತಿಸಂಹಿತೆ') ||
+    text.includes('नियम') ||
+    text.includes('जूते') ||
+    text.includes('तौलिया') ||
+    text.includes('ड्रेस कोड')
+  ) {
+    gesture = 'NOD_YES';
+    switch (normLang) {
+      case 'kn-IN':
+        reply = 'ಫಿಟ್‌ನೆಸ್ ಫ್ಲೋರ್‌ನಲ್ಲಿ ಸ್ವಚ್ಛವಾದ ಶೂಗಳು ಮತ್ತು ಟವೆಲ್ ಧರಿಸುವುದು ಕಡ್ಡಾಯವಾಗಿದೆ. ದಯವಿಟ್ಟು ಉಪಕರಣಗಳನ್ನು ಬಳಸಿದ ನಂತರ ಸ್ವಚ್ಛಗೊಳಿಸಿ ಮತ್ತು ವೇಯ್ಟ್‌ಗಳನ್ನು ಮರಳಿ ಇರಿಸಿ.';
+        break;
+      case 'hi-IN':
+        reply = 'फिटनेस फ्लोर पर साफ जूते और तौलिया लाना अनिवार्य है। कृपया इस्तेमाल के बाद मशीनों को पोंछें और वजन सही जगह पर रखें।';
+        break;
+      case 'en-IN':
+      default:
+        reply = 'Clean indoor athletic shoes and workout towels are mandatory on the fitness floor. Please wipe down machines and re-rack weights after use.';
+        break;
+    }
+  }
+
+  // 9. AMENITIES, LOCKERS & SHOWERS
   else if (
     text.includes('locker') ||
     text.includes('shower') ||
     text.includes('water') ||
-    text.includes('towel') ||
-    text.includes('rule') ||
+    text.includes('steam') ||
+    text.includes('wifi') ||
     text.includes('facility') ||
     text.includes('amenit') ||
     text.includes('ಲಾಕರ್') ||
     text.includes('ಶವರ್') ||
+    text.includes('ಸ್ಟೀಮ್') ||
+    text.includes('ವೈಫೈ') ||
     text.includes('ಸೌಲಭ್ಯ') ||
     text.includes('लॉकर') ||
     text.includes('शावर') ||
+    text.includes('स्टीम') ||
+    text.includes('वाईफाई') ||
     text.includes('सुविधा')
   ) {
     gesture = 'NOD_YES';
@@ -364,17 +558,20 @@ export function generateFallbackResponse({ message, language = 'en-IN' }) {
     }
   }
 
-  // 6. CONTACT INFORMATION & LOCATION
+  // 10. CONTACT INFORMATION & LOCATION
   else if (
     text.includes('contact') ||
     text.includes('phone') ||
     text.includes('email') ||
     text.includes('address') ||
     text.includes('location') ||
+    text.includes('reach') ||
     text.includes('ಕರೆ') ||
     text.includes('ವಿಳಾಸ') ||
+    text.includes('ದೂರವಾಣಿ') ||
     text.includes('फ़ोन') ||
-    text.includes('पता')
+    text.includes('पता') ||
+    text.includes('संपर्क')
   ) {
     gesture = 'NOD_YES';
     switch (normLang) {
@@ -391,7 +588,7 @@ export function generateFallbackResponse({ message, language = 'en-IN' }) {
     }
   }
 
-  // 7. MISSING DATA DIRECTIVE (Never invent data; direct to reception)
+  // 11. MISSING DATA DIRECTIVE (Never invent data; direct to reception)
   else {
     gesture = 'IDLE';
     switch (normLang) {
