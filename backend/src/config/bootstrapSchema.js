@@ -16,11 +16,30 @@ import { getPool } from './database.js';
 const FILE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../database/bootstrap/full_schema.sql');
 const COUNT_TABLES = `SELECT COUNT(*)::int AS n FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'`;
 
+/** Outcome of the last start-up check, shown in GET /api/v1/health (no secrets). */
+export const bootstrapStatus = { state: 'not-run', detail: null, at: null };
+const note = (state, detail) => Object.assign(bootstrapStatus, { state, detail: detail ? String(detail).slice(0, 200) : null, at: new Date().toISOString() });
+
 /** @returns {Promise<{ ran: boolean, reason?: string, tables?: number }>} */
 export async function bootstrapEmptyDatabase(pool = getPool()) {
-  if (String(process.env.AUTO_BOOTSTRAP_SCHEMA || '').toLowerCase() === 'false') return { ran: false, reason: 'disabled' };
-  if ((await pool.query(COUNT_TABLES)).rows[0].n > 0) return { ran: false, reason: 'database already has tables' };
-  if (!fs.existsSync(FILE)) return { ran: false, reason: 'database/bootstrap/full_schema.sql is missing' };
+  try {
+    const r = await runBootstrap(pool);
+    note(r.ran ? 'created' : 'skipped', r.ran ? `${r.tables} tables created` : r.reason);
+    return r;
+  } catch (err) {
+    note('failed', `${err.code ? err.code + ': ' : ''}${err.message}`);
+    throw err;
+  }
+}
+
+async function runBootstrap(pool) {
+  if (String(process.env.AUTO_BOOTSTRAP_SCHEMA || '').toLowerCase() === 'false') return { ran: false, reason: 'disabled (AUTO_BOOTSTRAP_SCHEMA=false)' };
+  const existing = (await pool.query(COUNT_TABLES)).rows[0].n;
+  if (existing > 0) {
+    const hasUsers = (await pool.query(`SELECT to_regclass('public.users') IS NOT NULL AS ok`)).rows[0].ok;
+    return { ran: false, reason: hasUsers ? 'database already has tables' : `database has ${existing} other table(s) but no Virtex tables — not touched` };
+  }
+  if (!fs.existsSync(FILE)) return { ran: false, reason: 'database/bootstrap/full_schema.sql is missing from the deploy' };
 
   const client = await pool.connect();
   try {

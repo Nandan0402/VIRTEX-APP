@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { bootstrapStatus } from '../config/bootstrapSchema.js';
 import gymRoutes from './gym.routes.js';
 import faqRoutes from './faq.routes.js';
 import membershipRoutes from './membership.routes.js';
@@ -20,9 +21,20 @@ import roboticsManagementRoutes from './roboticsManagement.routes.js';
 import systemAdminRoutes from './systemAdmin.routes.js';
 import trainerHubRoutes from './trainerHub.routes.js';
 import memberPortalRoutes from './memberPortal.routes.js';
-import { checkDatabaseConnection } from '../config/database.js';
+import { checkDatabaseConnection, query } from '../config/database.js';
 
 const router = Router();
+
+/** Table count + first-start set-up result, so an empty / unset-up hosted database is visible (no secrets). */
+async function schemaInfo() {
+  try {
+    const r = (await query(`SELECT (SELECT COUNT(*)::int FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE') AS tables,
+                                   has_schema_privilege('public', 'CREATE') AS can_create`)).rows[0];
+    return { tables: r.tables, canCreateTables: r.can_create, setup: bootstrapStatus };
+  } catch (err) {
+    return { error: err.message, setup: bootstrapStatus };
+  }
+}
 
 // GET /api/health
 router.get('/health', async (req, res) => {
@@ -38,6 +50,7 @@ router.get('/health', async (req, res) => {
         pgVersion: dbStatus.pgVersion,
         pool: dbStatus.pool,
       },
+      schema: await schemaInfo(),
     });
   } catch (err) {
     res.status(200).json({
