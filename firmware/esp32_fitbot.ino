@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * PulseCore FitBot - ESP32 Physical Receptionist Robot Firmware
+ * Virtex FitBot - ESP32 Physical Receptionist Robot Firmware
  * ============================================================================
  * Target Microcontroller : ESP32 DevKit V1 (30-pin / DOIT ESP32 DEVKIT V1)
  * Actuators              : 3x SG90 Micro Servos (Head Pan, Head Tilt / Left Arm, Right Arm Wave)
@@ -22,14 +22,17 @@
 #define PIN_SERVO_HEAD_PAN   18   // SG90 Head Pan / Horizontal Yaw (GPIO 18)
 #define PIN_SERVO_HEAD_TILT  19   // SG90 Head Tilt / Left Arm Pitch (GPIO 19)
 #define PIN_SERVO_ARM_WAVE   21   // SG90 Right Arm Wave (GPIO 21)
+#define PIN_SERVO_HEAD       18   // SG90 Head Servo Alias (GPIO 18)
+#define PIN_SERVO_LEFT_ARM   19   // SG90 Left Arm Servo Alias (GPIO 19)
+#define PIN_SERVO_RIGHT_ARM  21   // SG90 Right Arm Servo Alias (GPIO 21)
 #define PIN_STATUS_LED        2   // On-board Blue Status LED (GPIO 2)
 #define PIN_BATTERY_ADC      34   // ADC1 Channel 6 for battery voltage divider (GPIO 34)
 
 // ============================================================================
 // NETWORK & BACKEND CONFIGURATION
 // ============================================================================
-const char* WIFI_SSID         = "PulseCore_Staff_WiFi";     // Replace with your 2.4GHz Wi-Fi SSID
-const char* WIFI_PASSWORD     = "PulseCoreSecure2026";      // Replace with Wi-Fi Password
+const char* WIFI_SSID         = "Virtex_Staff_WiFi";     // Replace with your 2.4GHz Wi-Fi SSID
+const char* WIFI_PASSWORD     = "VirtexSecure2026";      // Replace with Wi-Fi Password
 const char* BACKEND_BASE_URL  = "http://192.168.1.100:3000"; // Replace with your Node.js backend IP & Port
 
 // Device Authentication Credentials (Never exposed in frontend JS)
@@ -308,6 +311,9 @@ void sendHeartbeat() {
   servos["headPan"]  = currentHeadPan;
   servos["headTilt"] = currentHeadTilt;
   servos["armWave"]  = currentArmWave;
+  servos["head"]     = currentHeadPan;
+  servos["leftArm"]  = currentHeadTilt;
+  servos["rightArm"] = currentArmWave;
 
   String requestBody;
   serializeJson(doc, requestBody);
@@ -460,12 +466,18 @@ void pollNextCommand() {
 
       if (!steps.isNull()) {
         if (!steps["headPan"].isNull())  targetPan  = steps["headPan"].as<int>();
+        if (!steps["head"].isNull())     targetPan  = steps["head"].as<int>();
         if (!steps["headTilt"].isNull()) targetTilt = steps["headTilt"].as<int>();
+        if (!steps["leftArm"].isNull())  targetTilt = steps["leftArm"].as<int>();
         if (!steps["armWave"].isNull())  targetArm  = steps["armWave"].as<int>();
+        if (!steps["rightArm"].isNull()) targetArm  = steps["rightArm"].as<int>();
       } else if (!servosObj.isNull()) {
         if (!servosObj["headPan"].isNull())  targetPan  = servosObj["headPan"].as<int>();
+        if (!servosObj["head"].isNull())     targetPan  = servosObj["head"].as<int>();
         if (!servosObj["headTilt"].isNull()) targetTilt = servosObj["headTilt"].as<int>();
+        if (!servosObj["leftArm"].isNull())  targetTilt = servosObj["leftArm"].as<int>();
         if (!servosObj["armWave"].isNull())  targetArm  = servosObj["armWave"].as<int>();
+        if (!servosObj["rightArm"].isNull()) targetArm  = servosObj["rightArm"].as<int>();
       }
 
       Serial.printf("[FitBot] Direct angles: Pan=%d°, Tilt=%d°, Arm=%d°\n", targetPan, targetTilt, targetArm);
@@ -487,7 +499,7 @@ void setup() {
   delay(500);
 
   Serial.println("\n========================================================");
-  Serial.println("  PulseCore FitBot - ESP32 Physical Robot Controller    ");
+  Serial.println("  Virtex FitBot - ESP32 Physical Robot Controller    ");
   Serial.printf("  Firmware: %s | Device: %s\n", FIRMWARE_VERSION, ROBOT_DEVICE_ID);
   Serial.println("========================================================");
 
@@ -551,3 +563,4 @@ void loop() {
 
   delay(10); // Yield to FreeRTOS watchdog
 }
+

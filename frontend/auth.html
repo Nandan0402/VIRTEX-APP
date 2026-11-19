@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
+  <title>Sign in · Virtex</title>
+  <!-- The old combined sign-in page (Member / Personal Trainer / Admin tabs) was removed.
+       Old links go to the right sign-in page: ?role=member → Member, ?role=trainer → Trainer, otherwise Admin. -->
+  <script>
+    (function () {
+      var p = new URLSearchParams(location.search);
+      var role = (p.get('role') || '').toLowerCase();
+      var page = role === 'member' ? 'member-auth.html' : role === 'trainer' ? 'trainer-auth.html' : 'admin-auth.html';
+      p.delete('role'); p.delete('mode');
+      var q = p.toString();
+      location.replace(page + (q ? '?' + q : ''));
+    })();
+  </script>
+  <meta http-equiv="refresh" content="1; url=admin-auth.html">
+</head>
+<body>Opening sign in… <a href="admin-auth.html">Admin</a> · <a href="member-auth.html">Member</a> · <a href="trainer-auth.html">Trainer</a></body>
+</html>

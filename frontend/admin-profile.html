@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Administrator Profile</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root, html {
+      color-scheme: dark !important;
+      --accent-green: #00e676;
+      --accent-green-dark: #00b050;
+      --accent-green-glow: rgba(0, 230, 118, 0.28);
+      --green: #00e676;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.18) #0e1017;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0e1017 !important;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18) !important;
+      border-radius: 4px !important;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00e676 !important;
+    }
+
+    /* Dedicated Profile Page Specific Enhancements */
+    .profile-hero-card {
+      background: linear-gradient(135deg, rgba(19, 22, 31, 0.95), rgba(14, 16, 23, 0.98));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .profile-hero-card::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(0, 230, 118, 0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .profile-hero-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-avatar-large {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00e676, #00b0ff);
+      color: #04121e;
+      font-size: 2.1rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 22px rgba(0, 230, 118, 0.35);
+      border: 3px solid rgba(0, 230, 118, 0.4);
+      flex-shrink: 0;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .profile-avatar-large:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 26px rgba(0, 230, 118, 0.5);
+    }
+
+    .profile-avatar-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      display: block;
+    }
+
+    .avatar-hover-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.65);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      font-size: 1.15rem;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .profile-avatar-large:hover .avatar-hover-overlay {
+      opacity: 1;
+    }
+
+    .profile-avatar-large.avatar-owner {
+      background: linear-gradient(135deg, #00e676, #10b981);
+      color: #04140b;
+    }
+
+    .profile-meta-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-white);
+      margin: 0 0 0.35rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .profile-submeta {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      color: var(--text-dim);
+      font-size: 0.88rem;
+      flex-wrap: wrap;
+    }
+
+    .profile-grid-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .profile-grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .profile-section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .profile-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .profile-section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .form-group-custom {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group-custom label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-gray);
+      margin-bottom: 0.45rem;
+      letter-spacing: 0.02em;
+    }
+
+    .form-group-custom input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-white);
+      font-family: inherit;
+      font-size: 0.92rem;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      box-sizing: border-box;
+    }
+
+    .form-group-custom input:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.2);
+    }
+
+    .form-group-custom input:disabled,
+    .form-group-custom input[readonly] {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-dim);
+      cursor: not-allowed;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .form-row-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .form-row-2col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .telemetry-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.86rem;
+    }
+
+    .telemetry-item:last-child {
+      border-bottom: none;
+    }
+
+    .telemetry-label {
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+
+    .telemetry-val {
+      color: var(--text-white);
+      font-weight: 600;
+    }
+
+    .photo-upload-box {
+      padding: 1.15rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed rgba(0, 230, 118, 0.3);
+      border-radius: var(--radius-md);
+      margin-bottom: 1.5rem;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .photo-upload-box:hover {
+      border-color: var(--green);
+      background: rgba(0, 230, 118, 0.03);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation (Same as Admin Dashboard) -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="admin.html#tab-overview" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📊</span> Overview & Stats
+        </a>
+        <a href="admin-members.html" class="nav-item-btn " id="nav-item-members"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👥</span> Members
+        </a>
+        <a href="admin-feessalert.html" class="nav-item-btn" id="nav-item-fees-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💰</span> Fees Alert
+        </a>
+        <a href="admin-birthdayalert.html" class="nav-item-btn" id="nav-item-birthday-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🎂</span> Birthday Alert
+        </a>
+        <a href="admin-messages.html" class="nav-item-btn " id="nav-item-messages"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📩</span> Message
+        </a>
+        <a href="admin-notification.html" class="nav-item-btn " id="nav-item-notifications"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📢</span> Notification
+        </a>
+        <a href="admin-personaltraniner.html" class="nav-item-btn " id="nav-item-trainers"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏋️</span> Personal Trainer
+        </a>
+        <a href="admin-assign-membertoperonal traniner.html" class="nav-item-btn" id="nav-item-assign-trainer" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤝</span> Assign PT & Fees
+        </a>
+        <a href="admin-routine-tracker.html" class="nav-item-btn" id="nav-item-routine-tracker" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏱️</span> Routine Tracker
+        </a>
+        <a href="admin.html#tab-plans" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💳</span> Membership Plans
+        </a>
+        <a href="admin.html#tab-faqs" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">❓</span> FAQs / Knowledge Base
+        </a>
+        <a href="admin.html#tab-robot" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
+        </a>
+        <a href="admin.html#tab-profile" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile
+        </a>
+        <a href="admin-working-hours.html" class="nav-item-btn " id="nav-item-working-hours-link"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏰</span> Working Hours
+        </a>
+        <a href="admin-calander.html" class="nav-item-btn " id="nav-item-admin-calendar"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📅</span> Class & Shift Calendar
+        </a>
+        <a href="admin-profile.html" class="nav-item-btn active" id="nav-item-admin-profile" aria-current="page" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👤</span> Profile
+        </a>
+        <a href="admin.html#tab-settings" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⚙️</span> Language & Settings
+        </a>
+      </nav>
+
+      <!-- User Profile & Session Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" style="cursor: pointer;" title="Active Profile" role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <img id="sidebar-user-photo" src="" alt="Avatar" style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+            </div>
+            <div class="user-meta-row">
+              <span class="user-handle font-mono" id="sidebar-user-handle">@nandanb449</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+          </div>
+          <button class="btn-sidebar-logout btn-logout" id="btn-logout" title="Log Out" aria-label="End active session">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="admin-main">
+      <!-- Top App Bar -->
+      <header class="admin-topbar" role="banner">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Sidebar Menu">☰</button>
+          <h1 class="topbar-title">Administrator Profile</h1>
+        </div>
+
+        <div class="topbar-right" id="topbar-right-actions">
+          <!-- Routine Quick Punch Group -->
+          <div class="topbar-routine-group" id="topbar-routine-group">
+            <a href="admin-routine-tracker.html" class="topbar-routine-badge status-out" id="topbar-routine-badge" title="Click to view full Routine Tracker">
+              <span class="topbar-status-dot"></span>
+              <span id="topbar-routine-text">PUNCHED OUT</span>
+            </a>
+
+            <div class="topbar-punch-btns">
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-in" id="topbar-btn-punch-in" title="Punch In (Start Daily Shift)">
+                <span>🟢</span>
+                <span class="topbar-btn-text">Punch In</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-break" id="topbar-btn-break" title="Take or Resume Routine Break" disabled>
+                <span id="topbar-break-icon">☕</span>
+                <span class="topbar-btn-text" id="topbar-break-text">Break</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-out" id="topbar-btn-punch-out" title="Punch Out (End Daily Shift)" disabled>
+                <span>⏹️</span>
+                <span class="topbar-btn-text">Punch Out</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="topbar-divider-vert"></div>
+
+          <!-- Message Link Icon -->
+          <a href="admin-messages.html" class="topbar-nav-icon-link" id="topbar-message-link" title="Member Messages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="topbar-counter-badge" id="topbar-message-badge" style="display: none;">0</span>
+          </a>
+
+          <!-- Notification Link Icon -->
+          <a href="admin-notification.html" class="topbar-nav-icon-link" id="topbar-notification-link" title="Notifications & System Announcements">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="topbar-counter-badge topbar-counter-red" id="topbar-notification-badge" style="display: none;">0</span>
+          </a>
+        </div>
+      </header>
+
+      <!-- Main Body -->
+      <main class="admin-body">
+        <!-- Toast Notification Banner -->
+        <div id="toast-banner" class="toast-banner" role="alert" aria-live="polite"></div>
+
+        <!-- Hidden Global File Input for Profile Photo Upload -->
+        <input type="file" id="input-avatar-file" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;" />
+
+        <!-- =============================================================== -->
+        <!-- PROFILE HERO HEADER CARD WITH INTERACTIVE PHOTO AVATAR -->
+        <!-- =============================================================== -->
+        <div class="profile-hero-card">
+          <div class="profile-hero-left">
+            <div class="profile-avatar-large avatar-owner" id="hero-avatar" title="Click to upload profile photo" role="button" tabindex="0">
+              <img id="hero-avatar-img" src="" alt="Profile Photo" style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+              <span id="hero-initials">NB</span>
+              <div class="avatar-hover-overlay">
+                <span style="font-size: 1.25rem;">📷</span>
+                <span style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase; margin-top: 3px;">Change Photo</span>
+              </div>
+            </div>
+            <div>
+              <div class="profile-meta-title">
+                <span id="hero-fullname">Nandan.B</span>
+                <span class="role-badge-pill role-owner" id="hero-role-pill" style="font-size: 0.72rem; padding: 2px 9px;">OWNER</span>
+              </div>
+              <div class="profile-submeta">
+                <span class="font-mono text-dim" id="hero-handle">@nandanb449</span>
+                <span>•</span>
+                <span class="badge badge-green text-xs" style="padding: 2px 8px;">● PostgreSQL Verified Session</span>
+                <span>•</span>
+                <span class="font-mono text-dim text-xs" id="hero-account-id">ID #29</span>
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px; align-items: center; flex-wrap: wrap;">
+                <button type="button" class="btn btn-outline btn-xs" id="btn-trigger-upload-hero" style="display: inline-flex; align-items: center; gap: 6px;">
+                  📷 Upload Photo
+                </button>
+                <button type="button" class="btn btn-outline btn-xs text-danger" id="btn-remove-photo-hero" style="display: none; align-items: center; gap: 6px; border-color: rgba(239, 68, 68, 0.4);">
+                  🗑️ Remove Photo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =============================================================== -->
+        <!-- PROFILE DETAILS & EDIT FORMS GRID -->
+        <!-- =============================================================== -->
+        <div class="profile-grid-layout">
+          <!-- Left Column: Personal Information & Settings -->
+          <div>
+            <div class="profile-section-card">
+              <div class="profile-section-header">
+                <h3 class="profile-section-title">
+                  <span>👤</span> Personal & Account Information
+                </h3>
+                <span class="badge badge-green font-mono text-xs">PostgreSQL: users</span>
+              </div>
+
+              <!-- Dedicated Photo Upload Box -->
+              <div class="photo-upload-box">
+                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                  <div class="profile-avatar-large avatar-owner" id="form-avatar-box" style="width: 64px; height: 64px; font-size: 1.45rem; cursor: pointer;">
+                    <img id="form-avatar-img" src="" alt="Preview" style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+                    <span id="form-avatar-init">NB</span>
+                    <div class="avatar-hover-overlay">
+                      <span style="font-size: 1rem;">📷</span>
+                    </div>
+                  </div>
+                  <div style="flex: 1; min-width: 200px;">
+                    <strong style="color: #fff; font-size: 0.92rem; display: block; margin-bottom: 2px;">Administrator Profile Photo</strong>
+                    <span class="text-xs text-dim" style="display: block; margin-bottom: 8px;">
+                      Upload your profile picture (JPG, PNG, or WebP). Automatically scaled and stored in PostgreSQL.
+                    </span>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                      <button type="button" class="btn btn-outline btn-xs" id="btn-choose-photo-form" style="display: inline-flex; align-items: center; gap: 5px;">
+                        📁 Choose Image File
+                      </button>
+                      <button type="button" class="btn btn-outline btn-xs text-danger" id="btn-remove-photo-form" style="display: none; border-color: rgba(239, 68, 68, 0.4);">
+                        🗑️ Remove Photo
+                      </button>
+                      <span class="text-xs text-dim font-mono" id="photo-status-indicator">Initial avatar active</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <form id="form-update-profile">
+                <div class="form-row-2col">
+                  <div class="form-group-custom">
+                    <label for="profile-input-fullname">Full Name</label>
+                    <input type="text" id="profile-input-fullname" name="fullName" required placeholder="e.g. Nandan.B" />
+                  </div>
+                  <div class="form-group-custom">
+                    <label for="profile-input-email">Email Address</label>
+                    <input type="email" id="profile-input-email" name="email" required placeholder="e.g. nandanb449@gmail.com" />
+                  </div>
+                </div>
+
+                <div class="form-row-2col">
+                  <div class="form-group-custom">
+                    <label for="profile-input-phone">Contact Phone</label>
+                    <input type="tel" id="profile-input-phone" name="phone" placeholder="e.g. +91 83104 25800" />
+                  </div>
+                  <div class="form-group-custom">
+                    <label for="profile-input-username">System Username (Primary Key)</label>
+                    <input type="text" id="profile-input-username" disabled readonly value="nandanb449@gmail.com" />
+                  </div>
+                </div>
+
+                <div class="form-group-custom">
+                  <label>Assigned RBAC Role</label>
+                  <input type="text" id="profile-input-role" disabled readonly value="Facility Owner (Full Unrestricted Access)" />
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+                  <button type="submit" class="btn btn-green" id="btn-save-profile" style="min-width: 180px;">
+                    💾 Save Profile Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Password & Security Card -->
+            <div class="profile-section-card">
+              <div class="profile-section-header">
+                <h3 class="profile-section-title">
+                  <span>🔒</span> Security & Authentication Credentials
+                </h3>
+                <span class="badge badge-outline text-xs font-mono">Bcrypt Salted Hash</span>
+              </div>
+
+              <form id="form-update-password">
+                <div class="form-group-custom">
+                  <label for="profile-input-current-pass">Current Password</label>
+                  <input type="password" id="profile-input-current-pass" name="currentPassword" required placeholder="Enter active password" autocomplete="current-password" />
+                </div>
+
+                <div class="form-row-2col">
+                  <div class="form-group-custom">
+                    <label for="profile-input-new-pass">New Password</label>
+                    <input type="password" id="profile-input-new-pass" name="newPassword" required minlength="8" placeholder="At least 8 characters" autocomplete="new-password" />
+                  </div>
+                  <div class="form-group-custom">
+                    <label for="profile-input-confirm-pass">Confirm New Password</label>
+                    <input type="password" id="profile-input-confirm-pass" name="confirmPassword" required minlength="8" placeholder="Re-enter new password" autocomplete="new-password" />
+                  </div>
+                </div>
+
+                <p class="text-xs text-dim" style="margin-bottom: 1.25rem;">
+                  Passwords must contain at least 8 characters. Password updates immediately invalidate prior tokens across any stale devices.
+                </p>
+
+                <div style="display: flex; justify-content: flex-end;">
+                  <button type="submit" class="btn btn-outline" id="btn-save-password" style="min-width: 180px;">
+                    🔑 Update Password
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Right Column: Database, Telemetry & Role Permissions -->
+          <div>
+            <div class="profile-section-card">
+              <div class="profile-section-header">
+                <h3 class="profile-section-title">
+                  <span>🐘</span> Database & Audit Telemetry
+                </h3>
+                <span class="badge badge-green font-mono text-xs">LIVE PG-16</span>
+              </div>
+
+              <div class="telemetry-list">
+                <div class="telemetry-item">
+                  <span class="telemetry-label">DATABASE HOST</span>
+                  <span class="telemetry-val font-mono text-xs">localhost:5432 (PostgreSQL)</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-label">TARGET SCHEMA</span>
+                  <span class="telemetry-val font-mono text-xs text-green">gym_robot_db.public.users</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-label">USER ID (PK)</span>
+                  <span class="telemetry-val font-mono text-cyan" id="telem-user-id">#29</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-label">ROLE ENUM</span>
+                  <span class="telemetry-val font-mono text-green" id="telem-role">owner</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-label">AVATAR STATUS</span>
+                  <span class="telemetry-val font-mono text-xs" id="telem-avatar-status">Initial Badge</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-label">PERMISSIONS</span>
+                  <span class="telemetry-val font-mono text-green" id="telem-perms">* (Full Unrestricted Authority)</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-label">HASH CIPHER</span>
+                  <span class="telemetry-val font-mono text-xs text-dim">Bcrypt Blowfish (Cost 10)</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-label">JWT ENCRYPTION</span>
+                  <span class="telemetry-val font-mono text-xs text-dim">HMAC-SHA256 (Protected)</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-label">LAST ACTIVE LOGIN</span>
+                  <span class="telemetry-val font-mono text-xs" id="telem-last-login">Active Now</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-section-card" style="border-color: rgba(239, 68, 68, 0.25);">
+              <div class="profile-section-header">
+                <h3 class="profile-section-title" style="color: var(--danger);">
+                  <span>⚠️</span> Session & Access Termination
+                </h3>
+              </div>
+              <p class="text-xs text-dim" style="line-height: 1.5; margin-bottom: 1.25rem;">
+                Logging out writes this session's JWT signature to the PostgreSQL <code class="font-mono text-green">token_blacklist</code> table and resets local credentials.
+              </p>
+              <button type="button" class="btn btn-danger btn-outline" id="btn-terminate-session" style="width: 100%;">
+                🚪 Sign Out of Active Session
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal-backdrop" id="modal-logout" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Administrative Session Logout</h3>
+        <button class="modal-close-btn" id="btn-close-modal-logout">✕</button>
+      </div>
+      <div style="margin-bottom: 1.25rem; font-size: 0.9rem; color: var(--text-gray);">
+        <p style="margin-bottom: 8px;">
+          Logging out will invalidate your cryptographic JWT token in PostgreSQL <code
+            class="font-mono text-green">token_blacklist</code> and record an audit log entry.
+        </p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-outline" style="flex: 1;" id="btn-cancel-logout">Stay Signed In</button>
+        <button class="btn btn-green" style="flex: 1;" id="btn-confirm-logout">Confirm Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmation Dialog (Centered) -->
+  <div class="modal-backdrop" id="modal-confirm" aria-hidden="true" role="dialog" aria-modal="true" style="z-index: 2500;">
+    <div class="modal-card" style="max-width: 440px; text-align: center; border: 1px solid rgba(239, 68, 68, 0.4); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95); padding: 2rem 1.75rem;">
+      <div style="font-size: 3rem; line-height: 1; margin-bottom: 0.85rem;" id="modal-confirm-icon">🗑️</div>
+      <h3 id="modal-confirm-title" style="margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 700; color: #fff;">Confirm Action</h3>
+      <p id="modal-confirm-message" style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 1.75rem; line-height: 1.5;">
+        Are you sure you want to proceed?
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button type="button" class="btn btn-outline" id="modal-confirm-cancel-btn" style="flex: 1; padding: 0.75rem 1rem; font-weight: 600;">Cancel</button>
+        <button type="button" class="btn btn-danger" id="modal-confirm-ok-btn" style="flex: 1; padding: 0.75rem 1rem; font-weight: 700; background: #ef4444; color: #fff; border: 1px solid #ef4444; border-radius: var(--radius-md); cursor: pointer;">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Hydration, Photo Upload, and Update Logic -->
+  <script type="module">
+    import { adminApi } from './js/admin/adminApi.js';
+
+    function showToast(message, isError = false) {
+      const banner = document.getElementById('toast-banner');
+      if (!banner) return;
+      banner.textContent = message;
+      banner.className = 'toast-banner show' + (isError ? ' error' : '');
+      clearTimeout(banner._timer);
+      banner._timer = setTimeout(() => {
+        banner.className = 'toast-banner';
+      }, 4000);
+    }
+
+    // Toggle Mobile Sidebar
+    document.getElementById('btn-sidebar-toggle')?.addEventListener('click', () => {
+      document.getElementById('admin-sidebar')?.classList.toggle('open');
+    });
+
+    // Logout Modal controls
+    const modalLogout = document.getElementById('modal-logout');
+    function openLogoutModal() {
+      modalLogout?.classList.add('active');
+      modalLogout?.setAttribute('aria-hidden', 'false');
+    }
+    function closeLogoutModal() {
+      modalLogout?.classList.remove('active');
+      modalLogout?.setAttribute('aria-hidden', 'true');
+    }
+
+    document.getElementById('btn-terminate-session')?.addEventListener('click', openLogoutModal);
+    document.getElementById('btn-logout')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLogoutModal();
+    });
+    document.getElementById('btn-close-modal-logout')?.addEventListener('click', closeLogoutModal);
+    document.getElementById('btn-cancel-logout')?.addEventListener('click', closeLogoutModal);
+    modalLogout?.addEventListener('click', (e) => {
+      if (e.target === modalLogout) closeLogoutModal();
+    });
+
+    document.getElementById('btn-confirm-logout')?.addEventListener('click', async () => {
+      try {
+        await adminApi.logout();
+      } catch (e) {}
+      localStorage.removeItem('virtex_admin_jwt_token');
+      localStorage.removeItem('virtex_admin_user_profile');
+      window.location.href = 'index.html';
+    });
+
+    // =========================================================================
+    // PROFILE HYDRATION & PHOTO MANAGEMENT
+    // =========================================================================
+
+    function applyAvatarToUI(avatarUrl, initials) {
+      const heroImg = document.getElementById('hero-avatar-img');
+      const heroInit = document.getElementById('hero-initials');
+      const formImg = document.getElementById('form-avatar-img');
+      const formInit = document.getElementById('form-avatar-init');
+      const sideImg = document.getElementById('sidebar-user-photo');
+      const sideInit = document.getElementById('sidebar-user-initials');
+      const btnRemoveHero = document.getElementById('btn-remove-photo-hero');
+      const btnRemoveForm = document.getElementById('btn-remove-photo-form');
+      const statusIndicator = document.getElementById('photo-status-indicator');
+      const telemAvatarStatus = document.getElementById('telem-avatar-status');
+
+      if (avatarUrl) {
+        if (heroImg) { heroImg.src = avatarUrl; heroImg.style.display = 'block'; }
+        if (heroInit) heroInit.style.display = 'none';
+        if (formImg) { formImg.src = avatarUrl; formImg.style.display = 'block'; }
+        if (formInit) formInit.style.display = 'none';
+        if (sideImg) { sideImg.src = avatarUrl; sideImg.style.display = 'block'; }
+        if (sideInit) sideInit.style.display = 'none';
+        if (btnRemoveHero) btnRemoveHero.style.display = 'inline-flex';
+        if (btnRemoveForm) btnRemoveForm.style.display = 'inline-flex';
+        if (statusIndicator) {
+          statusIndicator.textContent = 'Custom photo active';
+          statusIndicator.className = 'text-xs text-green font-mono';
+        }
+        if (telemAvatarStatus) {
+          telemAvatarStatus.textContent = 'Custom Photo Synced';
+          telemAvatarStatus.className = 'telemetry-val font-mono text-xs text-green';
+        }
+      } else {
+        if (heroImg) heroImg.style.display = 'none';
+        if (heroInit) { heroInit.textContent = initials; heroInit.style.display = 'block'; }
+        if (formImg) formImg.style.display = 'none';
+        if (formInit) { formInit.textContent = initials; formInit.style.display = 'block'; }
+        if (sideImg) sideImg.style.display = 'none';
+        if (sideInit) { sideInit.textContent = initials; sideInit.style.display = 'block'; }
+        if (btnRemoveHero) btnRemoveHero.style.display = 'none';
+        if (btnRemoveForm) btnRemoveForm.style.display = 'none';
+        if (statusIndicator) {
+          statusIndicator.textContent = 'Initial avatar active';
+          statusIndicator.className = 'text-xs text-dim font-mono';
+        }
+        if (telemAvatarStatus) {
+          telemAvatarStatus.textContent = 'Initials Badge (' + initials + ')';
+          telemAvatarStatus.className = 'telemetry-val font-mono text-xs text-dim';
+        }
+      }
+    }
+
+    // Populate user profile data
+    async function hydrateProfile() {
+      let user = adminApi.getStoredUser();
+
+      // Ensure active token exists
+      let token = adminApi.getToken();
+      if (!token) {
+        try {
+          const loginRes = await adminApi.redirectToLogin();
+          if (loginRes.success) {
+            user = loginRes.data.user;
+            token = loginRes.data.token;
+          }
+        } catch (e) {}
+      }
+
+      // Fetch freshest profile from /api/v1/auth/me
+      try {
+        const meRes = await adminApi.getCurrentUser();
+        if (meRes.success && meRes.data) {
+          user = meRes.data;
+        }
+      } catch (e) {}
+
+      if (!user) return;
+
+      let fullName = (user.fullName || user.full_name || user.name || user.username || 'Nandan.B').trim();
+      if (fullName === 'Manju Owner') fullName = 'Nandan.B';
+      const rawUsername = user.username || user.email || 'nandanb449';
+      const shortHandle = (rawUsername === 'owner_manju' || rawUsername === 'nandanb449@gmail.com')
+        ? 'nandanb449'
+        : (rawUsername.includes('@') && !rawUsername.startsWith('@')
+          ? rawUsername.split('@')[0]
+          : rawUsername.replace(/^@/, ''));
+      const roleName = (user.role || 'owner').toUpperCase();
+      const roleLower = (user.role || 'owner').toLowerCase();
+      const avatarUrl = user.avatarUrl || user.avatar_url || null;
+
+      // Compute Initials
+      let initials = '';
+      const cleanWords = fullName.replace(/[^a-zA-Z0-9\s]/g, ' ').trim().split(/\s+/).filter(Boolean);
+      if (cleanWords.length >= 2) {
+        initials = (cleanWords[0][0] + cleanWords[1][0]).toUpperCase();
+      } else if (cleanWords.length === 1 && cleanWords[0].length >= 2) {
+        initials = cleanWords[0].slice(0, 2).toUpperCase();
+      } else {
+        initials = shortHandle.slice(0, 2).toUpperCase();
+      }
+
+      // Sidebar Elements
+      const elSideFullname = document.getElementById('sidebar-user-fullname');
+      const elSideHandle = document.getElementById('sidebar-user-handle');
+      const elSideRole = document.getElementById('sidebar-role-pill');
+      const elSideAvatar = document.getElementById('sidebar-user-avatar');
+
+      if (elSideFullname) elSideFullname.textContent = fullName;
+      if (elSideHandle) elSideHandle.textContent = `@${shortHandle}`;
+      if (elSideRole) {
+        elSideRole.textContent = roleName;
+        elSideRole.className = `role-badge-pill role-${roleLower}`;
+      }
+      if (elSideAvatar) elSideAvatar.className = `user-avatar avatar-${roleLower}`;
+
+      // Hero Elements
+      const elHeroFullname = document.getElementById('hero-fullname');
+      const elHeroHandle = document.getElementById('hero-handle');
+      const elHeroRole = document.getElementById('hero-role-pill');
+      const elHeroAvatar = document.getElementById('hero-avatar');
+      const elHeroAccountId = document.getElementById('hero-account-id');
+
+      if (elHeroFullname) elHeroFullname.textContent = fullName;
+      if (elHeroHandle) elHeroHandle.textContent = `@${shortHandle}`;
+      if (elHeroRole) {
+        elHeroRole.textContent = roleName;
+        elHeroRole.className = `role-badge-pill role-${roleLower}`;
+      }
+      if (elHeroAvatar) elHeroAvatar.className = `profile-avatar-large avatar-${roleLower}`;
+      if (elHeroAccountId) elHeroAccountId.textContent = `ID #${user.id || 29}`;
+
+      // Apply Avatar & Initials
+      applyAvatarToUI(avatarUrl, initials);
+
+      // Form Inputs
+      const inputFullname = document.getElementById('profile-input-fullname');
+      const inputEmail = document.getElementById('profile-input-email');
+      const inputPhone = document.getElementById('profile-input-phone');
+      const inputUsername = document.getElementById('profile-input-username');
+      const inputRole = document.getElementById('profile-input-role');
+
+      if (inputFullname) inputFullname.value = fullName;
+      if (inputEmail) inputEmail.value = user.email || (rawUsername.includes('@') ? rawUsername : 'nandanb449@gmail.com');
+      if (inputPhone) inputPhone.value = user.phone || '+91 83104 25800';
+      if (inputUsername) inputUsername.value = rawUsername;
+      if (inputRole) inputRole.value = `${roleName} (Facility Owner - Full RBAC Authority)`;
+
+      // Telemetry
+      const telemUserId = document.getElementById('telem-user-id');
+      const telemRole = document.getElementById('telem-role');
+      const telemPerms = document.getElementById('telem-perms');
+      const telemLastLogin = document.getElementById('telem-last-login');
+
+      if (telemUserId) telemUserId.textContent = `#${user.id || 29}`;
+      if (telemRole) telemRole.textContent = roleLower;
+      if (telemPerms) {
+        telemPerms.textContent = Array.isArray(user.permissions) ? user.permissions.join(', ') : '* (Full Unrestricted Authority)';
+      }
+      if (telemLastLogin && user.last_login_at) {
+        try {
+          telemLastLogin.textContent = new Date(user.last_login_at).toLocaleString('en-IN', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+        } catch {
+          telemLastLogin.textContent = 'Active Session';
+        }
+      }
+    }
+
+    // =========================================================================
+    // IMAGE COMPRESSION & UPLOAD HANDLERS
+    // =========================================================================
+
+    const fileInput = document.getElementById('input-avatar-file');
+
+    function triggerFilePicker() {
+      fileInput?.click();
+    }
+
+    document.getElementById('hero-avatar')?.addEventListener('click', triggerFilePicker);
+    document.getElementById('btn-trigger-upload-hero')?.addEventListener('click', triggerFilePicker);
+    document.getElementById('form-avatar-box')?.addEventListener('click', triggerFilePicker);
+    document.getElementById('btn-choose-photo-form')?.addEventListener('click', triggerFilePicker);
+
+    // Resize image client-side to max 800x800 for crisp quality and instant upload
+    function processAndCompressImage(file) {
+      return new Promise((resolve, reject) => {
+        if (!file.type.startsWith('image/')) {
+          reject(new Error('Please select an image file (PNG, JPG, WebP).'));
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const maxDim = 800;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+            const dataUrl = canvas.toDataURL(mime, 0.92);
+            resolve(dataUrl);
+          };
+          img.onerror = () => reject(new Error('Invalid image file.'));
+          img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('Failed to read image file.'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    fileInput?.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      showToast('⏳ Uploading and saving profile photo to PostgreSQL...');
+
+      try {
+        const compressedDataUrl = await processAndCompressImage(file);
+
+        // Send to backend via PUT /api/v1/auth/profile
+        const res = await adminApi.updateUserProfile({ avatarUrl: compressedDataUrl });
+        if (res.success) {
+          showToast('✅ Profile photo successfully updated and saved in PostgreSQL!');
+          await hydrateProfile();
+        } else {
+          showToast(`❌ Photo upload failed: ${res.error}`, true);
+        }
+      } catch (err) {
+        showToast(`❌ Error: ${err.message}`, true);
+      } finally {
+        fileInput.value = '';
+      }
+    });
+
+    // Centered Custom Confirmation Modal
+    function confirmCenter({
+      title = 'Confirm Action',
+      message = 'Are you sure you want to proceed?',
+      icon = '🗑️',
+      confirmText = 'Confirm',
+      confirmClass = 'btn-action-danger',
+      cancelText = 'Cancel',
+    } = {}) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('modal-confirm');
+        const titleEl = document.getElementById('modal-confirm-title');
+        const msgEl = document.getElementById('modal-confirm-message');
+        const iconEl = document.getElementById('modal-confirm-icon');
+        const okBtn = document.getElementById('modal-confirm-ok-btn');
+        const cancelBtn = document.getElementById('modal-confirm-cancel-btn');
+
+        if (!modal || !okBtn || !cancelBtn) {
+          resolve(window.confirm(message));
+          return;
+        }
+
+        if (titleEl) titleEl.textContent = title;
+        if (iconEl) iconEl.textContent = icon;
+        if (msgEl) msgEl.textContent = message;
+        if (okBtn) {
+          okBtn.textContent = confirmText;
+          if (confirmClass === 'btn-action-danger') {
+            okBtn.style.background = '#ef4444';
+            okBtn.style.borderColor = '#ef4444';
+            okBtn.style.color = '#ffffff';
+          } else {
+            okBtn.style.background = '#00e676';
+            okBtn.style.borderColor = '#00e676';
+            okBtn.style.color = '#000000';
+          }
+        }
+        if (cancelBtn) {
+          cancelBtn.textContent = cancelText;
+        }
+
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+
+        let resolved = false;
+        const cleanup = (val) => {
+          if (resolved) return;
+          resolved = true;
+          modal.classList.remove('active');
+          modal.setAttribute('aria-hidden', 'true');
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          window.removeEventListener('keydown', onKey);
+          modal.removeEventListener('click', onBackdrop);
+          resolve(val);
+        };
+
+        const onOk = (e) => { e.preventDefault(); cleanup(true); };
+        const onCancel = (e) => { e.preventDefault(); cleanup(false); };
+        const onKey = (e) => {
+          if (e.key === 'Escape') cleanup(false);
+          else if (e.key === 'Enter') cleanup(true);
+        };
+        const onBackdrop = (e) => {
+          if (e.target === modal) cleanup(false);
+        };
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        window.addEventListener('keydown', onKey);
+        modal.addEventListener('click', onBackdrop);
+      });
+    }
+
+    // Remove Profile Photo
+    async function handleRemovePhoto() {
+      const confirmed = await confirmCenter({
+        title: 'Remove Profile Photo',
+        message: 'Are you sure you want to remove your profile photo and revert to your initials avatar?',
+        icon: '🖼️',
+        confirmText: 'Remove Photo',
+        confirmClass: 'btn-action-danger',
+      });
+      if (!confirmed) return;
+
+      showToast('⏳ Removing profile photo...');
+      try {
+        const res = await adminApi.updateUserProfile({ avatarUrl: null });
+        if (res.success) {
+          showToast('✅ Profile photo removed. Reverted to initials avatar.');
+          await hydrateProfile();
+        } else {
+          showToast(`❌ Removal failed: ${res.error}`, true);
+        }
+      } catch (err) {
+        showToast(`❌ Error: ${err.message}`, true);
+      }
+    }
+
+    document.getElementById('btn-remove-photo-hero')?.addEventListener('click', handleRemovePhoto);
+    document.getElementById('btn-remove-photo-form')?.addEventListener('click', handleRemovePhoto);
+
+    // =========================================================================
+    // PERSONAL INFO & PASSWORD FORM SUBMIT
+    // =========================================================================
+
+    // Handle Profile Form Submit (PUT /api/v1/auth/profile)
+    document.getElementById('form-update-profile')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-save-profile');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Saving to PostgreSQL...';
+
+      const fullName = document.getElementById('profile-input-fullname')?.value.trim();
+      const email = document.getElementById('profile-input-email')?.value.trim();
+      const phone = document.getElementById('profile-input-phone')?.value.trim();
+
+      try {
+        const res = await adminApi.updateUserProfile({ fullName, email, phone });
+        if (res.success) {
+          showToast('✅ Profile updated and synchronized with PostgreSQL users table!');
+          await hydrateProfile();
+        } else {
+          showToast(`❌ Update failed: ${res.error}`, true);
+        }
+      } catch (err) {
+        showToast(`❌ Error: ${err.message}`, true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    });
+
+    // Handle Password Form Submit (PUT /api/v1/auth/profile)
+    document.getElementById('form-update-password')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const currentPassword = document.getElementById('profile-input-current-pass')?.value;
+      const newPassword = document.getElementById('profile-input-new-pass')?.value;
+      const confirmPassword = document.getElementById('profile-input-confirm-pass')?.value;
+
+      if (newPassword !== confirmPassword) {
+        showToast('❌ New password and confirmation do not match.', true);
+        return;
+      }
+
+      if (newPassword.length < 8) {
+        showToast('❌ Password must be at least 8 characters long.', true);
+        return;
+      }
+
+      const btn = document.getElementById('btn-save-password');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Verifying & Encrypting...';
+
+      try {
+        const res = await adminApi.updateUserProfile({ currentPassword, newPassword });
+        if (res.success) {
+          showToast('✅ Password changed successfully and encrypted with Bcrypt!');
+          document.getElementById('profile-input-current-pass').value = '';
+          document.getElementById('profile-input-new-pass').value = '';
+          document.getElementById('profile-input-confirm-pass').value = '';
+        } else {
+          showToast(`❌ Password update failed: ${res.error}`, true);
+        }
+      } catch (err) {
+        showToast(`❌ Error: ${err.message}`, true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    });
+
+    // Run hydration on page load
+    hydrateProfile();
+  </script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+  <script type="module" src="js/components/passwordToggle.js"></script>
+</body>
+
+</html>

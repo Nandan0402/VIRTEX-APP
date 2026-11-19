@@ -3,7 +3,7 @@
  */
 
 export function validateRobotCommand(req, res, next) {
-  const { commandType, gesture, gestureName, angles, headPan, headTilt, armWave } = req.body;
+  const { commandType, gesture, gestureName, angles, servoPayload, headPan, headTilt, armWave, head, leftArm, rightArm } = req.body;
   const gestureCandidate = gesture || gestureName;
 
   // 1. Strict gesture validation (WAVE, NOD, IDLE, SHAKE, LOOK_LEFT, LOOK_RIGHT and standard aliases)
@@ -36,15 +36,20 @@ export function validateRobotCommand(req, res, next) {
     });
   }
 
-  // 2. Direct angles validation
-  if (headPan !== undefined || headTilt !== undefined || armWave !== undefined) {
-    if (headPan !== undefined && (isNaN(headPan) || headPan < 0 || headPan > 180)) {
+  // 2. Direct angles validation (from top-level fields, servoPayload, or angles)
+  const payload = servoPayload || angles || {};
+  const pan = headPan !== undefined ? headPan : (head !== undefined ? head : payload.headPan !== undefined ? payload.headPan : payload.head);
+  const tilt = headTilt !== undefined ? headTilt : (leftArm !== undefined ? leftArm : payload.headTilt !== undefined ? payload.headTilt : payload.leftArm);
+  const arm = armWave !== undefined ? armWave : (rightArm !== undefined ? rightArm : payload.armWave !== undefined ? payload.armWave : payload.rightArm);
+
+  if (pan !== undefined || tilt !== undefined || arm !== undefined) {
+    if (pan !== undefined && (isNaN(pan) || pan < 0 || pan > 180)) {
       return res.status(400).json({ success: false, error: 'headPan must be between 0 and 180 degrees.' });
     }
-    if (headTilt !== undefined && (isNaN(headTilt) || headTilt < 45 || headTilt > 135)) {
+    if (tilt !== undefined && (isNaN(tilt) || tilt < 45 || tilt > 135)) {
       return res.status(400).json({ success: false, error: 'headTilt must be between 45 and 135 degrees.' });
     }
-    if (armWave !== undefined && (isNaN(armWave) || armWave < 0 || armWave > 160)) {
+    if (arm !== undefined && (isNaN(arm) || arm < 0 || arm > 160)) {
       return res.status(400).json({ success: false, error: 'armWave must be between 0 and 160 degrees.' });
     }
     return next();
@@ -98,6 +103,33 @@ export function validateLogin(req, res, next) {
 
   if (!password || typeof password !== 'string' || password.length === 0) {
     return res.status(400).json({ success: false, error: 'Password is required.' });
+  }
+
+  next();
+}
+
+export function validateRegister(req, res, next) {
+  const { username, password, email, fullName, role = 'member' } = req.body;
+
+  if (!username || typeof username !== 'string' || username.trim().length < 3) {
+    return res.status(400).json({ success: false, error: 'Username must be at least 3 characters.' });
+  }
+
+  if (!password || typeof password !== 'string' || password.length < 6) {
+    return res.status(400).json({ success: false, error: 'Password must be at least 6 characters.' });
+  }
+
+  if (!email || typeof email !== 'string' || !email.includes('@')) {
+    return res.status(400).json({ success: false, error: 'A valid email address is required.' });
+  }
+
+  if (!fullName || typeof fullName !== 'string' || fullName.trim().length === 0) {
+    return res.status(400).json({ success: false, error: 'Full name is required.' });
+  }
+
+  const validRoles = ['member', 'trainer', 'admin', 'manager', 'owner'];
+  if (!validRoles.includes(String(role).toLowerCase())) {
+    return res.status(400).json({ success: false, error: `Invalid role. Must be one of: ${validRoles.join(', ')}` });
   }
 
   next();

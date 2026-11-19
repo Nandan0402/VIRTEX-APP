@@ -36,10 +36,10 @@ export const api = {
       return {
         success: false,
         data: {
-          gym_name: 'PulseCore Fitness',
+          gym_name: 'Virtex Fitness',
           tagline: 'AI-Powered Smart Fitness Reception',
           phone: '+91 98765 43210',
-          email: 'reception@pulsecorefitness.in',
+          email: 'reception@virtexfitness.in',
           address: '42, 100 Feet Road, Indiranagar, Bengaluru, Karnataka 560038',
           operating_hours: [
             { day: 'Monday', open: '06:00', close: '22:00', is_closed: false },

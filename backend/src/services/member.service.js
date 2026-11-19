@@ -43,7 +43,7 @@ const mockEnquiries = [];
  * Record a membership enquiry / lead from the Kiosk
  * @param {Object} enquiry
  */
-export async function recordEnquiry({ fullName, phone, email, planName, preferredTiming, notes, assignedTrainerId }) {
+export async function recordEnquiry({ fullName, phone, email, planName, preferredTiming, notes, assignedTrainerId, customizationType }) {
   if (isDatabaseConnected()) {
     return await memberRepository.createEnquiry({
       fullName,
@@ -53,6 +53,7 @@ export async function recordEnquiry({ fullName, phone, email, planName, preferre
       preferredTiming,
       notes,
       assignedTrainerId,
+      customizationType,
     });
   }
 
@@ -86,9 +87,9 @@ export async function getRecentEnquiries(limit = 20) {
  * List members with search, status filter, and pagination
  * @param {Object} options
  */
-export async function listMembers({ search, status, page = 1, limit = 10 } = {}) {
+export async function listMembers({ search, status, page = 1, limit = 10, training } = {}) {
   if (isDatabaseConnected()) {
-    return await memberRepository.listMembers({ search, status, page, limit });
+    return await memberRepository.listMembers({ search, status, page, limit, training: ['personal', 'general'].includes(training) ? training : undefined });
   }
 
   let filtered = [...mockMembers];
@@ -135,6 +136,15 @@ export async function createMember(data) {
     status: data.status || 'active',
     preferred_language: data.preferredLanguage || 'en-IN',
   };
+  if (data.password) {
+    newMember.user_account = {
+      username: (data.username || (data.email ? data.email.split('@')[0] : `mem_${id}`)).toLowerCase(),
+      email: data.email,
+      password: data.password,
+      role: 'member',
+      loginUrl: '/member-auth.html',
+    };
+  }
   mockMembers.push(newMember);
   return newMember;
 }
@@ -144,7 +154,19 @@ export async function updateMember(id, data) {
     return await memberRepository.updateMember(id, data);
   }
   const member = mockMembers.find((m) => m.id === Number(id));
-  if (member) Object.assign(member, data);
+  if (member) {
+    Object.assign(member, data);
+    if (data.password) {
+      member.user_account = {
+        username: (data.username || (member.email ? member.email.split('@')[0] : `mem_${id}`)).toLowerCase(),
+        email: member.email,
+        password: data.password,
+        role: 'member',
+        updated: true,
+        loginUrl: '/member-auth.html',
+      };
+    }
+  }
   return member || null;
 }
 
@@ -164,6 +186,18 @@ export async function updateEnquiry(id, data) {
   const enquiry = mockEnquiries.find((e) => e.id === Number(id));
   if (enquiry) Object.assign(enquiry, data);
   return enquiry || null;
+}
+
+export async function deleteEnquiry(id) {
+  if (isDatabaseConnected()) {
+    return await memberRepository.deleteEnquiry(id);
+  }
+  const idx = mockEnquiries.findIndex((e) => e.id === Number(id));
+  if (idx !== -1) {
+    mockEnquiries.splice(idx, 1);
+    return { id };
+  }
+  return null;
 }
 
 
@@ -311,4 +345,94 @@ export async function registerMemberWithPlan(data) {
       status: 'active',
     },
   };
+}
+
+/**
+ * Record fee payment for a member
+ * @param {number} memberId
+ * @param {Object} paymentData - { amountPaid, paymentMethod, notes }
+ */
+/** Delete a member's fee and its payments (see memberRepository.deleteMemberFees). Database only. */
+export async function deleteMemberFees(memberId, admin) {
+  if (!isDatabaseConnected()) {
+    const e = new Error('Deleting fees needs the database.'); e.status = 503; throw e;
+  }
+  return withTransaction((client) => memberRepository.deleteMemberFees(client, memberId, admin));
+}
+
+export async function recordFeePayment(memberId, paymentData) {
+  if (isDatabaseConnected()) {
+    return await memberRepository.recordFeePayment(memberId, paymentData);
+  }
+
+  // Fallback for mock in-memory
+  const member = mockMembers.find((m) => m.id === memberId);
+  if (!member) {
+    throw new Error('Member not found');
+  }
+  const amt = parseFloat(paymentData.amountPaid) || 0;
+  member.fee_paid = (parseFloat(member.fee_paid) || 0) + amt;
+  member.fee_due = Math.max(0, (parseFloat(member.fee_due) || 0) - amt);
+  member.payment_status = member.fee_due <= 0 ? 'paid' : 'partial';
+  member.payment_method = paymentData.paymentMethod || 'UPI / QR';
+  return member;
+}
+
+/**
+ * Get Fees Alert summary and member list
+ */
+export async function getFeesAlertData(filter) {
+  if (isDatabaseConnected()) {
+    return await memberRepository.getFeesAlertData(filter);
+  }
+  return {
+    summary: { totalMembers: 0, totalFeeDue: 0, totalFeeCollected: 0, overdueCount: 0, dueSoonCount: 0, paidCount: 0 },
+    members: [],
+  };
+}
+
+/**
+ * Record fee alert sent
+ */
+export async function recordFeeAlertSent(memberId) {
+  if (isDatabaseConnected()) {
+    return await memberRepository.recordFeeAlertSent(memberId);
+  }
+  return { id: memberId, fee_alert_sent_at: new Date() };
+}
+
+/**
+ * Get Birthday Alert summary and lists
+ */
+export async function getBirthdayAlertData() {
+  if (isDatabaseConnected()) {
+    return await memberRepository.getBirthdayAlertData();
+  }
+  return {
+    summary: { todayCount: 0, thisWeekCount: 0, thisMonthCount: 0, totalWithDob: 0, totalMembers: 0 },
+    today: [],
+    thisWeek: [],
+    thisMonth: [],
+    all: [],
+  };
+}
+
+/**
+ * Record birthday wish sent
+ */
+export async function recordBirthdayWishSent(memberId) {
+  if (isDatabaseConnected()) {
+    return await memberRepository.recordBirthdayWishSent(memberId);
+  }
+  return { id: memberId, birthday_wish_sent_at: new Date() };
+}
+
+/**
+ * Update member date of birth
+ */
+export async function updateMemberDob(memberId, dateOfBirth) {
+  if (isDatabaseConnected()) {
+    return await memberRepository.updateMemberDob(memberId, dateOfBirth);
+  }
+  return { id: memberId, date_of_birth: dateOfBirth };
 }

@@ -1,7 +1,7 @@
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../../backend/src/app.js';
-import { checkDatabaseConnection } from '../../backend/src/config/database.js';
+import { checkDatabaseConnection, query } from '../../backend/src/config/database.js';
 
 describe('Member Reception Kiosk Integration Tests', () => {
   let server;
@@ -20,6 +20,9 @@ describe('Member Reception Kiosk Integration Tests', () => {
   });
 
   after(async () => {
+    try {
+      await query("DELETE FROM member_enquiries WHERE phone = '9845112233' OR full_name = 'Anita Rao';");
+    } catch (_) {}
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }

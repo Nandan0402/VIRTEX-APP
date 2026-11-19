@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Fitness Books & Digital Library</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/modules/admin-workouts.css">
+  <link rel="stylesheet" href="css/modules/admin-library.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation (Auto-rendered with 16 categories by adminSidebarNav.js) -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <!-- Rendered dynamically by adminSidebarNav.js -->
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Application Canvas -->
+    <div class="admin-main-wrap">
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-brand">
+            <span class="topbar-title">Fitness Books & Digital Library</span>
+            <span class="badge badge-green font-mono text-xs">Knowledge Vault</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group Mounted by topbarRoutineNav.js -->
+        </div>
+      </header>
+
+      <main class="admin-body">
+        <div class="admin-content-wrap" style="padding: 1.5rem; max-width: 1300px; margin: 0 auto;">
+          <!-- Breadcrumb & Header -->
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 4px;">
+                <a href="admin.html" style="color: var(--text-dim); text-decoration: none;">Virtex Admin</a> /
+                <span style="color: var(--text-gray);">Books and Library</span> /
+                <span style="color: var(--green);">Fitness Books & Digital Library</span>
+              </div>
+              <h1
+                style="font-size: 1.6rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px;">
+                <span>📚</span> Fitness Books & Digital Library
+              </h1>
+              <p style="font-size: 0.9rem; color: var(--text-gray); margin-top: 4px;">
+                Secure digital e-book repository, bodybuilding & biomechanics literature, sports nutrition guides,
+                access control, and member reading logs.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-outline" id="btn-open-book-modal">+ Publish / Upload Book</button>
+              <button class="btn btn-outline" id="btn-open-purchase-modal">+ Record Purchase</button>
+              <button class="btn btn-green"
+                onclick="document.getElementById('modal-update-progress').classList.add('active')">+ Log Reading
+                Progress</button>
+            </div>
+          </div>
+
+          <!-- Top KPI Summary Cards -->
+          <div id="stats"></div>
+          <div class="program-stats"
+            style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 1.5rem; background: #11141e; border: 1px solid #1e2433; padding: 16px; border-radius: 10px;">
+            <div>
+              <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Total Titles</div>
+              <div id="kpi-total-books"
+                style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 800; color: #ffd600;">0
+              </div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">Books & guides in vault</div>
+            </div>
+            <div>
+              <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Pricing Structure</div>
+              <div id="kpi-paid-books"
+                style="font-family: 'JetBrains Mono', monospace; font-size: 1.35rem; font-weight: 800; color: #00e676;">
+                0 Paid / 0 Free</div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">Monetized & complimentary</div>
+            </div>
+            <div>
+              <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Secure Downloads</div>
+              <div id="kpi-total-downloads"
+                style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 800; color: #00b0ff;">0
+              </div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">Vault downloads authorized</div>
+            </div>
+            <div>
+              <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Active Readers</div>
+              <div id="kpi-active-readers"
+                style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 800; color: #b388ff;">0
+              </div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">Members tracking progress</div>
+            </div>
+            <div>
+              <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Digital Book Revenue</div>
+              <div id="kpi-total-revenue"
+                style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 800; color: #fff;">₹0
+              </div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">Total e-book purchases</div>
+            </div>
+          </div>
+
+          <!-- Secure File Storage & Access Control Banner -->
+          <div class="admin-card"
+            style="padding: 12px 18px; border-left: 4px solid #ffd600; margin-bottom: 1.5rem; background: #12151e; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 1.5rem;">🔒</span>
+              <div>
+                <strong style="color: #ffd600; font-size: 0.9rem;">Secure Vault Storage & Permission Guard
+                  Active</strong>
+                <p style="color: #94a3b8; font-size: 0.82rem; margin: 2px 0 0 0;">
+                  Uploaded manuscripts and PDF research files are stored in the server-side vault (<code
+                    style="color: #00e676;">backend/storage/library_vault/</code>). Direct public directory browsing is
+                  blocked; documents stream exclusively through authenticated JWT authorization gates.
+                </p>
+              </div>
+            </div>
+            <span class="badge badge-green font-mono">VAULT: PROTECTED</span>
+          </div>
+
+          <!-- Navigation Tabs -->
+          <div class="lib-nav-tabs">
+            <button type="button" class="lib-tab-btn active" data-tab="catalogue">
+              <span>📚 Book Catalogue</span>
+              <span class="lib-tab-badge" id="badge-books-count">0</span>
+            </button>
+            <button type="button" class="lib-tab-btn" data-tab="purchases">
+              <span>💳 Purchase History & Invoices</span>
+              <span class="lib-tab-badge" id="badge-purchases-count">0</span>
+            </button>
+            <button type="button" class="lib-tab-btn" data-tab="progress">
+              <span>📖 Member Reading Progress</span>
+              <span class="lib-tab-badge" id="badge-progress-count">0</span>
+            </button>
+            <button type="button" class="lib-tab-btn" data-tab="categories">
+              <span>🗂️ Library Categories & Disciplines</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: Book Catalogue -->
+          <div id="tab-catalogue" class="lib-tab-content">
+            <div id="guides"></div>
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <input type="text" id="lib-search-input" class="workout-form-input"
+                  style="width: 250px; padding: 7px 12px; font-size: 0.85rem;"
+                  placeholder="🔍 Search by title, author, keyword...">
+                <select id="filter-lib-category" class="workout-form-select"
+                  style="width: 200px; padding: 7px 12px; font-size: 0.85rem;">
+                  <option value="All">All Categories</option>
+                  <option value="Fitness & Training">Fitness & Training</option>
+                  <option value="Bodybuilding & Hypertrophy">Bodybuilding & Hypertrophy</option>
+                  <option value="Human Anatomy & Biomechanics">Human Anatomy & Biomechanics</option>
+                  <option value="Nutrition & Dietetics">Nutrition & Dietetics</option>
+                  <option value="Exercise Physiology & Science">Exercise Physiology & Science</option>
+                  <option value="Gym Facility Rulebook">Gym Facility Rulebook</option>
+                </select>
+                <select id="filter-lib-paid" class="workout-form-select"
+                  style="width: 140px; padding: 7px 12px; font-size: 0.85rem;">
+                  <option value="All">All Pricing</option>
+                  <option value="false">Free Titles</option>
+                  <option value="true">Paid Titles</option>
+                </select>
+                <select id="filter-lib-tier" class="workout-form-select"
+                  style="width: 160px; padding: 7px 12px; font-size: 0.85rem;">
+                  <option value="All">All Access Tiers</option>
+                  <option value="all_members">All Members</option>
+                  <option value="vip_tier">VIP Members Only</option>
+                  <option value="staff_only">Staff Only</option>
+                  <option value="purchased_only">Purchased Only</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="books-grid-container" class="book-grid">
+              <!-- Rendered dynamically by libraryManagement.js -->
+            </div>
+          </div>
+
+          <!-- TAB 2: Purchase History & Invoices -->
+          <div id="tab-purchases" class="lib-tab-content" style="display: none;">
+            <div class="admin-card"
+              style="background: #11141e; border: 1px solid #1e2433; border-radius: 10px; padding: 18px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="color: #fff; font-size: 1.1rem; margin: 0;">Digital Book Purchase History & Financial
+                  Invoices</h3>
+                <button class="btn btn-outline btn-xs"
+                  onclick="document.getElementById('modal-record-purchase').classList.add('active')">+ Record
+                  Purchase</button>
+              </div>
+
+              <div style="overflow-x: auto;">
+                <table class="exercise-table">
+                  <thead>
+                    <tr>
+                      <th>Purchaser / Member</th>
+                      <th>Book Title & Category</th>
+                      <th>Amount Paid</th>
+                      <th>Payment Method</th>
+                      <th>Invoice Code</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="purchases-table-body">
+                    <!-- Rendered dynamically by libraryManagement.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: Reading Progress Tracking -->
+          <div id="tab-progress" class="lib-tab-content" style="display: none;">
+            <div class="admin-card"
+              style="background: #11141e; border: 1px solid #1e2433; border-radius: 10px; padding: 18px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="color: #fff; font-size: 1.1rem; margin: 0;">Member Reading Activity & Completion Status</h3>
+                <button class="btn btn-outline btn-xs"
+                  onclick="document.getElementById('modal-update-progress').classList.add('active')">+ Log Reading
+                  Progress</button>
+              </div>
+
+              <div style="overflow-x: auto;">
+                <table class="exercise-table">
+                  <thead>
+                    <tr>
+                      <th>Reader / Member</th>
+                      <th>Book & Author</th>
+                      <th>Reading Progress</th>
+                      <th>Completion</th>
+                      <th>Notes & Remarks</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="progress-table-body">
+                    <!-- Rendered dynamically by libraryManagement.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: Categories & Disciplines Overview -->
+          <div id="tab-categories" class="lib-tab-content" style="display: none;">
+            <div id="rules"></div>
+            <div style="margin-bottom: 1.25rem;">
+              <h3 style="color: #fff; font-size: 1.15rem; margin: 0 0 4px 0;">Specialized Fitness Literature Disciplines
+              </h3>
+              <p style="font-size: 0.82rem; color: #94a3b8; margin: 0;">Curated libraries spanning exercise physiology,
+                bodybuilding mechanics, clinical anatomy, and nutrition.</p>
+            </div>
+
+            <div id="category-overview-container"
+              style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px;">
+              <!-- Rendered dynamically by libraryManagement.js -->
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: Publish / Upload Book -->
+  <div class="workout-modal-overlay" id="modal-new-book">
+    <div class="workout-modal" style="max-width: 620px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">📚 Publish E-Book to Digital Vault</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-new-book">
+        <div class="workout-modal-body">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Book Title *</label>
+              <input type="text" id="new-book-title" class="workout-form-input" required
+                placeholder="e.g. Advanced Sports Nutrition Protocols">
+            </div>
+            <div>
+              <label class="workout-form-label">Category *</label>
+              <select id="new-book-category" class="workout-form-select" required>
+                <option value="Fitness & Training">Fitness & Training</option>
+                <option value="Bodybuilding & Hypertrophy">Bodybuilding & Hypertrophy</option>
+                <option value="Human Anatomy & Biomechanics">Human Anatomy & Biomechanics</option>
+                <option value="Nutrition & Dietetics">Nutrition & Dietetics</option>
+                <option value="Exercise Physiology & Science">Exercise Physiology & Science</option>
+                <option value="Gym Facility Rulebook">Gym Facility Rulebook</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Author / Publisher *</label>
+              <input type="text" id="new-book-author" class="workout-form-input" required
+                placeholder="e.g. Dr. Brad Schoenfeld">
+            </div>
+            <div>
+              <label class="workout-form-label">Access Permission Tier *</label>
+              <select id="new-book-tier" class="workout-form-select" required>
+                <option value="all_members">All Members (Free / Open)</option>
+                <option value="vip_tier">VIP Tier Members Only</option>
+                <option value="staff_only">Certified Staff / Trainers Only</option>
+                <option value="purchased_only">Purchased Only (Monetized)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Format</label>
+              <select id="new-book-format" class="workout-form-select">
+                <option value="PDF">PDF</option>
+                <option value="EPUB">EPUB</option>
+              </select>
+            </div>
+            <div>
+              <label class="workout-form-label">Page Count</label>
+              <input type="number" id="new-book-pages" class="workout-form-input" value="250">
+            </div>
+            <div>
+              <label class="workout-form-label">File Size (MB)</label>
+              <input type="number" step="0.1" id="new-book-filesize" class="workout-form-input" value="12.5">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Cover Image URL</label>
+              <input type="url" id="new-book-cover" class="workout-form-input"
+                placeholder="https://images.unsplash.com/...">
+            </div>
+            <div>
+              <label class="workout-form-label">Secure Vault Storage Path</label>
+              <input type="text" id="new-book-filepath" class="workout-form-input"
+                placeholder="vault/books/filename.pdf">
+            </div>
+          </div>
+
+          <div
+            style="background: #0b0d14; border: 1px solid #1e2433; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
+              <input type="checkbox" id="new-book-paid" style="accent-color: #ffd600; width: 16px; height: 16px;">
+              <span style="font-weight: 700; color: #fff; font-size: 0.9rem;">Paid Title (Monetized E-Book)</span>
+            </label>
+            <div id="new-book-price-row" style="display: none;">
+              <label class="workout-form-label">Price Amount (₹ INR)</label>
+              <input type="number" step="1" id="new-book-price" class="workout-form-input" value="499.00">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Publication Status</label>
+              <select id="new-book-status" class="workout-form-select">
+                <option value="published">Published (Available)</option>
+                <option value="draft">Draft (Restricted)</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 10px;">
+            <label class="workout-form-label">Synopsis / Description</label>
+            <textarea id="new-book-desc" class="workout-form-textarea" rows="2"
+              placeholder="Key topics covered, table of contents overview, intended readers..."></textarea>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Publish E-Book 📚</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Record Purchase -->
+  <div class="workout-modal-overlay" id="modal-record-purchase">
+    <div class="workout-modal" style="max-width: 480px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">💳 Record Member Book Purchase</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-record-purchase">
+        <div class="workout-modal-body">
+          <div style="margin-bottom: 14px;">
+            <label class="workout-form-label">Select Book *</label>
+            <select id="purchase-book-select" class="workout-form-select" required>
+              <option value="">-- Choose Book --</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 14px;">
+            <label class="workout-form-label">Gym Member *</label>
+            <select id="purchase-member-select" class="workout-form-select" required>
+              <option value="">-- Choose Member --</option>
+            </select>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Amount Paid (₹)</label>
+              <input type="number" step="0.01" id="purchase-amount" class="workout-form-input" required value="0.00">
+            </div>
+            <div>
+              <label class="workout-form-label">Payment Method</label>
+              <select id="purchase-method" class="workout-form-select">
+                <option value="UPI / Virtex Pay">UPI / Virtex Pay</option>
+                <option value="Credit / Debit Card">Credit / Debit Card</option>
+                <option value="Wallet Balance">Wallet Balance</option>
+                <option value="Cash at Front Desk">Cash at Front Desk</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Issue Purchase Receipt</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Update Reading Progress -->
+  <div class="workout-modal-overlay" id="modal-update-progress">
+    <div class="workout-modal" style="max-width: 480px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">📖 Log Member Reading Progress</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-update-progress">
+        <div class="workout-modal-body">
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Book *</label>
+            <select id="progress-book-select" class="workout-form-select" required>
+              <option value="">-- Choose Book --</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Gym Member *</label>
+            <select id="progress-member-select" class="workout-form-select" required>
+              <option value="">-- Choose Member --</option>
+            </select>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Current Page *</label>
+              <input type="number" id="progress-current-page" class="workout-form-input" required value="1">
+            </div>
+            <div>
+              <label class="workout-form-label">Total Pages</label>
+              <input type="number" id="progress-total-pages" class="workout-form-input" required value="200">
+            </div>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <label class="workout-form-label">Reading Notes / Key Learnings</label>
+            <textarea id="progress-notes" class="workout-form-textarea" rows="2"
+              placeholder="Highlights, study notes, or questions for trainer..."></textarea>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Update Progress</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Component Scripts -->
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script src="js/admin/libraryManagement.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Virtex Fitness Trainer Hub sign in for personal trainers and coaches.">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Trainer Sign In · Virtex Fitness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin-auth.css">
+  <script>
+    // Google Sign-In only works on the web addresses registered for this client ID (http://localhost:3000).
+    // 127.0.0.1 is the same computer but a different address for Google, so switch to localhost.
+    if (location.hostname === '127.0.0.1' || location.hostname === '[::1]') location.replace(location.href.replace(location.hostname, 'localhost'));
+  </script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="aa-body aa-theme-trainer">
+  <div class="aa-split">
+
+    <!-- ============ Brand panel ============ -->
+    <aside class="aa-brand-pane" aria-label="Virtex Trainer Hub">
+      <div class="aa-brand-media" aria-hidden="true"></div>
+      <div class="aa-brand-shade" aria-hidden="true"></div>
+      <a class="aa-logo" href="/" title="Back to Virtex home">
+        <svg class="aa-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#0f131b" stroke="#22d3ee" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#22d3ee"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#00e676"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="aa-wordmark">VIRTEX<small>COACHING</small></span>
+      </a>
+      <div class="aa-brand-copy">
+        <span class="aa-eyebrow">Trainer Hub</span>
+        <h2>Coach every client<br>with <span class="aa-grad">live data.</span></h2>
+        <ul class="aa-points">
+          <li><span class="aa-dot" aria-hidden="true"></span>Your assigned clients and their progress</li>
+          <li><span class="aa-dot" aria-hidden="true"></span>Workouts, diet plans and coaching feedback</li>
+          <li><span class="aa-dot" aria-hidden="true"></span>PT sessions, shift punch-in and messages</li>
+        </ul>
+      </div>
+      <p class="aa-brand-foot">For Virtex personal trainers and coaches. Accounts are set up by the gym admin.</p>
+    </aside>
+
+    <!-- ============ Sign-in panel ============ -->
+    <main class="aa-form-pane">
+      <div class="aa-form-wrap">
+        <a class="aa-logo aa-logo-mobile" href="/" title="Back to Virtex home">
+          <svg class="aa-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#0f131b" stroke="#22d3ee" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#22d3ee"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#00e676"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="aa-wordmark">VIRTEX<small>COACHING</small></span>
+        </a>
+
+        <header class="aa-head">
+          <span class="aa-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>Personal trainers</span>
+          <h1 id="page-title">Sign in to Trainer Hub</h1>
+          <p>Use the email and password the gym admin gave you.</p>
+        </header>
+
+        <div id="auth-alert" class="aa-alert" role="alert" aria-live="polite" hidden></div>
+
+        <form id="trainer-form" class="aa-form" novalidate autocomplete="on">
+          <div class="aa-field">
+            <label for="login-id">Email</label>
+            <div class="aa-input-wrap">
+              <svg class="aa-input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+              <input type="text" id="login-id" placeholder="e.g. coach@virtexfitness.in" required autocomplete="username" autocapitalize="off" spellcheck="false">
+            </div>
+          </div>
+          <div class="aa-field">
+            <label for="login-pass">Password</label>
+            <div class="aa-input-wrap aa-has-eye">
+              <svg class="aa-input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              <input type="password" id="login-pass" placeholder="Enter your password" required autocomplete="current-password">
+              <button type="button" class="aa-eye" id="btn-toggle-pass" aria-label="Show password" aria-pressed="false">Show</button>
+            </div>
+            <p class="aa-caps" id="caps-warn" hidden>Caps Lock is on</p>
+          </div>
+          <button type="submit" id="btn-submit" class="aa-submit">
+            <span class="aa-spinner" id="btn-spinner" hidden aria-hidden="true"></span>
+            <span id="btn-label">Sign in</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        <!-- 2-step sign-in: step 2 = the person's linked Google account (first sign-in links one). -->
+        <section id="two-step" class="two-step" hidden aria-live="polite">
+          <p class="two-step-kicker">Step 2 of 2</p>
+          <h2 id="two-step-title">Confirm with Google</h2>
+          <p id="two-step-text">Your password is correct. Now choose the Google account linked to your login.</p>
+          <div id="google-signin-btn" style="width: 100%; display: flex; justify-content: center; min-height: 44px; margin: 6px 0 10px;"></div>
+          <button type="button" class="two-step-back" id="two-step-back">← Use a different account</button>
+        </section>
+        <style>
+          .two-step { border: 1px solid rgba(255,255,255,.14); border-radius: 14px; padding: 1rem 1.1rem; margin: 1rem 0; background: rgba(255,255,255,.03); }
+          .two-step[hidden] { display: none; }
+          .two-step-kicker { margin: 0 0 .2rem; font-size: .72rem; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: #00e676; }
+          .two-step h2 { margin: 0 0 .35rem; font-size: 1.15rem; color: #fff; }
+          .two-step p { margin: 0 0 .5rem; color: #cbd5e1; font-size: .88rem; line-height: 1.45; }
+          .two-step-back { background: none; border: 0; color: #94a3b8; font: inherit; font-size: .82rem; cursor: pointer; text-decoration: underline; padding: 0; }
+        </style>
+
+        <div class="aa-help">
+          <p><strong>Forgot your password?</strong> Trainer passwords are set by the gym admin. Ask the admin for a new one,
+            or once signed in send a request from Settings → Login &amp; password.</p>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    // Post-login destination (?next=, saved start page, supervisors → admin) lives in the Trainer Portal auth module.
+    import { trainerDestination } from '/js/trainer/trainer-auth.js';
+
+    const form = document.getElementById('trainer-form');
+    const idInput = document.getElementById('login-id');
+    const passInput = document.getElementById('login-pass');
+    const alertBox = document.getElementById('auth-alert');
+    const submitBtn = document.getElementById('btn-submit');
+    const btnLabel = document.getElementById('btn-label');
+    const spinner = document.getElementById('btn-spinner');
+    const toggle = document.getElementById('btn-toggle-pass');
+    const caps = document.getElementById('caps-warn');
+
+    const showAlert = (msg, type = 'error') => { alertBox.hidden = false; alertBox.className = `aa-alert aa-alert-${type}`; alertBox.textContent = String(msg); };
+    const clearAlert = () => { alertBox.hidden = true; alertBox.textContent = ''; };
+    const setBusy = (busy) => { submitBtn.disabled = busy; spinner.hidden = !busy; btnLabel.textContent = busy ? 'Signing in…' : 'Sign in'; };
+
+    toggle.addEventListener('click', () => {
+      const show = passInput.type === 'password';
+      passInput.type = show ? 'text' : 'password';
+      toggle.textContent = show ? 'Hide' : 'Show';
+      toggle.setAttribute('aria-pressed', String(show));
+      toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      passInput.focus();
+    });
+    passInput.addEventListener('keyup', (e) => { caps.hidden = !(e.getModifierState && e.getModifierState('CapsLock')); });
+
+
+    // ---- 2-step sign-in (step 2 = Google). Step 1 returns { twoStep, mode: 'link' | 'verify', challenge }.
+    let twoStepChallenge = null;
+    function startTwoStep(d, formEl) {
+      twoStepChallenge = d.challenge;
+      formEl.hidden = true;
+      const box = document.getElementById('two-step');
+      document.getElementById('two-step-title').textContent = d.mode === 'link' ? 'Link your Google account' : 'Confirm with Google';
+      document.getElementById('two-step-text').textContent = d.mode === 'link'
+        ? `Hi ${d.user?.fullName || ''} — your password is correct. This is your first sign-in: choose the Gmail account you will use to confirm every future sign-in.`
+        : `Hi ${d.user?.fullName || ''} — your password is correct. Now choose the Google account linked to your login to finish signing in.`;
+      box.hidden = false;
+      document.getElementById('two-step-back').onclick = () => { location.reload(); };
+    }
+    async function finishTwoStep(credential) {
+      if (!twoStepChallenge) throw new Error('Sign in with your email and password first — Google is your second step.');
+      const res = await fetch('/api/v1/auth/2fa/google', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ challenge: twoStepChallenge, id_token: credential }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        if (res.status === 401) { twoStepChallenge = null; setTimeout(() => location.reload(), 2500); }
+        throw new Error(data.error || 'Google confirmation failed.');
+      }
+      return data;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearAlert();
+      const identifier = idInput.value.trim();
+      const password = passInput.value;
+      if (!identifier || !password) { showAlert('Enter your email or username and your password.'); (identifier ? passInput : idInput).focus(); return; }
+      setBusy(true);
+      try {
+        const res = await fetch('/api/v1/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: identifier, password }) });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 429) throw new Error(data.error || 'Too many sign-in attempts. Please wait a few minutes and try again.');
+        if (!res.ok || !data.success) throw new Error(data.error || 'Invalid email/username or password.');
+        if (data.data?.twoStep) {
+          if (String(data.data.user?.role || '').toLowerCase() === 'member') throw new Error('This is a member account. Please use Member sign in.');
+          passInput.value = ''; setBusy(false); startTwoStep(data.data, form);
+          return;
+        }
+
+        // Member accounts belong on the Member Portal: revoke the token instead of storing it here.
+        if (String(data.data.user?.role || '').toLowerCase() === 'member') {
+          fetch('/api/v1/auth/logout', { method: 'POST', headers: { Authorization: `Bearer ${data.data.token}`, 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {});
+          throw new Error('This is a member account. Please use Member sign in.');
+        }
+
+        localStorage.setItem('virtex_admin_jwt_token', data.data.token);
+        localStorage.setItem('virtex_admin_user_profile', JSON.stringify(data.data.user));
+        passInput.value = '';
+        showAlert(`Welcome, ${data.data.user.fullName || 'coach'}. Opening Trainer Hub…`, 'success');
+        setTimeout(() => { window.location.href = trainerDestination(data.data.user); }, 600);
+      } catch (err) {
+        showAlert(err.message || 'Sign in failed. Please try again.');
+        setBusy(false);
+      }
+    });
+
+    // ---- Arrival: notices, and resume an existing valid trainer session instead of asking again
+    const params = new URLSearchParams(window.location.search);
+    const ROLE_NAMES = { member: 'a member', owner: 'the owner', manager: 'a manager', superadmin: 'an administrator' };
+    const wrongRole = String(params.get('wrongRole') || '').toLowerCase();
+    if (params.get('signedOut') === '1') showAlert('You have been signed out.', 'success');
+    else if (params.get('expired') === '1') showAlert('Your session has expired. Please sign in again.', 'info');
+    else if (wrongRole) {
+      let who = '';
+      try { who = JSON.parse(localStorage.getItem('virtex_admin_user_profile') || 'null')?.fullName || ''; } catch { /* ignore */ }
+      showAlert(`This browser is signed in as ${ROLE_NAMES[wrongRole] || 'a non-trainer account'}${who ? ` (${who})` : ''}. Sign in with a trainer account to open the Trainer Hub.`, 'info');
+    }
+    (async () => {
+      if (wrongRole || params.get('signedOut') === '1') { idInput.focus(); return; }
+      let profile = null;
+      try { profile = JSON.parse(localStorage.getItem('virtex_admin_user_profile') || 'null'); } catch { /* ignore */ }
+      const token = localStorage.getItem('virtex_admin_jwt_token');
+      if (!token || String(profile?.role || '').toLowerCase() !== 'trainer') { idInput.focus(); return; }
+      try {
+        const res = await fetch('/api/v1/trainer/me', { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok) { window.location.replace(trainerDestination(profile)); return; }
+      } catch { /* offline: stay on the form */ }
+      idInput.focus();
+    })();
+
+    // ---- Google OAuth 2.0 Sign-In
+    const GOOGLE_CLIENT_ID = '521224801754-9s3d6mfta7e501gcum6i4glkillrn98k.apps.googleusercontent.com';
+
+    window.handleGoogleCredentialResponse = async (response) => {
+      clearAlert();
+      setBusy(true);
+      try {
+        const data = await finishTwoStep(response.credential);   // step 2 of 2
+
+        // Member accounts belong on the Member Portal
+        if (String(data.data.user?.role || '').toLowerCase() === 'member') {
+          fetch('/api/v1/auth/logout', { method: 'POST', headers: { Authorization: `Bearer ${data.data.token}`, 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {});
+          throw new Error('This is a member account. Please use Member sign in.');
+        }
+
+        localStorage.setItem('virtex_admin_jwt_token', data.data.token);
+        localStorage.setItem('virtex_admin_user_profile', JSON.stringify(data.data.user));
+        showAlert(`Welcome, ${data.data.user.fullName || 'coach'}. Opening Trainer Hub…`, 'success');
+        setTimeout(() => { window.location.href = trainerDestination(data.data.user); }, 600);
+      } catch (err) {
+        showAlert(err.message || 'Google sign-in failed. Please try again.');
+        setBusy(false);
+      }
+    };
+
+    function initGoogleSignIn() {
+      if (window.google?.accounts?.id) {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: window.handleGoogleCredentialResponse,
+        });
+        const btnContainer = document.getElementById('google-signin-btn');
+        if (btnContainer) {
+          google.accounts.id.renderButton(btnContainer, {
+            theme: 'filled_black',
+            size: 'large',
+            width: Math.min(btnContainer.offsetWidth || 340, 360),
+            text: 'continue_with',
+            shape: 'pill'
+          });
+        }
+      } else {
+        // Give up after ~10 s (blocked network, ad blocker…) and say so instead of waiting forever.
+        initGoogleSignIn.tries = (initGoogleSignIn.tries || 0) + 1;
+        if (initGoogleSignIn.tries < 70) setTimeout(initGoogleSignIn, 150);
+        else { const b = document.getElementById('google-signin-btn'); if (b) b.innerHTML = '<small style="color:#94a3b8">Google sign-in could not load. Use your username and password, or reload the page.</small>'; }
+      }
+    }
+    initGoogleSignIn();
+  </script>
+</body>
+</html>

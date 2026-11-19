@@ -70,10 +70,10 @@ CREATE INDEX IF NOT EXISTS idx_announcements_active ON announcements(is_active);
 -- 5. Gym Facility Profile & System Configuration
 CREATE TABLE IF NOT EXISTS gym_profile (
     id SERIAL PRIMARY KEY,
-    gym_name VARCHAR(120) NOT NULL DEFAULT 'PulseCore Fitness',
+    gym_name VARCHAR(120) NOT NULL DEFAULT 'Virtex Fitness',
     tagline VARCHAR(200) DEFAULT 'AI-Powered Smart Fitness Reception',
     phone VARCHAR(30) NOT NULL DEFAULT '+91 98765 43210',
-    email VARCHAR(120) NOT NULL DEFAULT 'reception@pulsecorefitness.in',
+    email VARCHAR(120) NOT NULL DEFAULT 'reception@virtexfitness.in',
     address TEXT NOT NULL DEFAULT '42, 100 Feet Road, Indiranagar, Bengaluru, Karnataka 560038',
     operating_hours JSONB NOT NULL DEFAULT '[
         {"days": "Monday – Friday", "open": "06:00", "close": "22:00", "status": "Open"},
@@ -88,15 +88,15 @@ CREATE TABLE IF NOT EXISTS gym_profile (
 
 -- Seed initial records if empty
 INSERT INTO gym_profile (id, gym_name) 
-VALUES (1, 'PulseCore Fitness') 
+VALUES (1, 'Virtex Fitness') 
 ON CONFLICT (id) DO NOTHING;
 
 -- Seed Sample Trainers
 INSERT INTO trainers (trainer_code, full_name, specialty, phone, email, bio, status, shift_hours)
 VALUES
-    ('TRN001', 'Arjun Reddy', 'CrossFit & Strength Training', '9876500001', 'arjun@pulsecorefitness.in', 'CSCS Certified, 8 years elite athletic conditioning', 'on_floor', '06:00 AM - 02:00 PM'),
-    ('TRN002', 'Meera Rao', 'Functional Mobility & Yoga', '9876500002', 'meera@pulsecorefitness.in', 'RYT-500 Certified, Specialist in posture & core recovery', 'in_session', '08:00 AM - 04:00 PM'),
-    ('TRN003', 'Karan Verma', 'HIIT & Bodybuilding Coach', '9876500003', 'karan@pulsecorefitness.in', 'ACE Personal Trainer, Hypertrophy & transformation expert', 'off_duty', '02:00 PM - 10:00 PM')
+    ('TRN001', 'Arjun Reddy', 'CrossFit & Strength Training', '9876500001', 'arjun@virtexfitness.in', 'CSCS Certified, 8 years elite athletic conditioning', 'on_floor', '06:00 AM - 02:00 PM'),
+    ('TRN002', 'Meera Rao', 'Functional Mobility & Yoga', '9876500002', 'meera@virtexfitness.in', 'RYT-500 Certified, Specialist in posture & core recovery', 'in_session', '08:00 AM - 04:00 PM'),
+    ('TRN003', 'Karan Verma', 'HIIT & Bodybuilding Coach', '9876500003', 'karan@virtexfitness.in', 'ACE Personal Trainer, Hypertrophy & transformation expert', 'off_duty', '02:00 PM - 10:00 PM')
 ON CONFLICT (trainer_code) DO NOTHING;
 
 -- Seed Initial FAQs

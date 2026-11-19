@@ -1,5 +1,5 @@
 # End-to-End Test Plan & Verification Report
-## Wi-Fi ESP32 AI Gym Receptionist Robot ("PulseCore Fitness")
+## Wi-Fi ESP32 AI Gym Receptionist Robot ("Virtex Fitness")
 
 > **Document Version:** 1.0.0  
 > **Target Environment:** Windows 10/11 Host, Node.js v22 LTS, PostgreSQL 16, ESP32 DevKit V1 (ESP-WROOM-32), 3x SG90 Micro Servos  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & Test Strategy
 
-This document outlines the **End-to-End (E2E) Test Plan and Quality Assurance Specification** for the PulseCore AI Gym Receptionist Robot. The testing architecture is partitioned into three distinct tiers:
+This document outlines the **End-to-End (E2E) Test Plan and Quality Assurance Specification** for the Virtex AI Gym Receptionist Robot. The testing architecture is partitioned into three distinct tiers:
 
 ```mermaid
 flowchart TD
@@ -176,7 +176,7 @@ npm test
 ### Official Execution Log:
 ```
 TAP version 13
-ok 1 - PulseCore Robot REST API Integration Test Suite (14 tests)
+ok 1 - Virtex Robot REST API Integration Test Suite (14 tests)
 ok 2 - End-to-End System Integration: Kiosk, Backend, Database & ESP32 Hardware Lifecycle (9 tests)
 ok 3 - ESP32 Wi-Fi & Backend Polling Integration Tests (8 tests)
 ok 4 - Backend API Integration Tests (3 tests)

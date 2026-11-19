@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Online Classes & Courses</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/modules/admin-workouts.css">
+  <link rel="stylesheet" href="css/modules/admin-online-classes.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation (Auto-rendered with 16 categories by adminSidebarNav.js) -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <!-- Rendered dynamically by adminSidebarNav.js -->
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Application Canvas -->
+    <div class="admin-main-wrap">
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-brand">
+            <span class="topbar-title">Online Classes & Courses</span>
+            <span class="badge badge-green font-mono text-xs">VOD & Digital Academy</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group Mounted by topbarRoutineNav.js -->
+        </div>
+      </header>
+
+      <main class="admin-body">
+        <div class="admin-content-wrap" style="padding: 1.5rem; max-width: 1300px; margin: 0 auto;">
+          <!-- Breadcrumb & Header -->
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 4px;">
+                <a href="admin.html" style="color: var(--text-dim); text-decoration: none;">Virtex Admin</a> /
+                <span style="color: var(--text-gray);">Classes and Learning</span> /
+                <span style="color: var(--green);">Online Classes & Courses</span>
+              </div>
+              <h1
+                style="font-size: 1.6rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px;">
+                <span>📺</span> Online Classes & Masterclass Academy
+              </h1>
+              <p style="font-size: 0.9rem; color: var(--text-gray); margin-top: 4px;">
+                Live streaming workouts, on-demand VOD library, yoga flows, group fitness, multi-lesson curriculum,
+                assessments, and LMS certificates.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-outline" id="btn-open-class-modal">+ Schedule Class / VOD</button>
+              <button class="btn btn-outline" id="btn-open-reg-class-modal">+ Register Member</button>
+              <button class="btn btn-green" id="btn-open-course-modal">+ Create Course</button>
+            </div>
+          </div>
+
+          <!-- Top KPI Summary Cards -->
+          <div class="program-stats"
+            style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 1.5rem; background: #11141e; border: 1px solid #1e2433; padding: 16px; border-radius: 10px;">
+            <div>
+              <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Total Online Classes</div>
+              <div id="kpi-total-classes"
+                style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 800; color: #00e5ff;">0
+              </div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">Live streams & VOD replays</div>
+            </div>
+            <div>
+              <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Active / Scheduled</div>
+              <div id="kpi-active-streams"
+                style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 800; color: #ffd600;">0
+              </div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">Ready for live streaming</div>
+            </div>
+            <div>
+              <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Students Enrolled</div>
+              <div id="kpi-total-enrolments"
+                style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 800; color: #00e676;">0
+              </div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">Active curriculum learners</div>
+            </div>
+            <div>
+              <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Completion Rate</div>
+              <div id="kpi-completion-rate"
+                style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 800; color: #b388ff;">
+                0%</div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">Graduation & quiz pass rate</div>
+            </div>
+            <div>
+              <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Total Watch Time</div>
+              <div id="kpi-total-watch-hours"
+                style="font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 800; color: #fff;">0
+                hrs</div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">Cumulative viewing hours</div>
+            </div>
+          </div>
+
+          <!-- Distinction from Physical Gym Calendar Banner -->
+          <div class="admin-card"
+            style="padding: 12px 18px; border-left: 4px solid #00e5ff; margin-bottom: 1.5rem; background: #0c121d; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 1.5rem;">📡</span>
+              <div>
+                <strong style="color: #00e5ff; font-size: 0.9rem;">Digital Streaming Studio & LMS Education
+                  Engine</strong>
+                <p style="color: #94a3b8; font-size: 0.82rem; margin: 2px 0 0 0;">
+                  This module manages digital video streaming, on-demand VOD workout archives, multi-module course
+                  curriculum, interactive quizzes, and verifiable LMS certificates. Physical on-premise room
+                  reservations and studio timetables remain managed under the <strong>Gym Calendar</strong>.
+                </p>
+              </div>
+            </div>
+            <a href="admin-calander.html" class="btn btn-outline btn-xs" style="text-decoration: none;">View Gym
+              Calendar →</a>
+          </div>
+
+          <!-- Navigation Tabs -->
+          <div class="oc-nav-tabs">
+            <button type="button" class="oc-tab-btn active" data-tab="classes">
+              <span>📺 Live & Recorded Classes</span>
+              <span class="oc-tab-badge" id="badge-classes-count">0</span>
+            </button>
+            <button type="button" class="oc-tab-btn" data-tab="registrations">
+              <span>👥 Class Registrations & Attendance</span>
+              <span class="oc-tab-badge" id="badge-registrations-count">0</span>
+            </button>
+            <button type="button" class="oc-tab-btn" data-tab="courses">
+              <span>🎓 Masterclass Courses & Curriculum</span>
+              <span class="oc-tab-badge" id="badge-courses-count">0</span>
+            </button>
+            <button type="button" class="oc-tab-btn" data-tab="enrolments">
+              <span>📈 Enrolments & Completion Tracking</span>
+              <span class="oc-tab-badge" id="badge-enrolments-count">0</span>
+            </button>
+            <button type="button" class="oc-tab-btn" data-tab="certificates">
+              <span>🎖️ Digital Certificates & LMS Credentials</span>
+              <span class="oc-tab-badge" id="badge-certs-count">0</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: Live & Recorded Classes -->
+          <div id="tab-classes" class="oc-tab-content">
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <input type="text" id="oc-search-input" class="workout-form-input"
+                  style="width: 250px; padding: 7px 12px; font-size: 0.85rem;"
+                  placeholder="🔍 Search online classes...">
+                <select id="filter-oc-category" class="workout-form-select"
+                  style="width: 170px; padding: 7px 12px; font-size: 0.85rem;">
+                  <option value="All">All Categories</option>
+                  <option value="Live Online">Live Online</option>
+                  <option value="Recorded Workout">Recorded Workout</option>
+                  <option value="Yoga">Yoga</option>
+                  <option value="Group Fitness">Group Fitness</option>
+                </select>
+                <select id="filter-oc-type" class="workout-form-select"
+                  style="width: 150px; padding: 7px 12px; font-size: 0.85rem;">
+                  <option value="All">All Stream Types</option>
+                  <option value="live">Live Stream</option>
+                  <option value="vod_recorded">VOD Replay</option>
+                </select>
+                <select id="filter-oc-status" class="workout-form-select"
+                  style="width: 150px; padding: 7px 12px; font-size: 0.85rem;">
+                  <option value="All">All Statuses</option>
+                  <option value="scheduled">Scheduled</option>
+                  <option value="live_now">Live Now</option>
+                  <option value="completed">Completed</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="classes-grid-container" class="oc-grid">
+              <!-- Rendered dynamically by onlineClassManagement.js -->
+            </div>
+          </div>
+
+          <!-- TAB 2: Class Registrations & Attendance -->
+          <div id="tab-registrations" class="oc-tab-content" style="display: none;">
+            <div class="admin-card"
+              style="background: #11141e; border: 1px solid #1e2433; border-radius: 10px; padding: 18px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="color: #fff; font-size: 1.1rem; margin: 0;">Online Class Registrations & Digital Attendance
+                  Logs</h3>
+                <button class="btn btn-outline btn-xs"
+                  onclick="document.getElementById('modal-register-class').classList.add('active')">+ Enroll
+                  Member</button>
+              </div>
+
+              <div style="overflow-x: auto;">
+                <table class="exercise-table">
+                  <thead>
+                    <tr>
+                      <th>Enrolled Member</th>
+                      <th>Class & Stream Type</th>
+                      <th>Registration Date</th>
+                      <th>Attendance Status</th>
+                      <th>Watch Time (Mins)</th>
+                      <th>Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="registrations-table-body">
+                    <!-- Rendered dynamically by onlineClassManagement.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: Masterclass Courses & Curriculum -->
+          <div id="tab-courses" class="oc-tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+              <div>
+                <h3 style="color: #fff; font-size: 1.15rem; margin: 0 0 4px 0;">Virtex Athletic Academy Curriculum
+                </h3>
+                <p style="font-size: 0.82rem; color: #94a3b8; margin: 0;">Multi-lesson masterclasses with video modules,
+                  syllabi, and certification quizzes.</p>
+              </div>
+              <button class="btn btn-green btn-sm"
+                onclick="document.getElementById('modal-new-course').classList.add('active')">+ New Course</button>
+            </div>
+
+            <div id="courses-container">
+              <!-- Rendered dynamically by onlineClassManagement.js -->
+            </div>
+          </div>
+
+          <!-- TAB 4: Enrolments & Completion Tracking -->
+          <div id="tab-enrolments" class="oc-tab-content" style="display: none;">
+            <div class="admin-card"
+              style="background: #11141e; border: 1px solid #1e2433; border-radius: 10px; padding: 18px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="color: #fff; font-size: 1.1rem; margin: 0;">Student Curriculum Progression & Quiz Results
+                </h3>
+                <button class="btn btn-outline btn-xs"
+                  onclick="document.getElementById('modal-enrol-course').classList.add('active')">+ Enrol
+                  Student</button>
+              </div>
+
+              <div style="overflow-x: auto;">
+                <table class="exercise-table">
+                  <thead>
+                    <tr>
+                      <th>Enrolled Student</th>
+                      <th>Course & Level</th>
+                      <th>Curriculum Progress</th>
+                      <th>Assessment Quiz</th>
+                      <th>LMS Status</th>
+                      <th>Certificate</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="enrolments-table-body">
+                    <!-- Rendered dynamically by onlineClassManagement.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 5: Digital Certificates & LMS Credentials -->
+          <div id="tab-certificates" class="oc-tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+              <div>
+                <h3 style="color: #fff; font-size: 1.15rem; margin: 0 0 4px 0;">Official Verifiable Academy Certificates
+                </h3>
+                <p style="font-size: 0.82rem; color: #94a3b8; margin: 0;">Conferred credentials for curriculum
+                  graduation with unique authentication codes.</p>
+              </div>
+              <button class="btn btn-green btn-sm"
+                onclick="document.getElementById('modal-issue-cert').classList.add('active')">+ Issue
+                Certificate</button>
+            </div>
+
+            <div id="certificates-container"
+              style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;">
+              <!-- Rendered dynamically by onlineClassManagement.js -->
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: Schedule Online Class / VOD -->
+  <div class="workout-modal-overlay" id="modal-new-class">
+    <div class="workout-modal" style="max-width: 620px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">📺 Schedule Online Class or VOD Workout</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-new-class">
+        <div class="workout-modal-body">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Class Title *</label>
+              <input type="text" id="new-class-title" class="workout-form-input" required
+                placeholder="e.g. Sunrise Power Yoga & Core Flow">
+            </div>
+            <div>
+              <label class="workout-form-label">Category *</label>
+              <select id="new-class-category" class="workout-form-select" required>
+                <option value="Live Online">Live Online</option>
+                <option value="Recorded Workout">Recorded Workout</option>
+                <option value="Yoga">Yoga</option>
+                <option value="Group Fitness">Group Fitness</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Stream Type *</label>
+              <select id="new-class-type" class="workout-form-select" required>
+                <option value="live">Live Stream (Livestream Session)</option>
+                <option value="vod_recorded">Recorded Workout (On-Demand VOD)</option>
+              </select>
+            </div>
+            <div>
+              <label class="workout-form-label">Assigned Trainer / Coach</label>
+              <select id="new-class-trainer-select" class="workout-form-select">
+                <option value="">-- Choose Coach --</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Scheduled Date/Time *</label>
+              <input type="datetime-local" id="new-class-scheduled-at" class="workout-form-input" required>
+            </div>
+            <div>
+              <label class="workout-form-label">Duration (Mins) *</label>
+              <input type="number" id="new-class-duration" class="workout-form-input" value="45" required>
+            </div>
+            <div>
+              <label class="workout-form-label">Max Participants</label>
+              <input type="number" id="new-class-max-capacity" class="workout-form-input" value="50">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Difficulty Level</label>
+              <select id="new-class-difficulty" class="workout-form-select">
+                <option value="All Levels">All Levels</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </div>
+            <div>
+              <label class="workout-form-label">Thumbnail URL</label>
+              <input type="url" id="new-class-thumbnail" class="workout-form-input"
+                placeholder="https://images.unsplash.com/...">
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Live Stream URL or VOD MP4/HLS Link</label>
+            <input type="url" id="new-class-stream-url" class="workout-form-input"
+              placeholder="https://meet.google.com/virtex-live or storage video link">
+          </div>
+
+          <div style="margin-bottom: 10px;">
+            <label class="workout-form-label">Class Overview & Focus</label>
+            <textarea id="new-class-desc" class="workout-form-textarea" rows="2"
+              placeholder="Movement description, equipment required, warm-up instructions..."></textarea>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Broadcast Class 🚀</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Register Member for Class -->
+  <div class="workout-modal-overlay" id="modal-register-class">
+    <div class="workout-modal" style="max-width: 480px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">👥 Register Member for Online Class</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-register-class">
+        <div class="workout-modal-body">
+          <div style="margin-bottom: 14px;">
+            <label class="workout-form-label">Online Class / VOD Session *</label>
+            <select id="reg-class-select" class="workout-form-select" required>
+              <option value="">-- Choose Class --</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 14px;">
+            <label class="workout-form-label">Gym Member *</label>
+            <select id="reg-class-member-select" class="workout-form-select" required>
+              <option value="">-- Choose Member --</option>
+            </select>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Confirm Registration</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Create Masterclass Course -->
+  <div class="workout-modal-overlay" id="modal-new-course">
+    <div class="workout-modal" style="max-width: 600px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">🎓 Create Academy Masterclass Course</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-new-course">
+        <div class="workout-modal-body">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Course Title *</label>
+              <input type="text" id="new-course-title" class="workout-form-input" required
+                placeholder="e.g. Barbell Biomechanics & Functional Strength">
+            </div>
+            <div>
+              <label class="workout-form-label">Category *</label>
+              <select id="new-course-category" class="workout-form-select" required>
+                <option value="Strength Science">Strength Science</option>
+                <option value="Functional Mobility">Functional Mobility</option>
+                <option value="Yoga & Mindfulness">Yoga & Mindfulness</option>
+                <option value="Nutrition Mastery">Nutrition Mastery</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Level</label>
+              <select id="new-course-level" class="workout-form-select">
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </div>
+            <div>
+              <label class="workout-form-label">Est. Hours</label>
+              <input type="number" step="0.5" id="new-course-hours" class="workout-form-input" value="4.0">
+            </div>
+            <div>
+              <label class="workout-form-label">Lead Coach</label>
+              <select id="new-course-trainer-select" class="workout-form-select">
+                <option value="">-- Choose Coach --</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Thumbnail Image URL</label>
+            <input type="url" id="new-course-thumbnail" class="workout-form-input"
+              placeholder="https://images.unsplash.com/...">
+          </div>
+
+          <div style="margin-bottom: 10px;">
+            <label class="workout-form-label">Course Description & Learning Outcomes *</label>
+            <textarea id="new-course-desc" class="workout-form-textarea" rows="3" required
+              placeholder="Detailed syllabus outline, learning objectives, and intended audience..."></textarea>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Launch Course 🎓</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Video Lesson -->
+  <div class="workout-modal-overlay" id="modal-add-lesson">
+    <div class="workout-modal" style="max-width: 500px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">📹 Add Video Lesson to Curriculum</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-add-lesson">
+        <div class="workout-modal-body">
+          <div
+            style="background: #0b0d14; padding: 10px; border-radius: 6px; border: 1px solid #1e2433; margin-bottom: 12px;">
+            <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Target Course</div>
+            <div id="lesson-course-title-display" style="color: #00e5ff; font-weight: 700;">--</div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Lesson Title *</label>
+            <input type="text" id="lesson-title" class="workout-form-input" required
+              placeholder="e.g. Module 1: Physics of Moment Arms">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Duration (Mins) *</label>
+              <input type="number" id="lesson-duration" class="workout-form-input" value="20" required>
+            </div>
+            <div>
+              <label class="workout-form-label">Video URL *</label>
+              <input type="url" id="lesson-video-url" class="workout-form-input" required
+                placeholder="https://storage.../lesson.mp4">
+            </div>
+          </div>
+
+          <div style="margin-bottom: 10px;">
+            <label class="workout-form-label">Lesson Notes / PDF References</label>
+            <textarea id="lesson-notes" class="workout-form-textarea" rows="2"
+              placeholder="Key study cues, torque equations, recommended drill sets..."></textarea>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Append Lesson</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Configure Quiz -->
+  <div class="workout-modal-overlay" id="modal-quiz">
+    <div class="workout-modal" style="max-width: 580px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">📝 Course Assessment & Quiz Setup</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-quiz">
+        <div class="workout-modal-body">
+          <div
+            style="background: #0b0d14; padding: 10px; border-radius: 6px; border: 1px solid #1e2433; margin-bottom: 12px;">
+            <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Course</div>
+            <div id="quiz-course-title-display" style="color: #b388ff; font-weight: 700;">--</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Quiz Assessment Title *</label>
+              <input type="text" id="quiz-title" class="workout-form-input" required
+                value="Course Final Knowledge Assessment">
+            </div>
+            <div>
+              <label class="workout-form-label">Pass Percentage (%)</label>
+              <input type="number" id="quiz-pass-pct" class="workout-form-input" value="80" min="50" max="100">
+            </div>
+          </div>
+
+          <div
+            style="background: #0d111a; border: 1px solid #1e2433; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: #00e5ff; margin-bottom: 8px;">Question #1</div>
+            <div style="margin-bottom: 8px;">
+              <input type="text" id="quiz-q1-text" class="workout-form-input"
+                placeholder="e.g. What is the primary function of lat engagement in the deadlift?">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+              <input type="text" id="quiz-q1-opt0" class="workout-form-input" placeholder="Option A (Correct answer)">
+              <input type="text" id="quiz-q1-opt1" class="workout-form-input" placeholder="Option B (Distractor)">
+            </div>
+            <div>
+              <label class="workout-form-label" style="font-size: 0.75rem;">Correct Option Index</label>
+              <select id="quiz-q1-correct" class="workout-form-select" style="font-size: 0.82rem; padding: 6px 10px;">
+                <option value="0">Option A is Correct</option>
+                <option value="1">Option B is Correct</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Save Assessment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Enrol Course -->
+  <div class="workout-modal-overlay" id="modal-enrol-course">
+    <div class="workout-modal" style="max-width: 480px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">📈 Enrol Student in Course</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-enrol-course">
+        <div class="workout-modal-body">
+          <div style="margin-bottom: 14px;">
+            <label class="workout-form-label">Course *</label>
+            <select id="enrol-course-select" class="workout-form-select" required>
+              <option value="">-- Choose Course --</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 14px;">
+            <label class="workout-form-label">Gym Member *</label>
+            <select id="enrol-course-member-select" class="workout-form-select" required>
+              <option value="">-- Choose Member --</option>
+            </select>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Enrol Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Issue Certificate -->
+  <div class="workout-modal-overlay" id="modal-issue-cert">
+    <div class="workout-modal" style="max-width: 500px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">🎖️ Issue Academy Certificate</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-issue-cert">
+        <div class="workout-modal-body">
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Course *</label>
+            <select id="cert-course-select" class="workout-form-select" required>
+              <option value="">-- Choose Course --</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Graduate Member *</label>
+            <select id="cert-member-select" class="workout-form-select" required>
+              <option value="">-- Choose Member --</option>
+            </select>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Grade / Score</label>
+              <input type="text" id="cert-grade" class="workout-form-input" value="100% (High Distinction)">
+            </div>
+            <div>
+              <label class="workout-form-label">Issued By</label>
+              <input type="text" id="cert-issued-by" class="workout-form-input" value="Virtex Academy">
+            </div>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Confer Certificate 🎓</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Component Scripts -->
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script src="js/admin/onlineClassManagement.js"></script>
+</body>
+
+</html>

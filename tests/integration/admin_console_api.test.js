@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createApp } from '../../backend/src/app.js';
 import { checkDatabaseConnection, closePool } from '../../backend/src/config/database.js';
 
-describe('PulseCore Admin Console API Integration Suite (10 Modules)', () => {
+describe('Virtex Admin Console API Integration Suite (10 Modules)', () => {
   let server;
   let baseUrl;
   let ownerToken;

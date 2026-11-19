@@ -1,0 +1,3043 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIRTEX Admin • Assign Personal Trainer & Monthly Fees</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root,
+    html {
+      color-scheme: dark !important;
+      --accent-green: #00e676;
+      --accent-green-dark: #00b050;
+      --accent-green-glow: rgba(0, 230, 118, 0.28);
+      --green: #00e676;
+    }
+
+    .assign-page-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .pt-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card-pt {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card-pt::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent-green);
+    }
+
+    .stat-card-green::before {
+      background: var(--accent-green);
+    }
+
+    .stat-card-blue::before {
+      background: #38bdf8;
+    }
+
+    .stat-card-amber::before {
+      background: #f59e0b;
+    }
+
+    .stat-card-purple::before {
+      background: #a855f7;
+    }
+
+    .stat-icon-wrap {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+    }
+
+    .stat-meta h4 {
+      margin: 0;
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-meta .stat-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .filter-tabs-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+    }
+
+    .filter-btn-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tab-pill {
+      background: #090a0f;
+      border: 1px solid var(--border);
+      color: var(--text-gray);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-pill:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+
+    .tab-pill.active {
+      background: rgba(0, 230, 118, 0.15);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .search-input-box {
+      position: relative;
+      min-width: 260px;
+    }
+
+    .search-input-box input {
+      width: 100%;
+      background: #090a0f;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      color: #fff;
+      padding: 6px 14px 6px 36px;
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input-box input:focus {
+      border-color: var(--accent-green);
+    }
+
+    .search-icon-inside {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    .filter-controls-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .select-trainer-box {
+      position: relative;
+    }
+
+    .filter-select-trainer {
+      background: #090a0f;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      color: #fff;
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      min-width: 210px;
+      max-width: 280px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .filter-select-trainer:hover,
+    .filter-select-trainer:focus {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.15);
+    }
+
+    .filter-select-trainer option {
+      background: #13161f;
+      color: #fff;
+      padding: 6px 10px;
+    }
+
+    .btn-filter-search {
+      background: var(--accent-green, #00e676);
+      color: #04140b;
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-filter-search:hover {
+      background: #10f084;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 12px rgba(0, 230, 118, 0.35);
+    }
+
+    .btn-filter-search:active {
+      transform: translateY(0);
+    }
+
+    .btn-filter-reset {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      color: var(--text-dim);
+      padding: 6px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-filter-reset:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    @media (max-width: 900px) {
+      .filter-tabs-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+      }
+
+      .filter-controls-right {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .filter-select-trainer {
+        flex: 1 1 100%;
+        max-width: 100%;
+      }
+
+      .search-input-box {
+        flex: 1 1 180px;
+        min-width: 150px;
+      }
+
+      .btn-filter-search {
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+
+      .btn-filter-reset {
+        flex: 0 0 auto;
+      }
+    }
+
+    /* View Toggle Segmented Control */
+    .view-toggle-group {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .view-toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .view-toggle-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .view-toggle-btn.active {
+      background: var(--accent-green);
+      color: #04140b;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0, 230, 118, 0.35);
+    }
+
+    /* Coach Quick-Filter Cards Row */
+    .coach-filter-cards-section {
+      margin-bottom: 1.15rem;
+    }
+
+    .coach-filter-cards-row {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 4px 2px 8px 2px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    }
+
+    .coach-filter-cards-row::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .coach-filter-cards-row::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+
+    .coach-filter-card {
+      flex: 0 0 auto;
+      min-width: 175px;
+      background: #11141c;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+    }
+
+    .coach-filter-card:hover {
+      border-color: rgba(0, 230, 118, 0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+      background: #141824;
+    }
+
+    .coach-filter-card.active {
+      background: linear-gradient(135deg, rgba(0, 230, 118, 0.12) 0%, rgba(17, 20, 28, 0.95) 100%);
+      border-color: var(--accent-green);
+      box-shadow: 0 0 16px rgba(0, 230, 118, 0.25);
+    }
+
+    .coach-filter-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(0, 230, 118, 0.12);
+      color: var(--accent-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      border: 1px solid rgba(0, 230, 118, 0.25);
+    }
+
+    .coach-filter-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+
+    .coach-filter-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .coach-filter-count {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Contracts Cards Grid View */
+    .contracts-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+      padding: 1.25rem;
+    }
+
+    .contract-card {
+      background: #10131b;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .contract-card:hover {
+      border-color: rgba(0, 230, 118, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .contract-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .contract-member-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .contract-member-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00e676, #00b0ff);
+      color: #04140b;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      box-shadow: 0 2px 10px rgba(0, 230, 118, 0.25);
+    }
+
+    .contract-member-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .contract-member-meta {
+      font-size: 0.76rem;
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 2px;
+    }
+
+    .contract-coach-badge {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+    }
+
+    .contract-coach-label {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .contract-coach-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .contract-fee-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+    }
+
+    .contract-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 0.78rem;
+    }
+
+    .contract-detail-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .contract-detail-label {
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .contract-detail-val {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .contract-dates-bar {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+    }
+
+    .contract-card-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 10px;
+    }
+
+    /* Badges */
+    .badge-pt-active {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(0, 230, 118, 0.4);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-pt-paused {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-pt-expired {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .action-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .action-btn:hover {
+      border-color: var(--accent-green);
+      background: rgba(0, 230, 118, 0.1);
+      color: var(--accent-green);
+    }
+
+    .action-btn-danger:hover {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-card {
+      background: #13161f;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      width: 92%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      overflow-x: hidden !important;
+      padding: 1.5rem 1.75rem;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+      box-sizing: border-box;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .modal-header h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-close-modal {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      transition: color 0.15s;
+    }
+
+    .btn-close-modal:hover {
+      color: #fff;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 1.25rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .form-row>* {
+      min-width: 0;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 1rem;
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .form-group label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .form-control-dark {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      background: #090a0f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 0.88rem;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-control-dark:focus {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.2);
+    }
+
+    select.form-control-dark {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    select.form-control-dark option {
+      background: #13161f;
+      color: #fff;
+    }
+
+    .btn-modal-cancel {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #e2e8f0;
+      padding: 11px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-modal-cancel:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.35);
+      color: #fff;
+    }
+
+    .btn-modal-submit {
+      background: var(--accent-green);
+      border: none;
+      color: #000;
+      font-weight: 800;
+      padding: 11px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.92rem;
+      transition: all 0.15s;
+      box-shadow: 0 4px 14px rgba(0, 230, 118, 0.25);
+    }
+
+    .btn-modal-submit:hover {
+      background: #00ff84;
+      box-shadow: 0 6px 20px rgba(0, 230, 118, 0.4);
+      transform: translateY(-1px);
+    }
+
+    /* Live Auto-Fill Details Cards */
+    .autofill-card {
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      border: 1px solid var(--border);
+      background: #090a0f;
+      transition: all 0.2s ease;
+    }
+
+    .autofill-card-member {
+      background: rgba(0, 230, 118, 0.06);
+      border-color: rgba(0, 230, 118, 0.35);
+    }
+
+    .autofill-card-trainer {
+      background: rgba(56, 189, 248, 0.06);
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+
+    .autofill-pk-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .autofill-hint-text {
+      font-size: 0.73rem;
+      color: var(--accent-green);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 3px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .autofill-pulse {
+      animation: autofillPulseAnim 1.2s ease-out;
+    }
+
+    @keyframes autofillPulseAnim {
+      0% {
+        box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.45);
+        border-color: var(--accent-green);
+      }
+
+      50% {
+        box-shadow: 0 0 0 5px rgba(0, 230, 118, 0.2);
+        border-color: #00ff84;
+      }
+
+      100% {
+        box-shadow: none;
+      }
+    }
+
+    .autofill-pulse-blue {
+      animation: autofillPulseBlueAnim 1.2s ease-out;
+    }
+
+    @keyframes autofillPulseBlueAnim {
+      0% {
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.45);
+        border-color: #38bdf8;
+      }
+
+      50% {
+        box-shadow: 0 0 0 5px rgba(56, 189, 248, 0.2);
+      }
+
+      100% {
+        box-shadow: none;
+      }
+    }
+
+    .field-tag-badge {
+      font-size: 0.68rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      display: none;
+      margin-left: 6px;
+      vertical-align: middle;
+      letter-spacing: 0.3px;
+    }
+
+    .field-tag-green {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(0, 230, 118, 0.35);
+    }
+
+    .field-tag-blue {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    .field-tag-amber {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .search-input-wrapper input {
+      padding-right: 32px;
+    }
+
+    .btn-clear-search {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: none;
+      padding: 2px 6px;
+      line-height: 1;
+      border-radius: 4px;
+    }
+
+    .btn-clear-search:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Centered Custom Confirmation Modal */
+    .center-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeInCenterOverlay 0.18s ease-out;
+      padding: 1.25rem;
+      box-sizing: border-box;
+    }
+
+    @keyframes fadeInCenterOverlay {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .center-modal-card {
+      background: #13161f;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 440px;
+      padding: 2rem 1.75rem 1.75rem 1.75rem;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: popInCenterModal 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
+    }
+
+    @keyframes popInCenterModal {
+      from {
+        opacity: 0;
+        transform: scale(0.92) translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .center-modal-icon-badge {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.1rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .icon-badge-danger {
+      background: rgba(239, 68, 68, 0.14);
+      border: 2px solid rgba(239, 68, 68, 0.4);
+      color: #ef4444;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.25);
+    }
+
+    .icon-badge-amber {
+      background: rgba(245, 158, 11, 0.14);
+      border: 2px solid rgba(245, 158, 11, 0.4);
+      color: #f59e0b;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+    }
+
+    .icon-badge-green {
+      background: rgba(0, 230, 118, 0.14);
+      border: 2px solid rgba(0, 230, 118, 0.4);
+      color: #00e676;
+      box-shadow: 0 0 25px rgba(0, 230, 118, 0.25);
+    }
+
+    .center-modal-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.2px;
+    }
+
+    .center-modal-desc {
+      font-size: 0.92rem;
+      color: #94a3b8;
+      line-height: 1.55;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .center-modal-actions {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-center-cancel {
+      flex: 1;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #e2e8f0;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-center-cancel:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.35);
+      color: #fff;
+    }
+
+    .btn-center-confirm {
+      flex: 1.2;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-confirm-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.38);
+    }
+
+    .btn-confirm-danger:hover {
+      background: #dc2626;
+      box-shadow: 0 6px 22px rgba(239, 68, 68, 0.55);
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 640px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .modal-card {
+        padding: 1.25rem;
+        width: 95%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="admin.html#tab-overview" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📊</span> Overview & Stats
+        </a>
+        <a href="admin-members.html" class="nav-item-btn" id="nav-item-members" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👥</span> Members
+        </a>
+        <a href="admin-feessalert.html" class="nav-item-btn" id="nav-item-fees-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💰</span> Fees Alert
+        </a>
+        <a href="admin-birthdayalert.html" class="nav-item-btn" id="nav-item-birthday-alert"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🎂</span> Birthday Alert
+        </a>
+        <a href="admin-messages.html" class="nav-item-btn" id="nav-item-messages" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📩</span> Message
+        </a>
+        <a href="admin-notification.html" class="nav-item-btn" id="nav-item-notifications"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📢</span> Notification
+        </a>
+        <a href="admin-personaltraniner.html" class="nav-item-btn" id="nav-item-trainers"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏋️</span> Personal Trainer
+        </a>
+        <a href="admin-assign-membertoperonal traniner.html" class="nav-item-btn active" id="nav-item-assign-trainer"
+          aria-current="page" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤝</span> Assign PT & Fees
+        </a>
+        <a href="admin-routine-tracker.html" class="nav-item-btn" id="nav-item-routine-tracker"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏱️</span> Routine Tracker
+        </a>
+        <a href="admin.html#tab-plans" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💳</span> Membership Plans
+        </a>
+        <a href="admin.html#tab-faqs" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">❓</span> FAQs / Knowledge Base
+        </a>
+        <a href="admin.html#tab-robot" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
+        </a>
+        <a href="admin.html#tab-profile" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile
+        </a>
+        <a href="admin-working-hours.html" class="nav-item-btn" id="nav-item-working-hours-link"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏰</span> Working Hours
+        </a>
+        <a href="admin-calander.html" class="nav-item-btn" id="nav-item-admin-calendar" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📅</span> Class & Shift Calendar
+        </a>
+        <a href="admin-profile.html" class="nav-item-btn" id="nav-item-admin-profile" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👤</span> Profile
+        </a>
+        <a href="admin.html#tab-settings" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⚙️</span> Language & Settings
+        </a>
+      </nav>
+
+      <!-- User Profile & Session Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" style="cursor: pointer;" title="Active Profile"
+          role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <img id="sidebar-user-photo" src="" alt="Avatar"
+              style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main">
+      <!-- Topbar Header -->
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle navigation menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-title-block">
+            <h1>🏋️ Personal Trainer & Monthly Fees Assignment</h1>
+            <span class="topbar-subtitle">PostgreSQL Grounded • 1-on-1 Client Rosters, Schedule Slots & Monthly PT
+              Revenue</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group -->
+          <div class="topbar-routine-group" id="topbar-routine-group">
+            <a href="admin-routine-tracker.html" class="topbar-routine-badge status-out" id="topbar-routine-badge"
+              title="Click to view full Routine Tracker">
+              <span class="topbar-status-dot"></span>
+              <span id="topbar-routine-text">PUNCHED OUT</span>
+            </a>
+
+            <div class="topbar-punch-btns">
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-in" id="topbar-btn-punch-in"
+                title="Punch In (Start Daily Shift)">
+                <span>🟢</span>
+                <span class="topbar-btn-text">Punch In</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-break" id="topbar-btn-break"
+                title="Take or Resume Routine Break" disabled>
+                <span id="topbar-break-icon">☕</span>
+                <span class="topbar-btn-text" id="topbar-break-text">Break</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-out" id="topbar-btn-punch-out"
+                title="Punch Out (End Daily Shift)" disabled>
+                <span>⏹️</span>
+                <span class="topbar-btn-text">Punch Out</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="topbar-divider-vert"></div>
+
+          <!-- Message Link Icon -->
+          <a href="admin-messages.html" class="topbar-nav-icon-link" id="topbar-message-link"
+            title="Member Messages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="topbar-counter-badge" id="topbar-message-badge" style="display: none;">0</span>
+          </a>
+
+          <!-- Notification Link Icon -->
+          <a href="admin-notification.html" class="topbar-nav-icon-link" id="topbar-notification-link"
+            title="Notifications & System Announcements">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="topbar-counter-badge topbar-counter-red" id="topbar-notification-badge"
+              style="display: none;">0</span>
+          </a>
+
+          <div class="topbar-divider-vert"></div>
+
+          <span class="badge badge-green font-mono text-xs" id="topbar-db-status">● PostgreSQL Connected</span>
+          <button class="btn btn-green btn-sm" id="btn-open-assign-modal">
+            ➕ Assign Personal Trainer
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Body Container -->
+      <main class="admin-body">
+        <div class="assign-page-container">
+
+          <!-- Metric Quick Stats -->
+          <div class="pt-stats-grid">
+            <div class="stat-card-pt stat-card-green">
+              <div class="stat-icon-wrap" style="color: var(--accent-green); background: rgba(0,230,118,0.1);">🏋️</div>
+              <div class="stat-meta">
+                <h4>Active PT Clients</h4>
+                <div class="stat-val" id="stat-active-pt-count">0</div>
+              </div>
+            </div>
+
+            <div class="stat-card-pt stat-card-blue">
+              <div class="stat-icon-wrap" style="color: #38bdf8; background: rgba(56,189,248,0.1);">👨‍🏫</div>
+              <div class="stat-meta">
+                <h4>Active Coaches</h4>
+                <div class="stat-val" id="stat-trainers-count">0</div>
+              </div>
+            </div>
+
+            <div class="stat-card-pt stat-card-purple">
+              <div class="stat-icon-wrap" style="color: #a855f7; background: rgba(168,85,247,0.1);">💰</div>
+              <div class="stat-meta">
+                <h4>Monthly PT Revenue</h4>
+                <div class="stat-val" id="stat-monthly-revenue">₹0</div>
+              </div>
+            </div>
+
+            <div class="stat-card-pt stat-card-amber">
+              <div class="stat-icon-wrap" style="color: #f59e0b; background: rgba(245,158,11,0.1);">⏳</div>
+              <div class="stat-meta">
+                <h4>Pending PT Fees</h4>
+                <div class="stat-val" id="stat-pending-fees">₹0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls: Filter Tabs & Search -->
+          <div class="filter-tabs-row">
+            <div class="filter-btn-group" id="filter-btn-group">
+              <button class="tab-pill active" data-filter="all">All Assignments (<span id="count-all">0</span>)</button>
+              <button class="tab-pill" data-filter="active">🟢 Active PT (<span id="count-active">0</span>)</button>
+              <button class="tab-pill" data-filter="pending_fee">⏳ Fee Due (<span id="count-fee-due">0</span>)</button>
+              <button class="tab-pill" data-filter="expiring">⚠️ Expiring Soon (<span
+                  id="count-expiring">0</span>)</button>
+            </div>
+
+            <div class="filter-controls-right">
+              <!-- Personal Trainer Dropdown Filter -->
+              <div class="select-trainer-box">
+                <select id="filter-trainer-select" class="filter-select-trainer" title="Filter by Personal Trainer">
+                  <option value="all">🏋️ All Personal Trainers (All Coaches)</option>
+                </select>
+              </div>
+
+              <!-- Search Input Box -->
+              <div class="search-input-box">
+                <span class="search-icon-inside">🔍</span>
+                <input type="text" id="assign-search-input" placeholder="Search member, coach, or goal..." />
+              </div>
+
+              <!-- Search Button -->
+              <button type="button" class="btn-filter-search" id="btn-search-assignments" title="Search Assignments">
+                <span>🔍</span> Search
+              </button>
+
+              <!-- Reset Button -->
+              <button type="button" class="btn-filter-reset" id="btn-reset-filters" title="Reset all filters">
+                ✕ Reset
+              </button>
+            </div>
+          </div>
+
+          <!-- Coach Quick-Filter Cards Section -->
+          <div class="coach-filter-cards-section">
+            <div
+              style="font-size: 0.74rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.6px; display: flex; align-items: center; justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 6px;">
+                <span>🏋️</span> Personal Trainer Filter Cards:
+              </span>
+              <span style="font-size: 0.72rem; color: #38bdf8;" id="coach-filter-active-label">All Coaches
+                Selected</span>
+            </div>
+            <div class="coach-filter-cards-row" id="coach-filter-cards-container">
+              <!-- Dynamically populated Coach Filter Cards -->
+            </div>
+          </div>
+
+          <!-- Data Table / Card View Card -->
+          <div class="admin-card" style="padding: 0; overflow: hidden;">
+            <div
+              style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 style="font-size: 1rem; font-weight: 700; color: #fff;">Personal Trainer & Member Contracts</h3>
+                <span style="font-size: 0.78rem; color: var(--text-dim);">Live records of personal trainer assignments
+                  with recurring monthly training fees.</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <!-- View Mode Toggle: Table View vs Cards View -->
+                <div class="view-toggle-group" id="contracts-view-toggle">
+                  <button type="button" class="view-toggle-btn active" id="view-mode-table" data-view="table"
+                    title="Table View">
+                    <span>📄</span> Table
+                  </button>
+                  <button type="button" class="view-toggle-btn" id="view-mode-cards" data-view="cards"
+                    title="Cards Grid View">
+                    <span>🗂️</span> Cards
+                  </button>
+                </div>
+                <button class="btn btn-outline btn-sm" id="btn-refresh-assignments">
+                  🔄 Refresh
+                </button>
+              </div>
+            </div>
+
+            <!-- Table View Container -->
+            <div class="table-responsive" id="contracts-table-container" style="overflow-x: auto;">
+              <table class="data-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);">
+                    <th
+                      style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">
+                      Member</th>
+                    <th
+                      style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">
+                      Personal Trainer</th>
+                    <th
+                      style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">
+                      Monthly PT Fee</th>
+                    <th
+                      style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">
+                      Fee Status</th>
+                    <th
+                      style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">
+                      Schedule & Slot</th>
+                    <th
+                      style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">
+                      Goal / Focus</th>
+                    <th
+                      style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">
+                      Dates / Validity</th>
+                    <th
+                      style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">
+                      Status</th>
+                    <th
+                      style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); text-align: right;">
+                      Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="assign-table-body">
+                  <tr>
+                    <td colspan="9" style="padding: 2rem; text-align: center; color: var(--text-dim);">
+                      ⏳ Loading personal trainer assignments...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Cards Grid View Container -->
+            <div class="contracts-cards-grid" id="contracts-cards-container" style="display: none;">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Assign Trainer to Member -->
+  <div class="modal-overlay" id="modal-assign-trainer">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-assign-title">🏋️ Assign Member to Personal Trainer</h3>
+        <button class="btn-close-modal" id="btn-close-assign-modal">&times;</button>
+      </div>
+      <form id="form-assign-trainer">
+        <input type="hidden" id="assign-id" />
+
+        <div class="form-row">
+          <!-- Member Column -->
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label for="assign-member-search" style="margin: 0; color: #fff;">
+                👤 Member (Search PK ID / Code / Name) *
+              </label>
+              <span id="member-pk-badge" class="autofill-pk-pill"
+                style="display: none; background: rgba(0, 230, 118, 0.18); color: var(--accent-green); border: 1px solid rgba(0,230,118,0.35);">
+                PK #--
+              </span>
+            </div>
+            <div class="search-input-wrapper">
+              <input type="text" id="assign-member-search" class="form-control-dark font-mono"
+                list="member-search-datalist" placeholder="Type PK ID (e.g. 25), Code, Name..." autocomplete="off" />
+              <button type="button" class="btn-clear-search" id="btn-clear-member-search"
+                title="Clear selection">&times;</button>
+              <datalist id="member-search-datalist"></datalist>
+            </div>
+            <select id="assign-member-select" class="form-control-dark" style="margin-top: 6px;" required>
+              <option value="">-- Choose Member from Database --</option>
+            </select>
+            <!-- Auto-fill Member Details Card -->
+            <div id="member-autofill-preview" class="autofill-card autofill-card-member" style="display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 700; color: #fff; font-size: 0.86rem;" id="member-preview-name">--</span>
+                <span class="autofill-pk-pill" id="member-preview-id">PK ID: #--</span>
+              </div>
+              <div style="font-size: 0.75rem; color: #38bdf8;" id="member-preview-meta">--</div>
+              <div class="autofill-hint-text">
+                <span>⚡ Auto-filled Member Profile & Health Notes</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trainer Column -->
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label for="assign-trainer-search" style="margin: 0; color: #fff;">
+                🏋️ Coach (Search PK ID / Code / Name) *
+              </label>
+              <span id="trainer-pk-badge" class="autofill-pk-pill"
+                style="display: none; background: rgba(56, 189, 248, 0.18); color: #38bdf8; border: 1px solid rgba(56,189,248,0.35);">
+                PK #--
+              </span>
+            </div>
+            <div class="search-input-wrapper">
+              <input type="text" id="assign-trainer-search" class="form-control-dark font-mono"
+                list="trainer-search-datalist" placeholder="Type PK ID (e.g. 35), Code, Coach Name..."
+                autocomplete="off" />
+              <button type="button" class="btn-clear-search" id="btn-clear-trainer-search"
+                title="Clear selection">&times;</button>
+              <datalist id="trainer-search-datalist"></datalist>
+            </div>
+            <select id="assign-trainer-select" class="form-control-dark" style="margin-top: 6px;" required>
+              <option value="">-- Choose Coach from Database --</option>
+            </select>
+            <!-- Auto-fill Trainer Details Card -->
+            <div id="trainer-autofill-preview" class="autofill-card autofill-card-trainer" style="display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 700; color: #fff; font-size: 0.86rem;" id="trainer-preview-name">--</span>
+                <span class="autofill-pk-pill" id="trainer-preview-id">PK ID: #--</span>
+              </div>
+              <div style="font-size: 0.75rem; color: #38bdf8;" id="trainer-preview-meta">--</div>
+              <div class="autofill-hint-text" style="color: #38bdf8;">
+                <span>⚡ Auto-filled Monthly Fee, Slot & Goal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fee settings: admin picks the billing period (days / months) and the fee for that period -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="assign-billing-period">Billing Period *</label>
+            <select id="assign-billing-period" class="form-control-dark">
+              <option value="d7">7 Days</option>
+              <option value="d15">15 Days</option>
+              <option value="m1" selected>1 Month</option>
+              <option value="m2">2 Months</option>
+              <option value="m3">3 Months</option>
+              <option value="m6">6 Months</option>
+              <option value="m12">12 Months (1 Year)</option>
+              <option value="custom">Custom (number of days)</option>
+            </select>
+          </div>
+          <div class="form-group" id="custom-days-group" style="display: none;">
+            <label for="assign-custom-days">Number of Days *</label>
+            <input type="number" id="assign-custom-days" class="form-control-dark font-mono" min="1" max="730" step="1" value="30" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="assign-period-fee">
+              <span id="period-fee-label">PT Fee for 1 Month (₹ INR) *</span>
+              <span id="fee-autofill-badge" class="field-tag-badge field-tag-green">⚡ AUTO-FILLED</span>
+            </label>
+            <input type="number" id="assign-period-fee" class="form-control-dark font-mono" step="1" min="0" value="6500" required />
+            <div id="fee-monthly-hint" style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;"></div>
+            <input type="hidden" id="assign-monthly-fee" value="6500" />
+          </div>
+
+          <div class="form-group">
+            <label for="assign-sessions-week">
+              Sessions Per Week *
+              <span id="sessions-autofill-badge" class="field-tag-badge field-tag-blue">⚡ AUTO-FILLED</span>
+            </label>
+            <select id="assign-sessions-week" class="form-control-dark">
+              <option value="2">2 Days / Week (8 sessions/mo)</option>
+              <option value="3" selected>3 Days / Week (12 sessions/mo)</option>
+              <option value="4">4 Days / Week (16 sessions/mo)</option>
+              <option value="5">5 Days / Week (20 sessions/mo)</option>
+              <option value="6">6 Days / Week (Full Program)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="assign-slot">
+            Preferred Training Time Slot
+            <span id="slot-autofill-badge" class="field-tag-badge field-tag-blue">⚡ AUTO-FILLED</span>
+          </label>
+          <input type="text" id="assign-slot" class="form-control-dark" value="Morning (06:30 AM - 07:30 AM)"
+            placeholder="e.g. Morning (06:30 AM - 07:30 AM)" />
+        </div>
+
+        <div class="form-group">
+          <label for="assign-goal">
+            Fitness / Body Goal
+            <span id="goal-autofill-badge" class="field-tag-badge field-tag-amber">⚡ AUTO-FILLED</span>
+          </label>
+          <input type="text" id="assign-goal" class="form-control-dark" value="Fat Loss & Hypertrophy"
+            placeholder="e.g. Fat Loss, Hypertrophy, Rehab, Strength" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="assign-start-date">Start Date *</label>
+            <input type="date" id="assign-start-date" class="form-control-dark font-mono" required />
+          </div>
+
+          <div class="form-group">
+            <label for="assign-end-date">
+              End / Renewal Date *
+              <span id="date-autofill-badge" class="field-tag-badge field-tag-green">⚡ +30 DAYS</span>
+            </label>
+            <input type="date" id="assign-end-date" class="form-control-dark font-mono" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="assign-payment-status">Fee Payment Status</label>
+            <select id="assign-payment-status" class="form-control-dark">
+              <option value="paid" selected>Paid in Full</option>
+              <option value="partial">Partial Payment</option>
+              <option value="pending">Payment Pending</option>
+              <option value="waived">Waived / Trial</option>
+            </select>
+            <div id="partial-paid-group" style="display: none; margin-top: 8px;">
+              <label for="assign-amount-paid" style="font-size: 0.75rem;">Amount Paid Now (₹)</label>
+              <input type="number" id="assign-amount-paid" class="form-control-dark font-mono" min="0" step="1" value="0" />
+              <div id="balance-hint" style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="assign-status">Assignment Status</label>
+            <select id="assign-status" class="form-control-dark">
+              <option value="active" selected>Active</option>
+              <option value="paused">Paused</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="assign-notes">
+            Notes / Workout Focus
+            <span id="notes-autofill-badge" class="field-tag-badge field-tag-blue">⚡ AUTO-FILLED</span>
+          </label>
+          <input type="text" id="assign-notes" class="form-control-dark"
+            placeholder="e.g. Low-back pain caution; high-protein diet prescribed" />
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 1.5rem; justify-content: flex-end;">
+          <button type="button" class="btn-modal-cancel" id="btn-cancel-assign">Cancel</button>
+          <button type="submit" class="btn-modal-submit">Save PT Assignment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Centered Custom Confirmation Modal -->
+  <div class="center-modal-overlay" id="custom-confirm-modal" role="dialog" aria-modal="true">
+    <div class="center-modal-card">
+      <div class="center-modal-icon-badge icon-badge-danger" id="confirm-modal-icon">
+        🗑️
+      </div>
+      <h3 class="center-modal-title" id="confirm-modal-title">Remove PT Assignment</h3>
+      <p class="center-modal-desc" id="confirm-modal-desc">
+        Are you sure you want to remove this personal trainer assignment?
+      </p>
+      <div class="center-modal-actions">
+        <button type="button" class="btn-center-cancel" id="btn-confirm-cancel">Cancel</button>
+        <button type="button" class="btn-center-confirm btn-confirm-danger" id="btn-confirm-ok">Yes, Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"
+    style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 8px;">
+  </div>
+
+  <!-- Application Script -->
+  <script type="module">
+    import { adminApi } from './js/admin/adminApi.js';
+
+    const state = {
+      assignments: [],
+      allAssignmentsForCounts: [],
+      summary: {},
+      trainersList: [],
+      membersList: [],
+      currentFilter: 'all',
+      searchQuery: '',
+      selectedTrainerId: 'all',
+      viewMode: localStorage.getItem('pt_contracts_view_mode') || 'table',
+    };
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showToast(message, isError = false) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        background: ${isError ? '#ef4444' : '#13161f'};
+        color: #fff;
+        border: 1px solid ${isError ? '#b91c1c' : '#00e676'};
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: opacity 0.3s ease;
+      `;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    async function hydrateUser() {
+      try {
+        let userRes = await adminApi.getCurrentUser();
+        if (!userRes.success) {
+          const loginRes = await adminApi.redirectToLogin().catch(() => null);
+          if (loginRes && loginRes.success) {
+            userRes = await adminApi.getCurrentUser();
+          }
+        }
+        if (userRes.success && userRes.data) {
+          const u = userRes.data;
+          const fullName = u.fullName || u.full_name || u.username || 'Nandan.B';
+          const username = u.username || 'nandanb449';
+          const role = (u.role || 'owner').toUpperCase();
+
+          document.getElementById('sidebar-user-fullname').textContent = fullName;
+          document.getElementById('sidebar-user-handle').textContent = `@${username}`;
+          const pill = document.getElementById('sidebar-role-pill');
+          if (pill) {
+            pill.textContent = role;
+            pill.className = `role-badge-pill role-${role.toLowerCase()}`;
+          }
+        }
+      } catch (err) {
+        console.warn('[AssignPT] Auth hydration warning:', err.message);
+      }
+    }
+
+    async function loadDropdowns() {
+      try {
+        const [trainersRes, membersRes] = await Promise.all([
+          adminApi.getTrainers('all'),
+          adminApi.getMembers({ limit: 100 }),
+        ]);
+
+        state.trainersList = trainersRes.trainers || trainersRes.data || [];
+        state.membersList = membersRes.data || membersRes.members || [];
+
+        populateMemberDatalistAndSelect();
+        populateTrainerDatalistAndSelect();
+        populateFilterTrainerDropdown();
+        populateCoachFilterCards();
+      } catch (err) {
+        console.error('[AssignPT] Error loading dropdowns:', err);
+      }
+    }
+
+    function selectTrainerFilter(trainerId) {
+      state.selectedTrainerId = String(trainerId);
+      const sel = document.getElementById('filter-trainer-select');
+      if (sel) sel.value = String(trainerId);
+      loadAssignments();
+      if (trainerId !== 'all') {
+        const t = state.trainersList.find(x => String(x.id) === String(trainerId));
+        showToast(`Filtered assignments for Coach ${t ? t.full_name : trainerId}`);
+      } else {
+        showToast('Showing all personal trainers');
+      }
+    }
+
+    function populateCoachFilterCards() {
+      const container = document.getElementById('coach-filter-cards-container');
+      const activeLabel = document.getElementById('coach-filter-active-label');
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      const countsByTrainer = {};
+      (state.allAssignmentsForCounts || []).forEach(a => {
+        const tid = String(a.trainer_id);
+        countsByTrainer[tid] = (countsByTrainer[tid] || 0) + 1;
+      });
+
+      const totalAssignments = (state.allAssignmentsForCounts || []).length;
+
+      // 1. "All Coaches" Card
+      const isAllActive = state.selectedTrainerId === 'all';
+      const allCard = document.createElement('div');
+      allCard.className = `coach-filter-card ${isAllActive ? 'active' : ''}`;
+      allCard.title = 'Show all personal trainers and assigned members';
+      allCard.innerHTML = `
+        <div class="coach-filter-avatar" style="${isAllActive ? 'background: var(--accent-green); color: #04140b;' : ''}">🏋️</div>
+        <div class="coach-filter-meta">
+          <span class="coach-filter-name">All Coaches</span>
+          <span class="coach-filter-count">${totalAssignments} total clients</span>
+        </div>
+      `;
+      allCard.addEventListener('click', () => {
+        selectTrainerFilter('all');
+      });
+      container.appendChild(allCard);
+
+      // 2. Individual Coach Cards
+      state.trainersList.forEach(t => {
+        const tid = String(t.id);
+        const isActive = state.selectedTrainerId === tid;
+        const count = countsByTrainer[tid] || 0;
+        const initials = t.full_name ? t.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'PT';
+
+        const card = document.createElement('div');
+        card.className = `coach-filter-card ${isActive ? 'active' : ''}`;
+        card.title = `Click to filter Coach ${t.full_name} (${t.specialty || 'Personal Trainer'})`;
+        card.innerHTML = `
+          <div class="coach-filter-avatar" style="${isActive ? 'background: var(--accent-green); color: #04140b;' : ''}">
+            ${initials}
+          </div>
+          <div class="coach-filter-meta">
+            <span class="coach-filter-name">${/^coach\b/i.test(t.full_name || '') ? '' : 'Coach '}${escapeHtml(t.full_name)}</span>
+            <span class="coach-filter-count" style="font-family: 'JetBrains Mono', monospace; color: #00e5ff;">ID #${escapeHtml(t.id)}${t.trainer_code ? ` · ${escapeHtml(t.trainer_code)}` : ''}</span>
+            <span class="coach-filter-count">
+              <span style="color: ${count > 0 ? '#00e676' : 'var(--text-dim)'};">${count > 0 ? '🟢' : '⚪'}</span> ${count} client${count === 1 ? '' : 's'}
+            </span>
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          selectTrainerFilter(tid);
+        });
+        container.appendChild(card);
+      });
+
+      if (activeLabel) {
+        if (state.selectedTrainerId === 'all') {
+          activeLabel.textContent = `All Coaches Selected (${totalAssignments} contracts)`;
+          activeLabel.style.color = '#38bdf8';
+        } else {
+          const t = state.trainersList.find(x => String(x.id) === String(state.selectedTrainerId));
+          activeLabel.textContent = t ? `Coach ${t.full_name} Selected` : 'Coach Selected';
+          activeLabel.style.color = 'var(--accent-green)';
+        }
+      }
+    }
+
+    function populateFilterTrainerDropdown() {
+      const sel = document.getElementById('filter-trainer-select');
+      if (!sel) return;
+      const currentVal = state.selectedTrainerId || 'all';
+      sel.innerHTML = '<option value="all">🏋️ All Personal Trainers (All Coaches)</option>';
+      state.trainersList.forEach((t) => {
+        const opt = document.createElement('option');
+        opt.value = String(t.id);
+        const spec = t.specialty ? ` • ${t.specialty}` : '';
+        const code = t.trainer_code ? ` [${t.trainer_code}]` : '';
+        opt.textContent = `Coach ${t.full_name}${code}${spec}`;
+        sel.appendChild(opt);
+      });
+      sel.value = currentVal;
+    }
+
+    function populateMemberDatalistAndSelect() {
+      const memberSel = document.getElementById('assign-member-select');
+      const memberDatalist = document.getElementById('member-search-datalist');
+      memberSel.innerHTML = '<option value="">-- Choose Member from Database --</option>';
+      memberDatalist.innerHTML = '';
+
+      state.membersList.forEach((m) => {
+        // Datalist Option 1: PK ID Search Format
+        const optPk = document.createElement('option');
+        optPk.value = `PK #${m.id}`;
+        optPk.label = `${m.full_name} (${m.member_code} • ${m.plan_name || 'Member'})`;
+        memberDatalist.appendChild(optPk);
+
+        // Datalist Option 2: Member Code
+        if (m.member_code) {
+          const optCode = document.createElement('option');
+          optCode.value = m.member_code;
+          optCode.label = `${m.full_name} (ID: #${m.id})`;
+          memberDatalist.appendChild(optCode);
+        }
+
+        // Datalist Option 3: Full Name
+        const optName = document.createElement('option');
+        optName.value = `[ID: #${m.id}] ${m.full_name}`;
+        optName.label = `${m.member_code} • ${m.plan_name || 'Standard'}`;
+        memberDatalist.appendChild(optName);
+
+        // Select Dropdown Option
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = `[ID: #${m.id} | ${m.member_code}] ${m.full_name} — ${m.plan_name || 'Standard'}`;
+        memberSel.appendChild(opt);
+      });
+    }
+
+    function populateTrainerDatalistAndSelect() {
+      const trainerSel = document.getElementById('assign-trainer-select');
+      const trainerDatalist = document.getElementById('trainer-search-datalist');
+      trainerSel.innerHTML = '<option value="">-- Choose Coach from Database --</option>';
+      trainerDatalist.innerHTML = '';
+
+      state.trainersList.forEach((t) => {
+        // Datalist Option 1: PK ID Search Format
+        const optPk = document.createElement('option');
+        optPk.value = `PK #${t.id}`;
+        optPk.label = `Coach ${t.full_name} (${t.trainer_code || 'TRN'} • ${t.specialty || 'Personal Trainer'})`;
+        trainerDatalist.appendChild(optPk);
+
+        // Datalist Option 2: Trainer Code
+        if (t.trainer_code) {
+          const optCode = document.createElement('option');
+          optCode.value = t.trainer_code;
+          optCode.label = `Coach ${t.full_name} (ID: #${t.id})`;
+          trainerDatalist.appendChild(optCode);
+        }
+
+        // Datalist Option 3: Full Name
+        const optName = document.createElement('option');
+        optName.value = `[ID: #${t.id}] ${t.full_name}`;
+        optName.label = `${t.specialty || 'General Coach'}`;
+        trainerDatalist.appendChild(optName);
+
+        // Select Dropdown Option
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = `[ID: #${t.id} | ${t.trainer_code || 'TRN'}] ${t.full_name} — ${t.specialty || 'Personal Coach'}`;
+        trainerSel.appendChild(opt);
+      });
+    }
+
+    function findMember(val) {
+      if (!val) return null;
+      const raw = String(val).trim();
+      if (!raw) return null;
+
+      // Match [ID: #25] or PK #25 or #25
+      const idMatch = raw.match(/(?:\[ID:\s*#?|PK\s*#?|#)(\d+)/i);
+      if (idMatch) {
+        const id = parseInt(idMatch[1], 10);
+        const m = state.membersList.find((item) => Number(item.id) === id);
+        if (m) return m;
+      }
+
+      // Exact number
+      if (/^\d+$/.test(raw)) {
+        const id = parseInt(raw, 10);
+        const m = state.membersList.find((item) => Number(item.id) === id);
+        if (m) return m;
+      }
+
+      // Member code
+      const lower = raw.toLowerCase();
+      let m = state.membersList.find((item) => item.member_code && item.member_code.toLowerCase() === lower);
+      if (m) return m;
+
+      // Full Name prefix or substring
+      m = state.membersList.find((item) => item.full_name && item.full_name.toLowerCase().includes(lower));
+      if (m) return m;
+
+      // Phone match
+      const digitsOnly = raw.replace(/\D/g, '');
+      if (digitsOnly.length >= 4) {
+        m = state.membersList.find((item) => item.phone && item.phone.replace(/\D/g, '').includes(digitsOnly));
+        if (m) return m;
+      }
+
+      return null;
+    }
+
+    function findTrainer(val) {
+      if (!val) return null;
+      const raw = String(val).trim();
+      if (!raw) return null;
+
+      // Match [ID: #35] or PK #35 or #35
+      const idMatch = raw.match(/(?:\[ID:\s*#?|PK\s*#?|#)(\d+)/i);
+      if (idMatch) {
+        const id = parseInt(idMatch[1], 10);
+        const t = state.trainersList.find((item) => Number(item.id) === id);
+        if (t) return t;
+      }
+
+      // Exact number
+      if (/^\d+$/.test(raw)) {
+        const id = parseInt(raw, 10);
+        const t = state.trainersList.find((item) => Number(item.id) === id);
+        if (t) return t;
+      }
+
+      // Trainer code
+      const lower = raw.toLowerCase();
+      let t = state.trainersList.find((item) => item.trainer_code && item.trainer_code.toLowerCase() === lower);
+      if (t) return t;
+
+      // Full name
+      t = state.trainersList.find((item) => item.full_name && item.full_name.toLowerCase().includes(lower));
+      if (t) return t;
+
+      // Specialty
+      t = state.trainersList.find((item) => item.specialty && item.specialty.toLowerCase().includes(lower));
+      return t || null;
+    }
+
+    function flashEl(el, color = 'green') {
+      if (!el) return;
+      const cls = color === 'blue' ? 'autofill-pulse-blue' : 'autofill-pulse';
+      el.classList.remove('autofill-pulse', 'autofill-pulse-blue');
+      void el.offsetWidth;
+      el.classList.add(cls);
+    }
+
+    function showBadge(selector) {
+      const b = document.querySelector(selector);
+      if (b) {
+        b.style.display = 'inline-block';
+        setTimeout(() => { b.style.display = 'none'; }, 4000);
+      }
+    }
+
+    function onMemberSelected(member, fromUserInteraction = true) {
+      const clearBtn = document.getElementById('btn-clear-member-search');
+      const badge = document.getElementById('member-pk-badge');
+      const preview = document.getElementById('member-autofill-preview');
+      const nameEl = document.getElementById('member-preview-name');
+      const idEl = document.getElementById('member-preview-id');
+      const metaEl = document.getElementById('member-preview-meta');
+
+      if (!member) {
+        document.getElementById('assign-member-select').value = '';
+        clearBtn.style.display = 'none';
+        badge.style.display = 'none';
+        preview.style.display = 'none';
+        return;
+      }
+
+      document.getElementById('assign-member-select').value = member.id;
+      document.getElementById('assign-member-search').value = `[ID: #${member.id}] ${member.member_code} - ${member.full_name}`;
+      clearBtn.style.display = 'block';
+
+      badge.textContent = `PK #${member.id}`;
+      badge.style.display = 'inline-block';
+
+      nameEl.textContent = member.full_name;
+      idEl.textContent = `PK ID: #${member.id}`;
+      metaEl.textContent = `${member.member_code} • ${member.plan_name || 'Standard Plan'} • 📞 ${member.phone || 'No phone'}`;
+      preview.style.display = 'flex';
+
+      if (fromUserInteraction) {
+        // Auto-fill member notes if present
+        if (member.notes && member.notes.trim()) {
+          const notesInput = document.getElementById('assign-notes');
+          notesInput.value = member.notes;
+          flashEl(notesInput, 'green');
+          showBadge('#notes-autofill-badge');
+        }
+
+        // Auto-suggest fitness goal based on plan/notes
+        const goalInput = document.getElementById('assign-goal');
+        if (!goalInput.value || goalInput.value === 'Fat Loss & Hypertrophy' || goalInput.value === 'General Fitness') {
+          if (member.plan_name && member.plan_name.toLowerCase().includes('platinum')) {
+            goalInput.value = 'Comprehensive Strength & Athletic Performance';
+          } else if (member.plan_name && member.plan_name.toLowerCase().includes('gold')) {
+            goalInput.value = 'Hypertrophy & Core Conditioning';
+          } else if (member.notes && member.notes.toLowerCase().includes('core')) {
+            goalInput.value = 'Functional Core Stability & Fat Loss';
+          }
+          flashEl(goalInput, 'green');
+          showBadge('#goal-autofill-badge');
+        }
+
+        flashEl(document.getElementById('assign-member-select'), 'green');
+        flashEl(document.getElementById('assign-member-search'), 'green');
+        showToast(`⚡ Member [ID #${member.id}] ${member.full_name} selected. Details auto-filled!`);
+      }
+    }
+
+    function onTrainerSelected(trainer, fromUserInteraction = true) {
+      const clearBtn = document.getElementById('btn-clear-trainer-search');
+      const badge = document.getElementById('trainer-pk-badge');
+      const preview = document.getElementById('trainer-autofill-preview');
+      const nameEl = document.getElementById('trainer-preview-name');
+      const idEl = document.getElementById('trainer-preview-id');
+      const metaEl = document.getElementById('trainer-preview-meta');
+
+      if (!trainer) {
+        document.getElementById('assign-trainer-select').value = '';
+        clearBtn.style.display = 'none';
+        badge.style.display = 'none';
+        preview.style.display = 'none';
+        return;
+      }
+
+      document.getElementById('assign-trainer-select').value = trainer.id;
+      document.getElementById('assign-trainer-search').value = `[ID: #${trainer.id}] ${trainer.trainer_code || 'TRN'} - ${trainer.full_name}`;
+      clearBtn.style.display = 'block';
+
+      badge.textContent = `PK #${trainer.id}`;
+      badge.style.display = 'inline-block';
+
+      nameEl.textContent = `Coach ${trainer.full_name}`;
+      idEl.textContent = `PK ID: #${trainer.id}`;
+      metaEl.textContent = `${trainer.trainer_code || 'TRN'} • ${trainer.specialty || 'Personal Coach'} • 📞 ${trainer.phone || ''}`;
+      preview.style.display = 'flex';
+
+      if (fromUserInteraction) {
+        const spec = (trainer.specialty || '').toLowerCase();
+        let recommendedFee = 6500;
+        let recommendedSlot = 'Morning (06:30 AM - 07:30 AM)';
+        let recommendedGoal = 'Hypertrophy & Strength Training';
+        let recommendedSessions = '3';
+
+        if (spec.includes('crossfit') || spec.includes('olympic') || spec.includes('powerlifting')) {
+          recommendedFee = 7500;
+          recommendedSlot = 'Morning (06:30 AM - 07:30 AM)';
+          recommendedGoal = 'CrossFit, High-Intensity Conditioning & Olympic Lifts';
+          recommendedSessions = '4';
+        } else if (spec.includes('mobility') || spec.includes('yoga') || spec.includes('flexibility')) {
+          recommendedFee = 5500;
+          recommendedSlot = 'Morning (07:30 AM - 08:30 AM)';
+          recommendedGoal = 'Functional Mobility, Flexibility & Postural Alignment';
+          recommendedSessions = '3';
+        } else if (spec.includes('hypertrophy') || spec.includes('physique') || spec.includes('bodybuilding')) {
+          recommendedFee = 6500;
+          recommendedSlot = 'Evening (06:00 PM - 07:00 PM)';
+          recommendedGoal = 'Hypertrophy, Muscle Sculpting & Progressive Overload';
+          recommendedSessions = '3';
+        } else if (spec.includes('rehab') || spec.includes('therapy')) {
+          recommendedFee = 8000;
+          recommendedSlot = 'Afternoon (04:00 PM - 05:00 PM)';
+          recommendedGoal = 'Injury Rehabilitation & Musculoskeletal Recovery';
+          recommendedSessions = '3';
+        }
+
+        // Auto-fill Monthly Fee
+        // Coach's monthly rate → fee for the chosen billing period
+        const feeInput = document.getElementById('assign-period-fee');
+        feeInput.value = Math.round(recommendedFee * window.ptBilling.periodMonths());
+        window.ptBilling.refresh();
+        flashEl(feeInput, 'green');
+        showBadge('#fee-autofill-badge');
+
+        // Auto-fill Preferred Slot
+        const slotInput = document.getElementById('assign-slot');
+        slotInput.value = recommendedSlot;
+        flashEl(slotInput, 'blue');
+        showBadge('#slot-autofill-badge');
+
+        // Auto-fill Sessions Per Week
+        const sessInput = document.getElementById('assign-sessions-week');
+        sessInput.value = recommendedSessions;
+        flashEl(sessInput, 'blue');
+        showBadge('#sessions-autofill-badge');
+
+        // Auto-fill Fitness / Body Goal
+        const goalInput = document.getElementById('assign-goal');
+        goalInput.value = recommendedGoal;
+        flashEl(goalInput, 'blue');
+        showBadge('#goal-autofill-badge');
+
+        // Auto-calculate Dates
+        const startInput = document.getElementById('assign-start-date');
+        const endInput = document.getElementById('assign-end-date');
+        if (!startInput.value) {
+          startInput.value = new Date().toISOString().split('T')[0];
+        }
+        window.ptBilling.updateEndDate();
+        flashEl(endInput, 'green');
+        showBadge('#date-autofill-badge');
+
+        flashEl(document.getElementById('assign-trainer-select'), 'blue');
+        flashEl(document.getElementById('assign-trainer-search'), 'blue');
+        showToast(`⚡ Coach [ID #${trainer.id}] ${trainer.full_name} selected. Fee ₹${recommendedFee} auto-filled!`);
+      }
+    }
+
+    async function loadAssignments() {
+      try {
+        const [filteredRes, allRes] = await Promise.all([
+          adminApi.getTrainerAssignments({
+            search: state.searchQuery,
+            trainerId: state.selectedTrainerId || 'all',
+          }),
+          adminApi.getTrainerAssignments({ trainerId: 'all' }).catch(() => null),
+        ]);
+
+        if (filteredRes.success) {
+          state.assignments = filteredRes.data || [];
+          state.summary = filteredRes.summary || {};
+          if (allRes && allRes.success && allRes.data) {
+            state.allAssignmentsForCounts = allRes.data;
+          } else if (state.selectedTrainerId === 'all') {
+            state.allAssignmentsForCounts = state.assignments;
+          }
+
+          populateCoachFilterCards();
+          renderSummary();
+          renderContracts();
+        } else {
+          showToast(filteredRes.error || 'Failed to load assignments.', true);
+        }
+      } catch (err) {
+        console.error('[AssignPT] Load error:', err);
+        showToast('Error loading trainer assignments.', true);
+      }
+    }
+
+    function renderSummary() {
+      const isFilteredByTrainer = state.selectedTrainerId && state.selectedTrainerId !== 'all';
+
+      let activeCount = 0;
+      let trainersCount = 0;
+      let monthlyRevenue = 0;
+      let pendingFees = 0;
+
+      if (isFilteredByTrainer) {
+        activeCount = state.assignments.filter(a => a.status === 'active').length;
+        trainersCount = state.assignments.length > 0 ? 1 : 0;
+        monthlyRevenue = state.assignments.reduce((sum, a) => sum + Number(a.monthly_fee || 0), 0);
+        pendingFees = state.assignments.reduce((sum, a) => sum + Number(a.fee_due || 0), 0);
+      } else {
+        const s = state.summary || {};
+        activeCount = s.active_assignments ?? state.assignments.filter(a => a.status === 'active').length;
+        trainersCount = s.trainers_with_clients ?? (new Set(state.assignments.map(a => a.trainer_id))).size;
+        monthlyRevenue = s.total_monthly_revenue ?? state.assignments.reduce((sum, a) => sum + Number(a.monthly_fee || 0), 0);
+        pendingFees = s.pending_fees_total ?? state.assignments.reduce((sum, a) => sum + Number(a.fee_due || 0), 0);
+      }
+
+      document.getElementById('stat-active-pt-count').textContent = activeCount;
+      document.getElementById('stat-trainers-count').textContent = trainersCount;
+      document.getElementById('stat-monthly-revenue').textContent = `₹${Number(monthlyRevenue || 0).toLocaleString('en-IN')}`;
+      document.getElementById('stat-pending-fees').textContent = `₹${Number(pendingFees || 0).toLocaleString('en-IN')}`;
+
+      document.getElementById('count-all').textContent = state.assignments.length;
+      document.getElementById('count-active').textContent = state.assignments.filter(a => a.status === 'active').length;
+      document.getElementById('count-fee-due').textContent = state.assignments.filter(a => Number(a.fee_due) > 0).length;
+      document.getElementById('count-expiring').textContent = state.assignments.filter(a => a.status === 'active' && a.days_remaining <= 7).length;
+    }
+
+    function getFilteredAssignments() {
+      let list = state.assignments;
+      if (state.selectedTrainerId && state.selectedTrainerId !== 'all') {
+        list = list.filter((a) => String(a.trainer_id) === String(state.selectedTrainerId));
+      }
+      if (state.currentFilter === 'active') {
+        list = list.filter((a) => a.status === 'active');
+      } else if (state.currentFilter === 'pending_fee') {
+        list = list.filter((a) => Number(a.fee_due) > 0);
+      } else if (state.currentFilter === 'expiring') {
+        list = list.filter((a) => a.status === 'active' && a.days_remaining <= 7);
+      }
+      return list;
+    }
+
+    function switchViewMode(mode) {
+      state.viewMode = mode;
+      try {
+        localStorage.setItem('pt_contracts_view_mode', mode);
+      } catch (e) { }
+
+      const tableContainer = document.getElementById('contracts-table-container');
+      const cardsContainer = document.getElementById('contracts-cards-container');
+      const btnTable = document.getElementById('view-mode-table');
+      const btnCards = document.getElementById('view-mode-cards');
+
+      if (mode === 'cards') {
+        if (tableContainer) tableContainer.style.display = 'none';
+        if (cardsContainer) cardsContainer.style.display = 'grid';
+        btnTable?.classList.remove('active');
+        btnCards?.classList.add('active');
+      } else {
+        if (tableContainer) tableContainer.style.display = 'block';
+        if (cardsContainer) cardsContainer.style.display = 'none';
+        btnTable?.classList.add('active');
+        btnCards?.classList.remove('active');
+      }
+    }
+
+    function renderContracts() {
+      renderTable();
+      renderCards();
+      switchViewMode(state.viewMode);
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('assign-table-body');
+      tbody.innerHTML = '';
+      const list = getFilteredAssignments();
+
+      if (list.length === 0) {
+        const coachName = (state.selectedTrainerId && state.selectedTrainerId !== 'all')
+          ? (state.trainersList.find(t => String(t.id) === String(state.selectedTrainerId))?.full_name || 'selected coach')
+          : null;
+        const msg = coachName
+          ? `No personal trainer assignments found for Coach ${coachName}.`
+          : 'No personal trainer assignments found for this filter. Click "+ Assign Personal Trainer" to enroll a member!';
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="padding: 2.5rem; text-align: center; color: var(--text-dim);">
+              <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🏋️‍♂️</div>
+              <div>${msg}</div>
+              ${coachName ? `
+                <div style="margin-top: 0.85rem;">
+                  <button type="button" class="btn btn-outline btn-sm" id="btn-empty-reset" style="font-size: 0.8rem; padding: 6px 14px;">
+                    ✕ Clear Filter & Show All Personal Trainers
+                  </button>
+                </div>
+              ` : ''}
+            </td>
+          </tr>
+        `;
+        document.getElementById('btn-empty-reset')?.addEventListener('click', resetAllFilters);
+        return;
+      }
+
+      list.forEach((a) => {
+        const tr = document.createElement('tr');
+        tr.style.cssText = 'border-bottom: 1px solid var(--border); transition: background 0.15s;';
+        tr.onmouseover = () => tr.style.background = 'rgba(255,255,255,0.02)';
+        tr.onmouseout = () => tr.style.background = 'transparent';
+
+        const monthlyFee = Number(a.monthly_fee || 0);
+        const feeDue = Number(a.fee_due || 0);
+
+        let feeBadge = '<span class="badge-pt-active">PAID</span>';
+        if (feeDue > 0) {
+          feeBadge = `<span class="badge-pt-expired">DUE ₹${feeDue.toLocaleString('en-IN')}</span>`;
+        } else if (a.payment_status === 'waived') {
+          feeBadge = `<span class="badge-pt-paused">WAIVED</span>`;
+        }
+
+        let validityBadge = '';
+        if (a.days_expired > 0) {
+          validityBadge = `<span class="badge-pt-expired">Expired by ${a.days_expired}d</span>`;
+        } else if (a.days_remaining <= 7) {
+          validityBadge = `<span class="badge-pt-paused">Renews in ${a.days_remaining}d</span>`;
+        } else {
+          validityBadge = `<span style="color: var(--text-gray); font-size: 0.78rem;">${a.days_remaining} days left</span>`;
+        }
+
+        let statusBadge = `<span class="badge-pt-active">ACTIVE</span>`;
+        if (a.status === 'paused') {
+          statusBadge = `<span class="badge-pt-paused">PAUSED</span>`;
+        } else if (a.status === 'completed' || a.status === 'cancelled') {
+          statusBadge = `<span class="badge-pt-expired">${a.status.toUpperCase()}</span>`;
+        }
+
+        const startFormatted = a.start_date ? new Date(a.start_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '-';
+        const endFormatted = a.end_date ? new Date(a.end_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+
+        tr.innerHTML = `
+          <td style="padding: 12px 16px;">
+            <div style="font-weight: 700; color: #fff;">${escapeHtml(a.member_name)}</div>
+            <div style="font-size: 0.75rem; color: #38bdf8;">${escapeHtml(a.member_code || '')} • ${escapeHtml(a.member_phone || '')}</div>
+          </td>
+          <td style="padding: 12px 16px;">
+            <div style="font-weight: 700; color: var(--accent-green);">${escapeHtml(a.trainer_name)}</div>
+            <div style="font-size: 0.75rem; color: var(--text-dim);">${escapeHtml(a.trainer_specialty || 'Personal Coach')}</div>
+          </td>
+          <td style="padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 800; color: #fff;">
+            ₹${monthlyFee.toLocaleString('en-IN')}<span style="font-size: 0.72rem; color: var(--text-dim); font-weight: normal;"> / mo</span>
+          </td>
+          <td style="padding: 12px 16px;">
+            ${feeBadge}
+          </td>
+          <td style="padding: 12px 16px; font-size: 0.82rem; color: #fff;">
+            <div>${escapeHtml(a.sessions_per_week || 3)} days / week</div>
+            <div style="font-size: 0.75rem; color: var(--text-dim);">${escapeHtml(a.preferred_slot || 'Morning')}</div>
+          </td>
+          <td style="padding: 12px 16px; font-size: 0.82rem; color: #facc15;">
+            ${escapeHtml(a.training_goal || 'General Fitness')}
+          </td>
+          <td style="padding: 12px 16px;">
+            <div style="font-size: 0.8rem; color: #fff;">${startFormatted} → ${endFormatted}</div>
+            <div style="margin-top: 3px;">${validityBadge}</div>
+          </td>
+          <td style="padding: 12px 16px;">
+            ${statusBadge}
+          </td>
+          <td style="padding: 12px 16px; text-align: right;">
+            <div style="display: flex; gap: 6px; justify-content: flex-end;">
+              <button class="action-btn" data-action="edit" data-id="${a.id}" title="Edit Assignment">
+                ✏️ Edit
+              </button>
+              <button class="action-btn action-btn-danger" data-action="delete" data-id="${a.id}" data-name="${escapeHtml(a.member_name)}" title="Remove Assignment">
+                🗑️
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Bind actions
+      tbody.querySelectorAll('button[data-action]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const action = btn.getAttribute('data-action');
+          const id = btn.getAttribute('data-id');
+          if (action === 'edit') {
+            openEditModal(id);
+          } else if (action === 'delete') {
+            confirmDelete(id, btn.getAttribute('data-name'));
+          }
+        });
+      });
+    }
+
+    function renderCards() {
+      const container = document.getElementById('contracts-cards-container');
+      if (!container) return;
+      container.innerHTML = '';
+      const list = getFilteredAssignments();
+
+      if (list.length === 0) {
+        const coachName = (state.selectedTrainerId && state.selectedTrainerId !== 'all')
+          ? (state.trainersList.find(t => String(t.id) === String(state.selectedTrainerId))?.full_name || 'selected coach')
+          : null;
+        const msg = coachName
+          ? `No personal trainer assignments found for Coach ${coachName}.`
+          : 'No personal trainer assignments found for this filter. Click "+ Assign Personal Trainer" to enroll a member!';
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 3rem; text-align: center; color: var(--text-dim); background: rgba(255,255,255,0.01); border: 1px dashed var(--border); border-radius: var(--radius-lg);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏋️‍♂️</div>
+            <div style="font-size: 1rem; color: #fff; font-weight: 600;">${msg}</div>
+            <div style="margin-top: 1rem;">
+              <button type="button" class="btn btn-outline btn-sm" id="btn-empty-reset-cards" style="font-size: 0.8rem; padding: 6px 16px;">
+                ✕ Clear Filter & Show All Personal Trainers
+              </button>
+            </div>
+          </div>
+        `;
+        document.getElementById('btn-empty-reset-cards')?.addEventListener('click', resetAllFilters);
+        return;
+      }
+
+      list.forEach((a) => {
+        const monthlyFee = Number(a.monthly_fee || 0);
+        const feeDue = Number(a.fee_due || 0);
+
+        let feeBadge = '<span class="badge-pt-active">PAID</span>';
+        if (feeDue > 0) {
+          feeBadge = `<span class="badge-pt-expired">DUE ₹${feeDue.toLocaleString('en-IN')}</span>`;
+        } else if (a.payment_status === 'waived') {
+          feeBadge = `<span class="badge-pt-paused">WAIVED</span>`;
+        }
+
+        let validityBadge = '';
+        if (a.days_expired > 0) {
+          validityBadge = `<span class="badge-pt-expired">Expired by ${a.days_expired}d</span>`;
+        } else if (a.days_remaining <= 7) {
+          validityBadge = `<span class="badge-pt-paused">Renews in ${a.days_remaining}d</span>`;
+        } else {
+          validityBadge = `<span style="color: var(--text-gray); font-size: 0.76rem;">${a.days_remaining} days left</span>`;
+        }
+
+        let statusBadge = `<span class="badge-pt-active">ACTIVE</span>`;
+        if (a.status === 'paused') {
+          statusBadge = `<span class="badge-pt-paused">PAUSED</span>`;
+        } else if (a.status === 'completed' || a.status === 'cancelled') {
+          statusBadge = `<span class="badge-pt-expired">${a.status.toUpperCase()}</span>`;
+        }
+
+        const startFormatted = a.start_date ? new Date(a.start_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '-';
+        const endFormatted = a.end_date ? new Date(a.end_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+        const initials = a.member_name ? a.member_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'MB';
+
+        const card = document.createElement('div');
+        card.className = 'contract-card';
+        card.innerHTML = `
+          <div class="contract-card-header">
+            <div class="contract-member-info">
+              <div class="contract-member-avatar">${initials}</div>
+              <div>
+                <div class="contract-member-name">${escapeHtml(a.member_name)}</div>
+                <div class="contract-member-meta">${escapeHtml(a.member_code || 'GYM')} • ${escapeHtml(a.member_phone || '-')}</div>
+              </div>
+            </div>
+            <div>${statusBadge}</div>
+          </div>
+
+          <div class="contract-coach-badge">
+            <div>
+              <div class="contract-coach-label">Personal Trainer</div>
+              <div class="contract-coach-name">🏋️ Coach ${escapeHtml(a.trainer_name || 'Trainer')}</div>
+            </div>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-family: 'JetBrains Mono', monospace;">${escapeHtml(a.trainer_code || '')}</span>
+          </div>
+
+          <div class="contract-fee-row">
+            <div>
+              <div class="contract-detail-label">Monthly PT Fee</div>
+              <div style="font-size: 1.15rem; font-weight: 800; color: #fff; font-family: 'JetBrains Mono', monospace;">
+                ₹${monthlyFee.toLocaleString('en-IN')} <span style="font-size: 0.75rem; color: var(--text-dim); font-weight: normal;">/ mo</span>
+              </div>
+            </div>
+            <div>${feeBadge}</div>
+          </div>
+
+          <div class="contract-details-grid">
+            <div class="contract-detail-cell">
+              <span class="contract-detail-label">Schedule & Slot</span>
+              <span class="contract-detail-val">${escapeHtml(a.sessions_per_week || 3)} days / week</span>
+              <span style="font-size: 0.72rem; color: var(--text-dim);">${escapeHtml(a.preferred_slot || 'Morning')}</span>
+            </div>
+            <div class="contract-detail-cell">
+              <span class="contract-detail-label">Goal / Focus</span>
+              <span class="contract-detail-val" style="color: #fbbf24;">${escapeHtml(a.training_goal || 'General Fitness')}</span>
+              <span style="font-size: 0.72rem; color: var(--text-dim);">${escapeHtml(a.membership_plan || 'Active Member')}</span>
+            </div>
+          </div>
+
+          <div class="contract-dates-bar">
+            <div>
+              <span style="color: var(--text-dim);">Dates:</span>
+              <strong style="color: #fff; margin-left: 4px;">${startFormatted} → ${endFormatted}</strong>
+            </div>
+            <div>${validityBadge}</div>
+          </div>
+
+          <div class="contract-card-actions">
+            <button class="action-btn" data-action="edit" data-id="${a.id}" title="Edit Assignment">
+              ✏️ Edit Contract
+            </button>
+            <button class="action-btn action-btn-danger" data-action="delete" data-id="${a.id}" data-name="${escapeHtml(a.member_name)}" title="Remove Assignment">
+              🗑️
+            </button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      // Bind actions for cards
+      container.querySelectorAll('button[data-action]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const action = btn.getAttribute('data-action');
+          const id = btn.getAttribute('data-id');
+          if (action === 'edit') {
+            openEditModal(id);
+          } else if (action === 'delete') {
+            confirmDelete(id, btn.getAttribute('data-name'));
+          }
+        });
+      });
+    }
+
+    function openCreateModal() {
+      document.getElementById('modal-assign-title').textContent = '🏋️ Assign Member to Personal Trainer';
+      document.getElementById('assign-id').value = '';
+
+      const memberSearch = document.getElementById('assign-member-search');
+      const memberSel = document.getElementById('assign-member-select');
+      memberSearch.disabled = false;
+      memberSearch.value = '';
+      memberSel.disabled = false;
+      memberSel.value = '';
+      onMemberSelected(null, false);
+
+      const trainerSearch = document.getElementById('assign-trainer-search');
+      const trainerSel = document.getElementById('assign-trainer-select');
+      trainerSearch.disabled = false;
+      trainerSearch.value = '';
+      trainerSel.disabled = false;
+      trainerSel.value = '';
+      onTrainerSelected(null, false);
+
+      document.getElementById('assign-billing-period').value = 'm1';
+      document.getElementById('assign-custom-days').value = '30';
+      document.getElementById('assign-period-fee').value = '6500';
+      document.getElementById('assign-amount-paid').value = '0';
+      document.getElementById('assign-sessions-week').value = '3';
+      document.getElementById('assign-slot').value = 'Morning (06:30 AM - 07:30 AM)';
+      document.getElementById('assign-goal').value = 'Hypertrophy & Strength Training';
+
+      document.getElementById('assign-start-date').value = new Date().toISOString().split('T')[0];
+      window.ptBilling.updateEndDate();
+
+      document.getElementById('assign-payment-status').value = 'paid';
+      document.getElementById('assign-status').value = 'active';
+      document.getElementById('assign-notes').value = '';
+      window.ptBilling.refresh();
+
+      document.getElementById('modal-assign-trainer').style.display = 'flex';
+    }
+
+    function openEditModal(id) {
+      const a = state.assignments.find((item) => String(item.id) === String(id));
+      if (!a) return;
+
+      document.getElementById('modal-assign-title').textContent = `✏️ Edit PT Assignment: ${a.member_name}`;
+      document.getElementById('assign-id').value = a.id;
+
+      // Member
+      const member = state.membersList.find((item) => Number(item.id) === Number(a.member_id)) || {
+        id: a.member_id,
+        member_code: a.member_code,
+        full_name: a.member_name,
+        plan_name: 'Member',
+        phone: a.member_phone,
+      };
+      onMemberSelected(member, false);
+      document.getElementById('assign-member-search').disabled = true;
+      document.getElementById('assign-member-select').disabled = true;
+
+      // Trainer
+      const trainer = state.trainersList.find((item) => Number(item.id) === Number(a.trainer_id)) || {
+        id: a.trainer_id,
+        trainer_code: a.trainer_code,
+        full_name: a.trainer_name,
+        specialty: a.trainer_specialty,
+      };
+      onTrainerSelected(trainer, false);
+
+      // Keep DB values
+      document.getElementById('assign-sessions-week').value = a.sessions_per_week || 3;
+      document.getElementById('assign-slot').value = a.preferred_slot || '';
+      document.getElementById('assign-goal').value = a.training_goal || '';
+
+      document.getElementById('assign-start-date').value = a.start_date ? a.start_date.split('T')[0] : '';
+      document.getElementById('assign-end-date').value = a.end_date ? a.end_date.split('T')[0] : '';
+
+      document.getElementById('assign-payment-status').value = a.payment_status || 'paid';
+      document.getElementById('assign-status').value = a.status || 'active';
+      document.getElementById('assign-notes').value = a.notes || '';
+      // Restore the saved billing period (from the dates) and the fee billed for it (paid + due)
+      window.ptBilling.loadSaved(a);
+
+      document.getElementById('modal-assign-trainer').style.display = 'flex';
+    }
+
+    function askConfirmation({ title = 'Remove Assignment', message = 'Are you sure?', confirmText = 'Yes, Remove', confirmStyle = 'danger', icon = '🗑️' } = {}) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('custom-confirm-modal');
+        const titleEl = document.getElementById('confirm-modal-title');
+        const descEl = document.getElementById('confirm-modal-desc');
+        const iconEl = document.getElementById('confirm-modal-icon');
+        const okBtn = document.getElementById('btn-confirm-ok');
+        const cancelBtn = document.getElementById('btn-confirm-cancel');
+
+        titleEl.textContent = title;
+        descEl.textContent = message;
+        iconEl.textContent = icon;
+        okBtn.textContent = confirmText;
+
+        iconEl.className = `center-modal-icon-badge icon-badge-${confirmStyle}`;
+        okBtn.className = `btn-center-confirm btn-confirm-${confirmStyle}`;
+
+        modal.style.display = 'flex';
+
+        function cleanup(result) {
+          modal.style.display = 'none';
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          modal.removeEventListener('click', onBackdrop);
+          document.removeEventListener('keydown', onKeyDown);
+          resolve(result);
+        }
+
+        function onOk() { cleanup(true); }
+        function onCancel() { cleanup(false); }
+        function onBackdrop(e) {
+          if (e.target === modal) cleanup(false);
+        }
+        function onKeyDown(e) {
+          if (e.key === 'Escape') cleanup(false);
+          else if (e.key === 'Enter') cleanup(true);
+        }
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        modal.addEventListener('click', onBackdrop);
+        document.addEventListener('keydown', onKeyDown);
+      });
+    }
+
+    async function confirmDelete(id, memberName) {
+      const confirmed = await askConfirmation({
+        title: 'Remove PT Assignment',
+        message: `Are you sure you want to remove the personal trainer assignment for "${memberName}"?`,
+        confirmText: 'Yes, Remove',
+        confirmStyle: 'danger',
+        icon: '🗑️',
+      });
+      if (!confirmed) return;
+
+      try {
+        const res = await adminApi.deleteTrainerAssignment(id);
+        if (res.success) {
+          showToast(`🗑️ Assignment for "${memberName}" removed.`);
+          await loadAssignments();
+        } else {
+          showToast(res.error || 'Failed to remove assignment.', true);
+        }
+      } catch (err) {
+        showToast('Error removing assignment.', true);
+      }
+    }
+
+    // Bind Member search & selection events
+    const memberSearchInput = document.getElementById('assign-member-search');
+    const memberSelectDropdown = document.getElementById('assign-member-select');
+    const memberClearBtn = document.getElementById('btn-clear-member-search');
+
+    memberSearchInput.addEventListener('input', (e) => {
+      const match = findMember(e.target.value);
+      if (match) {
+        onMemberSelected(match, true);
+      } else if (!e.target.value.trim()) {
+        onMemberSelected(null, false);
+      }
+    });
+
+    memberSearchInput.addEventListener('change', (e) => {
+      const match = findMember(e.target.value);
+      if (match) {
+        onMemberSelected(match, true);
+      }
+    });
+
+    memberSelectDropdown.addEventListener('change', (e) => {
+      const memberId = e.target.value;
+      const match = state.membersList.find((m) => String(m.id) === String(memberId));
+      onMemberSelected(match, true);
+    });
+
+    memberClearBtn.addEventListener('click', () => {
+      memberSearchInput.value = '';
+      onMemberSelected(null, false);
+      memberSearchInput.focus();
+    });
+
+    // Bind Trainer search & selection events
+    const trainerSearchInput = document.getElementById('assign-trainer-search');
+    const trainerSelectDropdown = document.getElementById('assign-trainer-select');
+    const trainerClearBtn = document.getElementById('btn-clear-trainer-search');
+
+    trainerSearchInput.addEventListener('input', (e) => {
+      const match = findTrainer(e.target.value);
+      if (match) {
+        onTrainerSelected(match, true);
+      } else if (!e.target.value.trim()) {
+        onTrainerSelected(null, false);
+      }
+    });
+
+    trainerSearchInput.addEventListener('change', (e) => {
+      const match = findTrainer(e.target.value);
+      if (match) {
+        onTrainerSelected(match, true);
+      }
+    });
+
+    trainerSelectDropdown.addEventListener('change', (e) => {
+      const trainerId = e.target.value;
+      const match = state.trainersList.find((t) => String(t.id) === String(trainerId));
+      onTrainerSelected(match, true);
+    });
+
+    trainerClearBtn.addEventListener('click', () => {
+      trainerSearchInput.value = '';
+      onTrainerSelected(null, false);
+      trainerSearchInput.focus();
+    });
+
+    // ---------------- Fee settings: billing period (days / months) + fee for that period ----------------
+    window.ptBilling = (() => {
+      const $ = (id) => document.getElementById(id);
+      const PERIODS = { d7: { days: 7 }, d15: { days: 15 }, m1: { months: 1 }, m2: { months: 2 }, m3: { months: 3 }, m6: { months: 6 }, m12: { months: 12 } };
+      const inr = (n) => `₹${Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+      const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const parse = (s) => { const [y, m, d] = String(s || '').slice(0, 10).split('-').map(Number); return y ? new Date(y, m - 1, d) : null; };
+      function period() {
+        const v = $('assign-billing-period').value;
+        if (v === 'custom') return { days: Math.max(1, Math.min(730, parseInt($('assign-custom-days').value, 10) || 1)) };
+        return PERIODS[v] || PERIODS.m1;
+      }
+      const periodMonths = () => { const p = period(); return p.months || p.days / 30; };
+      const periodLabel = () => { const p = period(); return p.months ? `${p.months} Month${p.months > 1 ? 's' : ''}` : `${p.days} Day${p.days > 1 ? 's' : ''}`; };
+      function updateEndDate() {
+        const start = parse($('assign-start-date').value); if (!start) return;
+        const p = period(); const end = new Date(start);
+        if (p.months) end.setMonth(end.getMonth() + p.months); else end.setDate(end.getDate() + p.days);
+        $('assign-end-date').value = iso(end);
+        const badge = $('date-autofill-badge'); if (badge) badge.textContent = `⚡ +${periodLabel().toUpperCase()}`;
+      }
+      function amounts() {
+        const total = Math.max(0, Number($('assign-period-fee').value) || 0);
+        const st = $('assign-payment-status').value;
+        if (st === 'paid') return { total, paid: total, due: 0 };
+        if (st === 'waived') return { total, paid: 0, due: 0 };
+        if (st === 'pending') return { total, paid: 0, due: total };
+        const paid = Math.min(total, Math.max(0, Number($('assign-amount-paid').value) || 0));
+        return { total, paid, due: Math.round((total - paid) * 100) / 100 };
+      }
+      function refresh() {
+        $('custom-days-group').style.display = $('assign-billing-period').value === 'custom' ? '' : 'none';
+        $('period-fee-label').textContent = `PT Fee for ${periodLabel()} (₹ INR) *`;
+        const a = amounts(); const months = periodMonths();
+        const monthly = months > 0 ? Math.round((a.total / months) * 100) / 100 : a.total;
+        $('assign-monthly-fee').value = monthly;
+        $('fee-monthly-hint').textContent = months === 1 ? '' : `≈ ${inr(monthly)} per month`;
+        const partial = $('assign-payment-status').value === 'partial';
+        $('partial-paid-group').style.display = partial ? '' : 'none';
+        $('balance-hint').textContent = partial ? `Balance due: ${inr(a.due)}` : '';
+      }
+      /** Edit: infer the period from the saved dates; fee billed = paid + due (or monthly × months). */
+      function loadSaved(a) {
+        const s = parse(a.start_date); const e = parse(a.end_date);
+        let key = 'custom'; let days = 30;
+        if (s && e) {
+          days = Math.max(1, Math.round((e - s) / 86400000));
+          const match = Object.entries(PERIODS).find(([, p]) => {
+            const t = new Date(s); if (p.months) t.setMonth(t.getMonth() + p.months); else t.setDate(t.getDate() + p.days);
+            return iso(t) === iso(e);
+          });
+          if (match) key = match[0];
+        }
+        $('assign-billing-period').value = key; $('assign-custom-days').value = String(days);
+        const paid = Number(a.fee_paid || 0); const due = Number(a.fee_due || 0);
+        const total = paid + due > 0 ? paid + due : Math.round(Number(a.monthly_fee || 0) * periodMonths());
+        $('assign-period-fee').value = String(total);
+        $('assign-amount-paid').value = String(paid);
+        refresh();
+      }
+      ['assign-billing-period', 'assign-custom-days'].forEach((id) => $(id).addEventListener('input', () => { updateEndDate(); refresh(); flashEl($('assign-end-date'), 'green'); }));
+      ['assign-period-fee', 'assign-amount-paid', 'assign-payment-status'].forEach((id) => $(id).addEventListener('input', refresh));
+      $('assign-payment-status').addEventListener('change', refresh);
+      $('assign-billing-period').addEventListener('change', () => { updateEndDate(); refresh(); });
+      $('assign-start-date').addEventListener('change', () => { updateEndDate(); flashEl($('assign-end-date'), 'green'); showBadge('#date-autofill-badge'); });
+      return { periodMonths, updateEndDate, refresh, amounts, loadSaved };
+    })();
+
+    document.getElementById('btn-open-assign-modal').addEventListener('click', openCreateModal);
+    document.getElementById('btn-close-assign-modal').addEventListener('click', () => {
+      document.getElementById('modal-assign-trainer').style.display = 'none';
+    });
+    document.getElementById('btn-cancel-assign').addEventListener('click', () => {
+      document.getElementById('modal-assign-trainer').style.display = 'none';
+    });
+
+    document.getElementById('form-assign-trainer').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('assign-id').value;
+      window.ptBilling.refresh();
+      const bill = window.ptBilling.amounts();
+      if (!(bill.total > 0) && document.getElementById('assign-payment-status').value !== 'waived') {
+        showToast('Enter the PT fee for the selected period.', true);
+        return;
+      }
+      const payload = {
+        feePaid: bill.paid,
+        feeDue: bill.due,
+        memberId: document.getElementById('assign-member-select').value,
+        trainerId: document.getElementById('assign-trainer-select').value,
+        monthlyFee: document.getElementById('assign-monthly-fee').value,
+        sessionsPerWeek: document.getElementById('assign-sessions-week').value,
+        preferredSlot: document.getElementById('assign-slot').value,
+        trainingGoal: document.getElementById('assign-goal').value,
+        startDate: document.getElementById('assign-start-date').value,
+        endDate: document.getElementById('assign-end-date').value,
+        paymentStatus: document.getElementById('assign-payment-status').value,
+        status: document.getElementById('assign-status').value,
+        notes: document.getElementById('assign-notes').value,
+      };
+
+      try {
+        let res;
+        if (id) {
+          res = await adminApi.updateTrainerAssignment(id, payload);
+        } else {
+          res = await adminApi.createTrainerAssignment(payload);
+        }
+
+        if (res.success) {
+          showToast(res.message || '✅ Personal trainer assignment saved!');
+          document.getElementById('modal-assign-trainer').style.display = 'none';
+          await loadAssignments();
+        } else {
+          showToast(res.error || 'Failed to save assignment.', true);
+        }
+      } catch (err) {
+        showToast('Error submitting assignment.', true);
+      }
+    });
+
+    // Reset All Filters Helper
+    function resetAllFilters() {
+      state.selectedTrainerId = 'all';
+      state.searchQuery = '';
+      state.currentFilter = 'all';
+
+      const trainerSel = document.getElementById('filter-trainer-select');
+      if (trainerSel) trainerSel.value = 'all';
+
+      const searchInput = document.getElementById('assign-search-input');
+      if (searchInput) searchInput.value = '';
+
+      document.querySelectorAll('#filter-btn-group .tab-pill').forEach((b) => {
+        if (b.getAttribute('data-filter') === 'all') {
+          b.classList.add('active');
+        } else {
+          b.classList.remove('active');
+        }
+      });
+
+      loadAssignments();
+      showToast('Filters reset. Showing all personal trainers.');
+    }
+
+    // View Mode Toggle (Table vs Cards)
+    document.getElementById('view-mode-table')?.addEventListener('click', () => switchViewMode('table'));
+    document.getElementById('view-mode-cards')?.addEventListener('click', () => switchViewMode('cards'));
+
+    // Filter Buttons
+    document.querySelectorAll('#filter-btn-group .tab-pill').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#filter-btn-group .tab-pill').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.currentFilter = btn.getAttribute('data-filter');
+        renderContracts();
+      });
+    });
+
+    // Personal Trainer Dropdown Filter
+    const filterTrainerSelect = document.getElementById('filter-trainer-select');
+    if (filterTrainerSelect) {
+      filterTrainerSelect.addEventListener('change', (e) => {
+        state.selectedTrainerId = e.target.value;
+        loadAssignments();
+        if (state.selectedTrainerId !== 'all') {
+          const selectedText = e.target.options[e.target.selectedIndex]?.text || '';
+          showToast(`Filtered assignments for ${selectedText.split('(')[0].trim()}`);
+        } else {
+          showToast('Showing all personal trainers');
+        }
+      });
+    }
+
+    // Search Input (Real-time debounce + Enter key)
+    let searchDebounce;
+    const assignSearchInput = document.getElementById('assign-search-input');
+    if (assignSearchInput) {
+      assignSearchInput.addEventListener('input', (e) => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+          state.searchQuery = e.target.value.trim();
+          loadAssignments();
+        }, 300);
+      });
+
+      assignSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          clearTimeout(searchDebounce);
+          state.searchQuery = assignSearchInput.value.trim();
+          loadAssignments();
+        }
+      });
+    }
+
+    // Search Button Click
+    const btnSearchAssignments = document.getElementById('btn-search-assignments');
+    if (btnSearchAssignments) {
+      btnSearchAssignments.addEventListener('click', () => {
+        if (assignSearchInput) {
+          clearTimeout(searchDebounce);
+          state.searchQuery = assignSearchInput.value.trim();
+        }
+        loadAssignments();
+        showToast('Searching personal trainer assignments...');
+      });
+    }
+
+    // Reset Button Click
+    const btnResetFilters = document.getElementById('btn-reset-filters');
+    if (btnResetFilters) {
+      btnResetFilters.addEventListener('click', resetAllFilters);
+    }
+
+    document.getElementById('btn-refresh-assignments').addEventListener('click', () => {
+      loadAssignments();
+      showToast('🔄 Refreshed personal trainer assignments');
+    });
+
+    // Mobile Sidebar Toggle
+    document.getElementById('btn-sidebar-toggle')?.addEventListener('click', () => {
+      document.getElementById('admin-sidebar')?.classList.toggle('open');
+    });
+
+    // Logout
+    document.getElementById('btn-logout')?.addEventListener('click', async () => {
+      await adminApi.logout();
+      window.location.href = 'index.html';
+    });
+
+    // Init
+    (async () => {
+      await hydrateUser();
+      await loadDropdowns();
+      await loadAssignments();
+    })();
+  </script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+</body>
+
+</html>

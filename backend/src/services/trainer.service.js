@@ -8,7 +8,7 @@ const MOCK_TRAINERS = [
     full_name: 'Arjun Reddy',
     specialty: 'CrossFit & Olympic Weightlifting',
     phone: '9876500001',
-    email: 'arjun@pulsecorefitness.in',
+    email: 'arjun@virtexfitness.in',
     status: 'on_floor',
     shift_hours: '06:00 AM - 02:00 PM',
     certifications: ['CSCS', 'CrossFit L2', 'CPR/AED'],
@@ -19,7 +19,7 @@ const MOCK_TRAINERS = [
     full_name: 'Meera Rao',
     specialty: 'Functional Mobility & Hatha Yoga',
     phone: '9876500002',
-    email: 'meera@pulsecorefitness.in',
+    email: 'meera@virtexfitness.in',
     status: 'in_session',
     shift_hours: '08:00 AM - 04:00 PM',
     certifications: ['RYT-500', 'Core Rehab Specialist'],
@@ -30,7 +30,7 @@ const MOCK_TRAINERS = [
     full_name: 'Karan Verma',
     specialty: 'Hypertrophy & Physique Coach',
     phone: '9876500003',
-    email: 'karan@pulsecorefitness.in',
+    email: 'karan@virtexfitness.in',
     status: 'off_duty',
     shift_hours: '02:00 PM - 10:00 PM',
     certifications: ['ACE Personal Trainer', 'ISSN Sports Nutritionist'],
@@ -80,6 +80,15 @@ export async function createTrainer(data) {
     trainer_code: `TRN00${MOCK_TRAINERS.length + 1}`,
     ...data,
   };
+  if (data.password && data.email) {
+    newTrainer.user_account = {
+      username: data.username || data.email.split('@')[0],
+      email: data.email,
+      password: data.password,
+      role: 'trainer',
+      loginUrl: '/trainer-auth.html',
+    };
+  }
   MOCK_TRAINERS.push(newTrainer);
   return newTrainer;
 }
@@ -89,7 +98,17 @@ export async function updateTrainer(id, data) {
     return await trainerRepository.updateTrainer(id, data);
   }
   const trainer = MOCK_TRAINERS.find((t) => t.id === Number(id));
-  if (trainer) Object.assign(trainer, data);
+  if (trainer) {
+    Object.assign(trainer, data);
+    if (data.password) {
+      trainer.user_account = {
+        email: data.email || trainer.email,
+        password: data.password,
+        updated: true,
+        loginUrl: '/trainer-auth.html',
+      };
+    }
+  }
   return trainer || null;
 }
 

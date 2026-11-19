@@ -1,0 +1,36 @@
+/* Admin → Logins & Access (admin-logins.html) */
+.lg-wrap { max-width: 1300px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 1.4rem 1.5rem; display: grid; gap: 1.1rem; }
+.lg-hero h1 { margin: 0 0 .35rem; font-size: 1.6rem; color: #fff; }
+.lg-hero p { margin: 0; color: var(--text-gray); font-size: .88rem; line-height: 1.5; max-width: 950px; }
+.lg-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1rem 1.1rem; }
+.lg-tools { display: flex; justify-content: space-between; gap: .8rem; flex-wrap: wrap; margin-bottom: .8rem; }
+.lg-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.lg-chip { background: transparent; border: 1px solid var(--border); color: var(--text-gray); border-radius: 999px; padding: .35rem .85rem; font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; }
+.lg-chip.on { background: rgba(0,230,118,.12); border-color: rgba(0,230,118,.45); color: var(--accent-green, #00e676); }
+.lg-search { background: var(--bg-input, #0b0d14); border: 1px solid var(--border); color: #fff; border-radius: 10px; padding: .5rem .7rem; font: inherit; font-size: .86rem; min-width: 240px; }
+.lg-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.lg-table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+.lg-table th { text-align: left; font-size: .7rem; text-transform: uppercase; letter-spacing: .4px; color: var(--text-dim); padding: .55rem .6rem; border-bottom: 1px solid var(--border); }
+.lg-table td { padding: .6rem; border-bottom: 1px solid rgba(255,255,255,.05); color: #e5e7eb; vertical-align: middle; }
+.lg-table b { color: #fff; } .lg-muted { color: var(--text-dim); font-size: .78rem; }
+.lg-act { text-align: right; } td.lg-act { white-space: nowrap; }
+.lg-tag { display: inline-block; font-size: .64rem; font-weight: 800; border-radius: 999px; padding: 1px 7px; border: 1px solid; text-transform: uppercase; margin-left: 4px; }
+.lg-tag.member { color: #6ee7b7; border-color: rgba(16,185,129,.45); } .lg-tag.trainer { color: #fdba74; border-color: rgba(251,146,60,.45); }
+.lg-pill { display: inline-block; font-size: .72rem; font-weight: 800; border-radius: 999px; padding: 2px 9px; border: 1px solid; white-space: nowrap; }
+.lg-pill.ok { color: #6ee7b7; border-color: rgba(16,185,129,.45); background: rgba(16,185,129,.08); }
+.lg-pill.frozen { color: #93c5fd; border-color: rgba(59,130,246,.5); background: rgba(59,130,246,.1); }
+.lg-pill.none { color: var(--text-dim); border-color: var(--border); }
+.lg-pill.g { color: #a5b4fc; border-color: rgba(129,140,248,.45); } .lg-pill.gwait { color: #fcd34d; border-color: rgba(245,158,11,.45); }
+.lg-btn { background: transparent; border: 1px solid var(--border); color: #cbd5e1; border-radius: 8px; padding: .3rem .6rem; font: inherit; font-size: .76rem; font-weight: 700; cursor: pointer; margin-left: 4px; }
+.lg-btn:hover { color: #fff; border-color: rgba(255,255,255,.3); } .lg-btn.add { background: #00e676; border-color: #00e676; color: #04130a; }
+.lg-btn.danger { color: #fca5a5; border-color: rgba(239,68,68,.45); } .lg-btn.danger:hover { background: #ef4444; color: #fff; }
+.lg-btn:disabled { opacity: .5; cursor: wait; }
+.lg-back { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.lg-box { width: min(460px, 100%); background: var(--bg-card, #13161f); border: 1px solid var(--border); border-radius: 16px; padding: 1.3rem 1.4rem; display: grid; gap: .8rem; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.lg-box h3 { margin: 0; color: #fff; font-size: 1.1rem; } .lg-box p { margin: 0; color: var(--text-gray); font-size: .88rem; line-height: 1.5; }
+.lg-box label { display: grid; gap: 4px; font-size: .78rem; font-weight: 700; color: var(--text-gray); }
+.lg-box input { background: var(--bg-input, #0b0d14); border: 1px solid var(--border); color: #fff; border-radius: 9px; padding: .55rem .65rem; font: inherit; font-size: .9rem; }
+.lg-box .lg-row { display: flex; gap: .4rem; } .lg-box .lg-row input { flex: 1; }
+.lg-err { color: #fca5a5; font-size: .82rem; margin: 0; } .lg-err:empty { display: none; }
+.lg-acts { display: flex; justify-content: flex-end; gap: .5rem; }
+@media (max-width: 760px) { .lg-wrap { padding: 1rem; } .lg-search { min-width: 0; width: 100%; } }

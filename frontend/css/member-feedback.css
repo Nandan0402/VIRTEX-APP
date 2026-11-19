@@ -1,0 +1,42 @@
+/* =====================================================================
+   Virtex Member Portal — Feedback (member-feedback.html)
+   Builds on member-classes.css + member-comms.css.
+   ===================================================================== */
+.fb-types { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 1rem; }
+.fb-type { display: grid; grid-template-columns: 28px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 8px; align-items: center; text-align: left; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--mp-line); background: transparent; color: var(--mp-text); cursor: pointer; font-family: inherit; }
+.fb-type span { grid-row: 1 / 3; font-size: 1.3rem; }
+.fb-type b { font-size: 0.86rem; }
+.fb-type small { font-size: 0.72rem; color: var(--mp-text-dim); }
+.fb-type.on { border-color: var(--mp-accent); background: var(--mp-accent-soft); }
+.fb-type:focus-visible { outline: 2px solid var(--mp-accent); outline-offset: 2px; }
+.fb-form { display: grid; gap: 0.8rem; }
+.fb-row { display: grid; gap: 0.8rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mm-field { display: flex; flex-direction: column; gap: 5px; font-size: 0.8rem; color: var(--mp-text-muted); min-width: 0; }
+.mm-field i { font-style: normal; font-size: 0.68rem; color: var(--mp-text-dim); }
+.mm-field i.mm-req { color: var(--mp-accent); }
+.mm-field input, .mm-field select, .mm-field textarea { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--mp-line); background: var(--bg-input, #090a0f); color: var(--mp-text); font-family: inherit; font-size: 0.9rem; }
+.fb-count { align-self: flex-end; font-size: 0.68rem; color: var(--mp-text-dim); }
+.rc-scale { border: 0; padding: 0; margin: 0; }
+.rc-scale legend { font-size: 0.8rem; color: var(--mp-text); font-weight: 600; margin-bottom: 6px; padding: 0; }
+.rc-scale legend i { font-style: normal; font-weight: 400; font-size: 0.7rem; color: var(--mp-accent); }
+.rc-scale-row { display: flex; gap: 4px; flex-wrap: wrap; }
+.rc-scale-row label { position: relative; }
+.rc-scale-row input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.rc-scale-row span { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--mp-line); color: var(--mp-text-body); font-weight: 700; font-size: 0.85rem; }
+.rc-scale-row input:checked + span { background: var(--mp-accent); border-color: var(--mp-accent); color: #000; }
+.rc-scale-row input:focus-visible + span { outline: 2px solid var(--mp-accent); outline-offset: 2px; }
+.rc-scale-ends { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--mp-text-dim); margin-top: 3px; max-width: 430px; }
+.mm-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mm-actions .pg-muted { margin: 0; }
+.fb-survey { border-color: var(--mp-accent-border); }
+.fb-survey p { margin: 4px 0 8px; font-size: 0.85rem; color: var(--mp-text-body); }
+.fb-item code { font-size: 0.72rem; color: var(--mp-text-muted); margin-left: 4px; }
+.fb-rating { display: block; color: var(--mp-text-muted); }
+.fb-reply { margin: 6px 0; padding: 6px 10px; border-left: 3px solid var(--mp-accent); background: var(--mp-accent-soft); border-radius: 6px; }
+.fb-reply b { font-size: 0.76rem; }
+.fb-reply p { margin: 2px 0 0; }
+.oc-out { font-size: 0.72rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--mp-line); white-space: nowrap; }
+.oc-out-ok { color: var(--mp-accent); border-color: var(--mp-accent-border); }
+.oc-out-warn { color: #fbbf24; border-color: rgba(251, 191, 36, 0.45); }
+.oc-out-na { color: var(--mp-text-muted); }
+@media (max-width: 800px) { .fb-types { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fb-row { grid-template-columns: 1fr; } }

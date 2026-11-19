@@ -1,0 +1,38 @@
+/* Admin → Training Times (admin-training-times.html) */
+.tt-wrap { max-width: 1200px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 1.4rem 1.5rem; display: grid; gap: 1.2rem; }
+.tt-hero h1 { margin: 0 0 .35rem; font-size: 1.6rem; color: #fff; }
+.tt-hero p { margin: 0; color: var(--text-gray); font-size: .88rem; max-width: 900px; line-height: 1.5; }
+.tt-hero a { color: var(--accent-green, #00e676); }
+.tt-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.1rem 1.2rem; }
+.tt-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: .9rem; }
+.tt-head h2 { margin: 0; font-size: 1.05rem; color: #fff; display: flex; align-items: center; gap: .5rem; }
+.tt-count { font-size: .72rem; font-weight: 800; background: #f59e0b; color: #1a1205; border-radius: 999px; padding: 1px 8px; }
+.tt-count:empty { display: none; }
+.tt-muted { color: var(--text-dim); font-size: .82rem; }
+.tt-form { display: grid; grid-template-columns: 1.4fr 1.2fr .7fr .7fr; gap: .7rem; align-items: end; }
+.tt-form label { display: grid; gap: 4px; font-size: .78rem; font-weight: 700; color: var(--text-gray); }
+.tt-form select, .tt-form input { background: var(--bg-input, #0b0d14); border: 1px solid var(--border); color: #fff; border-radius: 10px; padding: .55rem .65rem; font: inherit; font-size: .88rem; min-width: 0; }
+.tt-form .tt-wide { grid-column: 1 / 4; }
+.tt-form button { grid-column: 4; }
+.tt-err { color: #fca5a5; font-size: .84rem; margin: .5rem 0 0; min-height: 1em; }
+.tt-table { width: 100%; border-collapse: collapse; font-size: .86rem; margin-top: .6rem; }
+.tt-table th { text-align: left; font-size: .7rem; text-transform: uppercase; letter-spacing: .4px; color: var(--text-dim); padding: .5rem .6rem; border-bottom: 1px solid var(--border); }
+.tt-table td { padding: .6rem; border-bottom: 1px solid rgba(255,255,255,.05); color: #e5e7eb; vertical-align: middle; }
+.tt-time { font-weight: 800; color: #fff; white-space: nowrap; }
+.tt-tag { display: inline-block; font-size: .64rem; font-weight: 800; border-radius: 999px; padding: 1px 7px; border: 1px solid; margin-left: 4px; text-transform: uppercase; }
+.tt-tag.pt { color: #c4b5fd; border-color: rgba(167,139,250,.5); } .tt-tag.gen { color: #93c5fd; border-color: rgba(59,130,246,.5); }
+.tt-tag.pending { color: #fcd34d; border-color: rgba(245,158,11,.55); } .tt-tag.approved { color: #6ee7b7; border-color: rgba(16,185,129,.5); }
+.tt-tag.rejected, .tt-tag.cancelled { color: #fca5a5; border-color: rgba(239,68,68,.45); }
+.tt-req { border: 1px solid var(--border); border-radius: 12px; padding: .8rem .9rem; display: grid; gap: .5rem; margin-bottom: .6rem; }
+.tt-req.pending { border-color: rgba(245,158,11,.5); background: rgba(245,158,11,.05); }
+.tt-req-top { display: flex; justify-content: space-between; gap: .6rem; flex-wrap: wrap; align-items: center; }
+.tt-req-top b { color: #fff; }
+.tt-change { font-size: .9rem; color: #e5e7eb; }
+.tt-change .from { color: var(--text-dim); text-decoration: line-through; margin-right: .3rem; }
+.tt-change .to { color: #fff; font-weight: 800; }
+.tt-actions { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+.tt-actions input[type=time], .tt-actions input[type=text] { background: var(--bg-input, #0b0d14); border: 1px solid var(--border); color: #fff; border-radius: 8px; padding: .35rem .5rem; font: inherit; font-size: .82rem; }
+.tt-actions input[type=text] { min-width: 200px; flex: 1; }
+.btn-danger-soft { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.45); color: #fca5a5; }
+.btn-danger-soft:hover { background: #ef4444; color: #fff; }
+@media (max-width: 760px) { .tt-form { grid-template-columns: 1fr 1fr; } .tt-form .tt-wide, .tt-form button { grid-column: 1 / -1; } .tt-wrap { padding: 1rem; } }

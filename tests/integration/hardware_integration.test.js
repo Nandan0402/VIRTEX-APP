@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { createApp } from '../../backend/src/app.js';
 import { config } from '../../backend/src/config/env.js';
 
-describe('PulseCore FitBot Hardware Integration Suite', () => {
+describe('Virtex FitBot Hardware Integration Suite', () => {
   let server;
   let baseUrl;
   let adminToken;
@@ -306,5 +306,42 @@ describe('PulseCore FitBot Hardware Integration Suite', () => {
     if (checkInRes.status === 200) {
       assert.equal(checkInBody.data.gesture, 'GREET_WAVE');
     }
+  });
+
+  // Test 11: Individual Calibrated Servo Positioning via servoPayload
+  test('Direct individual servo positioning supports head, leftArm, rightArm via servoPayload', async () => {
+    const validRes = await fetch(`${baseUrl}/robot/commands`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        commandType: 'DIRECT_ANGLES',
+        servoPayload: {
+          head: 95,
+          leftArm: 75,
+          rightArm: 35,
+        },
+      }),
+    });
+
+    assert.equal(validRes.status, 201);
+    const validBody = await validRes.json();
+    assert.equal(validBody.success, true);
+    assert.ok(validBody.command.steps);
+    assert.equal(validBody.command.steps[0].head, 95);
+    assert.equal(validBody.command.steps[0].leftArm, 75);
+    assert.equal(validBody.command.steps[0].rightArm, 35);
+
+    // Out-of-bounds inside servoPayload rejected
+    const invalidRes = await fetch(`${baseUrl}/robot/commands`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        commandType: 'DIRECT_ANGLES',
+        servoPayload: {
+          head: 250,
+        },
+      }),
+    });
+    assert.equal(invalidRes.status, 400);
   });
 });

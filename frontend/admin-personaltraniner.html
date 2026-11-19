@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Personal Trainers & Floor Shifts</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/modules/admin-trainer-hub.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root,
+    html {
+      color-scheme: dark !important;
+      --accent-green: #00e676;
+      --accent-green-dark: #00b050;
+      --accent-green-glow: rgba(0, 230, 118, 0.28);
+      --green: #00e676;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.18) #0e1017;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0e1017 !important;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18) !important;
+      border-radius: 4px !important;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00e676 !important;
+    }
+
+    .trainers-page-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .trainer-stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .trainer-stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .trainer-stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      background: rgba(0, 230, 118, 0.1);
+      color: var(--accent-green);
+    }
+
+    .trainer-stat-info h4 {
+      margin: 0;
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .trainer-stat-info .stat-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Grid cards view */
+    .trainers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 600px) {
+      .trainers-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .coach-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .coach-card:hover {
+      border-color: rgba(0, 230, 118, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .coach-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .coach-avatar-circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(0, 230, 118, 0.12);
+      border: 2px solid rgba(0, 230, 118, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: var(--accent-green);
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .coach-status-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-on-floor {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(0, 230, 118, 0.35);
+    }
+
+    .status-in-session {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .status-off-duty {
+      background: rgba(148, 163, 184, 0.12);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .coach-meta-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .coach-quick-toggle-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .btn-toggle-status {
+      flex: 1;
+      padding: 5px 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-gray);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+
+    .btn-toggle-status:hover {
+      border-color: var(--accent-green);
+      color: #fff;
+    }
+
+    .btn-toggle-status.active-floor {
+      background: rgba(0, 230, 118, 0.2);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .btn-toggle-status.active-session {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: #f59e0b;
+      color: #f59e0b;
+    }
+
+    .btn-toggle-status.active-off {
+      background: rgba(148, 163, 184, 0.2);
+      border-color: #94a3b8;
+      color: #cbd5e1;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 7, 12, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      box-sizing: border-box;
+    }
+
+    .modal-dialog {
+      background: #11141d;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(0, 230, 118, 0.15);
+      animation: modalFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.96) translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #141824;
+      flex-shrink: 0;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-close-modal {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      color: #94a3b8;
+      width: 34px;
+      height: 34px;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .btn-close-modal:hover {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      transform: scale(1.05);
+    }
+
+    .modal-body {
+      padding: 1.5rem 1.75rem;
+      overflow-y: auto;
+      box-sizing: border-box;
+      flex: 1 1 auto;
+      min-height: 0;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 230, 118, 0.45) rgba(255, 255, 255, 0.04);
+    }
+
+    /* The trainer form sits between the dialog and .modal-body: let it fill the dialog so the
+       body (not the whole dialog) scrolls and the header + Save/Cancel footer stay visible. */
+    #form-trainer {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    /* Trainer password change requests panel */
+    .pwr-card { padding: 1rem 1.25rem; border: 1px solid rgba(250, 204, 21, 0.35); }
+    .pwr-head { display: flex; flex-direction: column; gap: 4px; margin-bottom: 0.6rem; }
+    .pwr-row { display: flex; justify-content: space-between; align-items: center; gap: 10px 16px; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid rgba(255, 255, 255, 0.06); }
+    .pwr-who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .pwr-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .pwr-note { width: 180px; padding: 6px 10px !important; font-size: 0.8rem !important; }
+    @media (max-width: 600px) { .pwr-actions, .pwr-note { width: 100%; } }
+
+    .modal-body::-webkit-scrollbar { width: 10px; }
+    .modal-body::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); border-radius: 10px; }
+    .modal-body::-webkit-scrollbar-thumb {
+      background: rgba(0, 230, 118, 0.45);
+      border-radius: 10px;
+      border: 2px solid #11141d;
+    }
+    .modal-body::-webkit-scrollbar-thumb:hover { background: rgba(0, 230, 118, 0.7); }
+
+    .modal-footer {
+      padding: 1.15rem 1.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.85rem;
+      background: #141824;
+      flex-shrink: 0;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #94a3b8;
+      margin-bottom: 0.45rem;
+    }
+
+    .form-label .req {
+      color: #00e676;
+      font-weight: 700;
+      margin-left: 2px;
+    }
+
+    .form-input,
+    input.form-input,
+    select.form-input,
+    textarea.form-input {
+      width: 100% !important;
+      display: block !important;
+      box-sizing: border-box !important;
+      background-color: #090a0f !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      border-radius: 8px !important;
+      padding: 10px 14px !important;
+      font-size: 0.9rem !important;
+      font-family: inherit !important;
+      line-height: 1.45 !important;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
+    }
+
+    .form-input::placeholder {
+      color: #4b5563 !important;
+      opacity: 1 !important;
+    }
+
+    .form-input:hover {
+      border-color: rgba(0, 230, 118, 0.35) !important;
+    }
+
+    .form-input:focus {
+      outline: none !important;
+      border-color: #00e676 !important;
+      box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.18) !important;
+      background-color: #0d1017 !important;
+    }
+
+    textarea.form-input {
+      min-height: 95px !important;
+      resize: vertical !important;
+      line-height: 1.5 !important;
+    }
+
+    select.form-input {
+      cursor: pointer !important;
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300e676' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 14px center !important;
+      background-size: 15px !important;
+      padding-right: 38px !important;
+    }
+
+    select.form-input option {
+      background: #11141d !important;
+      color: #f1f5f9 !important;
+      padding: 8px 12px !important;
+    }
+
+    input[type="time"].form-input {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 0.9rem !important;
+      color-scheme: dark !important;
+      height: 42px !important;
+      min-height: 42px !important;
+      padding: 9px 12px !important;
+    }
+
+    @media (max-width: 580px) {
+      .form-grid-2-col {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="admin.html#tab-overview" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📊</span> Overview & Stats
+        </a>
+        <a href="admin-members.html" class="nav-item-btn " id="nav-item-members"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👥</span> Members
+        </a>
+        <a href="admin-feessalert.html" class="nav-item-btn" id="nav-item-fees-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💰</span> Fees Alert
+        </a>
+        <a href="admin-birthdayalert.html" class="nav-item-btn" id="nav-item-birthday-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🎂</span> Birthday Alert
+        </a>
+        <a href="admin-messages.html" class="nav-item-btn " id="nav-item-messages"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📩</span> Message
+        </a>
+        <a href="admin-notification.html" class="nav-item-btn " id="nav-item-notifications"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📢</span> Notification
+        </a>
+        <a href="admin-personaltraniner.html" class="nav-item-btn active" id="nav-item-trainers" aria-current="page" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏋️</span> Personal Trainer
+        </a>
+        <a href="admin-assign-membertoperonal traniner.html" class="nav-item-btn" id="nav-item-assign-trainer" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤝</span> Assign PT & Fees
+        </a>
+        <a href="admin-routine-tracker.html" class="nav-item-btn" id="nav-item-routine-tracker" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏱️</span> Routine Tracker
+        </a>
+        <a href="admin.html#tab-plans" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💳</span> Membership Plans
+        </a>
+        <a href="admin.html#tab-faqs" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">❓</span> FAQs / Knowledge Base
+        </a>
+        <a href="admin.html#tab-robot" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
+        </a>
+        <a href="admin.html#tab-profile" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile
+        </a>
+        <a href="admin-working-hours.html" class="nav-item-btn " id="nav-item-working-hours-link"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏰</span> Working Hours
+        </a>
+        <a href="admin-calander.html" class="nav-item-btn " id="nav-item-admin-calendar"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📅</span> Class & Shift Calendar
+        </a>
+        <a href="admin-profile.html" class="nav-item-btn " id="nav-item-admin-profile"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👤</span> Profile
+        </a>
+        <a href="admin.html#tab-settings" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⚙️</span> Language & Settings
+        </a>
+      </nav>
+
+      <!-- User Profile & Session Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" style="cursor: pointer;" title="Active Profile"
+          role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <img id="sidebar-user-photo" src="" alt="Avatar"
+              style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main">
+      <!-- Topbar Header -->
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle navigation menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-title-block">
+            <h1>🏋️ Personal Trainers & Floor Availability</h1>
+            <span class="topbar-subtitle">Active Floor Presence • Synchronized with Receptionist FitBot
+              Announcements</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group -->
+          <div class="topbar-routine-group" id="topbar-routine-group">
+            <a href="admin-routine-tracker.html" class="topbar-routine-badge status-out" id="topbar-routine-badge" title="Click to view full Routine Tracker">
+              <span class="topbar-status-dot"></span>
+              <span id="topbar-routine-text">PUNCHED OUT</span>
+            </a>
+
+            <div class="topbar-punch-btns">
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-in" id="topbar-btn-punch-in" title="Punch In (Start Daily Shift)">
+                <span>🟢</span>
+                <span class="topbar-btn-text">Punch In</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-break" id="topbar-btn-break" title="Take or Resume Routine Break" disabled>
+                <span id="topbar-break-icon">☕</span>
+                <span class="topbar-btn-text" id="topbar-break-text">Break</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-out" id="topbar-btn-punch-out" title="Punch Out (End Daily Shift)" disabled>
+                <span>⏹️</span>
+                <span class="topbar-btn-text">Punch Out</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="topbar-divider-vert"></div>
+
+          <!-- Message Link Icon -->
+          <a href="admin-messages.html" class="topbar-nav-icon-link" id="topbar-message-link" title="Member Messages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="topbar-counter-badge" id="topbar-message-badge" style="display: none;">0</span>
+          </a>
+
+          <!-- Notification Link Icon -->
+          <a href="admin-notification.html" class="topbar-nav-icon-link" id="topbar-notification-link" title="Notifications & System Announcements">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="topbar-counter-badge topbar-counter-red" id="topbar-notification-badge" style="display: none;">0</span>
+          </a>
+
+          <div class="topbar-divider-vert"></div>
+
+          <span class="badge badge-green font-mono text-xs" id="topbar-status">● PostgreSQL Connected</span>
+          <button class="btn btn-green btn-sm" id="btn-top-add-coach">
+            ➕ Add Personal Trainer
+          </button>
+        </div>
+      </header>
+
+      <main class="admin-body" id="main-content" role="main">
+        <div id="toast-banner" class="toast-banner" role="alert" aria-live="polite"></div>
+
+        <div class="trainers-page-container">
+          <!-- Metric Quick Stats Row -->
+          <div class="trainer-stats-row">
+            <div class="trainer-stat-card">
+              <div class="trainer-stat-icon">🏋️</div>
+              <div class="trainer-stat-info">
+                <h4>Total Trainers</h4>
+                <div class="stat-val" id="stat-total-trainers">--</div>
+              </div>
+            </div>
+
+            <div class="trainer-stat-card">
+              <div class="trainer-stat-icon">🟢</div>
+              <div class="trainer-stat-info">
+                <h4>On Floor Now</h4>
+                <div class="stat-val" id="stat-on-floor">--</div>
+              </div>
+            </div>
+
+            <div class="trainer-stat-card">
+              <div class="trainer-stat-icon">🟡</div>
+              <div class="trainer-stat-info">
+                <h4>In 1-on-1 Session</h4>
+                <div class="stat-val" id="stat-in-session">--</div>
+              </div>
+            </div>
+
+            <div class="trainer-stat-card">
+              <div class="trainer-stat-icon">⚪</div>
+              <div class="trainer-stat-info">
+                <h4>Off Duty</h4>
+                <div class="stat-val" id="stat-off-duty">--</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Toolbar & Controls -->
+          <div class="card" style="padding: 1rem 1.25rem;">
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="trainer-search" class="input-search"
+                  placeholder="🔍 Search coach name, specialty, code..." style="min-width: 280px;" />
+                <select id="filter-trainer-status" class="select-filter" style="font-size: 0.8rem; padding: 6px 12px;">
+                  <option value="all">🌟 All Statuses</option>
+                  <option value="on_floor">🟢 On Floor Only</option>
+                  <option value="in_session">🟡 In Session</option>
+                  <option value="off_duty">⚪ Off Duty</option>
+                </select>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn btn-outline btn-sm" id="btn-refresh-trainers">🔄 Refresh</button>
+                <button class="btn btn-green btn-sm" id="btn-add-trainer">+ Add Trainer</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trainer password change requests (trainers cannot change their own password; the admin sets it) -->
+          <div class="card pwr-card" id="pw-requests" hidden aria-live="polite">
+            <div class="pwr-head">
+              <h3 style="margin: 0; font-size: 1rem;">🔐 Password change requests <span class="badge badge-warning" id="pw-requests-count">0</span></h3>
+              <span class="text-dim text-xs">Set a new password with “Set new password”, then give it to the coach. The request closes automatically.</span>
+            </div>
+            <div id="pw-requests-list"></div>
+          </div>
+
+          <div id="shifts"></div>
+          <!-- Coaches Roster Grid -->
+          <div class="trainers-grid" id="coaches-grid-container">
+            <div class="loading-indicator">Loading personal trainers from PostgreSQL...</div>
+          </div>
+        </div>
+        <!-- Trainer Hub activity (Trainer -> Admin oversight); rendered by js/admin/trainerHubActivity.js -->
+        <section id="trainer-hub-activity" class="thub-section" aria-label="Trainer Hub activity"></section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Create / Edit Personal Trainer -->
+  <div class="modal-overlay" id="modal-trainer" role="dialog" aria-modal="true" aria-labelledby="modal-trainer-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 style="display: flex; align-items: center; gap: 8px;">
+          <span>🏋️</span>
+          <span id="modal-trainer-title">Add Personal Trainer</span>
+        </h3>
+        <button class="btn-close-modal" id="btn-close-trainer-modal" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="form-trainer">
+        <input type="hidden" id="edit-trainer-id" value="" />
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 1.15rem;">
+          
+          <div class="form-grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-field">
+              <label class="form-label" for="trn-name">Full Name <span class="req">*</span></label>
+              <input type="text" id="trn-name" class="form-input" placeholder="e.g. Coach Arjun" required />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="trn-specialty">Specialty & Focus Area <span class="req">*</span></label>
+              <select id="trn-specialty" class="form-input" required>
+                <option value="" disabled selected>Select specialty…</option>
+                <optgroup label="Gym & Strength">
+                  <option>General Fitness / Gym Training</option>
+                  <option>Strength Training</option>
+                  <option>Bodybuilding</option>
+                  <option>Powerlifting</option>
+                  <option>Olympic Weightlifting</option>
+                  <option>CrossFit</option>
+                  <option>Functional Training</option>
+                  <option>Weight Loss & Fat Loss</option>
+                  <option>Calisthenics</option>
+                </optgroup>
+                <optgroup label="Yoga & Mind-Body">
+                  <option>Yoga</option>
+                  <option>Power Yoga</option>
+                  <option>Pilates</option>
+                  <option>Meditation & Breathwork</option>
+                  <option>Mobility & Stretching</option>
+                </optgroup>
+                <optgroup label="Cardio & Group Classes">
+                  <option>Cardio & Endurance</option>
+                  <option>HIIT</option>
+                  <option>Zumba / Dance Fitness</option>
+                  <option>Aerobics</option>
+                  <option>Spinning / Indoor Cycling</option>
+                  <option>Kickboxing</option>
+                  <option>Boxing & MMA Conditioning</option>
+                </optgroup>
+                <optgroup label="Specialised">
+                  <option>Sports Conditioning</option>
+                  <option>Injury Rehab & Physiotherapy</option>
+                  <option>Senior Fitness</option>
+                  <option>Pre & Post Natal Fitness</option>
+                  <option>Kids & Teen Fitness</option>
+                  <option>Nutrition & Diet Coaching</option>
+                </optgroup>
+                <option value="__other">Other (type your own)…</option>
+              </select>
+              <input type="text" id="trn-specialty-other" class="form-input" maxlength="100" placeholder="Type the specialty, e.g. Kettlebell Training" style="display: none; margin-top: 8px;" />
+            </div>
+          </div>
+
+          <div class="form-grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-field">
+              <label class="form-label" for="trn-phone">Phone Number <span class="req">*</span></label>
+              <input type="tel" id="trn-phone" class="form-input" placeholder="+91 99112 00000" required />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="trn-email">Email Address (Login ID) <span class="req" id="trn-email-req">*</span></label>
+              <input type="email" id="trn-email" class="form-input" placeholder="coach@virtexfitness.in" required />
+            </div>
+          </div>
+
+          <!-- Login Credentials Provisioning Section -->
+          <div class="credentials-box-container" style="background: rgba(0, 230, 118, 0.05); border: 1px solid rgba(0, 230, 118, 0.25); border-radius: 10px; padding: 1rem 1.15rem; display: flex; flex-direction: column; gap: 0.65rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <label class="form-label" for="trn-password" style="margin: 0; display: flex; align-items: center; gap: 6px; font-weight: 700; color: #fff;">
+                <span>🔑</span>
+                <span>Personal Trainer Login Password</span>
+                <span class="req" id="trn-password-req">*</span>
+              </label>
+              <button type="button" id="btn-generate-password" class="btn btn-outline btn-xs" style="font-size: 0.72rem; padding: 3px 8px; border-color: rgba(0, 230, 118, 0.4); color: var(--accent-green); cursor: pointer;">
+                ⚡ Auto-Generate Password
+              </button>
+            </div>
+            
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="trn-password" class="form-input" placeholder="e.g. TrainerPass2026!" style="padding-right: 44px !important;" autocomplete="new-password" />
+              <button type="button" id="btn-toggle-trn-password" style="position: absolute; right: 10px; background: transparent; border: none; color: #94a3b8; font-size: 1.1rem; cursor: pointer; padding: 4px;" title="Show/Hide Password" aria-label="Toggle password visibility">
+                👁️
+              </button>
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; line-height: 1.4;">
+              <span id="trn-password-hint">🔑 Admin can set email & password to give to the personal trainer for Coach Portal login.</span>
+            </div>
+          </div>
+
+          <div class="form-grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-field">
+              <label class="form-label" for="trn-shift-start">Floor Shift Start</label>
+              <input type="time" id="trn-shift-start" class="form-input" value="06:00" />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="trn-shift-end">Floor Shift End</label>
+              <input type="time" id="trn-shift-end" class="form-input" value="14:00" />
+            </div>
+          </div>
+
+          <div class="form-grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-field">
+              <label class="form-label" for="trn-status">Initial Floor Status</label>
+              <select id="trn-status" class="form-input">
+                <option value="on_floor">🟢 On Floor (Active)</option>
+                <option value="in_session">🟡 In Session</option>
+                <option value="off_duty">⚪ Off Duty</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="trn-certifications">Certifications</label>
+              <input type="text" id="trn-certifications" class="form-input" placeholder="e.g. CSCS, CrossFit L2, CPR/AED" />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="trn-bio">Trainer Bio & Background</label>
+            <textarea id="trn-bio" class="form-input" rows="3"
+              placeholder="e.g. 8+ years functional hypertrophy and strength conditioning specialist."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancel-trainer">Cancel</button>
+          <button type="submit" class="btn btn-green" id="btn-save-trainer">Save Trainer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmation Dialog (Centered) -->
+  <div class="modal-overlay" id="modal-confirm" role="dialog" aria-modal="true" style="z-index: 2500;">
+    <div class="modal-dialog" style="max-width: 440px; text-align: center; border: 1px solid rgba(239, 68, 68, 0.4); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95); padding: 2rem 1.75rem;">
+      <div style="font-size: 3rem; line-height: 1; margin-bottom: 0.85rem;" id="modal-confirm-icon">🗑️</div>
+      <h3 id="modal-confirm-title" style="margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 700; color: #fff;">Delete Trainer</h3>
+      <p id="modal-confirm-message" style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 1.75rem; line-height: 1.5;">
+        Are you sure you want to delete this trainer? This action cannot be undone.
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button type="button" class="btn btn-outline" id="modal-confirm-cancel-btn" style="flex: 1; padding: 0.75rem 1rem; font-weight: 600;">Cancel</button>
+        <button type="button" class="btn btn-action-danger" id="modal-confirm-ok-btn" style="flex: 1; padding: 0.75rem 1rem; font-weight: 700; background: #ef4444; color: #fff; border: 1px solid #ef4444; border-radius: var(--radius-md); cursor: pointer;">Delete Trainer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Give Credentials to Personal Trainer (Post-Save & Copy Card) -->
+  <div class="modal-overlay" id="modal-credentials-share" role="dialog" aria-modal="true" style="z-index: 2600;">
+    <div class="modal-dialog" style="max-width: 520px; border: 1px solid rgba(0, 230, 118, 0.35); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95); padding: 1.75rem;">
+      <div style="text-align: center; margin-bottom: 1.25rem;">
+        <div style="font-size: 3rem; line-height: 1; margin-bottom: 0.5rem;" id="cred-share-icon">🎉</div>
+        <h3 style="margin: 0 0 0.4rem 0; font-size: 1.35rem; color: #fff; font-weight: 700;" id="cred-share-title">Trainer Account Provisioned!</h3>
+        <p style="margin: 0; color: #94a3b8; font-size: 0.88rem; line-height: 1.5;" id="cred-share-subtitle">
+          Copy and give these login credentials to the personal trainer:
+        </p>
+      </div>
+
+      <!-- Credentials Preview Card -->
+      <div style="background: #090a0f; border: 1px solid rgba(0, 230, 118, 0.25); border-radius: 10px; padding: 1.15rem; margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
+          <span style="color: #6b7280;">Coach Name:</span>
+          <strong style="color: #fff;" id="cred-coach-name">Arjun Reddy</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
+          <span style="color: #6b7280;">Login Email:</span>
+          <strong style="color: #00e676;" id="cred-email">coach@virtexfitness.in</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; align-items: center;">
+          <span style="color: #6b7280;">Password:</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong style="color: #f59e0b;" id="cred-password">••••••••</strong>
+            <button type="button" id="btn-toggle-cred-pass" style="background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 1rem; padding: 2px;" title="Show/Hide Password">👁️</button>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
+          <span style="color: #6b7280;">Assigned Role:</span>
+          <span style="color: #38bdf8; font-weight: 700;">Personal Trainer</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #6b7280;">Login Portal:</span>
+          <a href="trainer-auth.html" target="_blank" style="color: #00e676; text-decoration: underline; font-weight: 600;">trainer-auth.html</a>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button type="button" class="btn btn-green" id="btn-copy-credentials" style="width: 100%; justify-content: center; font-size: 0.95rem; font-weight: 700; padding: 11px;">
+          📋 Copy Credentials for Coach
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <a href="trainer-auth.html" target="_blank" class="btn btn-outline" style="flex: 1; text-align: center; text-decoration: none; justify-content: center; display: inline-flex; align-items: center;">
+            🚀 Open Trainer Portal
+          </a>
+          <button type="button" class="btn btn-outline" id="btn-close-credentials" style="flex: 1; justify-content: center;">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Direct Give / Reset Credentials Modal -->
+  <div class="modal-overlay" id="modal-give-credentials-direct" role="dialog" aria-modal="true" style="z-index: 2600;">
+    <div class="modal-dialog" style="max-width: 480px; border: 1px solid rgba(0, 230, 118, 0.3); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95); padding: 1.75rem;">
+      <div class="modal-header" style="background: transparent; padding: 0 0 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <h3 style="margin: 0; font-size: 1.2rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+          <span>🔑</span>
+          <span id="direct-cred-title">Give Credentials to Coach</span>
+        </h3>
+        <button class="btn-close-modal" id="btn-close-direct-cred">&times;</button>
+      </div>
+      <div style="padding: 1rem 0; display: flex; flex-direction: column; gap: 1rem;">
+        <input type="hidden" id="direct-cred-coach-id" value="" />
+        <div class="form-field">
+          <label class="form-label" for="direct-cred-email">Trainer Work Email (Login ID) <span class="req">*</span></label>
+          <input type="email" id="direct-cred-email" class="form-input" placeholder="coach@virtexfitness.in" required />
+        </div>
+        <div class="form-field">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label class="form-label" for="direct-cred-password" style="margin: 0;">New Login Password <span class="req">*</span></label>
+            <button type="button" id="btn-direct-gen-pass" class="btn btn-outline btn-xs" style="font-size: 0.72rem; padding: 2px 7px; color: var(--accent-green); border-color: rgba(0,230,118,0.4); cursor: pointer;">
+              ⚡ Auto-Generate
+            </button>
+          </div>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="text" id="direct-cred-password" class="form-input" placeholder="e.g. CoachPass2026!" style="padding-right: 44px !important;" required />
+            <button type="button" id="btn-toggle-direct-pass" style="position: absolute; right: 10px; background: transparent; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; padding: 4px;" title="Show/Hide">
+              👁️
+            </button>
+          </div>
+          <small style="color: #94a3b8; font-size: 0.75rem; margin-top: 3px;">
+            This will update the trainer's password and generate a copyable credentials card.
+          </small>
+        </div>
+      </div>
+      <div class="modal-footer" style="background: transparent; padding: 1rem 0 0 0; border-top: 1px solid rgba(255,255,255,0.08);">
+        <button type="button" class="btn btn-outline" id="btn-cancel-direct-cred">Cancel</button>
+        <button type="button" class="btn btn-green" id="btn-save-direct-cred">Save & Give Credentials</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Controller Script -->
+  <script type="module">
+    import { adminApi } from './js/admin/adminApi.js';
+
+    const state = {
+      trainers: [],
+      searchQuery: '',
+      statusFilter: 'all',
+    };
+
+    function showToast(msg, isErr = false) {
+      const banner = document.getElementById('toast-banner');
+      if (!banner) return;
+      banner.textContent = msg;
+      banner.className = `toast-banner show ${isErr ? 'toast-error' : 'toast-success'}`;
+      clearTimeout(banner._timer);
+      banner._timer = setTimeout(() => { banner.className = 'toast-banner'; }, isErr ? 8000 : 3500); // warnings need time to read
+    }
+
+    // Hydrate User Session
+    async function hydrateUser() {
+      try {
+        let user = adminApi.getStoredUser();
+        let token = adminApi.getToken();
+        if (!user || !token) {
+          const loginRes = await adminApi.redirectToLogin().catch(() => null);
+          if (loginRes && loginRes.success) {
+            user = loginRes.data?.user || user;
+          }
+        }
+        let userRes = await adminApi.getCurrentUser();
+        if (!userRes.success) {
+          const loginRes = await adminApi.redirectToLogin().catch(() => null);
+          if (loginRes && loginRes.success) {
+            userRes = await adminApi.getCurrentUser();
+          }
+        }
+        if (userRes.success && userRes.data) {
+          const u = userRes.data;
+          const fullName = u.fullName || u.full_name || u.username || 'Nandan.B';
+          const username = u.username || 'nandanb449';
+          const role = (u.role || 'owner').toUpperCase();
+
+          document.getElementById('sidebar-user-fullname').textContent = fullName;
+          document.getElementById('sidebar-user-handle').textContent = `@${username}`;
+
+          const pill = document.getElementById('sidebar-role-pill');
+          if (pill) {
+            pill.textContent = role;
+            pill.className = `role-badge-pill role-${role.toLowerCase()}`;
+          }
+
+          const photoEl = document.getElementById('sidebar-user-photo');
+          const initialsEl = document.getElementById('sidebar-user-initials');
+          if (u.avatar_url || u.avatarUrl) {
+            if (photoEl) {
+              photoEl.src = u.avatar_url || u.avatarUrl;
+              photoEl.style.display = 'block';
+            }
+            if (initialsEl) initialsEl.style.display = 'none';
+          } else {
+            if (photoEl) photoEl.style.display = 'none';
+            if (initialsEl) {
+              initialsEl.textContent = fullName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
+              initialsEl.style.display = 'inline';
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Trainers] Auth hydration notice:', err.message);
+      }
+    }
+
+    // Trainer password change requests (GET/POST /api/v1/admin/trainer-password-requests)
+    const PW_REASONS = { forgot: 'Forgot / lost password', security: 'Someone else may know it', shared: 'Signed in on a shared device', periodic: 'Routine change', other: 'Other' };
+    async function loadPasswordRequests() {
+      const card = document.getElementById('pw-requests');
+      const listEl = document.getElementById('pw-requests-list');
+      if (!card || !listEl) return;
+      try {
+        const r = await fetch('/api/v1/admin/trainer-password-requests', { headers: adminApi.getHeaders(true) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.success) { card.hidden = true; return; }
+        const rows = j.data || [];
+        document.getElementById('pw-requests-count').textContent = String(rows.length);
+        card.hidden = rows.length === 0;
+        listEl.innerHTML = rows.map((q) => `
+          <div class="pwr-row" data-req="${q.id}">
+            <div class="pwr-who">
+              <strong>${escapeHtml(q.full_name || q.username || 'Coach')}</strong>
+              <span class="text-dim text-xs font-mono">${escapeHtml(q.trainer_code || '')} · ${escapeHtml(q.login_email || q.username || '')}</span>
+              <span class="text-dim text-xs">Requested ${escapeHtml(new Date(q.created_at).toLocaleString())} · ${escapeHtml(PW_REASONS[q.reason] || q.reason || '—')}</span>
+            </div>
+            <div class="pwr-actions">
+              <button class="btn btn-green btn-sm" data-pw-set="${q.trainer_id || ''}" ${q.trainer_id ? '' : 'disabled'}>🔑 Set new password</button>
+              <input type="text" class="form-input pwr-note" maxlength="300" placeholder="Note (optional)" aria-label="Dismiss note">
+              <button class="btn btn-outline btn-sm" data-pw-dismiss="${q.id}">Dismiss</button>
+            </div>
+          </div>`).join('');
+        listEl.querySelectorAll('[data-pw-set]').forEach((b) => b.addEventListener('click', () => {
+          openEditCoachModal(b.dataset.pwSet);
+          document.getElementById('btn-generate-password')?.click();
+          document.getElementById('trn-password')?.focus();
+        }));
+        listEl.querySelectorAll('[data-pw-dismiss]').forEach((b) => b.addEventListener('click', async () => {
+          const note = b.closest('.pwr-row')?.querySelector('.pwr-note')?.value.trim() || '';
+          b.disabled = true;
+          try {
+            const d = await fetch(`/api/v1/admin/trainer-password-requests/${b.dataset.pwDismiss}/dismiss`, { method: 'POST', headers: adminApi.getHeaders(true), body: JSON.stringify({ note }) });
+            const dj = await d.json().catch(() => ({}));
+            showToast(dj.success ? 'Request dismissed.' : (dj.error || 'Could not dismiss the request.'), !dj.success);
+          } catch (e) { showToast('Error: ' + e.message, true); }
+          loadPasswordRequests();
+        }));
+      } catch { card.hidden = true; }
+    }
+
+    // Load Trainers from PostgreSQL
+    async function loadTrainers() {
+      try {
+        const res = await adminApi.getTrainers();
+        const list = res.data || res.trainers || [];
+        if (res.success && Array.isArray(list)) {
+          state.trainers = list;
+          renderTrainersGrid();
+          updateMetrics();
+          loadPasswordRequests();
+        } else {
+          showToast(res.error || 'Failed to load trainers', true);
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Error loading trainers: ' + err.message, true);
+      }
+    }
+
+    // Render Trainers Cards Grid
+    function renderTrainersGrid() {
+      const container = document.getElementById('coaches-grid-container');
+      if (!container) return;
+
+      const filtered = state.trainers.filter((t) => {
+        if (state.statusFilter !== 'all' && (t.status || 'off_duty') !== state.statusFilter) {
+          return false;
+        }
+        if (state.searchQuery) {
+          const q = state.searchQuery.toLowerCase();
+          const name = (t.full_name || '').toLowerCase();
+          const spec = (t.specialty || '').toLowerCase();
+          const code = (t.trainer_code || '').toLowerCase();
+          return name.includes(q) || spec.includes(q) || code.includes(q);
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: var(--bg-card); border: 1px dashed var(--border); border-radius: var(--radius-lg);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏋️</div>
+            <strong style="color: #fff; font-size: 1.1rem;">No Personal Trainers Found</strong>
+            <p class="text-dim text-xs" style="margin-top: 4px;">Click "+ Add Personal Trainer" to register coaches to PostgreSQL.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map((c) => {
+        const st = (c.status || 'off_duty').toLowerCase();
+
+        const initials = (c.full_name || 'Coach').split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
+        const shiftStr = (c.shift_start && c.shift_end) ? `${c.shift_start} – ${c.shift_end}` : 'Standard Shifts';
+        const certsStr = Array.isArray(c.certifications) ? c.certifications.join(', ') : (c.certifications || 'Certified Coach');
+
+        return `
+          <div class="coach-card" data-id="${c.id}">
+            <div class="coach-header">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="coach-avatar-circle">${initials}</div>
+                <div>
+                  <h3 style="margin: 0; font-size: 1.1rem; color: #fff;">${escapeHtml(c.full_name)}</h3>
+                  <span class="badge badge-outline text-xs font-mono" style="margin-top: 2px;">${escapeHtml(c.trainer_code || 'TRN-' + c.id)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="coach-meta-row">
+              <div style="color: var(--accent-green); font-weight: 600;">⚡ ${escapeHtml(c.specialty || 'General Fitness')}</div>
+              <div>📧 Email: <strong style="color: ${c.email ? '#00e676' : 'inherit'};">${escapeHtml(c.email || 'No email set')}</strong></div>
+              <div>⏰ Shift: <strong style="color: #fff;">${escapeHtml(shiftStr)}</strong></div>
+              <div>📞 Phone: <strong>${escapeHtml(c.phone || '—')}</strong></div>
+              <div>📜 Certs: <span class="text-xs text-dim">${escapeHtml(certsStr)}</span></div>
+              ${c.bio ? `<div style="font-style: italic; margin-top: 4px; font-size: 0.75rem;" class="text-dim">"${escapeHtml(c.bio)}"</div>` : ''}
+            </div>
+
+            <!-- Quick Status Change Pills -->
+            <div class="coach-quick-toggle-group">
+              <button class="btn-toggle-status ${st === 'on_floor' ? 'active-floor' : ''}" data-id="${c.id}" data-status="on_floor">
+                🟢 On Floor
+              </button>
+              <button class="btn-toggle-status ${st === 'in_session' ? 'active-session' : ''}" data-id="${c.id}" data-status="in_session">
+                🟡 In Session
+              </button>
+              <button class="btn-toggle-status ${st === 'off_duty' ? 'active-off' : ''}" data-id="${c.id}" data-status="off_duty">
+                ⚪ Off Duty
+              </button>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+              <button class="btn btn-outline btn-xs btn-give-credentials" data-id="${c.id}" style="color: var(--accent-green); border-color: rgba(0,230,118,0.4);" title="Give or Reset Login Credentials for Coach">🔑 Login Info</button>
+              <button class="btn btn-outline btn-xs btn-edit-coach" data-id="${c.id}">✏️ Edit Details</button>
+              <button class="btn btn-outline btn-xs btn-delete-coach" data-id="${c.id}" style="color: #ef4444; border-color: rgba(239,68,68,0.3);">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Attach status toggle listeners
+      container.querySelectorAll('.btn-toggle-status').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const coachId = btn.dataset.id;
+          const targetStatus = btn.dataset.status;
+          try {
+            const res = await adminApi.updateTrainerStatus(coachId, targetStatus);
+            if (res.success) {
+              showToast(`Status updated to ${targetStatus}`);
+              await loadTrainers();
+            } else {
+              showToast(res.error || 'Failed to update trainer status', true);
+            }
+          } catch (err) {
+            showToast('Error: ' + err.message, true);
+          }
+        });
+      });
+
+      // Attach Credentials, Edit & Delete buttons
+      container.querySelectorAll('.btn-give-credentials').forEach((btn) => {
+        btn.addEventListener('click', () => openDirectCredentialsModal(btn.dataset.id));
+      });
+      container.querySelectorAll('.btn-edit-coach').forEach((btn) => {
+        btn.addEventListener('click', () => openEditCoachModal(btn.dataset.id));
+      });
+      container.querySelectorAll('.btn-delete-coach').forEach((btn) => {
+        btn.addEventListener('click', () => deleteCoach(btn.dataset.id));
+      });
+    }
+
+    // Update Top Overview Metrics
+    function updateMetrics() {
+      const total = state.trainers.length;
+      let onFloor = 0;
+      let inSession = 0;
+      let offDuty = 0;
+
+      state.trainers.forEach((t) => {
+        const s = (t.status || 'off_duty').toLowerCase();
+        if (s === 'on_floor') onFloor++;
+        else if (s === 'in_session') inSession++;
+        else offDuty++;
+      });
+
+      const totalEl = document.getElementById('stat-total-trainers');
+      const floorEl = document.getElementById('stat-on-floor');
+      const sessEl = document.getElementById('stat-in-session');
+      const offEl = document.getElementById('stat-off-duty');
+
+      if (totalEl) totalEl.textContent = total;
+      if (floorEl) floorEl.textContent = onFloor;
+      if (sessEl) sessEl.textContent = inSession;
+      if (offEl) offEl.textContent = offDuty;
+    }
+
+    // Helper: Password Generation
+    function generateStrongPassword() {
+      const prefixes = ['Coach', 'Trainer', 'FitPro', 'Virtex', 'Power', 'Apex'];
+      const symbols = ['!', '@', '#', '$', '%'];
+      const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+      const num = Math.floor(1000 + Math.random() * 9000);
+      const sym = symbols[Math.floor(Math.random() * symbols.length)];
+      return `${prefix}@${num}${sym}`;
+    }
+
+    // Helper: Clipboard Copy with multi-tier fallback
+    async function copyToClipboard(text) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (_) {}
+
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.top = '0';
+        ta.style.left = '0';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const success = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return success;
+      } catch (err) {
+        return false;
+      }
+    }
+
+    let isTrnPassVisible = true;
+    let isCredPassVisible = false;
+    let currentCredsToShare = null;
+
+    // Show Credentials Ready Modal
+    function showCredentialsReadyModal({ fullName, email, password, isUpdated = false }) {
+      currentCredsToShare = {
+        fullName: fullName || 'Coach',
+        email: email || '',
+        password: password || '',
+        portalUrl: window.location.origin + '/trainer-auth.html',
+      };
+
+      document.getElementById('cred-share-title').textContent = isUpdated ? 'Credentials Ready for Coach!' : 'Trainer Account Provisioned!';
+      document.getElementById('cred-share-subtitle').textContent = isUpdated 
+        ? 'Login credentials updated. Copy and give these to the personal trainer:'
+        : 'New personal trainer account created. Copy and give these credentials to the coach:';
+      
+      document.getElementById('cred-coach-name').textContent = fullName || 'Personal Trainer';
+      document.getElementById('cred-email').textContent = email || '—';
+      
+      const passEl = document.getElementById('cred-password');
+      passEl.textContent = password || '••••••••';
+      passEl.dataset.plain = password || '';
+      passEl.dataset.hidden = 'false';
+
+      const copyBtn = document.getElementById('btn-copy-credentials');
+      if (copyBtn) {
+        copyBtn.textContent = '📋 Copy Credentials for Coach';
+        copyBtn.style.background = '#00e676';
+        copyBtn.style.color = '#000000';
+      }
+
+      document.getElementById('modal-credentials-share').style.display = 'flex';
+    }
+
+    // Specialty dropdown (+ "Other" free text). Existing custom specialties are kept when editing.
+    const specSelect = document.getElementById('trn-specialty');
+    const specOther = document.getElementById('trn-specialty-other');
+    function toggleSpecialtyOther() {
+      const other = specSelect.value === '__other';
+      specOther.style.display = other ? '' : 'none';
+      specOther.required = other;
+      if (other) specOther.focus();
+    }
+    function setSpecialty(value) {
+      const v = String(value || '').trim();
+      const match = [...specSelect.options].find((o) => o.value !== '__other' && o.value && o.value.toLowerCase() === v.toLowerCase());
+      if (!v) { specSelect.value = ''; specOther.value = ''; }
+      else if (match) { specSelect.value = match.value; specOther.value = ''; }
+      else { specSelect.value = '__other'; specOther.value = v; }
+      specOther.style.display = specSelect.value === '__other' ? '' : 'none';
+      specOther.required = specSelect.value === '__other';
+    }
+    function getSpecialty() {
+      return specSelect.value === '__other' ? specOther.value.trim() : (specSelect.value || '').trim();
+    }
+    specSelect.addEventListener('change', toggleSpecialtyOther);
+
+    // Modal Create / Edit
+    function openCreateCoachModal() {
+      document.getElementById('form-trainer').reset();
+      setSpecialty('');
+      document.getElementById('edit-trainer-id').value = '';
+      document.getElementById('modal-trainer-title').textContent = 'Add Personal Trainer';
+      
+      const reqEmail = document.getElementById('trn-email-req');
+      if (reqEmail) reqEmail.textContent = '*';
+      document.getElementById('trn-email').required = true;
+
+      const reqPass = document.getElementById('trn-password-req');
+      if (reqPass) reqPass.textContent = '*';
+      
+      const passInput = document.getElementById('trn-password');
+      const genPass = generateStrongPassword();
+      passInput.value = genPass;
+      passInput.type = 'text';
+      isTrnPassVisible = true;
+      const toggleBtn = document.getElementById('btn-toggle-trn-password');
+      if (toggleBtn) toggleBtn.textContent = '🙈';
+      passInput.placeholder = 'e.g. TrainerPass2026!';
+      passInput.required = true;
+
+      const hintEl = document.getElementById('trn-password-hint');
+      if (hintEl) hintEl.innerHTML = '🔑 Admin can set login email & password to give to the personal trainer for Coach Portal login.';
+
+      const saveBtn = document.getElementById('btn-save-trainer');
+      if (saveBtn) saveBtn.textContent = 'Save & Give Credentials';
+
+      document.getElementById('modal-trainer').style.display = 'flex';
+    }
+
+    function openEditCoachModal(coachId) {
+      const coach = state.trainers.find((t) => String(t.id) === String(coachId));
+      if (!coach) return;
+
+      document.getElementById('edit-trainer-id').value = coach.id;
+      document.getElementById('modal-trainer-title').textContent = `Edit Coach • ${coach.full_name}`;
+      document.getElementById('trn-name').value = coach.full_name || '';
+      setSpecialty(coach.specialty || '');
+      document.getElementById('trn-phone').value = coach.phone || '';
+      document.getElementById('trn-email').value = coach.email || '';
+      document.getElementById('trn-shift-start').value = coach.shift_start || '06:00';
+      document.getElementById('trn-shift-end').value = coach.shift_end || '14:00';
+      document.getElementById('trn-status').value = coach.status || 'on_floor';
+      document.getElementById('trn-certifications').value = Array.isArray(coach.certifications) ? coach.certifications.join(', ') : (coach.certifications || '');
+      document.getElementById('trn-bio').value = coach.bio || '';
+
+      const reqPass = document.getElementById('trn-password-req');
+      if (reqPass) reqPass.textContent = '(Optional)';
+
+      const passInput = document.getElementById('trn-password');
+      passInput.value = '';
+      passInput.type = 'password';
+      passInput.required = false;
+      isTrnPassVisible = false;
+      const toggleBtn = document.getElementById('btn-toggle-trn-password');
+      if (toggleBtn) toggleBtn.textContent = '👁️';
+      passInput.placeholder = 'Leave blank to keep existing password';
+
+      const hintEl = document.getElementById('trn-password-hint');
+      if (hintEl) hintEl.innerHTML = 'Enter a new password if you want to reset credentials for this coach.';
+
+      const saveBtn = document.getElementById('btn-save-trainer');
+      if (saveBtn) saveBtn.textContent = 'Update Coach';
+
+      document.getElementById('modal-trainer').style.display = 'flex';
+    }
+
+    // Direct Credentials Modal
+    function openDirectCredentialsModal(coachId) {
+      const coach = state.trainers.find((t) => String(t.id) === String(coachId));
+      if (!coach) return;
+
+      document.getElementById('direct-cred-coach-id').value = coach.id;
+      document.getElementById('direct-cred-title').textContent = `Give Credentials • ${coach.full_name}`;
+      document.getElementById('direct-cred-email').value = coach.email || '';
+      
+      const passInput = document.getElementById('direct-cred-password');
+      passInput.value = generateStrongPassword();
+      passInput.type = 'text';
+
+      document.getElementById('modal-give-credentials-direct').style.display = 'flex';
+    }
+
+    // Centered Custom Confirmation Modal
+    function confirmCenter({
+      title = 'Confirm Action',
+      message = 'Are you sure you want to proceed?',
+      targetName = '',
+      icon = '🗑️',
+      confirmText = 'Confirm',
+      confirmClass = 'btn-action-danger',
+      cancelText = 'Cancel',
+    } = {}) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('modal-confirm');
+        const titleEl = document.getElementById('modal-confirm-title');
+        const msgEl = document.getElementById('modal-confirm-message');
+        const iconEl = document.getElementById('modal-confirm-icon');
+        const okBtn = document.getElementById('modal-confirm-ok-btn');
+        const cancelBtn = document.getElementById('modal-confirm-cancel-btn');
+
+        if (!modal || !okBtn || !cancelBtn) {
+          resolve(window.confirm(message));
+          return;
+        }
+
+        if (titleEl) titleEl.textContent = title;
+        if (iconEl) iconEl.textContent = icon;
+        if (msgEl) {
+          if (targetName) {
+            msgEl.innerHTML = `Are you sure you want to delete <strong style="color: #fff;">${escapeHtml(targetName)}</strong>? This action cannot be undone.`;
+          } else {
+            msgEl.textContent = message;
+          }
+        }
+        if (okBtn) {
+          okBtn.textContent = confirmText;
+          if (confirmClass === 'btn-action-danger') {
+            okBtn.style.background = '#ef4444';
+            okBtn.style.borderColor = '#ef4444';
+            okBtn.style.color = '#ffffff';
+          } else {
+            okBtn.style.background = '#00e676';
+            okBtn.style.borderColor = '#00e676';
+            okBtn.style.color = '#000000';
+          }
+        }
+        if (cancelBtn) {
+          cancelBtn.textContent = cancelText;
+        }
+
+        modal.style.display = 'flex';
+
+        let resolved = false;
+        const cleanup = (val) => {
+          if (resolved) return;
+          resolved = true;
+          modal.style.display = 'none';
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          window.removeEventListener('keydown', onKey);
+          modal.removeEventListener('click', onBackdrop);
+          resolve(val);
+        };
+
+        const onOk = (e) => { e.preventDefault(); cleanup(true); };
+        const onCancel = (e) => { e.preventDefault(); cleanup(false); };
+        const onKey = (e) => {
+          if (e.key === 'Escape') cleanup(false);
+          else if (e.key === 'Enter') cleanup(true);
+        };
+        const onBackdrop = (e) => {
+          if (e.target === modal) cleanup(false);
+        };
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        window.addEventListener('keydown', onKey);
+        modal.addEventListener('click', onBackdrop);
+      });
+    }
+
+    // Delete Trainer
+    async function deleteCoach(coachId) {
+      const coach = state.trainers.find((t) => String(t.id) === String(coachId));
+      const name = coach ? coach.full_name : 'this coach';
+      const confirmed = await confirmCenter({
+        title: 'Delete Trainer',
+        targetName: name,
+        icon: '🗑️',
+        confirmText: 'Delete Trainer',
+        confirmClass: 'btn-action-danger',
+      });
+      if (!confirmed) return;
+
+      try {
+        const res = await adminApi.deleteTrainer(coachId);
+        if (res.success) {
+          showToast(`🗑️ Coach "${name}" deleted.`);
+          await loadTrainers();
+        } else {
+          showToast(res.error || 'Failed to delete trainer.', true);
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, true);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Setup Listeners
+    function setupListeners() {
+      document.getElementById('btn-top-add-coach')?.addEventListener('click', openCreateCoachModal);
+      document.getElementById('btn-add-trainer')?.addEventListener('click', openCreateCoachModal);
+      document.getElementById('btn-close-trainer-modal')?.addEventListener('click', () => {
+        document.getElementById('modal-trainer').style.display = 'none';
+      });
+      document.getElementById('btn-cancel-trainer')?.addEventListener('click', () => {
+        document.getElementById('modal-trainer').style.display = 'none';
+      });
+
+      // Password Toggles & Auto-Generation in Trainer Form
+      document.getElementById('btn-generate-password')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('trn-password');
+        if (!input) return;
+        const pass = generateStrongPassword();
+        input.value = pass;
+        input.type = 'text';
+        isTrnPassVisible = true;
+        const toggleBtn = document.getElementById('btn-toggle-trn-password');
+        if (toggleBtn) toggleBtn.textContent = '🙈';
+        showToast('⚡ Strong password generated for coach!');
+      });
+
+      document.getElementById('btn-toggle-trn-password')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('trn-password');
+        if (!input) return;
+        isTrnPassVisible = !isTrnPassVisible;
+        input.type = isTrnPassVisible ? 'text' : 'password';
+        e.currentTarget.textContent = isTrnPassVisible ? '🙈' : '👁️';
+      });
+
+      // Direct Credentials Modal Handlers
+      document.getElementById('btn-direct-gen-pass')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const passInput = document.getElementById('direct-cred-password');
+        if (!passInput) return;
+        passInput.value = generateStrongPassword();
+        passInput.type = 'text';
+        showToast('⚡ New password generated!');
+      });
+
+      document.getElementById('btn-toggle-direct-pass')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const passInput = document.getElementById('direct-cred-password');
+        if (!passInput) return;
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';
+        e.currentTarget.textContent = passInput.type === 'text' ? '🙈' : '👁️';
+      });
+
+      document.getElementById('btn-close-direct-cred')?.addEventListener('click', () => {
+        document.getElementById('modal-give-credentials-direct').style.display = 'none';
+      });
+      document.getElementById('btn-cancel-direct-cred')?.addEventListener('click', () => {
+        document.getElementById('modal-give-credentials-direct').style.display = 'none';
+      });
+
+      document.getElementById('btn-save-direct-cred')?.addEventListener('click', async () => {
+        const coachId = document.getElementById('direct-cred-coach-id').value;
+        const email = document.getElementById('direct-cred-email').value.trim();
+        const password = document.getElementById('direct-cred-password').value.trim();
+
+        if (!email) {
+          showToast('Email address is required.', true);
+          return;
+        }
+        if (!password) {
+          showToast('Please enter or generate a password.', true);
+          return;
+        }
+
+        const coach = state.trainers.find((t) => String(t.id) === String(coachId));
+        const coachName = coach ? coach.full_name : 'Trainer';
+        const saveBtn = document.getElementById('btn-save-direct-cred');
+        if (saveBtn) saveBtn.textContent = 'Saving...';
+
+        try {
+          const res = await adminApi.updateTrainer(coachId, { email, password });
+          if (res.success) {
+            document.getElementById('modal-give-credentials-direct').style.display = 'none';
+            showCredentialsReadyModal({
+              fullName: coachName,
+              email,
+              password,
+              isUpdated: true,
+            });
+            await loadTrainers();
+          } else {
+            showToast(res.error || 'Failed to update trainer credentials.', true);
+          }
+        } catch (err) {
+          showToast('Error: ' + err.message, true);
+        } finally {
+          if (saveBtn) saveBtn.textContent = 'Save & Give Credentials';
+        }
+      });
+
+      // Share Credentials Modal Toggles & Clipboard
+      document.getElementById('btn-toggle-cred-pass')?.addEventListener('click', () => {
+        const passEl = document.getElementById('cred-password');
+        const plain = passEl.dataset.plain || '';
+        isCredPassVisible = !isCredPassVisible;
+        if (isCredPassVisible) {
+          passEl.textContent = plain;
+          document.getElementById('btn-toggle-cred-pass').textContent = '🙈';
+        } else {
+          passEl.textContent = '••••••••';
+          document.getElementById('btn-toggle-cred-pass').textContent = '👁️';
+        }
+      });
+
+      document.getElementById('btn-copy-credentials')?.addEventListener('click', async () => {
+        if (!currentCredsToShare) return;
+        const text =
+`🏋️ VIRTEX FITNESS — PERSONAL TRAINER LOGIN CREDENTIALS
+==================================================
+Coach Name:   ${currentCredsToShare.fullName}
+Role:         Fitness Trainer
+Login Portal: ${currentCredsToShare.portalUrl}
+Email ID:     ${currentCredsToShare.email}
+Password:     ${currentCredsToShare.password}
+==================================================
+Admin Notes:
+1. Open ${currentCredsToShare.portalUrl} to sign in to the Coach Console.
+2. Please change your password upon initial login if required.`;
+
+        const ok = await copyToClipboard(text);
+        const copyBtn = document.getElementById('btn-copy-credentials');
+        if (ok && copyBtn) {
+          copyBtn.textContent = '✅ Copied to Clipboard! Ready to Give Coach';
+          copyBtn.style.background = '#00e676';
+          copyBtn.style.color = '#000000';
+          showToast('📋 Credentials copied to clipboard!');
+        } else {
+          showToast('Credentials copied to clipboard!');
+        }
+      });
+
+      document.getElementById('btn-close-credentials')?.addEventListener('click', () => {
+        document.getElementById('modal-credentials-share').style.display = 'none';
+      });
+
+      // Close modal on backdrop click or Escape key
+      const modalTrainer = document.getElementById('modal-trainer');
+      const modalCreds = document.getElementById('modal-credentials-share');
+      const modalDirect = document.getElementById('modal-give-credentials-direct');
+
+      [modalTrainer, modalCreds, modalDirect].forEach((m) => {
+        m?.addEventListener('click', (e) => {
+          if (e.target === m) m.style.display = 'none';
+        });
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (modalTrainer?.style.display === 'flex') modalTrainer.style.display = 'none';
+          if (modalCreds?.style.display === 'flex') modalCreds.style.display = 'none';
+          if (modalDirect?.style.display === 'flex') modalDirect.style.display = 'none';
+        }
+      });
+
+      // Form Submit (Create / Edit Personal Trainer)
+      document.getElementById('form-trainer')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const editId = document.getElementById('edit-trainer-id').value;
+        const certsVal = document.getElementById('trn-certifications').value.trim();
+        const passVal = document.getElementById('trn-password').value.trim();
+        const emailVal = document.getElementById('trn-email').value.trim();
+
+        if (!getSpecialty()) {
+          showToast('Please choose a specialty (or type one under "Other").', true);
+          return;
+        }
+
+        if (!editId && !passVal) {
+          showToast('Please set or generate a login password for the coach.', true);
+          return;
+        }
+
+        const payload = {
+          fullName: document.getElementById('trn-name').value.trim(),
+          specialty: getSpecialty(),
+          phone: document.getElementById('trn-phone').value.trim(),
+          email: emailVal,
+          shiftStart: document.getElementById('trn-shift-start').value,
+          shiftEnd: document.getElementById('trn-shift-end').value,
+          status: document.getElementById('trn-status').value,
+          certifications: certsVal ? certsVal.split(',').map((c) => c.trim()).filter(Boolean) : [],
+          bio: document.getElementById('trn-bio').value.trim(),
+        };
+
+        if (passVal) {
+          payload.password = passVal;
+        }
+
+        const btnSave = document.getElementById('btn-save-trainer');
+        if (btnSave) btnSave.textContent = 'Saving & Provisioning...';
+
+        try {
+          let res;
+          if (editId) {
+            res = await adminApi.updateTrainer(editId, payload);
+          } else {
+            res = await adminApi.createTrainer(payload);
+          }
+
+          if (res.success) {
+            document.getElementById('modal-trainer').style.display = 'none';
+            await loadTrainers();
+
+            // Show the credentials dialog only when the server confirms the login was set up; otherwise say why
+            // (e.g. the email belongs to another account) instead of handing the coach credentials that fail with 401.
+            const note = res.data?.user_account_note;
+            if (passVal && note && !res.data?.user_account) {
+              showToast(`⚠️ ${note}`, true);
+            } else if (passVal) {
+              if (note) showToast(`⚠️ ${note}`, true);
+              showCredentialsReadyModal({
+                fullName: payload.fullName,
+                email: payload.email,
+                password: passVal,
+                isUpdated: Boolean(editId),
+              });
+            } else {
+              showToast(`✅ Coach "${payload.fullName}" saved successfully!`);
+            }
+          } else {
+            showToast(res.error || 'Failed to save trainer.', true);
+          }
+        } catch (err) {
+          showToast('Error: ' + err.message, true);
+        } finally {
+          if (btnSave) btnSave.textContent = editId ? 'Update Coach' : 'Save & Give Credentials';
+        }
+      });
+
+      // Filter Search
+      let timer = null;
+      document.getElementById('trainer-search')?.addEventListener('input', (e) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          state.searchQuery = e.target.value.trim();
+          renderTrainersGrid();
+        }, 250);
+      });
+
+      // Filter Status
+      document.getElementById('filter-trainer-status')?.addEventListener('change', (e) => {
+        state.statusFilter = e.target.value;
+        renderTrainersGrid();
+      });
+
+      // Refresh
+      document.getElementById('btn-refresh-trainers')?.addEventListener('click', () => {
+        loadTrainers();
+        showToast('🔄 Refreshed personal trainers from PostgreSQL!');
+      });
+
+      // Sidebar Mobile Toggle
+      document.getElementById('btn-sidebar-toggle')?.addEventListener('click', () => {
+        document.getElementById('admin-sidebar')?.classList.toggle('open');
+      });
+
+      // Logout handler
+      document.getElementById('btn-logout')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const confirmed = await confirmCenter({
+          title: 'Sign Out',
+          message: 'Are you sure you want to log out of Virtex Admin Console?',
+          icon: '🚪',
+          confirmText: 'Sign Out',
+          confirmClass: 'btn-action-primary',
+        });
+        if (confirmed) {
+          await adminApi.logout();
+          window.location.href = 'index.html';
+        }
+      });
+    }
+
+    function handleTrainerHash() {
+      if (window.location.hash.toLowerCase() === '#shifts') {
+        const sel = document.getElementById('filter-trainer-status');
+        if (sel) {
+          sel.value = 'on_floor';
+          renderTrainers(state.coaches);
+        }
+        setTimeout(() => {
+          document.getElementById('shifts')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
+      }
+    }
+
+    // Initialization
+    async function init() {
+      await hydrateUser();
+      setupListeners();
+      await loadTrainers();
+      handleTrainerHash();
+      window.addEventListener('hashchange', handleTrainerHash);
+    }
+
+    init();
+  </script>
+  <script type="module" src="js/admin/trainerHubActivity.js"></script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,40 @@
+/* =====================================================================
+   Virtex Trainer Portal — Dashboard (trainer-dashboard.html)
+   ===================================================================== */
+
+.tp-welcome {
+  padding: 1rem 1.2rem;
+  background: linear-gradient(120deg, var(--tp-accent-soft), transparent 60%), var(--tp-surface);
+  border-color: var(--tp-accent-border);
+}
+.tp-welcome-name { color: var(--tp-text); font-weight: 800; font-size: 1.05rem; margin-bottom: 4px; }
+
+.tp-page-dashboard .tp-stat-value { color: var(--tp-accent); }
+.tp-page-dashboard .tp-grid-2 .card { display: flex; flex-direction: column; }
+.tp-page-dashboard .tp-list { max-height: 340px; overflow-y: auto; padding-right: 2px; }
+
+/* Hero row: welcome + today's overview */
+.tp-dash-hero { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+.tp-dash-hero .tp-welcome { display: flex; flex-direction: column; justify-content: center; }
+.tp-today { display: flex; gap: 1.25rem; align-items: flex-start; flex-wrap: wrap; }
+.tp-today-date { display: flex; flex-direction: column; min-width: 140px; }
+.tp-today-date span { color: var(--tp-accent); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+.tp-today-date strong { color: var(--tp-text); font-size: 1.05rem; margin-top: 2px; }
+.tp-today-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; flex: 1; min-width: 220px; }
+.tp-today-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 0.85rem; color: var(--tp-text-body); }
+.tp-today-list b { color: var(--tp-text); font-weight: 700; }
+
+/* Stat tiles that link to their page */
+.tp-stat-link { text-decoration: none; display: block; }
+.tp-stat-link:hover { border-color: var(--tp-accent-border); background: var(--tp-accent-soft); }
+
+@media (max-width: 900px) {
+  .tp-dash-hero { grid-template-columns: 1fr; }
+}
+
+/* Gym announcements (published by Admin) */
+.tp-ann { align-items: flex-start; border-left: 3px solid var(--tp-line); }
+.tp-ann-urgent { border-left-color: var(--tp-danger); }
+.tp-ann-event { border-left-color: var(--tp-accent); }
+.tp-ann-maintenance { border-left-color: var(--tp-warn); }
+.tp-ann-body { color: var(--tp-text-body); font-size: 0.84rem; margin-top: 3px; white-space: pre-wrap; }

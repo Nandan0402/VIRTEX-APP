@@ -2,12 +2,18 @@ import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../../backend/src/app.js';
 import { getRecentInteractions } from '../../backend/src/services/interaction.service.js';
+import { query, closePool } from '../../backend/src/config/database.js';
 
 describe('Multilingual Voice & Chat Knowledge Base Integration Tests', () => {
   let server;
   let baseUrl;
+  let maxInitialId = 0;
 
   before(async () => {
+    try {
+      const res = await query('SELECT COALESCE(MAX(id), 0) AS max_id FROM interaction_logs;');
+      maxInitialId = Number(res.rows[0].max_id);
+    } catch (_) {}
     const app = createApp();
     await new Promise((resolve) => {
       server = app.listen(0, '127.0.0.1', () => {
@@ -19,9 +25,15 @@ describe('Multilingual Voice & Chat Knowledge Base Integration Tests', () => {
   });
 
   after(async () => {
+    try {
+      if (maxInitialId !== undefined) {
+        await query('DELETE FROM interaction_logs WHERE id > $1;', [maxInitialId]);
+      }
+    } catch (_) {}
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }
+    await closePool();
   });
 
   // 1. Languages endpoint

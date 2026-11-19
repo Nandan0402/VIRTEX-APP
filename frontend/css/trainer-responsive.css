@@ -1,0 +1,55 @@
+/* =====================================================================
+   Virtex Trainer Hub — responsive rules (load LAST)
+   ===================================================================== */
+
+/* Small laptop: compact profile chip and punch buttons */
+@media (max-width: 1180px) {
+  .tp-profile-meta { display: none; }
+  .tp-profile-btn { padding-right: 8px; }
+  .tp-topbar .tp-punch-label { display: none; }
+}
+
+/* Tablet: sidebar becomes an off-canvas drawer with backdrop */
+@media (max-width: 900px) {
+  .tp-sidebar { transform: translateX(-100%); width: min(var(--tp-sidebar-w), 84vw); }
+  .tp-sidebar.open { transform: translateX(0); box-shadow: 0 0 40px rgba(0, 0, 0, 0.6); }
+  .tp-sidebar-close { display: inline-block; }
+  body.tp-nav-open { overflow: hidden; }
+  .tp-main { margin-left: 0; }
+  .tp-menu-btn { display: inline-block; }
+  .tp-topbar-brand { display: flex; }
+  .tp-topbar { padding: 0.55rem 1rem; }
+  .tp-page-header { padding: 1rem 1rem 0; }
+  .tp-content { padding: 1rem; }
+  .tp-kv { grid-template-columns: 1fr; gap: 2px 0; }
+  .tp-kv dd { margin-bottom: 6px; }
+  .tp-grid-2 { grid-template-columns: 1fr; }
+}
+
+/* Phone: punch controls move to their own row under the top bar */
+@media (max-width: 600px) {
+  .tp-topbar { flex-wrap: wrap; row-gap: 8px; }
+  .tp-topbar-brand span { display: none; }
+  .tp-topbar-right { display: contents; }
+  .tp-topbar .tp-bell { margin-left: auto; }
+  .tp-topbar .topbar-routine-group.tp-punch {
+    order: 10; flex: 1 1 100%; width: 100%; box-sizing: border-box; justify-content: space-between;
+    border-radius: var(--radius-md, 10px); padding: 4px 6px 4px 8px; margin: 0;
+  }
+  .tp-page-heading h1 { font-size: 1.2rem; }
+  .tp-page-heading p { font-size: 0.8rem; }
+  .tp-page-actions { margin-left: 0; width: 100%; }
+  .tp-page-actions .btn { flex: 1; }
+  .tp-profile-menu { position: fixed; left: 12px; right: 12px; top: 56px; min-width: 0; }
+
+  .tp-toolbar > * { flex: 1 1 100%; min-width: 0 !important; }
+  .tp-client-select, .tp-toolbar .input-search { min-width: 0; width: 100%; max-width: none; box-sizing: border-box; }
+  .tp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tp-stat-value { font-size: 1.3rem; }
+  .tp-row { flex-wrap: wrap; }
+  .tp-pager { justify-content: space-between; flex-wrap: wrap; }
+  .tp-form-actions .btn { flex: 1; }
+  .tp-toast { left: 16px; right: 16px; max-width: none; }
+  .tp-ex-row { grid-template-columns: 1fr 1fr !important; }
+  .tp-ex-row .form-group:first-child { grid-column: 1 / -1; }
+}

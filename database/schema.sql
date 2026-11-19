@@ -1,5 +1,5 @@
 -- ==============================================================================
--- PulseCore AI Gym Receptionist Robot - Complete Shared PostgreSQL Database Schema
+-- Virtex AI Gym Receptionist Robot - Complete Shared PostgreSQL Database Schema
 -- File: database/schema.sql
 -- Serves: Member Reception Kiosk (/kiosk.html) & Staff Admin Console (/admin)
 -- Compatible with PostgreSQL 14, 15, 16, 17, 18+
@@ -52,10 +52,10 @@ $$ LANGUAGE plpgsql;
 -- ==============================================================================
 CREATE TABLE gym_settings (
     id SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1), -- Enforces strict singleton configuration
-    gym_name VARCHAR(120) NOT NULL DEFAULT 'PulseCore Fitness',
+    gym_name VARCHAR(120) NOT NULL DEFAULT 'Virtex Fitness',
     tagline VARCHAR(200) DEFAULT 'AI-Powered Smart Fitness Reception',
     phone VARCHAR(20) NOT NULL DEFAULT '+91 98765 43210',
-    email VARCHAR(120) NOT NULL DEFAULT 'reception@pulsecorefitness.in',
+    email VARCHAR(120) NOT NULL DEFAULT 'reception@virtexfitness.in',
     address TEXT NOT NULL DEFAULT '42, 100 Feet Road, Indiranagar, Bengaluru, Karnataka 560038',
     operating_hours JSONB NOT NULL DEFAULT '[
         {"day": "Monday", "open": "06:00", "close": "22:00", "is_closed": false},
@@ -71,7 +71,7 @@ CREATE TABLE gym_settings (
     speech_rate NUMERIC(3, 2) NOT NULL DEFAULT 1.00 CHECK (speech_rate BETWEEN 0.50 AND 2.00),
     speech_pitch NUMERIC(3, 2) NOT NULL DEFAULT 1.00 CHECK (speech_pitch BETWEEN 0.50 AND 2.00),
     checkin_cooldown_minutes SMALLINT NOT NULL DEFAULT 5 CHECK (checkin_cooldown_minutes >= 0),
-    wifi_ssid VARCHAR(64) DEFAULT 'PulseCore-Gym-Guest',
+    wifi_ssid VARCHAR(64) DEFAULT 'Virtex-Gym-Guest',
     updated_by INTEGER,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -266,7 +266,8 @@ CREATE TABLE trainer_schedules (
     is_available BOOLEAN NOT NULL DEFAULT TRUE,
     notes VARCHAR(100),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_shift_time CHECK (shift_end > shift_start)
+    CONSTRAINT chk_shift_time CHECK (shift_end > shift_start),
+    CONSTRAINT uq_trainer_day_shift UNIQUE (trainer_id, day_of_week, shift_start)
 );
 
 CREATE INDEX idx_trainer_schedules_day ON trainer_schedules(day_of_week, is_available);
@@ -375,6 +376,7 @@ CREATE TABLE member_enquiries (
     plan_name VARCHAR(100),
     preferred_timing VARCHAR(50),
     notes TEXT,
+    customization_type VARCHAR(100) DEFAULT 'Standard Gym Access',
     status VARCHAR(20) NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'converted', 'closed')),
     assigned_trainer_id INTEGER REFERENCES trainers(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -384,6 +386,10 @@ CREATE TABLE member_enquiries (
 CREATE INDEX idx_member_enquiries_status ON member_enquiries(status);
 CREATE INDEX idx_member_enquiries_phone ON member_enquiries(phone);
 CREATE INDEX idx_member_enquiries_created ON member_enquiries(created_at DESC);
+-- One open lead per phone number; repeat kiosk enquiries update it (see createEnquiry)
+CREATE UNIQUE INDEX uq_member_enquiries_open_phone
+    ON member_enquiries ((regexp_replace(phone, '\D', '', 'g')))
+    WHERE status IN ('new', 'contacted');
 
 CREATE TRIGGER trg_member_enquiries_updated
 BEFORE UPDATE ON member_enquiries
@@ -501,18 +507,20 @@ BEGIN
     SELECT COALESCE(checkin_cooldown_minutes, 5) INTO v_cooldown_minutes
     FROM gym_settings WHERE id = 1;
 
-    IF v_cooldown_minutes > 0 THEN
-        SELECT COUNT(*) INTO v_recent_count
-        FROM check_ins
-        WHERE member_id = NEW.member_id
-          AND check_in_time > (NEW.check_in_time - (v_cooldown_minutes || ' minutes')::interval)
-          AND id <> COALESCE(NEW.id, 0);
+    -- One check-in per member per calendar day (plus the short cooldown window)
+    SELECT COUNT(*) INTO v_recent_count
+    FROM check_ins
+    WHERE member_id = NEW.member_id
+      AND id <> COALESCE(NEW.id, 0)
+      AND (
+            check_in_time::date = NEW.check_in_time::date
+         OR (v_cooldown_minutes > 0
+             AND check_in_time > (NEW.check_in_time - (v_cooldown_minutes || ' minutes')::interval))
+      );
 
-        IF v_recent_count > 0 THEN
-            RAISE EXCEPTION 'DUPLICATE_CHECK_IN: Member % already checked in within the last % minutes.',
-                NEW.member_id, v_cooldown_minutes
-                USING ERRCODE = '23505';
-        END IF;
+    IF v_recent_count > 0 THEN
+        RAISE EXCEPTION 'DUPLICATE_CHECK_IN: Member % has already checked in today.', NEW.member_id
+            USING ERRCODE = '23505';
     END IF;
 
     RETURN NEW;

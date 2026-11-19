@@ -1,0 +1,39 @@
+/* =====================================================================
+   Virtex Member Portal — Books & Library (member-books.html, member-book-details.html)
+   Builds on member-classes.css + member-courses.css (cards, chips, grid, bars).
+   ===================================================================== */
+.bk-card { color: inherit; text-decoration: none; transition: border-color 0.15s; }
+.bk-card:hover, .bk-card:focus-visible { border-color: var(--mp-accent-border); outline: none; }
+.bk-facts { font-size: 0.75rem; }
+.pg-scroll { overflow-x: auto; max-width: 100%; }
+.pg-tbl { width: 100%; font-size: 0.8rem; }
+.pg-tbl td, .pg-tbl th { white-space: nowrap; }
+.pg-tbl a { color: var(--mp-accent); }
+.pg-sub { display: block; font-size: 0.7rem; color: var(--mp-text-dim); }
+
+.bk-head { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 1.2rem; align-items: start; }
+.bk-cover { aspect-ratio: 3 / 4; border-radius: 10px; border: 1px solid var(--mp-line); background: linear-gradient(160deg, rgba(0, 230, 118, 0.12), rgba(255, 255, 255, 0.02)); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 2.6rem; gap: 6px; }
+.bk-cover span { font-size: 0.7rem; font-weight: 700; color: var(--mp-text-muted); letter-spacing: 1px; }
+.bk-info { min-width: 0; }
+.bk-access { margin-top: 0.8rem; padding: 0.8rem 0.9rem; border-radius: 10px; border: 1px dashed rgba(148, 163, 184, 0.35); }
+.bk-access.ok { border-style: solid; border-color: var(--mp-accent-border); background: var(--mp-accent-soft); }
+.bk-access b { display: block; font-size: 0.9rem; }
+.bk-access p { margin: 4px 0 0; font-size: 0.8rem; color: var(--mp-text-muted); }
+.bk-read-act { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.bk-read-act small { font-size: 0.72rem; color: var(--mp-text-dim); }
+.bk-bar { max-width: 360px; }
+
+.bk-prog { display: grid; gap: 0.7rem; grid-template-columns: 200px minmax(0, 1fr); align-items: start; margin-top: 0.8rem; }
+.mm-field { display: flex; flex-direction: column; gap: 5px; font-size: 0.78rem; color: var(--mp-text-muted); min-width: 0; }
+.mm-field i { font-style: normal; font-size: 0.68rem; color: var(--mp-text-dim); }
+.mm-field input, .mm-field textarea { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--mp-line); background: var(--bg-input, #090a0f); color: var(--mp-text); font-family: inherit; font-size: 0.9rem; }
+.bk-prog-act { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+.mm-err { grid-column: 1 / -1; color: #f87171; font-size: 0.82rem; margin: 0; }
+.mm-err:empty { display: none; }
+.co-back { text-decoration: none; }
+
+@media (max-width: 600px) {
+  .bk-head { grid-template-columns: 1fr; }
+  .bk-cover { max-width: 110px; }
+  .bk-prog { grid-template-columns: 1fr; }
+}

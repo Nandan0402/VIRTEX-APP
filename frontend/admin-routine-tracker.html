@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Routine & Shift Tracker (Punch In / Break / Out)</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root, html {
+      color-scheme: dark !important;
+      --accent-green: #00e676;
+      --accent-green-dark: #00b050;
+      --accent-green-glow: rgba(0, 230, 118, 0.28);
+      --green: #00e676;
+    }
+
+    .routine-page-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    /* Main Punch Station Card */
+    .punch-station-card {
+      background: radial-gradient(circle at top right, rgba(0, 230, 118, 0.08), transparent 60%), #13161f;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    .clock-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 1.25rem;
+    }
+
+    .live-digital-clock {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    .live-date-str {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .status-badge-hero {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 9999px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-hero-in {
+      background: rgba(0, 230, 118, 0.16);
+      border: 1px solid rgba(0, 230, 118, 0.5);
+      color: var(--accent-green);
+      box-shadow: 0 0 16px rgba(0, 230, 118, 0.25);
+    }
+
+    .status-hero-break {
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: #f59e0b;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+    }
+
+    .status-hero-out {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: var(--text-dim);
+    }
+
+    /* Timer Display */
+    .stopwatch-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 0;
+      gap: 0.5rem;
+    }
+
+    .stopwatch-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+
+    .stopwatch-label {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Big Punch Buttons Grid */
+    .punch-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .btn-punch-action {
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 1.1rem 1rem;
+      font-size: 1rem;
+      font-weight: 800;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-punch-action:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .btn-punch-in {
+      background: linear-gradient(135deg, #00e676 0%, #00b050 100%);
+      color: #000;
+      box-shadow: 0 6px 20px rgba(0, 230, 118, 0.25);
+    }
+
+    .btn-punch-in:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 230, 118, 0.4);
+    }
+
+    .btn-punch-break {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #000;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.25);
+    }
+
+    .btn-punch-break:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-punch-out {
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.25);
+    }
+
+    .btn-punch-out:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Metric Cards */
+    .routine-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card-routine {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .stat-icon-wrap {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+    }
+
+    .stat-meta h4 {
+      margin: 0;
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-meta .stat-val {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Timeline */
+    .timeline-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      position: relative;
+    }
+
+    .timeline-marker {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      margin-top: 5px;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    .timeline-marker-break {
+      background: #f59e0b;
+      box-shadow: 0 0 8px #f59e0b;
+    }
+
+    .timeline-content {
+      background: #090a0f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      flex: 1;
+    }
+
+    .form-control-dark {
+      background: #090a0f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: #fff;
+      font-size: 0.88rem;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .form-control-dark:focus {
+      border-color: var(--accent-green);
+    }
+
+    /* Centered Confirmation & Prompt Modal Dialogs */
+    .center-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeInCenterOverlay 0.18s ease-out;
+      padding: 1.25rem;
+      box-sizing: border-box;
+    }
+
+    @keyframes fadeInCenterOverlay {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .center-modal-card {
+      background: #13161f;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 440px;
+      padding: 2rem 1.75rem 1.75rem 1.75rem;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: popInCenterModal 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
+    }
+
+    @keyframes popInCenterModal {
+      from {
+        opacity: 0;
+        transform: scale(0.92) translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .center-modal-icon-badge {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.1rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .icon-badge-danger {
+      background: rgba(239, 68, 68, 0.14);
+      border: 2px solid rgba(239, 68, 68, 0.4);
+      color: #ef4444;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.25);
+    }
+
+    .icon-badge-amber {
+      background: rgba(245, 158, 11, 0.14);
+      border: 2px solid rgba(245, 158, 11, 0.4);
+      color: #f59e0b;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+    }
+
+    .icon-badge-green {
+      background: rgba(0, 230, 118, 0.14);
+      border: 2px solid rgba(0, 230, 118, 0.4);
+      color: #00e676;
+      box-shadow: 0 0 25px rgba(0, 230, 118, 0.25);
+    }
+
+    .center-modal-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.2px;
+    }
+
+    .center-modal-desc {
+      font-size: 0.92rem;
+      color: #94a3b8;
+      line-height: 1.55;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .center-modal-actions {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-center-cancel {
+      flex: 1;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #e2e8f0;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-center-cancel:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.35);
+      color: #fff;
+    }
+
+    .btn-center-confirm {
+      flex: 1.2;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-confirm-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.38);
+    }
+
+    .btn-confirm-danger:hover {
+      background: #dc2626;
+      box-shadow: 0 6px 22px rgba(239, 68, 68, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .btn-confirm-amber {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #000;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.38);
+    }
+
+    .btn-confirm-amber:hover {
+      background: #d97706;
+      box-shadow: 0 6px 22px rgba(245, 158, 11, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .btn-confirm-green {
+      background: linear-gradient(135deg, #00e676 0%, #00b050 100%);
+      color: #000;
+      box-shadow: 0 4px 16px rgba(0, 230, 118, 0.38);
+    }
+
+    .btn-confirm-green:hover {
+      background: #00ff84;
+      box-shadow: 0 6px 22px rgba(0, 230, 118, 0.55);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="admin.html#tab-overview" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📊</span> Overview & Stats
+        </a>
+        <a href="admin-members.html" class="nav-item-btn" id="nav-item-members" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👥</span> Members
+        </a>
+        <a href="admin-feessalert.html" class="nav-item-btn" id="nav-item-fees-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💰</span> Fees Alert
+        </a>
+        <a href="admin-birthdayalert.html" class="nav-item-btn" id="nav-item-birthday-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🎂</span> Birthday Alert
+        </a>
+        <a href="admin-messages.html" class="nav-item-btn" id="nav-item-messages" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📩</span> Message
+        </a>
+        <a href="admin-notification.html" class="nav-item-btn" id="nav-item-notifications" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📢</span> Notification
+        </a>
+        <a href="admin-personaltraniner.html" class="nav-item-btn" id="nav-item-trainers" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏋️</span> Personal Trainer
+        </a>
+        <a href="admin-assign-membertoperonal traniner.html" class="nav-item-btn" id="nav-item-assign-trainer" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤝</span> Assign PT & Fees
+        </a>
+        <a href="admin-routine-tracker.html" class="nav-item-btn active" id="nav-item-routine-tracker" aria-current="page" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏱️</span> Routine Tracker
+        </a>
+        <a href="admin.html#tab-plans" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💳</span> Membership Plans
+        </a>
+        <a href="admin.html#tab-faqs" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">❓</span> FAQs / Knowledge Base
+        </a>
+        <a href="admin.html#tab-robot" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
+        </a>
+        <a href="admin.html#tab-profile" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile
+        </a>
+        <a href="admin-working-hours.html" class="nav-item-btn" id="nav-item-working-hours-link" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏰</span> Working Hours
+        </a>
+        <a href="admin-calander.html" class="nav-item-btn" id="nav-item-admin-calendar" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📅</span> Class & Shift Calendar
+        </a>
+        <a href="admin-profile.html" class="nav-item-btn" id="nav-item-admin-profile" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👤</span> Profile
+        </a>
+        <a href="admin.html#tab-settings" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⚙️</span> Language & Settings
+        </a>
+      </nav>
+
+      <!-- User Profile & Session Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" style="cursor: pointer;" title="Active Profile"
+          role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <img id="sidebar-user-photo" src="" alt="Avatar"
+              style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main">
+      <!-- Topbar Header -->
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle navigation menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-title-block">
+            <h1>⏱️ Routine & Shift Tracker</h1>
+            <span class="topbar-subtitle">PostgreSQL Grounded • Punch In, Break & Punch Out Daily Shift Attendance</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Message Link Icon -->
+          <a href="admin-messages.html" class="topbar-nav-icon-link" id="topbar-message-link" title="Member Messages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="topbar-counter-badge" id="topbar-message-badge" style="display: none;">0</span>
+          </a>
+
+          <!-- Notification Link Icon -->
+          <a href="admin-notification.html" class="topbar-nav-icon-link" id="topbar-notification-link" title="Notifications & System Announcements">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="topbar-counter-badge topbar-counter-red" id="topbar-notification-badge" style="display: none;">0</span>
+          </a>
+
+          <div class="topbar-divider-vert"></div>
+
+          <span class="badge badge-green font-mono text-xs" id="topbar-db-status">● PostgreSQL Connected</span>
+          <button class="btn btn-green btn-sm" id="btn-refresh-routine">
+            🔄 Sync Routine
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Body Container -->
+      <main class="admin-body">
+        <div class="routine-page-container">
+
+          <!-- Main Punch Station -->
+          <div class="punch-station-card">
+            <div class="clock-row">
+              <div>
+                <div class="live-digital-clock" id="digital-clock">00:00:00 AM</div>
+                <div class="live-date-str" id="digital-date">Loading date...</div>
+              </div>
+
+              <div id="status-pill-container">
+                <span class="status-badge-hero status-hero-out" id="hero-status-badge">
+                  ⏹ PUNCHED OUT
+                </span>
+              </div>
+            </div>
+
+            <!-- Stopwatch Center -->
+            <div class="stopwatch-center">
+              <div class="stopwatch-label" id="stopwatch-heading">Active Work Session Time</div>
+              <div class="stopwatch-time" id="stopwatch-display">00:00:00</div>
+              <div style="font-size: 0.8rem; color: var(--text-dim);" id="session-subtext">
+                Shift not started. Click "Punch In" to begin routine tracking.
+              </div>
+            </div>
+
+            <!-- Routine Notes Input -->
+            <div>
+              <input type="text" id="routine-notes-input" class="form-control-dark" style="width: 100%;"
+                placeholder="Optional routine notes (e.g. Morning gym floor opening, client evaluations, equipment maintenance)" />
+            </div>
+
+            <!-- Interactive Big Action Buttons -->
+            <div class="punch-actions-grid">
+              <button class="btn-punch-action btn-punch-in" id="btn-action-punch-in">
+                <span style="font-size: 1.5rem;">🟢</span>
+                <span>PUNCH IN</span>
+                <span style="font-size: 0.72rem; font-weight: normal; opacity: 0.85;">Start Daily Routine Shift</span>
+              </button>
+
+              <button class="btn-punch-action btn-punch-break" id="btn-action-break" disabled>
+                <span style="font-size: 1.5rem;" id="break-btn-icon">⏸️</span>
+                <span id="break-btn-text">TAKE BREAK</span>
+                <span style="font-size: 0.72rem; font-weight: normal; opacity: 0.85;" id="break-btn-sub">Pause Work Routine</span>
+              </button>
+
+              <button class="btn-punch-action btn-punch-out" id="btn-action-punch-out" disabled>
+                <span style="font-size: 1.5rem;">⏹️</span>
+                <span>PUNCH OUT</span>
+                <span style="font-size: 0.72rem; font-weight: normal; opacity: 0.85;">End Shift & Save Logs</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Shift & Routine Metrics -->
+          <div class="routine-metrics-grid">
+            <div class="stat-card-routine">
+              <div class="stat-icon-wrap" style="color: var(--accent-green);">💼</div>
+              <div class="stat-meta">
+                <h4>Today's Net Work Time</h4>
+                <div class="stat-val" id="metric-today-work">00h 00m</div>
+              </div>
+            </div>
+
+            <div class="stat-card-routine">
+              <div class="stat-icon-wrap" style="color: #f59e0b;">☕</div>
+              <div class="stat-meta">
+                <h4>Today's Total Breaks</h4>
+                <div class="stat-val" id="metric-today-break">00h 00m</div>
+              </div>
+            </div>
+
+            <div class="stat-card-routine">
+              <div class="stat-icon-wrap" style="color: #38bdf8;">🕒</div>
+              <div class="stat-meta">
+                <h4>Punch In Time</h4>
+                <div class="stat-val" id="metric-punch-in-time" style="font-size: 1.15rem;">--:--</div>
+              </div>
+            </div>
+
+            <div class="stat-card-routine">
+              <div class="stat-icon-wrap" style="color: #a855f7;">📊</div>
+              <div class="stat-meta">
+                <h4>Last 7 Days Total</h4>
+                <div class="stat-val" id="metric-week-work">00h 00m</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Today's Routine Timeline & History Table -->
+          <div style="display: grid; grid-template-columns: 1fr; gap: 1.25rem;">
+            <!-- Today's Timeline Card -->
+            <div class="admin-card" style="padding: 1.25rem;">
+              <h3 style="font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem;">
+                📅 Today's Routine Timeline
+              </h3>
+              <div class="timeline-container" id="timeline-container">
+                <div style="font-size: 0.85rem; color: var(--text-dim);">No punch events recorded today yet. Click "Punch In" above to start your shift!</div>
+              </div>
+            </div>
+
+            <!-- Historical Shift Logs Table -->
+            <div class="admin-card" style="padding: 0; overflow: hidden;">
+              <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <h3 style="font-size: 1rem; font-weight: 700; color: #fff;">Daily Routine Shift History</h3>
+                  <span style="font-size: 0.78rem; color: var(--text-dim);">Logged punch in, break durations, punch out timestamps and hours worked.</span>
+                </div>
+              </div>
+
+              <div class="table-responsive" style="overflow-x: auto;">
+                <table class="data-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                  <thead>
+                    <tr style="border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);">
+                      <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Date</th>
+                      <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Staff Member</th>
+                      <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Punch In</th>
+                      <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Punch Out</th>
+                      <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Breaks Taken</th>
+                      <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Net Work Hours</th>
+                      <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Status</th>
+                      <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Routine Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="history-table-body">
+                    <tr>
+                      <td colspan="8" style="padding: 2rem; text-align: center; color: var(--text-dim);">
+                        ⏳ Loading routine shift logs...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Centered Custom Confirmation Modal -->
+  <div class="center-modal-overlay" id="custom-confirm-modal" role="dialog" aria-modal="true">
+    <div class="center-modal-card">
+      <div class="center-modal-icon-badge icon-badge-danger" id="confirm-modal-icon">
+        ⏹️
+      </div>
+      <h3 class="center-modal-title" id="confirm-modal-title">Confirm Punch Out</h3>
+      <p class="center-modal-desc" id="confirm-modal-desc">
+        Are you sure you want to Punch Out and finish your routine shift for today?
+      </p>
+      <div class="center-modal-actions">
+        <button type="button" class="btn-center-cancel" id="btn-confirm-cancel">Cancel</button>
+        <button type="button" class="btn-center-confirm btn-confirm-danger" id="btn-confirm-ok">Yes, Punch Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Centered Custom Break Reason Modal -->
+  <div class="center-modal-overlay" id="custom-break-modal" role="dialog" aria-modal="true">
+    <div class="center-modal-card">
+      <div class="center-modal-icon-badge icon-badge-amber">
+        ☕
+      </div>
+      <h3 class="center-modal-title">Take Routine Break</h3>
+      <p class="center-modal-desc" style="margin-bottom: 0.85rem;">
+        Pause your active shift tracking. Enter an optional reason for this break:
+      </p>
+      <input type="text" id="break-reason-input" class="form-control-dark" style="width: 100%; margin-bottom: 1.25rem; text-align: left;" value="Routine Lunch / Coffee Break" placeholder="e.g. Lunch break, Equipment setup" />
+      <div class="center-modal-actions">
+        <button type="button" class="btn-center-cancel" id="btn-break-cancel">Cancel</button>
+        <button type="button" class="btn-center-confirm btn-confirm-amber" id="btn-break-ok">Start Break</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 8px;"></div>
+
+  <!-- Application Script -->
+  <script type="module">
+    import { adminApi } from './js/admin/adminApi.js';
+
+    const state = {
+      statusData: null,
+      history: [],
+      timerInterval: null,
+      clockInterval: null,
+      elapsedWorkSeconds: 0,
+      elapsedBreakSeconds: 0,
+    };
+
+    function showToast(message, isError = false) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        background: ${isError ? '#ef4444' : '#13161f'};
+        color: #fff;
+        border: 1px solid ${isError ? '#b91c1c' : '#00e676'};
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: opacity 0.3s ease;
+      `;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    function formatSeconds(totalSec) {
+      const sec = Math.max(0, Math.floor(totalSec || 0));
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function formatHoursMin(totalSec) {
+      const sec = Math.max(0, Math.floor(totalSec || 0));
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m`;
+    }
+
+    function startLiveClock() {
+      const clockEl = document.getElementById('digital-clock');
+      const dateEl = document.getElementById('digital-date');
+
+      function updateClock() {
+        const now = new Date();
+        clockEl.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        dateEl.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      updateClock();
+      state.clockInterval = setInterval(updateClock, 1000);
+    }
+
+    async function hydrateUser() {
+      try {
+        let userRes = await adminApi.getCurrentUser();
+        if (!userRes.success) {
+          const loginRes = await adminApi.redirectToLogin().catch(() => null);
+          if (loginRes && loginRes.success) {
+            userRes = await adminApi.getCurrentUser();
+          }
+        }
+        const u = userRes.data || userRes.user;
+        if (userRes.success && u) {
+          const fullName = u.fullName || u.full_name || u.username || 'Nandan.B';
+          const username = u.username || 'nandanb449';
+          const role = (u.role || 'owner').toUpperCase();
+
+          document.getElementById('sidebar-user-fullname').textContent = fullName;
+          document.getElementById('sidebar-user-handle').textContent = `@${username}`;
+          const pill = document.getElementById('sidebar-role-pill');
+          if (pill) {
+            pill.textContent = role;
+            pill.className = `role-badge-pill role-${role.toLowerCase()}`;
+          }
+        }
+      } catch (err) {
+        console.warn('[RoutineTracker] Auth hydration warning:', err.message);
+      }
+    }
+
+    async function syncRoutineStatus() {
+      try {
+        const res = await adminApi.getRoutineStatus();
+        if (res.success && res.data) {
+          state.statusData = res.data;
+          state.elapsedWorkSeconds = res.data.elapsedWorkSeconds || 0;
+          state.elapsedBreakSeconds = res.data.elapsedBreakSeconds || 0;
+          updatePunchUI();
+          renderTimeline();
+          renderMetrics();
+        }
+      } catch (err) {
+        console.error('[RoutineTracker] Status sync error:', err);
+      }
+    }
+
+    async function loadHistory() {
+      try {
+        const res = await adminApi.getRoutineHistory();
+        if (res.success && res.data) {
+          state.history = res.data;
+          renderHistoryTable();
+        }
+      } catch (err) {
+        console.error('[RoutineTracker] History error:', err);
+      }
+    }
+
+    function updatePunchUI() {
+      const data = state.statusData;
+      if (!data) return;
+
+      const badge = document.getElementById('hero-status-badge');
+      const btnIn = document.getElementById('btn-action-punch-in');
+      const btnBreak = document.getElementById('btn-action-break');
+      const btnBreakText = document.getElementById('break-btn-text');
+      const btnBreakIcon = document.getElementById('break-btn-icon');
+      const btnBreakSub = document.getElementById('break-btn-sub');
+      const btnOut = document.getElementById('btn-action-punch-out');
+      const subtext = document.getElementById('session-subtext');
+      const heading = document.getElementById('stopwatch-heading');
+
+      // Clear previous timer interval
+      if (state.timerInterval) clearInterval(state.timerInterval);
+
+      if (data.status === 'punched_in') {
+        badge.className = 'status-badge-hero status-hero-in';
+        badge.innerHTML = '🟢 PUNCHED IN (ON DUTY)';
+        heading.textContent = 'Active Work Shift Routine';
+        heading.style.color = 'var(--accent-green)';
+        subtext.innerHTML = `Punched in at <strong>${new Date(data.punch.punch_in).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</strong>. Timer active.`;
+
+        btnIn.disabled = true;
+        btnBreak.disabled = false;
+        btnBreak.className = 'btn-punch-action btn-punch-break';
+        btnBreakIcon.textContent = '⏸️';
+        btnBreakText.textContent = 'TAKE BREAK';
+        btnBreakSub.textContent = 'Pause Work Routine';
+        btnOut.disabled = false;
+
+        // Start live ticking timer
+        state.timerInterval = setInterval(() => {
+          state.elapsedWorkSeconds++;
+          document.getElementById('stopwatch-display').textContent = formatSeconds(state.elapsedWorkSeconds);
+        }, 1000);
+
+      } else if (data.status === 'on_break') {
+        badge.className = 'status-badge-hero status-hero-break';
+        badge.innerHTML = '⏸️ ON BREAK';
+        heading.textContent = 'Break Time Elapsed';
+        heading.style.color = '#f59e0b';
+        subtext.innerHTML = `Break started at <strong>${data.activeBreak?.break_start ? new Date(data.activeBreak.break_start).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : ''}</strong>. Click Resume to get back on shift.`;
+
+        btnIn.disabled = true;
+        btnBreak.disabled = false;
+        btnBreak.className = 'btn-punch-action btn-punch-in';
+        btnBreakIcon.textContent = '▶️';
+        btnBreakText.textContent = 'RESUME WORK';
+        btnBreakSub.textContent = 'End Break & Continue Shift';
+        btnOut.disabled = false;
+
+        // Start live break ticking timer
+        state.timerInterval = setInterval(() => {
+          state.elapsedBreakSeconds++;
+          document.getElementById('stopwatch-display').textContent = formatSeconds(state.elapsedBreakSeconds);
+        }, 1000);
+
+      } else {
+        badge.className = 'status-badge-hero status-hero-out';
+        badge.innerHTML = '⏹ PUNCHED OUT';
+        heading.textContent = 'Shift Not Started';
+        heading.style.color = 'var(--text-dim)';
+        document.getElementById('stopwatch-display').textContent = '00:00:00';
+        subtext.textContent = 'You are currently off duty. Click "Punch In" to start your daily routine tracking.';
+
+        btnIn.disabled = false;
+        btnBreak.disabled = true;
+        btnBreakIcon.textContent = '⏸️';
+        btnBreakText.textContent = 'TAKE BREAK';
+        btnBreakSub.textContent = 'Pause Work Routine';
+        btnOut.disabled = true;
+      }
+    }
+
+    function renderMetrics() {
+      const summary = state.statusData?.todaySummary || {};
+      const punch = state.statusData?.punch;
+
+      document.getElementById('metric-today-work').textContent = formatHoursMin(summary.todayWorkSeconds || state.elapsedWorkSeconds);
+      document.getElementById('metric-today-break').textContent = formatHoursMin(summary.todayBreakSeconds || state.elapsedBreakSeconds);
+      document.getElementById('metric-week-work').textContent = formatHoursMin((summary.weekWorkSeconds || 0) + state.elapsedWorkSeconds);
+
+      if (punch && punch.punch_in) {
+        document.getElementById('metric-punch-in-time').textContent = new Date(punch.punch_in).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      } else {
+        document.getElementById('metric-punch-in-time').textContent = '--:--';
+      }
+    }
+
+    function renderTimeline() {
+      const container = document.getElementById('timeline-container');
+      const punch = state.statusData?.punch;
+
+      if (!punch) {
+        container.innerHTML = '<div style="font-size: 0.85rem; color: var(--text-dim);">No punch events recorded today yet. Click "Punch In" above to start your shift!</div>';
+        return;
+      }
+
+      let html = '';
+      const inTime = new Date(punch.punch_in).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+      html += `
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div style="display: flex; justify-content: space-between;">
+              <strong style="color: #fff; font-size: 0.85rem;">🟢 Punched In</strong>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent-green);">${inTime}</span>
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 2px;">Shift routine commenced by ${punch.user_name}</div>
+          </div>
+        </div>
+      `;
+
+      if (punch.breaks && punch.breaks.length > 0) {
+        punch.breaks.forEach((b, idx) => {
+          const bStart = new Date(b.break_start).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+          const bEnd = b.break_end ? new Date(b.break_end).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'In Progress...';
+          const durStr = b.duration_seconds ? `${Math.round(b.duration_seconds / 60)} mins` : 'Active';
+
+          html += `
+            <div class="timeline-item">
+              <div class="timeline-marker timeline-marker-break"></div>
+              <div class="timeline-content">
+                <div style="display: flex; justify-content: space-between;">
+                  <strong style="color: #f59e0b; font-size: 0.85rem;">☕ Break #${idx + 1} (${durStr})</strong>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #f59e0b;">${bStart} → ${bEnd}</span>
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 2px;">${b.break_reason || 'Routine break'}</div>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      if (punch.punch_out) {
+        const outTime = new Date(punch.punch_out).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        html += `
+          <div class="timeline-item">
+            <div class="timeline-marker" style="background: #ef4444; box-shadow: 0 0 8px #ef4444;"></div>
+            <div class="timeline-content">
+              <div style="display: flex; justify-content: space-between;">
+                <strong style="color: #ef4444; font-size: 0.85rem;">⏹️ Punched Out</strong>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #ef4444;">${outTime}</span>
+              </div>
+              <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 2px;">
+                Net work time: ${formatHoursMin(punch.total_work_seconds)}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function renderHistoryTable() {
+      const tbody = document.getElementById('history-table-body');
+      tbody.innerHTML = '';
+
+      if (!state.history || state.history.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="padding: 2.5rem; text-align: center; color: var(--text-dim);">
+              No historical routine shift logs recorded yet.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      state.history.forEach((h) => {
+        const tr = document.createElement('tr');
+        tr.style.cssText = 'border-bottom: 1px solid var(--border); transition: background 0.15s;';
+        tr.onmouseover = () => tr.style.background = 'rgba(255,255,255,0.02)';
+        tr.onmouseout = () => tr.style.background = 'transparent';
+
+        const inTime = h.punch_in ? new Date(h.punch_in).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : '-';
+        const outTime = h.punch_out ? new Date(h.punch_out).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : '<span style="color: var(--accent-green);">In Shift</span>';
+        const breakMins = Math.round(Number(h.total_break_seconds || 0) / 60);
+
+        let statusBadge = '<span class="badge badge-green font-mono text-xs">PUNCHED IN</span>';
+        if (h.status === 'on_break') {
+          statusBadge = '<span class="badge font-mono text-xs" style="background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid rgba(245,158,11,0.4);">ON BREAK</span>';
+        } else if (h.status === 'punched_out') {
+          statusBadge = '<span class="badge font-mono text-xs" style="background: rgba(255,255,255,0.08); color: #fff;">COMPLETED</span>';
+        }
+
+        tr.innerHTML = `
+          <td style="padding: 12px 16px; font-size: 0.82rem; color: #fff;">
+            ${new Date(h.punch_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+          </td>
+          <td style="padding: 12px 16px;">
+            <div style="font-weight: 700; color: #fff;">${h.user_name}</div>
+            <div style="font-size: 0.72rem; color: var(--accent-green); text-transform: uppercase;">${h.user_role}</div>
+          </td>
+          <td style="padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent-green);">
+            ${inTime}
+          </td>
+          <td style="padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #fff;">
+            ${outTime}
+          </td>
+          <td style="padding: 12px 16px; font-size: 0.82rem; color: #f59e0b;">
+            ${breakMins > 0 ? `${breakMins} mins` : 'None'}
+          </td>
+          <td style="padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 700; color: #fff;">
+            ${formatHoursMin(h.total_work_seconds)}
+          </td>
+          <td style="padding: 12px 16px;">
+            ${statusBadge}
+          </td>
+          <td style="padding: 12px 16px; font-size: 0.8rem; color: var(--text-dim); max-width: 200px;">
+            ${h.routine_notes || '-'}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Action Handlers
+    document.getElementById('btn-action-punch-in').addEventListener('click', async () => {
+      const notes = document.getElementById('routine-notes-input').value;
+      try {
+        const res = await adminApi.routinePunchIn(notes);
+        if (res.success) {
+          showToast(res.message);
+          document.getElementById('routine-notes-input').value = '';
+          await syncRoutineStatus();
+          await loadHistory();
+        } else {
+          showToast(res.error || 'Failed to punch in.', true);
+        }
+      } catch (err) {
+        showToast('Error punching in.', true);
+      }
+    });
+
+    // Custom Centered Dialog Helpers
+    function askConfirmation({ title = 'Confirmation', message = 'Are you sure?', confirmText = 'Confirm', confirmStyle = 'danger', icon = '⏹️' } = {}) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('custom-confirm-modal');
+        const titleEl = document.getElementById('confirm-modal-title');
+        const descEl = document.getElementById('confirm-modal-desc');
+        const iconEl = document.getElementById('confirm-modal-icon');
+        const okBtn = document.getElementById('btn-confirm-ok');
+        const cancelBtn = document.getElementById('btn-confirm-cancel');
+
+        titleEl.textContent = title;
+        descEl.textContent = message;
+        iconEl.textContent = icon;
+        okBtn.textContent = confirmText;
+
+        iconEl.className = `center-modal-icon-badge icon-badge-${confirmStyle}`;
+        okBtn.className = `btn-center-confirm btn-confirm-${confirmStyle}`;
+
+        modal.style.display = 'flex';
+
+        function cleanup(result) {
+          modal.style.display = 'none';
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          modal.removeEventListener('click', onBackdrop);
+          document.removeEventListener('keydown', onKeyDown);
+          resolve(result);
+        }
+
+        function onOk() { cleanup(true); }
+        function onCancel() { cleanup(false); }
+        function onBackdrop(e) {
+          if (e.target === modal) cleanup(false);
+        }
+        function onKeyDown(e) {
+          if (e.key === 'Escape') cleanup(false);
+          else if (e.key === 'Enter') cleanup(true);
+        }
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        modal.addEventListener('click', onBackdrop);
+        document.addEventListener('keydown', onKeyDown);
+      });
+    }
+
+    function askBreakReason() {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('custom-break-modal');
+        const input = document.getElementById('break-reason-input');
+        const okBtn = document.getElementById('btn-break-ok');
+        const cancelBtn = document.getElementById('btn-break-cancel');
+
+        modal.style.display = 'flex';
+        input.focus();
+        input.select();
+
+        function cleanup(reason) {
+          modal.style.display = 'none';
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          modal.removeEventListener('click', onBackdrop);
+          input.removeEventListener('keydown', onInputKey);
+          document.removeEventListener('keydown', onDocKey);
+          resolve(reason);
+        }
+
+        function onOk() { cleanup(input.value.trim() || 'Routine Break'); }
+        function onCancel() { cleanup(null); }
+        function onBackdrop(e) {
+          if (e.target === modal) cleanup(null);
+        }
+        function onInputKey(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            onOk();
+          }
+        }
+        function onDocKey(e) {
+          if (e.key === 'Escape') cleanup(null);
+        }
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        modal.addEventListener('click', onBackdrop);
+        input.addEventListener('keydown', onInputKey);
+        document.addEventListener('keydown', onDocKey);
+      });
+    }
+
+    document.getElementById('btn-action-break').addEventListener('click', async () => {
+      const current = state.statusData?.status;
+      try {
+        let res;
+        if (current === 'punched_in') {
+          const reason = await askBreakReason();
+          if (reason === null) return; // User pressed Cancel
+          res = await adminApi.routineStartBreak(reason || 'Routine Break');
+        } else if (current === 'on_break') {
+          const proceed = await askConfirmation({
+            title: 'Resume Routine Shift',
+            message: 'Ready to finish your break and resume your routine shift tracking?',
+            confirmText: 'Resume Shift',
+            confirmStyle: 'green',
+            icon: '▶️',
+          });
+          if (!proceed) return;
+          res = await adminApi.routineEndBreak();
+        }
+
+        if (res && res.success) {
+          showToast(res.message);
+          await syncRoutineStatus();
+          await loadHistory();
+        } else if (res) {
+          showToast(res.error || 'Failed to update break status.', true);
+        }
+      } catch (err) {
+        showToast('Error updating break.', true);
+      }
+    });
+
+    document.getElementById('btn-action-punch-out').addEventListener('click', async () => {
+      const confirmed = await askConfirmation({
+        title: 'Confirm Punch Out',
+        message: 'Are you sure you want to Punch Out and finish your routine shift for today?',
+        confirmText: 'Yes, Punch Out',
+        confirmStyle: 'danger',
+        icon: '⏹️',
+      });
+      if (!confirmed) return;
+
+      const notes = document.getElementById('routine-notes-input').value;
+      try {
+        const res = await adminApi.routinePunchOut(notes);
+        if (res.success) {
+          showToast(res.message);
+          document.getElementById('routine-notes-input').value = '';
+          await syncRoutineStatus();
+          await loadHistory();
+        } else {
+          showToast(res.error || 'Failed to punch out.', true);
+        }
+      } catch (err) {
+        showToast('Error punching out.', true);
+      }
+    });
+
+    document.getElementById('btn-refresh-routine').addEventListener('click', async () => {
+      await syncRoutineStatus();
+      await loadHistory();
+      showToast('🔄 Routine tracker synchronized');
+    });
+
+    // Mobile Sidebar Toggle
+    document.getElementById('btn-sidebar-toggle')?.addEventListener('click', () => {
+      document.getElementById('admin-sidebar')?.classList.toggle('open');
+    });
+
+    // Logout
+    document.getElementById('btn-logout')?.addEventListener('click', async () => {
+      await adminApi.logout();
+      window.location.href = 'index.html';
+    });
+
+    async function syncBadges() {
+      try {
+        const notifBadge = document.getElementById('topbar-notification-badge');
+        if (notifBadge) {
+          const annRes = await adminApi.getAnnouncements(true).catch(() => null);
+          const list = annRes?.data || annRes?.announcements || [];
+          if (list.length > 0) {
+            notifBadge.textContent = list.length > 99 ? '99+' : String(list.length);
+            notifBadge.style.display = 'inline-block';
+          }
+        }
+        const msgBadge = document.getElementById('topbar-message-badge');
+        if (msgBadge) {
+          const enqRes = await adminApi.getEnquiries(20).catch(() => null);
+          const leads = enqRes?.data || [];
+          const newCount = leads.filter(l => l.status === 'new' || l.status === 'pending').length;
+          if (newCount > 0) {
+            msgBadge.textContent = newCount > 99 ? '99+' : String(newCount);
+            msgBadge.style.display = 'inline-block';
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Init
+    (async () => {
+      startLiveClock();
+      await hydrateUser();
+      await syncRoutineStatus();
+      await loadHistory();
+      await syncBadges();
+    })();
+  </script>
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+</body>
+
+</html>
+

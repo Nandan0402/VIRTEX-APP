@@ -19,8 +19,8 @@ export class VoiceVisualizerComponent {
     let subText = statusText;
     if (!subText) {
       if (state === 'listening') subText = 'Listening... Speak in English, ಕನ್ನಡ, or हिन्दी';
-      else if (state === 'speaking') subText = 'FitBot is speaking answer aloud...';
-      else subText = 'FitBot Ready. Tap microphone or type a question below.';
+      else if (state === 'speaking') subText = 'Receptionist is speaking the answer aloud...';
+      else subText = 'Ready. Tap the microphone or type a question below.';
     }
 
     this.container.innerHTML = `

@@ -5,7 +5,11 @@ import { query } from '../config/database.js';
  * @param {Object} [options] - { activeOnly, priority, limit }
  * @param {import('pg').PoolClient} [client]
  */
-export async function findAnnouncements({ activeOnly = false, priority, limit = 50 } = {}, client) {
+// audience / category come from migration 030; to_jsonb keeps these queries working before it is applied.
+const EXTRA_COLS = `COALESCE(to_jsonb(announcements) ->> 'audience', 'all') AS audience,
+       COALESCE(to_jsonb(announcements) ->> 'category', 'general') AS category`;
+
+export async function findAnnouncements({ activeOnly = false, priority, limit = 50, audience } = {}, client) {
   const conditions = [];
   const params = [];
   let paramIdx = 1;
@@ -19,9 +23,16 @@ export async function findAnnouncements({ activeOnly = false, priority, limit = 
     params.push(priority);
   }
 
+  // audience: 'members' → announcements for everyone or members; 'trainers' → everyone or trainers.
+  if (audience === 'members' || audience === 'trainers') {
+    conditions.push(`COALESCE(to_jsonb(announcements) ->> 'audience', 'all') IN ('all', $${paramIdx++})`);
+    params.push(audience);
+  }
+
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
   const sql = `
-    SELECT id, title, message, priority, target_language, start_date, end_date, is_active, created_at, updated_at
+    SELECT id, title, message, priority, target_language, start_date, end_date, is_active, created_at, updated_at,
+       ${EXTRA_COLS}
     FROM announcements
     ${whereClause}
     ORDER BY 
@@ -48,7 +59,8 @@ export async function findAnnouncements({ activeOnly = false, priority, limit = 
  */
 export async function findById(id, client) {
   const sql = `
-    SELECT id, title, message, priority, target_language, start_date, end_date, is_active, created_at, updated_at
+    SELECT id, title, message, priority, target_language, start_date, end_date, is_active, created_at, updated_at,
+       ${EXTRA_COLS}
     FROM announcements
     WHERE id = $1
     LIMIT 1;
@@ -149,3 +161,14 @@ export async function deleteAnnouncement(id, client) {
   return res.rows[0] || null;
 }
 
+
+/** Save who sees the announcement and its category (migration 030). */
+export async function setAudienceCategory(id, { audience, category }, client) {
+  const executor = client || { query };
+  const res = await executor.query(
+    `UPDATE announcements SET audience = COALESCE($2, audience), category = COALESCE($3, category) WHERE id = $1
+     RETURNING audience, category`,
+    [id, audience || null, category || null]
+  );
+  return res.rows[0] || null;
+}

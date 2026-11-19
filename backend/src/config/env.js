@@ -18,6 +18,9 @@ export const config = {
     secret: process.env.JWT_SECRET || 'fallback_development_secret_do_not_use_in_prod',
     expiresIn: process.env.JWT_EXPIRES_IN || '8h',
   },
+  auth: {
+    googleClientId: process.env.GOOGLE_CLIENT_ID || '521224801754-9s3d6mfta7e501gcum6i4glkillrn98k.apps.googleusercontent.com',
+  },
 
   // ESP32 Microcontroller Hardware Authentication
   robot: {

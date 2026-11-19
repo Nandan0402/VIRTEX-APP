@@ -1,0 +1,20 @@
+/* Virtex Admin — Trainer Hub activity panel (admin-personaltraniner.html) */
+.thub-section { margin-top: 1.5rem; }
+.thub-section:empty { display: none; }
+.thub-card { padding: 1.25rem; }
+.thub-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.thub-head h3 { margin: 0; color: #fff; font-size: 1.05rem; }
+.thub-head p { margin: 4px 0 0; color: var(--text-gray, #a1a1aa); font-size: 0.82rem; }
+.thub-range { display: flex; align-items: center; gap: 8px; color: var(--text-gray, #a1a1aa); font-size: 0.8rem; }
+.thub-table td { vertical-align: top; }
+.thub-name { color: #fff; font-weight: 700; }
+.thub-muted { color: var(--text-dim, #71717a); font-size: 0.75rem; }
+.thub-warn { color: var(--warning, #f59e0b); }
+.thub-open { white-space: nowrap; }
+.thub-empty { display: flex; flex-direction: column; gap: 4px; align-items: center; padding: 1.5rem 1rem; text-align: center; color: var(--text-gray, #a1a1aa); font-size: 0.85rem; }
+.thub-empty b { color: #fff; }
+.thub-error { color: var(--danger, #ef4444); font-size: 0.85rem; padding: 0.75rem 0; }
+@media (max-width: 600px) {
+  .thub-head { align-items: stretch; }
+  .thub-range { justify-content: space-between; }
+}

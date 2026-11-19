@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Automated PostgreSQL Backup and Retention Script for PulseCore Gym Receptionist Robot.
+    Automated PostgreSQL Backup and Retention Script for Virtex Gym Receptionist Robot.
 .DESCRIPTION
     Creates a timestamped SQL backup of the gym_robot_db database using pg_dump.
     Automatically manages backup rotation by removing files older than the retention threshold.
@@ -46,7 +46,7 @@ if (Test-Path $envFile) {
 }
 
 Write-Host "====================================================" -ForegroundColor Cyan
-Write-Host "🐘 PulseCore Gym Robot - PostgreSQL Backup Utility" -ForegroundColor Cyan
+Write-Host "🐘 Virtex Gym Robot - PostgreSQL Backup Utility" -ForegroundColor Cyan
 Write-Host "====================================================" -ForegroundColor Cyan
 Write-Host "Target Database : $DbName" -ForegroundColor Gray
 Write-Host "Host & Port     : $DbHost`:$DbPort" -ForegroundColor Gray

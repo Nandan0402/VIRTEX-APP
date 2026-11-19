@@ -7,7 +7,7 @@ import { config } from '../../backend/src/config/env.js';
 import { checkDatabaseConnection, closePool, query } from '../../backend/src/config/database.js';
 import { initRealtime, closeRealtime, broadcast } from '../../backend/src/services/realtime.service.js';
 
-describe('PulseCore Real-Time Synchronization Suite (Admin & Kiosk WebSockets)', () => {
+describe('Virtex Real-Time Synchronization Suite (Admin & Kiosk WebSockets)', () => {
   let server;
   let port;
   let baseUrl;
@@ -40,6 +40,11 @@ describe('PulseCore Real-Time Synchronization Suite (Admin & Kiosk WebSockets)',
   });
 
   after(async () => {
+    try {
+      await query("DELETE FROM member_enquiries WHERE full_name = 'Realtime Lead';");
+      await query("DELETE FROM announcements WHERE title = 'Realtime Sync Launch';");
+      await query("DELETE FROM faqs WHERE answer LIKE 'Yes, secure digital lockers%';");
+    } catch (_) {}
     await closeRealtime();
     if (server) {
       await new Promise((resolve) => server.close(resolve));
@@ -155,6 +160,19 @@ describe('PulseCore Real-Time Synchronization Suite (Admin & Kiosk WebSockets)',
     assert.equal(Number(receivedEvent.data.price_inr), 2799);
     assert.ok(receivedEvent.eventId, 'Event must contain unique eventId');
 
+    // Restore original clean baseline plan pricing & badge
+    await fetch(`${baseUrl}/membership-plans/1`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${ownerToken}`,
+      },
+      body: JSON.stringify({
+        priceInr: 2499,
+        badgeLabel: 'Starter',
+      }),
+    });
+
     kioskWs.close();
   });
 
@@ -192,13 +210,16 @@ describe('PulseCore Real-Time Synchronization Suite (Admin & Kiosk WebSockets)',
   // Scenario 4: Trainer Updates Floor Duty Status -> Kiosk Receives Real-time Broadcast
   // ---------------------------------------------------------------------------
   test('Scenario 4: Trainer updates floor status -> Kiosk receives TRAINER_STATUS_UPDATED event', async () => {
+    const trainerRow = (await query('SELECT id FROM trainers LIMIT 1')).rows[0];
+    const trainerId = trainerRow ? trainerRow.id : 1;
+
     const kioskWs = await createWsClient(`${wsUrl}?channel=kiosk`);
     await waitForEvent(kioskWs, 'CONNECTED');
 
     const eventPromise = waitForEvent(kioskWs, 'TRAINER_STATUS_UPDATED');
 
     // Trainer updates status to in_session
-    const updateRes = await fetch(`${baseUrl}/trainers/1/status`, {
+    const updateRes = await fetch(`${baseUrl}/trainers/${trainerId}/status`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -211,7 +232,7 @@ describe('PulseCore Real-Time Synchronization Suite (Admin & Kiosk WebSockets)',
     const receivedEvent = await eventPromise;
     assert.equal(receivedEvent.type, 'TRAINER_STATUS_UPDATED');
     assert.equal(receivedEvent.data.status, 'in_session');
-    assert.equal(receivedEvent.data.id, 1);
+    assert.equal(receivedEvent.data.id, trainerId);
 
     kioskWs.close();
   });
@@ -282,26 +303,26 @@ describe('PulseCore Real-Time Synchronization Suite (Admin & Kiosk WebSockets)',
   // Scenario 7: Member Check-in at Kiosk -> Admin Receives Live Event with Masked PII
   // ---------------------------------------------------------------------------
   test('Scenario 7: Member checks in at kiosk -> Admin receives live MEMBER_CHECKED_IN with masked PII', async () => {
-    // Clear recent check-ins for GYM004 to ensure 200 OK
-    await query(`DELETE FROM check_ins WHERE member_id = (SELECT id FROM members WHERE member_code = 'GYM004')`);
+    // Clear recent check-ins for GYM001 to ensure 200 OK
+    await query(`DELETE FROM check_ins WHERE member_id = (SELECT id FROM members WHERE member_code = 'GYM001')`);
 
     const adminWs = await createWsClient(`${wsUrl}?token=${ownerToken}`);
     await waitForEvent(adminWs, 'CONNECTED');
 
     const eventPromise = waitForEvent(adminWs, 'MEMBER_CHECKED_IN');
 
-    // Kiosk checks in member GYM004
+    // Kiosk checks in member GYM001
     const checkinRes = await fetch(`${baseUrl}/members/check-in`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier: 'GYM004', language: 'kn-IN' }),
+      body: JSON.stringify({ identifier: 'GYM001', language: 'kn-IN' }),
     });
 
     assert.equal(checkinRes.status, 200);
     const receivedEvent = await eventPromise;
     assert.equal(receivedEvent.type, 'MEMBER_CHECKED_IN');
     assert.ok(receivedEvent.data.member);
-    assert.equal(receivedEvent.data.member.member_code, 'GYM004');
+    assert.equal(receivedEvent.data.member.member_code, 'GYM001');
     assert.match(receivedEvent.data.member.phone, /^\*\*\*\*\*\*/, 'Phone must be masked');
     assert.equal(receivedEvent.data.member.password_hash, undefined, 'Password hash must never be broadcast');
     assert.equal(receivedEvent.data.member.emergency_contact_phone, undefined, 'Emergency contact must not be leaked');

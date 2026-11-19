@@ -1,0 +1,27 @@
+/* =====================================================================
+   Virtex Trainer Portal — Performance (trainer-performance.html,
+   trainer-recovery.html, trainer-measurements.html)
+   ===================================================================== */
+
+.tp-page-performance .tp-stat-value,
+.tp-page-measurements .tp-stat-value { color: var(--tp-accent); }
+
+/* Recovery table: readiness and soreness details */
+.tp-page-recovery .admin-table td:nth-child(2) .badge { margin-left: 4px; }
+.tp-page-recovery .admin-table td:last-child { min-width: 200px; }
+
+/* Measurements history table is wide: keep numbers aligned */
+.tp-page-measurements .admin-table td:not(:first-child),
+.tp-page-measurements .admin-table th:not(:first-child) { text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; }
+
+/* Recovery summary tiles */
+.tp-page-recovery #cp-body { display: flex; flex-direction: column; gap: 1rem; }
+.tp-page-recovery .tp-stat-value .badge { font-size: 0.62rem; vertical-align: middle; font-family: inherit; }
+
+/* Performance: progress meters + strength trend */
+.tp-meter { height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); margin-top: 8px; overflow: hidden; }
+.tp-meter span { display: block; height: 100%; background: var(--tp-accent); border-radius: inherit; transition: width 0.4s ease; }
+.tp-trend { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.82rem; }
+.tp-trend.up { color: var(--tp-accent); }
+.tp-trend.down { color: var(--tp-danger); }
+.tp-page-performance #cp-body .tp-stat-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

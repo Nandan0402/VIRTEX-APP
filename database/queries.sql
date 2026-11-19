@@ -1,5 +1,5 @@
 -- ==============================================================================
--- PulseCore AI Gym Receptionist Robot - Example Production SQL Queries
+-- Virtex AI Gym Receptionist Robot - Example Production SQL Queries
 -- File: database/queries.sql
 -- ==============================================================================
 
@@ -72,9 +72,14 @@ SELECT
     s.shift_start, 
     s.shift_end
 FROM trainers t
-LEFT JOIN trainer_schedules s 
-    ON t.id = s.trainer_id 
-    AND s.day_of_week = EXTRACT(DOW FROM CURRENT_TIMESTAMP)::smallint
+LEFT JOIN LATERAL (
+    SELECT shift_start, shift_end 
+    FROM trainer_schedules 
+    WHERE trainer_id = t.id 
+      AND day_of_week = EXTRACT(DOW FROM CURRENT_TIMESTAMP)::smallint
+    ORDER BY shift_start ASC
+    LIMIT 1
+) s ON true
 WHERE t.status = 'on_floor'
 ORDER BY t.full_name ASC;
 

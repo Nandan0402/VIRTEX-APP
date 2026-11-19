@@ -1,0 +1,26 @@
+/* =====================================================================
+   Virtex Member authentication — additions on top of portal.css + auth.css
+   (member-auth.html, member-forgot-password.html)
+   ===================================================================== */
+
+/* Password field with a show/hide toggle */
+.pw-wrap { position: relative; display: flex; align-items: center; }
+.pw-wrap .form-input { width: 100%; padding-right: 4.6rem; box-sizing: border-box; }
+.pw-toggle {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: transparent; border: 1px solid rgba(255, 255, 255, 0.14); color: #cbd5e1;
+  border-radius: 6px; padding: 4px 8px; font-size: 0.72rem; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.pw-toggle:hover, .pw-toggle[aria-pressed="true"] { color: var(--primary-green, #00e676); border-color: rgba(0, 230, 118, 0.45); }
+.pw-toggle:focus-visible { outline: 2px solid var(--primary-green, #00e676); outline-offset: 1px; }
+
+/* Field-level validation */
+.form-input[aria-invalid="true"] { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18); }
+.field-error { color: #f87171; font-size: 0.75rem; margin-top: 4px; min-height: 0; }
+.field-error:empty { display: none; }
+
+/* Links under the form */
+.auth-links { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 1rem; font-size: 0.82rem; }
+.auth-links a { color: var(--primary-green, #00e676); text-decoration: none; }
+.auth-links a:hover { text-decoration: underline; }
+.auth-note { color: #94a3b8; font-size: 0.8rem; line-height: 1.5; margin-top: 0.75rem; }

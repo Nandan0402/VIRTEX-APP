@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Recovery and Wellness</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <!-- Shared module base: filter bar, selects, tables, form controls (workouts) + KPI tiles (diet .macro-*) -->
+  <link rel="stylesheet" href="css/modules/admin-workouts.css">
+  <link rel="stylesheet" href="css/modules/admin-diet.css">
+  <link rel="stylesheet" href="css/modules/admin-recovery.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation (Auto-rendered with 16 categories by adminSidebarNav.js) -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <!-- Rendered dynamically by adminSidebarNav.js -->
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Application Canvas -->
+    <div class="admin-main-wrap">
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-brand">
+            <span class="topbar-title">Recovery & Wellness Management</span>
+            <span class="badge badge-green font-mono text-xs">Wellness Console</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group Mounted by topbarRoutineNav.js -->
+        </div>
+      </header>
+
+      <main class="admin-body">
+        <div class="admin-content-wrap" style="padding: 1.5rem; max-width: 1300px; margin: 0 auto;">
+          <!-- Breadcrumb & Header -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 4px;">
+                <a href="admin.html" style="color: var(--text-dim); text-decoration: none;">Virtex Admin</a> / 
+                <span style="color: var(--text-gray);">Recovery & Wellness</span> / 
+                <span style="color: var(--green);">Recovery Management</span>
+              </div>
+              <h1 style="font-size: 1.6rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px;">
+                <span>💤</span> Recovery & Wellness Management
+              </h1>
+              <p style="font-size: 0.9rem; color: var(--text-gray); margin-top: 4px;">
+                Athletic recovery tracking, muscle soreness heatmaps, sleep monitoring, and fatigue mitigation.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-green" id="btn-open-recovery-log-modal">+ Log Recovery Assessment</button>
+              <button class="btn btn-outline" onclick="window.location.reload();">🔄 Refresh</button>
+            </div>
+          </div>
+
+          <!-- Non-Medical Disclaimer Banner -->
+          <div class="recovery-disclaimer-banner">
+            <span class="disclaimer-icon">⚖️</span>
+            <div>
+              <strong>Non-Medical Lifestyle Wellness Notice:</strong> Virtex Recovery & Wellness tracks athletic recovery markers, muscle soreness, and sleep lifestyle indicators based on recorded and user-reported inputs. It is <u>not</u> intended for medical diagnosis, clinical treatment, or injury triage.
+            </div>
+          </div>
+
+          <!-- Top KPI Summary Cards -->
+          <div class="macro-summary-bar">
+            <div class="macro-box">
+              <div class="macro-box-icon" style="background: rgba(0, 230, 118, 0.12); color: #00e676;">⚡</div>
+              <div>
+                <div class="macro-box-val" id="kpi-avg-readiness" style="color: #00e676;">--%</div>
+                <div class="macro-box-lbl">Gym Avg Readiness</div>
+              </div>
+            </div>
+            <div class="macro-box">
+              <div class="macro-box-icon" style="background: rgba(0, 176, 255, 0.12); color: #00b0ff;">😴</div>
+              <div>
+                <div class="macro-box-val" id="kpi-avg-sleep" style="color: #00b0ff;">-- hrs</div>
+                <div class="macro-box-lbl">Avg Sleep Hours</div>
+              </div>
+            </div>
+            <div class="macro-box">
+              <div class="macro-box-icon" style="background: rgba(255, 214, 0, 0.12); color: #ffd600;">🧘</div>
+              <div>
+                <div class="macro-box-val" id="kpi-rest-days-week" style="color: #ffd600;">--</div>
+                <div class="macro-box-lbl">Rest Days This Week</div>
+              </div>
+            </div>
+            <div class="macro-box">
+              <div class="macro-box-icon" style="background: rgba(179, 136, 255, 0.12); color: #b388ff;">👥</div>
+              <div>
+                <div class="macro-box-val" id="kpi-tracked-members" style="color: #b388ff;">--</div>
+                <div class="macro-box-lbl">Tracked Lifters</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation Tabs -->
+          <div class="recovery-nav-tabs">
+            <button class="recovery-tab-btn active" data-tab="logs">
+              <span>💤 Daily Recovery Assessments</span>
+              <span class="recovery-tab-badge" id="badge-recovery-logs-count">0</span>
+            </button>
+            <button class="recovery-tab-btn" data-tab="heatmap">
+              <span>🔥 Muscle Soreness Heatmap</span>
+            </button>
+            <button class="recovery-tab-btn" data-tab="trainer">
+              <span>🏋️ Trainer Client Monitoring</span>
+              <span class="recovery-tab-badge" id="badge-trainer-clients-count">0</span>
+            </button>
+            <button class="recovery-tab-btn" data-tab="trends">
+              <span>📈 Trends & Weekly Reports</span>
+            </button>
+            <button class="recovery-tab-btn" data-tab="zones">
+              <span>🧖 Sauna & Cold Plunge Sessions</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: DAILY RECOVERY ASSESSMENTS -->
+          <div class="recovery-tab-content" id="rec-tab-logs" style="display: block;">
+            <div class="workout-filter-bar" style="background: #11141e; padding: 12px 16px; border-radius: 10px; border: 1px solid #1e2433; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 600;">Readiness Status:</span>
+                <select class="filter-select" id="filter-readiness-status" style="background: #0b0d14; border: 1px solid #1e2433; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;">
+                  <option value="All">All Statuses</option>
+                  <option value="Optimal">Optimal</option>
+                  <option value="Good">Good</option>
+                  <option value="Moderate">Moderate</option>
+                  <option value="Needs Recovery">Needs Recovery</option>
+                </select>
+              </div>
+              <div style="font-size: 0.78rem; color: #64748b;">
+                Metrics clearly distinguished: <span class="tag-user-reported" style="margin-right: 6px;">User-Reported</span> vs <span class="tag-calculated">System-Calculated</span>
+              </div>
+            </div>
+
+            <div class="admin-card" style="padding: 0; overflow: hidden; background: #11141e; border: 1px solid #1e2433; border-radius: 10px;">
+              <table class="exercise-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: #0d1018;">
+                    <th>Assessment Date</th>
+                    <th>Member</th>
+                    <th>User-Reported Indicators</th>
+                    <th>System-Calculated Readiness</th>
+                    <th>Recommended Action</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="recovery-logs-tbody">
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">Loading recovery assessments...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 2: MUSCLE SORENESS HEATMAP -->
+          <div id="soreness"></div>
+          <div class="recovery-tab-content" id="rec-tab-heatmap" style="display: none;">
+            <div class="workout-filter-bar" style="background: #11141e; padding: 12px 16px; border-radius: 10px; border: 1px solid #1e2433; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 600;">Select Member for Soreness Mapping:</span>
+                <select class="filter-select" id="heatmap-member-select" style="background: #0b0d14; border: 1px solid #1e2433; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; min-width: 240px;">
+                  <option value="">-- Select Member --</option>
+                </select>
+              </div>
+              <div style="font-size: 0.78rem; color: #64748b;">
+                Soreness Scale: <span style="color: #00e676; font-weight: 700;">1-3 Mild</span> • <span style="color: #ffd600; font-weight: 700;">4-6 Moderate</span> • <span style="color: #ff5252; font-weight: 700;">7-10 Severe DOMS</span>
+              </div>
+            </div>
+
+            <div class="soreness-heatmap-grid" id="soreness-heatmap-container">
+              <!-- Dynamically mapped muscle cards -->
+            </div>
+          </div>
+
+          <!-- TAB 3: TRAINER CLIENT MONITORING -->
+          <div class="recovery-tab-content" id="rec-tab-trainer" style="display: none;">
+            <div class="workout-filter-bar" style="background: #11141e; padding: 12px 16px; border-radius: 10px; border: 1px solid #1e2433; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 600;">Filter by Personal Trainer:</span>
+              <select class="filter-select" id="filter-recovery-trainer-select" style="background: #0b0d14; border: 1px solid #1e2433; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; min-width: 220px;">
+                <option value="All">All Trainers</option>
+              </select>
+            </div>
+
+            <div class="trainer-recovery-grid" id="trainer-clients-grid">
+              <!-- Dynamically rendered client cards -->
+            </div>
+          </div>
+
+          <!-- TAB 4: TRENDS & WEEKLY REPORTS -->
+          <div class="recovery-tab-content" id="rec-tab-trends" style="display: none;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <div class="admin-card" style="background: #11141e; border: 1px solid #1e2433; border-radius: 10px; padding: 20px;">
+                <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 14px;">Readiness Score Distribution</h3>
+                <div id="recovery-status-distribution">
+                  <!-- Dynamically rendered status distribution -->
+                </div>
+              </div>
+
+              <div class="admin-card" style="background: #11141e; border: 1px solid #1e2433; border-radius: 10px; padding: 20px;">
+                <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 14px;">Recovery & Rest-Day Best Practices</h3>
+                <ul style="color: #94a3b8; font-size: 0.85rem; line-height: 1.7; padding-left: 20px; margin: 0;">
+                  <li>Prioritize 7.5 - 9.0 hours of uninterrupted nocturnal sleep for peak growth hormone secretion.</li>
+                  <li>Incorporate 15-20 min post-workout infrared sauna to promote peripheral blood flow and metabolite clearance.</li>
+                  <li>Hydrate with minimum 3.5 Liters of water daily plus electrolytes on heavy compound lifting days.</li>
+                  <li>Schedule 1 to 2 dedicated non-lifting active recovery days every 7-day microcycle.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 5: SAUNA & COLD PLUNGE ZONES -->
+          <div id="zones"></div>
+          <div class="recovery-tab-content" id="rec-tab-zones" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 style="color: #fff; font-size: 1.15rem; margin: 0 0 4px 0;">🧖 Sauna & Cold Plunge Facility Zones</h3>
+                <p style="font-size: 0.85rem; color: var(--text-dim); margin: 0;">Thermal hydrotherapy scheduling, real-time temperature logs, and capacity monitoring.</p>
+              </div>
+            </div>
+
+            <div style="text-align: center; padding: 3rem; background: #11141e; border-radius: 12px; border: 1px dashed #1e2433;">
+              <div style="font-size: 2.5rem; margin-bottom: 10px;">🧖</div>
+              <h3 style="color: #fff; margin-bottom: 6px;">No recovery zones configured</h3>
+              <p style="color: #64748b; font-size: 0.9rem; margin: 0;">Sauna and cold-plunge zones, temperatures and occupancy will appear here once zones are set up.</p>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: LOG RECOVERY ASSESSMENT -->
+  <div class="workout-modal-overlay" id="modal-log-recovery">
+    <div class="workout-modal">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title"><span>💤</span> Log Member Recovery Assessment</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-log-recovery">
+        <div class="workout-modal-body">
+          <div class="recovery-disclaimer-banner" style="margin-bottom: 0;">
+            <span class="disclaimer-icon">ℹ️</span>
+            <div>Input subjective member-reported wellness metrics. The system will compute readiness scores mathematically.</div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="log-recovery-member-select">Member <span style="color: #ff5252;">*</span></label>
+              <select class="form-control" id="log-recovery-member-select" required>
+                <option value="">-- Choose Member --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="log-recovery-date">Assessment Date</label>
+              <input type="date" class="form-control" id="log-recovery-date">
+            </div>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label class="form-label" for="log-sleep-hours">Sleep Duration (hrs) <span style="color: #ff5252;">*</span></label>
+              <input type="number" step="0.1" class="form-control" id="log-sleep-hours" value="8.0" min="0" max="24" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="log-sleep-quality">Sleep Quality (1-10) <span style="color: #ff5252;">*</span></label>
+              <input type="number" class="form-control" id="log-sleep-quality" value="8" min="1" max="10" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="log-hydration-liters">Hydration (Liters)</label>
+              <input type="number" step="0.1" class="form-control" id="log-hydration-liters" value="3.5" min="0" max="10">
+            </div>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label class="form-label" for="log-energy-level">Energy Level (1-10) <span style="color: #ff5252;">*</span></label>
+              <input type="number" class="form-control" id="log-energy-level" value="8" min="1" max="10" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="log-stress-level">Stress Level (1-10) <span style="color: #ff5252;">*</span></label>
+              <input type="number" class="form-control" id="log-stress-level" value="3" min="1" max="10" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="log-overall-soreness">Overall Soreness (0-10) <span style="color: #ff5252;">*</span></label>
+              <input type="number" class="form-control" id="log-overall-soreness" value="3" min="0" max="10" required>
+            </div>
+          </div>
+
+          <div style="background: #0b0d14; padding: 12px; border-radius: 8px; border: 1px solid #1e2433;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <input type="checkbox" id="log-is-rest-day" style="width: 16px; height: 16px; accent-color: #00e676;">
+              <label for="log-is-rest-day" style="font-weight: 700; color: #fff; font-size: 0.9rem; cursor: pointer;">This is a Scheduled Rest / Active Recovery Day</label>
+            </div>
+            <input type="text" class="form-control" id="log-rest-activity" placeholder="e.g. Light Walking, Mobility Work, Infrared Sauna">
+          </div>
+
+          <!-- Dynamic Muscle Region Soreness -->
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="form-label">Muscle Region Soreness Specifics</span>
+              <button type="button" class="btn btn-outline btn-xs" id="btn-add-soreness-row">+ Add Region</button>
+            </div>
+            <div id="soreness-inputs-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Dynamic soreness inputs -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="log-recovery-notes">Member Subjective Wellness Notes</label>
+            <textarea class="form-control" id="log-recovery-notes" rows="2" placeholder="e.g. Felt well rested, hamstrings slightly tight after Romanian Deadlifts."></textarea>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Save Recovery Assessment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: TRAINER RECOVERY REVIEW -->
+  <div class="workout-modal-overlay" id="modal-trainer-review">
+    <div class="workout-modal">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title"><span>✍️</span> Prescribe Coach Recovery Advice</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-trainer-review">
+        <div class="workout-modal-body">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="review-member-select">Member <span style="color: #ff5252;">*</span></label>
+              <select class="form-control" id="review-member-select" required>
+                <option value="">-- Select Member --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="review-trainer-select">Reviewing Coach <span style="color: #ff5252;">*</span></label>
+              <select class="form-control" id="review-trainer-select" required>
+                <option value="">-- Select Coach --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="review-risk-level">Fatigue Risk Level</label>
+              <select class="form-control" id="review-risk-level">
+                <option value="Low">Low (Proceed as Planned)</option>
+                <option value="Moderate">Moderate (Deload / Lighter Working Sets)</option>
+                <option value="High">High (Mandate Rest Day)</option>
+                <option value="Elevated Strain">Elevated Strain (Active Mobility Only)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="review-suggested-rest">Suggested Rest Days</label>
+              <input type="number" class="form-control" id="review-suggested-rest" value="1" min="0" max="7">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="review-advice-text">Trainer Prescription & Advice <span style="color: #ff5252;">*</span></label>
+            <textarea class="form-control" id="review-advice-text" rows="3" placeholder="e.g. Quad fatigue elevated. Drop squat intensity by 10% and perform 15 min quad foam rolling." required></textarea>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Save Advice</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: VIEW RECOVERY DETAILS -->
+  <div class="workout-modal-overlay" id="modal-view-recovery-detail">
+    <div class="workout-modal">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title"><span>🔍</span> Recovery Assessment Details</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="workout-modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e2433; padding-bottom: 12px;">
+          <div>
+            <h4 id="view-rec-member" style="color: #fff; font-size: 1.15rem; margin: 0;">Member Name</h4>
+            <span id="view-rec-date" style="font-size: 0.8rem; color: #64748b; font-family: 'JetBrains Mono', monospace;">Date</span>
+          </div>
+          <div>
+            <span class="readiness-pill pill-optimal" id="view-rec-readiness">90% (Optimal)</span>
+          </div>
+        </div>
+
+        <div class="client-metrics-grid">
+          <div>
+            <div class="client-metric-val" id="view-rec-sleep" style="color: #00b0ff;">8.0 hrs</div>
+            <div class="client-metric-lbl">Sleep Duration & Quality</div>
+          </div>
+          <div>
+            <div class="client-metric-val" id="view-rec-energy" style="color: #00e676;">8/10</div>
+            <div class="client-metric-lbl">Energy Level</div>
+          </div>
+          <div>
+            <div class="client-metric-val" id="view-rec-stress" style="color: #ffd600;">3/10</div>
+            <div class="client-metric-lbl">Stress Rating</div>
+          </div>
+        </div>
+
+        <div class="client-metrics-grid">
+          <div>
+            <div class="client-metric-val" id="view-rec-hydration" style="color: #00e5ff;">3.5 L</div>
+            <div class="client-metric-lbl">Hydration</div>
+          </div>
+          <div>
+            <div class="client-metric-val" id="view-rec-fatigue" style="color: #b388ff;">20%</div>
+            <div class="client-metric-lbl">Fatigue Index</div>
+          </div>
+          <div>
+            <div class="client-metric-val" id="view-rec-action" style="color: #fff; font-size: 0.85rem; font-family: inherit;">Normal</div>
+            <div class="client-metric-lbl">Recommended Action</div>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 8px;">Muscle Soreness Specifics</h4>
+          <table class="exercise-table">
+            <thead>
+              <tr>
+                <th>Muscle Region</th>
+                <th>Soreness Rating</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="view-rec-soreness-tbody">
+              <!-- Soreness rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <div style="background: #0b0d14; padding: 12px; border-radius: 8px; border: 1px solid #1e2433;">
+          <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Member Notes:</div>
+          <div id="view-rec-notes" style="font-size: 0.88rem; color: #cbd5e1;">--</div>
+        </div>
+      </div>
+      <div class="workout-modal-footer">
+        <button type="button" class="btn btn-outline btn-modal-cancel">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: 14-DAY MEMBER TREND REPORT -->
+  <div class="workout-modal-overlay" id="modal-member-trend-report">
+    <div class="workout-modal" style="max-width: 850px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title"><span>📈</span> 14-Day Recovery Trend Report: <span id="report-trend-member-name" style="color: #00e676; margin-left: 6px;">Member</span></h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="workout-modal-body">
+        <div class="macro-summary-bar">
+          <div class="macro-box">
+            <div>
+              <div class="macro-box-val" id="rep-avg-readiness" style="color: #00e676;">--%</div>
+              <div class="macro-box-lbl">Avg Readiness Score</div>
+            </div>
+          </div>
+          <div class="macro-box">
+            <div>
+              <div class="macro-box-val" id="rep-avg-sleep" style="color: #00b0ff;">--h</div>
+              <div class="macro-box-lbl">Avg Sleep Hours</div>
+            </div>
+          </div>
+          <div class="macro-box">
+            <div>
+              <div class="macro-box-val" id="rep-rest-days" style="color: #ffd600;">--</div>
+              <div class="macro-box-lbl">Rest Days Logged</div>
+            </div>
+          </div>
+          <div class="macro-box">
+            <div>
+              <div class="macro-box-val" id="rep-avg-soreness" style="color: #b388ff;">--/10</div>
+              <div class="macro-box-lbl">Avg Muscle Soreness</div>
+            </div>
+          </div>
+        </div>
+
+        <table class="exercise-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Readiness Score</th>
+              <th>Sleep Duration</th>
+              <th>Soreness</th>
+              <th>Fatigue Index</th>
+              <th>Day Type</th>
+            </tr>
+          </thead>
+          <tbody id="report-trend-logs-tbody">
+            <!-- Dynamically populated trend rows -->
+          </tbody>
+        </table>
+      </div>
+      <div class="workout-modal-footer">
+        <button type="button" class="btn btn-outline btn-modal-cancel">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Component Scripts -->
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script src="js/admin/recoveryManagement.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 -- ==============================================================================
--- PulseCore AI Gym Receptionist Robot - Complete Shared Development Seed Data
+-- Virtex AI Gym Receptionist Robot - Complete Shared Development Seed Data
 -- File: database/seed.sql
 -- Compatible with PostgreSQL 14, 15, 16, 17, 18+
 -- ==============================================================================
@@ -9,10 +9,10 @@ INSERT INTO gym_settings (
     id, gym_name, tagline, phone, email, address, operating_hours, default_language, supported_languages, speech_rate, speech_pitch, checkin_cooldown_minutes, wifi_ssid
 ) VALUES (
     1,
-    'PulseCore Fitness',
+    'Virtex Fitness',
     'AI-Powered Smart Fitness Reception',
     '+91 98765 43210',
-    'reception@pulsecorefitness.in',
+    'reception@virtexfitness.in',
     '42, 100 Feet Road, Indiranagar, Bengaluru, Karnataka 560038',
     '[
         {"day": "Monday", "open": "06:00", "close": "22:00", "is_closed": false},
@@ -28,7 +28,7 @@ INSERT INTO gym_settings (
     1.00,
     1.00,
     5,
-    'PulseCore-Gym-Guest'
+    'Virtex-Gym-Guest'
 ) ON CONFLICT (id) DO UPDATE SET updated_at = CURRENT_TIMESTAMP;
 
 -- 2. ROLES (RBAC Permissions)
@@ -48,18 +48,18 @@ ON CONFLICT (role_code) DO NOTHING;
 --   'frontdesk_kavya' / 'StaffPass2026!'
 INSERT INTO users (username, email, password_hash, full_name, role_id, role, phone, is_active)
 VALUES
-    ('admin', 'admin@pulsecorefitness.in', crypt('AdminPass2026!', gen_salt('bf', 10)), 'Dev Admin Manager', 1, 'superadmin', '+91 98765 00000', TRUE),
-    ('head_trainer', 'trainer@pulsecorefitness.in', crypt('TrainerPass2026!', gen_salt('bf', 10)), 'Head Coach Arjun', 3, 'trainer', '+91 98765 00001', TRUE),
-    ('manager_priya', 'priya.manager@pulsecorefitness.in', crypt('ManagerPass2026!', gen_salt('bf', 10)), 'Priya Deshmukh', 2, 'manager', '+91 98765 00010', TRUE),
-    ('frontdesk_kavya', 'kavya.desk@pulsecorefitness.in', crypt('StaffPass2026!', gen_salt('bf', 10)), 'Kavya Gowda', 4, 'reception_staff', '+91 98765 00011', TRUE)
+    ('admin', 'admin@virtexfitness.in', crypt('AdminPass2026!', gen_salt('bf', 10)), 'Dev Admin Manager', 1, 'superadmin', '+91 98765 00000', TRUE),
+    ('head_trainer', 'trainer@virtexfitness.in', crypt('TrainerPass2026!', gen_salt('bf', 10)), 'Head Coach Arjun', 3, 'trainer', '+91 98765 00001', TRUE),
+    ('manager_priya', 'priya.manager@virtexfitness.in', crypt('ManagerPass2026!', gen_salt('bf', 10)), 'Priya Deshmukh', 2, 'manager', '+91 98765 00010', TRUE),
+    ('frontdesk_kavya', 'kavya.desk@virtexfitness.in', crypt('StaffPass2026!', gen_salt('bf', 10)), 'Kavya Gowda', 4, 'reception_staff', '+91 98765 00011', TRUE)
 ON CONFLICT (username) DO UPDATE SET
     password_hash = EXCLUDED.password_hash,
     full_name = EXCLUDED.full_name;
 
 INSERT INTO admin_users (username, email, password_hash, full_name, role)
 VALUES
-    ('admin', 'admin@pulsecorefitness.in', crypt('AdminPass2026!', gen_salt('bf', 10)), 'Dev Admin Manager', 'superadmin'),
-    ('head_trainer', 'trainer@pulsecorefitness.in', crypt('TrainerPass2026!', gen_salt('bf', 10)), 'Head Coach Arjun', 'trainer')
+    ('admin', 'admin@virtexfitness.in', crypt('AdminPass2026!', gen_salt('bf', 10)), 'Dev Admin Manager', 'superadmin'),
+    ('head_trainer', 'trainer@virtexfitness.in', crypt('TrainerPass2026!', gen_salt('bf', 10)), 'Head Coach Arjun', 'trainer')
 ON CONFLICT (username) DO NOTHING;
 
 -- 4. MEMBERSHIP PLANS
@@ -98,13 +98,13 @@ ON CONFLICT DO NOTHING;
 -- 7. TRAINERS (Staff Roster)
 INSERT INTO trainers (trainer_code, user_id, full_name, specialty, phone, email, bio, certifications, status)
 VALUES
-    ('TRN001', 2, 'Arjun Reddy', 'CrossFit & Olympic Weightlifting', '9876500001', 'arjun@pulsecorefitness.in', 
+    ('TRN001', 2, 'Arjun Reddy', 'CrossFit & Olympic Weightlifting', '9876500001', 'arjun@virtexfitness.in', 
      'CSCS Certified with 8 years of strength and high-intensity athletic conditioning experience.', 
      ARRAY['CSCS', 'CrossFit L2', 'CPR/AED'], 'on_floor'),
-    ('TRN002', NULL, 'Meera Rao', 'Functional Mobility & Hatha Yoga', '9876500002', 'meera@pulsecorefitness.in', 
+    ('TRN002', NULL, 'Meera Rao', 'Functional Mobility & Hatha Yoga', '9876500002', 'meera@virtexfitness.in', 
      'Specialist in postural alignment, athletic flexibility, and injury recovery.', 
      ARRAY['RYT-500', 'Core Rehab Specialist'], 'in_session'),
-    ('TRN003', NULL, 'Karan Verma', 'Hypertrophy & Physique Coach', '9876500003', 'karan@pulsecorefitness.in', 
+    ('TRN003', NULL, 'Karan Verma', 'Hypertrophy & Physique Coach', '9876500003', 'karan@virtexfitness.in', 
      'Specializes in evidence-based muscle hypertrophy and competition prep.', 
      ARRAY['ACE Personal Trainer', 'ISSN Sports Nutritionist'], 'off_duty')
 ON CONFLICT (trainer_code) DO NOTHING;
@@ -204,7 +204,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO robot_logs (device_id, log_level, event_type, message, payload)
 VALUES
     (1, 'INFO', 'boot', 'ESP32 DevKit V1 booted successfully. Firmware v1.2.0.', '{"heap_free": 184520, "reset_reason": "POWERON_RESET"}'::jsonb),
-    (1, 'INFO', 'network', 'Wi-Fi link established with PulseCore-AP. RSSI -58 dBm.', '{"ip": "192.168.1.150", "mac": "24:6F:28:B1:C4:80"}'::jsonb),
+    (1, 'INFO', 'network', 'Wi-Fi link established with Virtex-AP. RSSI -58 dBm.', '{"ip": "192.168.1.150", "mac": "24:6F:28:B1:C4:80"}'::jsonb),
     (1, 'INFO', 'servos', 'SG90 servo timers calibrated. Neutral angles initialized (90, 90, 10).', '{"servos": {"headPan": 90, "headTilt": 90, "armWave": 10}}'::jsonb),
     (1, 'WARN', 'brownout_check', 'Current spike detected during concurrent arm wave; smoothed via 470uF decoupling capacitor.', '{"current_ma_peak": 1280, "rail_voltage": 4.96}'::jsonb)
 ON CONFLICT DO NOTHING;

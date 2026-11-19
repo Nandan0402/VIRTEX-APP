@@ -1,0 +1,186 @@
+/* =====================================================================
+   Virtex Trainer Portal — base: tokens, page shell, sidebar, topbar
+   Load order: admin.css → trainer-style → trainer-components → trainer-forms
+               → trainer-animations → trainer-<page> → trainer-responsive
+   Reuses admin.css tokens (--green, --bg-card, --border …) and components
+   (.card .btn .badge .admin-table .form-group .modal-card .toast-banner).
+   ===================================================================== */
+
+:root {
+  --tp-accent: var(--green, #00e676);
+  --tp-accent-soft: rgba(0, 230, 118, 0.12);
+  --tp-accent-border: rgba(0, 230, 118, 0.35);
+  --tp-text: #ffffff;
+  --tp-text-body: #e5e7eb;
+  --tp-text-muted: #94a3b8;
+  --tp-text-dim: #64748b;
+  --tp-nav-text: #a3aab8;
+  --tp-warn: #fbbf24;
+  --tp-danger: #f87171;
+  --tp-surface: var(--bg-card, #13161f);
+  --tp-line: var(--border, #242731);
+  --tp-radius: 12px;
+  --tp-radius-sm: 8px;
+  --tp-gap: 1.25rem;
+  --tp-sidebar-w: 260px;
+  --tp-topbar-bg: rgba(8, 9, 13, 0.92);
+}
+
+body.tp-body {
+  margin: 0;
+  background: var(--bg-admin-base, #08090d);
+  color: var(--tp-text);
+}
+
+.tp-shell { display: flex; min-height: 100vh; }
+
+/* ---------- Sidebar ---------- */
+.tp-sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--tp-sidebar-w);
+  background: var(--bg-sidebar, #0e1017); border-right: 1px solid var(--tp-line);
+  display: flex; flex-direction: column; z-index: 50; overflow: hidden; /* only the menu scrolls; brand + profile footer stay put */
+}
+.tp-brand { display: flex; align-items: center; gap: 10px; padding: 1.1rem 1.1rem 0.9rem; border-bottom: 1px solid var(--tp-line); }
+.tp-brand-logo { width: 32px; height: 32px; flex-shrink: 0; }
+.tp-brand h2 { margin: 0; font-size: 1rem; font-weight: 800; letter-spacing: 0.5px; color: var(--tp-text); }
+.tp-brand span { display: block; font-size: 0.66rem; font-family: 'JetBrains Mono', monospace; color: var(--tp-accent); letter-spacing: 1px; }
+
+.tp-nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0.6rem 0.6rem 1rem; }
+.tp-brand, .tp-sidebar-foot { flex-shrink: 0; }
+.tp-nav-group { margin-top: 0.7rem; }
+.tp-nav-title { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 1px; color: var(--tp-text-dim); padding: 0 0.6rem 0.3rem; font-weight: 700; }
+.tp-nav a {
+  display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 7px;
+  color: var(--tp-nav-text); text-decoration: none; font-size: 0.84rem; font-weight: 500; line-height: 1.3;
+}
+.tp-nav a .tp-ico { width: 18px; text-align: center; flex-shrink: 0; }
+.tp-nav a:hover { background: rgba(255, 255, 255, 0.05); color: var(--tp-text); }
+.tp-nav a.active { background: var(--tp-accent-soft); color: var(--tp-accent); font-weight: 700; }
+.tp-nav a:focus-visible { outline: 2px solid var(--tp-accent); outline-offset: 1px; }
+
+.tp-sidebar-close { display: none; margin-left: auto; background: transparent; border: 1px solid var(--tp-line); color: var(--tp-nav-text); border-radius: 7px; padding: 4px 8px; cursor: pointer; }
+.tp-sidebar-foot { border-top: 1px solid var(--tp-line); padding: 0.75rem 0.9rem; display: flex; align-items: center; gap: 8px; }
+.tp-foot-user { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; padding: 6px 8px; border-radius: 10px; color: var(--tp-text); text-decoration: none; }
+.tp-foot-user:hover { background: rgba(255, 255, 255, 0.05); }
+.tp-foot-user:focus-visible, .tp-foot-logout:focus-visible { outline: 2px solid var(--tp-accent); outline-offset: 1px; }
+.tp-foot-avatar { flex-shrink: 0; }
+.tp-foot-meta { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.tp-foot-name { font-weight: 700; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tp-foot-role { font-size: 0.72rem; color: var(--tp-text-muted); text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tp-foot-logout { flex-shrink: 0; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--tp-line); border-radius: 9px; color: var(--tp-text-muted); cursor: pointer; transition: all 0.15s ease; }
+.tp-foot-logout svg { width: 18px; height: 18px; }
+.tp-foot-logout:hover { color: var(--tp-danger); border-color: rgba(248, 113, 113, 0.5); background: rgba(248, 113, 113, 0.1); }
+.tp-foot-logout:disabled { opacity: 0.5; cursor: wait; }
+.tp-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 45; }
+
+/* ---------- Skip link (keyboard users) ---------- */
+.tp-skip { position: absolute; left: -9999px; top: 8px; z-index: 100; background: var(--tp-accent); color: #000; padding: 6px 12px; border-radius: 6px; font-weight: 700; }
+.tp-skip:focus { left: 8px; }
+
+/* ---------- Main column ---------- */
+.tp-main { margin-left: var(--tp-sidebar-w); flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ---------- Top navigation ---------- */
+.tp-topbar {
+  position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 12px;
+  padding: 0.6rem 1.5rem; min-height: 56px; box-sizing: border-box;
+  background: var(--tp-topbar-bg); backdrop-filter: blur(8px); border-bottom: 1px solid var(--tp-line);
+}
+.tp-menu-btn { display: none; background: transparent; border: 1px solid var(--tp-line); color: var(--tp-text); border-radius: 7px; padding: 5px 9px; cursor: pointer; font-size: 1rem; }
+.tp-topbar-brand { display: none; align-items: center; gap: 8px; font-weight: 800; color: var(--tp-text); font-size: 0.95rem; }
+.tp-topbar-brand .tp-brand-logo { width: 26px; height: 26px; }
+.tp-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; min-width: 0; }
+.tp-punch[hidden] { display: none !important; }
+.tp-bell { color: #e2e8f0; }
+.tp-bell.tp-bell-off { opacity: 0.55; }
+.tp-bell.tp-bell-ring svg { animation: tp-bell-ring 0.9s ease-in-out 2; transform-origin: 50% 10%; }
+@keyframes tp-bell-ring { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(16deg); } 40% { transform: rotate(-14deg); } 60% { transform: rotate(9deg); } 80% { transform: rotate(-6deg); } }
+@media (prefers-reduced-motion: reduce) { .tp-bell.tp-bell-ring svg { animation: none; } }
+.tp-bell .topbar-counter-badge[hidden] { display: none; }
+
+/* ---------- Profile dropdown ---------- */
+.tp-profile { position: relative; }
+.tp-profile-btn {
+  display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--tp-line);
+  border-radius: 9999px; padding: 3px 10px 3px 3px; color: var(--tp-text); cursor: pointer; font-family: inherit; max-width: 230px;
+}
+.tp-profile-btn:hover, .tp-profile-btn[aria-expanded="true"] { border-color: var(--tp-accent-border); background: var(--tp-accent-soft); }
+.tp-profile-meta { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; line-height: 1.2; }
+.tp-caret { color: var(--tp-text-muted); font-size: 0.7rem; }
+.tp-avatar {
+  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0;
+  background: var(--tp-accent-soft); color: var(--tp-accent); font-weight: 800; font-size: 0.8rem;
+}
+.tp-user-name { color: var(--tp-text); font-weight: 700; font-size: 0.8rem; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tp-user-role { color: var(--tp-text-dim); font-size: 0.64rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tp-profile-menu {
+  position: absolute; right: 0; top: calc(100% + 6px); min-width: 210px; z-index: 60; padding: 6px;
+  background: var(--tp-surface); border: 1px solid var(--tp-line); border-radius: var(--tp-radius-sm); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+}
+.tp-profile-menu[hidden] { display: none; }
+.tp-profile-menu a, .tp-profile-menu button {
+  display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 6px; border: none; background: transparent;
+  color: var(--tp-text-body); font-size: 0.84rem; text-decoration: none; cursor: pointer; font-family: inherit; box-sizing: border-box;
+}
+.tp-profile-menu a:hover, .tp-profile-menu button:hover, .tp-profile-menu a:focus-visible, .tp-profile-menu button:focus-visible { background: rgba(255, 255, 255, 0.06); color: var(--tp-text); outline: none; }
+.tp-profile-menu hr { border: none; border-top: 1px solid var(--tp-line); margin: 4px 0; }
+.tp-profile-menu .tp-menu-danger { color: var(--tp-danger); }
+
+/* ---------- Page header + breadcrumbs ---------- */
+.tp-page-header { padding: 1.25rem 1.5rem 0; max-width: 1400px; width: 100%; box-sizing: border-box; margin: 0 auto; }
+.tp-breadcrumbs ol { list-style: none; margin: 0 0 6px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.75rem; color: var(--tp-text-dim); }
+.tp-breadcrumbs li + li::before { content: '›'; margin-right: 4px; color: var(--tp-text-dim); }
+.tp-breadcrumbs a { color: var(--tp-text-muted); text-decoration: none; }
+.tp-breadcrumbs a:hover { color: var(--tp-accent); }
+.tp-breadcrumbs [aria-current="page"] { color: var(--tp-accent); font-weight: 600; }
+.tp-page-header-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.tp-page-heading { min-width: 0; }
+.tp-page-heading h1 { margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--tp-text); }
+.tp-page-heading p { margin: 3px 0 0; font-size: 0.84rem; color: var(--tp-text-muted); }
+.tp-page-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tp-supervisor { font-size: 0.75rem; color: var(--tp-warn); border: 1px solid rgba(251, 191, 36, 0.35); border-radius: 6px; padding: 3px 8px; }
+
+.tp-content {
+  padding: 1.25rem 1.5rem 1.5rem; max-width: 1400px; width: 100%; box-sizing: border-box; margin: 0 auto;
+  display: flex; flex-direction: column; gap: var(--tp-gap); outline: none;
+}
+/* Sign-out button: red so it is easy to spot (same as the admin console) */
+.tp-foot-logout { color: #f87171; background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.45); }
+.tp-foot-logout:hover { color: #fff; background: #ef4444; border-color: #ef4444; }
+
+/* Gym-welfare share countdown (trainer-dashboard.js) */
+.tp-welfare { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; border: 1px solid; border-radius: 14px; padding: .9rem 1.1rem; margin-bottom: 1rem; }
+.tp-welfare.soon { background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.5); }
+.tp-welfare.overdue { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.55); }
+.tp-welfare-count { display: grid; place-items: center; width: 78px; height: 78px; border-radius: 50%; border: 3px solid currentColor; text-align: center; line-height: 1.05; flex-shrink: 0; }
+.tp-welfare.soon .tp-welfare-count { color: #fbbf24; } .tp-welfare.overdue .tp-welfare-count { color: #f87171; }
+.tp-welfare-count b { font-size: 1.5rem; font-weight: 800; }
+.tp-welfare-count span { font-size: .6rem; font-weight: 700; text-transform: uppercase; padding: 0 5px; }
+.tp-welfare-text { flex: 1; min-width: 220px; }
+.tp-welfare-text h2 { margin: 0 0 .25rem; font-size: 1rem; color: #fff; }
+.tp-welfare-text p { margin: 0 0 .2rem; font-size: .88rem; color: #e5e7eb; }
+.tp-welfare-text small { color: #94a3b8; font-size: .74rem; }
+
+/* Flat menu (no section headings) + page tabs — trainer-navigation.js */
+.tp-nav a.tp-nav-gap { margin-top: 0.55rem; position: relative; }
+.tp-nav a.tp-nav-gap::before { content: ''; position: absolute; left: 0.6rem; right: 0.6rem; top: -0.3rem; border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.tp-nav-label { display: grid; line-height: 1.2; min-width: 0; }
+.tp-nav-label small { font-size: 0.66rem; font-weight: 500; color: var(--tp-text-dim, #64748b); }
+.tp-nav a.active .tp-nav-label small { color: inherit; opacity: 0.75; }
+.tp-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 0.9rem; }
+.tp-tab { padding: 6px 13px; border-radius: 999px; border: 1px solid var(--tp-border, rgba(255,255,255,0.1)); color: #a3aab8; text-decoration: none; font-size: 0.8rem; font-weight: 600; transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
+.tp-tab:hover { color: #fff; border-color: rgba(255, 255, 255, 0.22); }
+.tp-tab.active { background: #00e676; border-color: #00e676; color: #04130a; font-weight: 800; }
+.tp-tab:focus-visible { outline: 2px solid #00e676; outline-offset: 2px; }
+
+/* Attendance: submit to admin (trainer-attendance.js) */
+.ta-toolbar { align-items: center; flex-wrap: wrap; }
+.ta-quick { display: flex; gap: 6px; }
+.ta-submit { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.ta-submit h2 { margin: 0 0 .2rem; font-size: 1rem; color: #fff; }
+.ta-submit p { margin: 0; font-size: .82rem; }
+.ta-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* General Training (trainer-general.js) */
+.tg-slot + .tg-slot { margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.06); }
+.tg-slot h2 { margin: 0 0 .5rem; font-size: 1rem; color: #fff; }

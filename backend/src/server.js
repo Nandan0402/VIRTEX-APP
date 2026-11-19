@@ -2,6 +2,7 @@ import { createApp } from './app.js';
 import { config } from './config/env.js';
 import { checkDatabaseConnection, closePool } from './config/database.js';
 import { initRealtime, closeRealtime } from './services/realtime.service.js';
+import { startBirthdayScheduler, stopBirthdayScheduler } from './services/birthdayWishes.service.js';
 
 async function bootstrap() {
   const app = createApp();
@@ -34,9 +35,13 @@ async function bootstrap() {
   // Attach WebSocket Real-Time Synchronization Engine
   initRealtime(server);
 
+  // Automatic birthday wishes for members and personal trainers (AUTO_BIRTHDAY_WISHES=false turns it off)
+  startBirthdayScheduler();
+
   // Graceful shutdown
   const shutdown = async (signal) => {
     console.log(`\n[Shutdown] Received ${signal}. Closing HTTP server and draining database connections...`);
+    stopBirthdayScheduler();
     await closeRealtime();
     server.close(async () => {
       console.log('[Shutdown] HTTP server closed.');

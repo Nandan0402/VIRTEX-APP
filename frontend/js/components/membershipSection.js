@@ -56,7 +56,7 @@ export class MembershipSectionComponent {
     if (!this.plans || this.plans.length === 0) {
       this.plansContainer.innerHTML = `
         <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #a1a1aa; background: #12141a; border-radius: 12px; border: 1px dashed #27272a;">
-          <p>No active membership plans found. Please enquire at the front desk desk.</p>
+          <p>No active membership plans found. Please enquire at the front desk.</p>
           <button class="btn btn-green btn-enquire-plan" data-plan-name="General Membership" style="margin-top: 12px;">
             Submit General Enquiry
           </button>
@@ -161,7 +161,6 @@ export class MembershipSectionComponent {
         <ul class="hours-timetable">
           ${hoursListHtml}
         </ul>
-        <p class="hours-note">🏋️ Members with Platinum Annual passes enjoy 24/7 keycard access.</p>
       </div>
     `;
   }
@@ -182,7 +181,7 @@ export class MembershipSectionComponent {
     const profile = this.gymProfile || {};
     const address = profile.address || '42, 100 Feet Road, Indiranagar, Bengaluru, Karnataka 560038';
     const phone = profile.phone || '+91 98765 43210';
-    const email = profile.email || 'reception@pulsecorefitness.in';
+    const email = profile.email || 'reception@virtexfitness.in';
 
     this.contactContainer.innerHTML = `
       <div class="card contact-card" aria-label="Gym Contact Details">

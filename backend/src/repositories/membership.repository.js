@@ -8,7 +8,7 @@ import { query } from '../config/database.js';
 export async function findPlans({ activeOnly = true } = {}, client) {
   const conditions = activeOnly ? 'WHERE is_active = TRUE' : '';
   const sql = `
-    SELECT id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks
+    SELECT id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks, audience, weekly_schedule
     FROM membership_plans
     ${conditions}
     ORDER BY price_inr ASC;
@@ -26,7 +26,7 @@ export async function findPlans({ activeOnly = true } = {}, client) {
  */
 export async function findPlanById(id, client) {
   const sql = `
-    SELECT id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks
+    SELECT id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks, audience, weekly_schedule
     FROM membership_plans
     WHERE id = $1
     LIMIT 1;
@@ -43,7 +43,7 @@ export async function findPlanById(id, client) {
  */
 export async function findPlanByCode(planCode, client) {
   const sql = `
-    SELECT id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks
+    SELECT id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks, audience, weekly_schedule
     FROM membership_plans
     WHERE plan_code = $1
     LIMIT 1;
@@ -125,13 +125,15 @@ export async function createPlan(planData, client) {
     isFeatured = false,
     isActive = true,
     perks = [],
+    audience = 'all',
+    weeklySchedule = {},
   } = planData;
 
   const sql = `
     INSERT INTO membership_plans (
-      plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    RETURNING id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks, created_at;
+      plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks, audience, weekly_schedule
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)
+    RETURNING id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks, audience, weekly_schedule, created_at;
   `;
 
   const executor = client || { query };
@@ -144,6 +146,8 @@ export async function createPlan(planData, client) {
     isFeatured,
     isActive,
     perks,
+    audience,
+    JSON.stringify(weeklySchedule || {}),
   ]);
   return result.rows[0];
 }
@@ -155,7 +159,7 @@ export async function createPlan(planData, client) {
  * @param {import('pg').PoolClient} [client]
  */
 export async function updatePlan(id, planData, client) {
-  const { name, durationMonths, priceInr, badgeLabel, isFeatured, isActive, perks } = planData;
+  const { name, durationMonths, priceInr, badgeLabel, isFeatured, isActive, perks, audience, weeklySchedule } = planData;
 
   const sql = `
     UPDATE membership_plans
@@ -166,9 +170,11 @@ export async function updatePlan(id, planData, client) {
         is_featured = COALESCE($5, is_featured),
         is_active = COALESCE($6, is_active),
         perks = COALESCE($7, perks),
+        audience = COALESCE($9, audience),
+        weekly_schedule = COALESCE($10::jsonb, weekly_schedule),
         updated_at = CURRENT_TIMESTAMP
     WHERE id = $8
-    RETURNING id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks, updated_at;
+    RETURNING id, plan_code, name, duration_months, price_inr, badge_label, is_featured, is_active, perks, audience, weekly_schedule, updated_at;
   `;
 
   const executor = client || { query };
@@ -181,6 +187,8 @@ export async function updatePlan(id, planData, client) {
     isActive,
     perks,
     id,
+    audience ?? null,
+    weeklySchedule === undefined || weeklySchedule === null ? null : JSON.stringify(weeklySchedule),
   ]);
   return result.rows[0] || null;
 }

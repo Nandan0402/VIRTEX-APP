@@ -8,6 +8,7 @@ import { config } from '../config/env.js';
 export const apiRateLimiter = rateLimit({
   windowMs: config.rateLimit.windowMs,
   max: config.rateLimit.max,
+  skip: (req) => process.env.NODE_ENV === 'test' || (process.env.NODE_ENV === 'development' && (req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1')),
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -22,7 +23,8 @@ export const apiRateLimiter = rateLimit({
  */
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: config.rateLimit.authMax,
+  max: config.rateLimit.authMax || 100,
+  skip: (req) => process.env.NODE_ENV === 'test' || (process.env.NODE_ENV === 'development' && (req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1')),
   standardHeaders: true,
   legacyHeaders: false,
   message: {

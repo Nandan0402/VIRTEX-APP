@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- Migration: 001_shared_schema_upgrade.sql
--- System: PulseCore Fitness AI Gym Receptionist & Admin Console
+-- System: Virtex Fitness AI Gym Receptionist & Admin Console
 -- Target Tables:
 --   1. roles (NEW)
 --   2. users (NEW - enhanced replacement/bridge for admin_users)
@@ -324,7 +324,7 @@ BEGIN
         ALTER TABLE gym_settings ADD COLUMN checkin_cooldown_minutes SMALLINT NOT NULL DEFAULT 5 CHECK (checkin_cooldown_minutes >= 0);
     END IF;
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='gym_settings' AND column_name='wifi_ssid') THEN
-        ALTER TABLE gym_settings ADD COLUMN wifi_ssid VARCHAR(64) DEFAULT 'PulseCore-Gym-Guest';
+        ALTER TABLE gym_settings ADD COLUMN wifi_ssid VARCHAR(64) DEFAULT 'Virtex-Gym-Guest';
     END IF;
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='gym_settings' AND column_name='updated_by') THEN
         ALTER TABLE gym_settings ADD COLUMN updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL;

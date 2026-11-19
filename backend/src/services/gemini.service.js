@@ -10,7 +10,7 @@ import { getAnnouncements } from './announcement.service.js';
  * System prompt definition for the Gym Receptionist Robot AI
  */
 export const GYM_RECEPTIONIST_SYSTEM_PROMPT = `
-You are "FitBot", a friendly, energetic, and professional AI Gym Receptionist robot at PulseCore Fitness.
+You are "FitBot", a friendly, energetic, and professional AI Gym Receptionist robot at Virtex Fitness.
 You speak aloud to members and visitors via Text-to-Speech (TTS) and trigger safe physical robot movements.
 
 CRITICAL OPERATIONAL RULES:
@@ -56,7 +56,28 @@ export async function buildGroundingContext(langCode = 'en-IN') {
     let hoursText = '';
     if (profile?.operating_hours && Array.isArray(profile.operating_hours)) {
       hoursText = profile.operating_hours
-        .map((h) => `${h.day}: ${h.is_closed ? 'Closed' : `${h.open} to ${h.close}`}`)
+        .map((h) => {
+          if (h.is_closed) return `${h.day}: Closed`;
+          if (Array.isArray(h.shifts) && h.shifts.length > 0) {
+            const slotsStr = h.shifts
+              .map((s, idx) => {
+                let sText = `Slot ${idx + 1}: ${s.open} to ${s.close} [Class: ${s.class_type || 'General Gym'}]`;
+                if (s.note) sText += ` (${s.note})`;
+                return sText;
+              })
+              .join(' & ');
+            return `${h.day}: ${slotsStr}`;
+          }
+          let time = `${h.open} to ${h.close}`;
+          if (h.class_type) time += ` [Class: ${h.class_type}]`;
+          if (h.note) time += ` (${h.note})`;
+          if (h.shift2_open && h.shift2_close) {
+            time += ` & Evening Shift: ${h.shift2_open} to ${h.shift2_close}`;
+            if (h.shift2_class_type) time += ` [Class: ${h.shift2_class_type}]`;
+            if (h.shift2_note) time += ` (${h.shift2_note})`;
+          }
+          return `${h.day}: ${time}`;
+        })
         .join(', ');
     } else {
       hoursText = 'Monday - Saturday: 05:30 to 22:30, Sunday: 07:00 to 13:00';
@@ -82,23 +103,23 @@ export async function buildGroundingContext(langCode = 'en-IN') {
 
     return `
 AUTHORITATIVE GYM DATA (DATABASE TRUTH SOURCE):
-Gym Name: ${profile?.gym_name || 'PulseCore Fitness'}
+Gym Name: ${profile?.gym_name || 'Virtex Fitness'}
 Tagline: ${profile?.tagline || 'AI-Powered Smart Fitness Reception'}
-Contact: Phone: ${profile?.phone || '+91 98765 43210'}, Email: ${profile?.email || 'reception@pulsecorefitness.in'}
+Contact: Phone: ${profile?.phone || '+91 98765 43210'}, Email: ${profile?.email || 'reception@virtexfitness.in'}
 Address: ${profile?.address || '42, 100 Feet Road, Indiranagar, Bengaluru, Karnataka 560038'}
-Guest Wi-Fi: ${profile?.wifi_ssid || 'PulseCore-Gym-Guest'}
+Guest Wi-Fi: ${profile?.wifi_ssid || 'Virtex-Gym-Guest'}
 
 Operating Hours:
 ${hoursText}
 
 Active Membership Plans & Pricing (INR):
-${plansText || '- Silver Monthly: ₹2,499 (1 mo)\n- Gold Quarterly: ₹5,999 (3 mo)\n- Platinum Annual: ₹18,999 (12 mo)'}
+${plansText || '- No membership plans are currently listed. Ask the visitor to enquire at the front desk for pricing.'}
 
 Trainer Roster & Availability:
-${trainersText || '- Arjun Reddy: CrossFit & Strength (Status: on_floor)\n- Meera Rao: Functional Yoga & Posture (Status: in_session)\n- Karan Verma: Hypertrophy & Bodybuilding (Status: off_duty)'}
+${trainersText || '- No trainers are currently listed.'}
 
 Active Announcements & Club Notices:
-${announcementsText || '- Diwali Transformation Challenge: Registration open for 30-Day Lean & Strong Bootcamp!\n- Steam Room Routine Maintenance: Steam room sanitization this Thursday 2:00 PM to 4:00 PM.'}
+${announcementsText || '- No active announcements.'}
 
 Facilities & Amenities:
 - Digital biometric lockers, hot water showers, steam room, hydration stations, and high-speed Wi-Fi.
@@ -116,11 +137,11 @@ Workout & Fitness Guidance:
 - For personalized nutrition or workout programming, consult our certified trainers on the floor. FitBot does not provide medical or prescription fitness plans.
 
 Frequently Asked Questions & Answers:
-${faqsText || 'Q: What are the locker facilities? | A: Digital lockers are free for all active members.'}
+${faqsText || '- No FAQs are currently configured.'}
 `.trim();
   } catch (err) {
     console.warn('[GeminiService] Error building grounding context:', err.message);
-    return 'Gym: PulseCore Fitness. Hours: Mon-Sat 5:30-22:30, Sun 7:00-13:00.';
+    return 'Gym: Virtex Fitness. Hours: Mon-Sat 5:30-22:30, Sun 7:00-13:00.';
   }
 }
 
@@ -227,7 +248,7 @@ Respond in strict JSON with keys "reply" and "gesture" ("WAVE", "NOD", or "IDLE"
     else if (gesture === 'IDLE') gesture = 'IDLE';
 
     return {
-      reply: parsed.reply || 'Welcome to PulseCore Fitness! How can I assist you?',
+      reply: parsed.reply || 'Welcome to Virtex Fitness! How can I assist you?',
       gesture,
     };
   } catch (err) {
@@ -271,14 +292,14 @@ export function generateFallbackResponse({ message, language = 'en-IN' }) {
     gesture = 'GREET_WAVE';
     switch (normLang) {
       case 'kn-IN':
-        reply = 'ನಮಸ್ಕಾರ! PulseCore Fitness ಗೆ ಸುಸ್ವಾಗತ! ಇಂದು ನಿಮ್ಮ ವ್ಯಾಯಾಮಕ್ಕೆ ನಾನು ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?';
+        reply = 'ನಮಸ್ಕಾರ! Virtex Fitness ಗೆ ಸುಸ್ವಾಗತ! ಇಂದು ನಿಮ್ಮ ವ್ಯಾಯಾಮಕ್ಕೆ ನಾನು ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?';
         break;
       case 'hi-IN':
-        reply = 'नमस्ते! PulseCore Fitness में आपका स्वागत है! आज आपकी कसरत में मैं क्या सहायता कर सकता हूँ?';
+        reply = 'नमस्ते! Virtex Fitness में आपका स्वागत है! आज आपकी कसरत में मैं क्या सहायता कर सकता हूँ?';
         break;
       case 'en-IN':
       default:
-        reply = 'Hello! Welcome to PulseCore Fitness. How can I assist you with your workout session today?';
+        reply = 'Hello! Welcome to Virtex Fitness. How can I assist you with your workout session today?';
         break;
     }
   }
@@ -307,7 +328,38 @@ export function generateFallbackResponse({ message, language = 'en-IN' }) {
         break;
       case 'en-IN':
       default:
-        reply = 'PulseCore Fitness is open Monday through Saturday from 5:30 AM to 10:30 PM, and Sundays from 7:00 AM to 1:00 PM.';
+        reply = 'Virtex Fitness is open Monday through Saturday from 5:30 AM to 10:30 PM, and Sundays from 7:00 AM to 1:00 PM.';
+        break;
+    }
+  }
+
+  // 2B. GROUP CLASSES & GYM SESSIONS
+  else if (
+    text.includes('class') ||
+    text.includes('group class') ||
+    text.includes('zumba') ||
+    text.includes('yoga') ||
+    text.includes('batch') ||
+    text.includes('ಕ್ಲಾಸ್') ||
+    text.includes('ತರಗತಿ') ||
+    text.includes('ಜುಂಬಾ') ||
+    text.includes('ಯೋಗ') ||
+    text.includes('क्लास') ||
+    text.includes('जुम्बा') ||
+    text.includes('योग') ||
+    text.includes('बैच')
+  ) {
+    gesture = 'NOD_YES';
+    switch (normLang) {
+      case 'kn-IN':
+        reply = 'ಪಲ್ಸ್‌ಕೋರ್ ಫಿಟ್‌ನೆಸ್‌ನಲ್ಲಿ ಜನರಲ್ ಜಿಮ್ ಜೊತೆಗೆ ಜುಂಬಾ, ಯೋಗ ಮತ್ತು ಎಚ್‌ಐಐಟಿ (HIIT) ಗ್ರೂಪ್ ಕ್ಲಾಸ್‌ಗಳು ನಡೆಯುತ್ತವೆ. ದೈನಂದಿನ ಬ್ಯಾಚ್ ವೇಳಾಪಟ್ಟಿಗಾಗಿ ನಮ್ಮ ರಿಸೆಪ್ಷನ್ ಅಥವಾ ಕಿಯೋಸ್ಕ್ ಡಿಸ್‌ಪ್ಲೇ ಪರಿಶೀಲಿಸಿ!';
+        break;
+      case 'hi-IN':
+        reply = 'पल्सकोर फिटनेस में जनरल जिम के साथ-साथ जुम्बा, योग और एचआईआईटी (HIIT) ग्रुप क्लासेस उपलब्ध हैं। दैनिक बैच टाइमिंग के लिए रिसेप्शन या कियोस्क शेड्यूल देखें!';
+        break;
+      case 'en-IN':
+      default:
+        reply = 'Virtex Fitness offers open gym access along with high-energy Group Classes including Zumba, Yoga, and HIIT. Check our reception schedule for today’s morning and evening batches!';
         break;
     }
   }
@@ -576,14 +628,14 @@ export function generateFallbackResponse({ message, language = 'en-IN' }) {
     gesture = 'NOD_YES';
     switch (normLang) {
       case 'kn-IN':
-        reply = 'ನಮ್ಮನ್ನು +91 98765 43210 ಗೆ ಕರೆ ಮಾಡಿ ಅಥವಾ reception@pulsecorefitness.in ಗೆ ಇಮೇಲ್ ಮಾಡಿ. ನಮ್ಮ ವಿಳಾಸ: 42, 100 Feet Road, Indiranagar, Bengaluru.';
+        reply = 'ನಮ್ಮನ್ನು +91 98765 43210 ಗೆ ಕರೆ ಮಾಡಿ ಅಥವಾ reception@virtexfitness.in ಗೆ ಇಮೇಲ್ ಮಾಡಿ. ನಮ್ಮ ವಿಳಾಸ: 42, 100 Feet Road, Indiranagar, Bengaluru.';
         break;
       case 'hi-IN':
-        reply = 'आप हमें +91 98765 43210 पर कॉल कर सकते हैं या reception@pulsecorefitness.in पर ईमेल कर सकते हैं। पता: 42, 100 फीट रोड, इंदिरानगर, बेंगलुरु।';
+        reply = 'आप हमें +91 98765 43210 पर कॉल कर सकते हैं या reception@virtexfitness.in पर ईमेल कर सकते हैं। पता: 42, 100 फीट रोड, इंदिरानगर, बेंगलुरु।';
         break;
       case 'en-IN':
       default:
-        reply = 'You can reach reception at +91 98765 43210 or email reception@pulsecorefitness.in. We are located at 42, 100 Feet Road, Indiranagar, Bengaluru.';
+        reply = 'You can reach reception at +91 98765 43210 or email reception@virtexfitness.in. We are located at 42, 100 Feet Road, Indiranagar, Bengaluru.';
         break;
     }
   }

@@ -40,7 +40,7 @@ export class ChatInterfaceComponent {
     if (!this.container) return;
 
     this.container.innerHTML = `
-      <div class="chat-container" role="region" aria-label="Conversation with FitBot">
+      <div class="chat-container" role="region" aria-label="Conversation with the receptionist">
         <div class="chat-messages" id="chat-messages-list" role="log" aria-live="polite">
           ${this.messages
             .map(
@@ -48,7 +48,7 @@ export class ChatInterfaceComponent {
             <article class="chat-bubble ${m.sender === 'user' ? 'bubble-user' : 'bubble-robot'}" tabindex="0">
               <div class="bubble-header">
                 <span class="bubble-author">
-                  ${m.sender === 'user' ? '👤 Member' : '🤖 FitBot (Receptionist)'}
+                  ${m.sender === 'user' ? '👤 Member' : '💬 Virtex Receptionist'}
                 </span>
                 <span class="bubble-time">${m.time}</span>
               </div>
@@ -58,13 +58,6 @@ export class ChatInterfaceComponent {
               </div>
 
               <div class="bubble-footer">
-                ${
-                  m.gesture
-                    ? `<button class="gesture-badge-btn" data-gesture="${m.gesture}" title="Trigger physical ${m.gesture} servo action">
-                        🦾 ${m.gesture}
-                      </button>`
-                    : ''
-                }
                 ${
                   m.sender === 'robot'
                     ? `<button class="btn-bubble-speak" data-text="${encodeURIComponent(m.text)}" data-lang="${m.language}" aria-label="Speak this answer aloud" title="Speak this answer aloud">
@@ -88,16 +81,6 @@ export class ChatInterfaceComponent {
         const lang = btn.dataset.lang || 'en-IN';
         if (this.onSpeakMessage) {
           this.onSpeakMessage(text, lang);
-        }
-      });
-    });
-
-    // Attach gesture badge clicks
-    this.container.querySelectorAll('.gesture-badge-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const gesture = btn.dataset.gesture;
-        if (this.onTriggerGesture) {
-          this.onTriggerGesture(gesture);
         }
       });
     });

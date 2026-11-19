@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Member Birthday Alert & Greetings</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root, html {
+      color-scheme: dark !important;
+      --accent-green: #00e676;
+      --accent-green-dark: #00b050;
+      --accent-green-glow: rgba(0, 230, 118, 0.28);
+      --green: #00e676;
+    }
+
+    .birthday-page-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .bday-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card-bday {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card-bday::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent-green);
+    }
+
+    .stat-card-gold::before { background: #facc15; }
+    .stat-card-purple::before { background: #a855f7; }
+    .stat-card-cyan::before { background: #38bdf8; }
+
+    .stat-icon-wrap {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+    }
+
+    .stat-meta h4 {
+      margin: 0;
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-meta .stat-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Festive Banner */
+    .today-celebration-banner {
+      background: linear-gradient(135deg, rgba(250, 204, 21, 0.15) 0%, rgba(168, 85, 247, 0.15) 50%, rgba(0, 230, 118, 0.15) 100%);
+      border: 1px solid rgba(250, 204, 21, 0.4);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .banner-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .banner-emoji {
+      font-size: 2.5rem;
+      animation: pulseBounce 2s infinite;
+    }
+
+    @keyframes pulseBounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15) rotate(6deg); }
+    }
+
+    .filter-tabs-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+    }
+
+    .filter-btn-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tab-pill {
+      background: #090a0f;
+      border: 1px solid var(--border);
+      color: var(--text-gray);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-pill:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+
+    .tab-pill.active {
+      background: rgba(0, 230, 118, 0.15);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .search-input-box {
+      position: relative;
+      min-width: 260px;
+    }
+
+    .search-input-box input {
+      width: 100%;
+      background: #090a0f;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      color: #fff;
+      padding: 6px 14px 6px 36px;
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input-box input:focus {
+      border-color: var(--accent-green);
+    }
+
+    .search-icon-inside {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    /* Badges */
+    .badge-today {
+      background: rgba(250, 204, 21, 0.2);
+      color: #facc15;
+      border: 1px solid rgba(250, 204, 21, 0.5);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      animation: pulseGlow 1.5s infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 5px rgba(250, 204, 21, 0.3); }
+      50% { box-shadow: 0 0 15px rgba(250, 204, 21, 0.7); }
+    }
+
+    .badge-soon {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .action-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .action-btn:hover {
+      border-color: var(--accent-green);
+      background: rgba(0, 230, 118, 0.1);
+      color: var(--accent-green);
+    }
+
+    .action-btn-wish {
+      background: rgba(250, 204, 21, 0.15);
+      border-color: rgba(250, 204, 21, 0.4);
+      color: #facc15;
+    }
+
+    .action-btn-wish:hover {
+      background: #facc15;
+      color: #000;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-card {
+      background: #13161f;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      width: 90%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      overflow-x: hidden !important;
+      padding: 1.5rem 1.75rem;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+      box-sizing: border-box;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-close-modal {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+
+    .btn-close-modal:hover { color: #fff; }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .form-group label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control-dark {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      background: #090a0f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 0.88rem;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-control-dark:focus {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.2);
+    }
+
+    .form-control-dark:focus {
+      border-color: var(--accent-green);
+    }
+    /* Automatic wishes card + trainer birthdays table */
+    .auto-wish-card { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 1rem 1.25rem; margin-bottom: 1.25rem; border: 1px solid rgba(0, 230, 118, 0.25); background: linear-gradient(135deg, rgba(0, 230, 118, 0.06), rgba(56, 189, 248, 0.04)); }
+    .auto-wish-main { display: flex; gap: 0.9rem; align-items: flex-start; flex: 1; min-width: 260px; }
+    .auto-wish-icon { font-size: 1.6rem; line-height: 1; }
+    .auto-wish-card h3 { margin: 0 0 4px; font-size: 1rem; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .auto-wish-card p { margin: 0; font-size: 0.82rem; color: var(--text-gray); line-height: 1.5; }
+    .auto-wish-card .auto-wish-sub { margin-top: 4px; color: var(--text-dim); }
+    .auto-wish-card .auto-wish-sub strong { color: #fff; }
+    .auto-wish-pill { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-dim); }
+    .auto-wish-pill.on { color: var(--accent-green); border-color: rgba(0, 230, 118, 0.45); background: rgba(0, 230, 118, 0.1); }
+    .auto-wish-pill.off { color: #f59e0b; border-color: rgba(245, 158, 11, 0.45); background: rgba(245, 158, 11, 0.1); }
+    .tb-table th { padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+    .tb-table td { padding: 12px 16px; font-size: 0.85rem; border-bottom: 1px solid var(--border); color: var(--text-white); vertical-align: top; }
+    .tb-dim { color: var(--text-dim); font-size: 0.75rem; }
+    .tb-today { color: #facc15; font-weight: 800; }
+    .tb-row-today { background: rgba(250, 204, 21, 0.06); }
+    .tb-empty { text-align: center; color: var(--text-dim); padding: 1.5rem !important; }
+    /* This Week cards + This Month calendar */
+    .bv-wrap { margin-bottom: 1.25rem; }
+    .bv-wrap[hidden], #bday-table-card[hidden] { display: none !important; }
+    .bv-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.85rem; }
+    .bv-head h3 { margin: 0; font-size: 1.05rem; color: #fff; }
+    .bv-head span { font-size: 0.8rem; color: var(--text-dim); }
+    .bv-week { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.85rem; }
+    .bv-day { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 0.85rem; min-height: 120px; display: flex; flex-direction: column; gap: 0.5rem; }
+    .bv-day header { display: flex; justify-content: space-between; align-items: baseline; }
+    .bv-day-name { font-weight: 800; color: #fff; font-size: 0.9rem; }
+    .bv-day-date { font-size: 0.75rem; color: var(--text-dim); }
+    .bv-day.is-today { border-color: rgba(250, 204, 21, 0.55); background: linear-gradient(160deg, rgba(250, 204, 21, 0.1), var(--bg-card) 60%); }
+    .bv-day.is-today .bv-day-name { color: #facc15; }
+    .bv-day.has-bday:not(.is-today) { border-color: rgba(168, 85, 247, 0.4); }
+    .bv-empty { margin: auto 0; font-size: 0.78rem; color: var(--text-dim); text-align: center; }
+    .bv-person { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.5rem; border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.03); }
+    .bv-avatar { flex: none; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; }
+    .bv-avatar.member { background: rgba(250, 204, 21, 0.14); color: #facc15; border: 1px solid rgba(250, 204, 21, 0.45); }
+    .bv-avatar.trainer { background: rgba(56, 189, 248, 0.14); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.45); }
+    .bv-person-main { flex: 1; min-width: 0; display: grid; }
+    .bv-person-main b { font-size: 0.84rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bv-person-main small { font-size: 0.7rem; color: var(--text-dim); }
+    .bv-wish { flex: none; border: 1px solid rgba(250, 204, 21, 0.5); background: rgba(250, 204, 21, 0.12); color: #facc15; border-radius: 999px; padding: 0.25rem 0.6rem; font: inherit; font-size: 0.72rem; font-weight: 800; cursor: pointer; }
+    .bv-wish:hover { background: rgba(250, 204, 21, 0.22); }
+    .bv-sent { flex: none; font-size: 0.7rem; font-weight: 700; color: var(--accent-green); }
+    .bv-auto { flex: none; font-size: 0.68rem; color: var(--text-dim); border: 1px solid var(--border); border-radius: 999px; padding: 0.15rem 0.5rem; }
+    .bv-nav { display: flex; gap: 6px; }
+    .bv-nav button { background: var(--bg-card); border: 1px solid var(--border); color: #fff; border-radius: var(--radius-md); padding: 0.35rem 0.75rem; font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+    .bv-nav button:disabled { opacity: 0.45; cursor: default; }
+    .bv-cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+    .bv-dow { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); padding: 0 4px 2px; }
+    .bv-cell { min-height: 92px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 6px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .bv-blank { background: transparent; border-color: transparent; }
+    .bv-num { font-size: 0.78rem; font-weight: 700; color: var(--text-gray); }
+    .bv-cell.is-past { opacity: 0.55; }
+    .bv-cell.is-today { border-color: #facc15; box-shadow: inset 0 0 0 1px rgba(250, 204, 21, 0.4); }
+    .bv-cell.is-today .bv-num { color: #facc15; }
+    .bv-cell.has-bday:not(.is-today) { border-color: rgba(168, 85, 247, 0.45); }
+    .bv-chip { display: block; font-size: 0.7rem; font-weight: 700; border-radius: 6px; padding: 2px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bv-chip.member { background: rgba(250, 204, 21, 0.14); color: #fde68a; }
+    .bv-chip.trainer { background: rgba(56, 189, 248, 0.14); color: #bae6fd; }
+    .bv-more { font-size: 0.68rem; color: var(--text-dim); }
+    .bv-legend { display: flex; gap: 8px; margin: 0.6rem 0 0; }
+    .bv-legend .bv-chip { display: inline-block; }
+    .bv-hint { margin: 0.75rem 0 0; font-size: 0.78rem; color: var(--text-dim); }
+    @media (max-width: 1100px) { .bv-week { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 640px) {
+      .bv-week { grid-template-columns: 1fr; }
+      .bv-cal { gap: 3px; }
+      .bv-cell { min-height: 58px; padding: 4px; }
+      .bv-chip { font-size: 0; padding: 0; background: none; }
+      .bv-chip::first-letter { font-size: 0.9rem; }
+      .bv-dow { font-size: 0.62rem; letter-spacing: 0; }
+    }
+    /* Member / Trainer tags in the birthdays directory */
+    .who-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .who-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.02em; padding: 2px 8px; border-radius: 999px; border: 1px solid; line-height: 1.4; white-space: nowrap; }
+    .who-tag.member { color: #4ade80; border-color: rgba(74, 222, 128, 0.45); background: rgba(74, 222, 128, 0.1); }
+    .who-tag.trainer { color: #a5b4fc; border-color: rgba(129, 140, 248, 0.5); background: rgba(129, 140, 248, 0.12); }
+    .badge-trainer-id { color: #a5b4fc; border: 1px solid rgba(129, 140, 248, 0.5); background: rgba(129, 140, 248, 0.1); }
+    .who-auto { display: inline-flex; align-items: center; font-size: 0.72rem; color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 0.3rem 0.6rem; white-space: nowrap; }
+    .who-filter { display: flex; gap: 6px; flex-wrap: wrap; }
+    .who-chip { display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1px solid var(--border); color: var(--text-gray); border-radius: 999px; padding: 0.38rem 0.8rem; font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+    .who-chip:hover { color: #fff; }
+    .who-chip.on { color: #fff; border-color: rgba(255, 255, 255, 0.35); background: rgba(255, 255, 255, 0.06); }
+    .who-chip:focus-visible { outline: 2px solid var(--accent-green); outline-offset: 2px; }
+    .who-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .who-dot.member { background: #4ade80; }
+    .who-dot.trainer { background: #818cf8; }
+  </style>
+</head>
+
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="admin.html#tab-overview" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📊</span> Overview & Stats
+        </a>
+        <a href="admin-members.html" class="nav-item-btn" id="nav-item-members" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👥</span> Members
+        </a>
+        <a href="admin-feessalert.html" class="nav-item-btn" id="nav-item-fees-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💰</span> Fees Alert
+        </a>
+        <a href="admin-birthdayalert.html" class="nav-item-btn active" id="nav-item-birthday-alert" aria-current="page" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🎂</span> Birthday Alert
+        </a>
+        <a href="admin-messages.html" class="nav-item-btn" id="nav-item-messages" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📩</span> Message
+        </a>
+        <a href="admin-notification.html" class="nav-item-btn" id="nav-item-notifications" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📢</span> Notification
+        </a>
+        <a href="admin-personaltraniner.html" class="nav-item-btn" id="nav-item-trainers" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏋️</span> Personal Trainer
+        </a>
+        <a href="admin-assign-membertoperonal traniner.html" class="nav-item-btn" id="nav-item-assign-trainer" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤝</span> Assign PT & Fees
+        </a>
+        <a href="admin-routine-tracker.html" class="nav-item-btn" id="nav-item-routine-tracker" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏱️</span> Routine Tracker
+        </a>
+        <a href="admin.html#tab-plans" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💳</span> Membership Plans
+        </a>
+        <a href="admin.html#tab-faqs" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">❓</span> FAQs / Knowledge Base
+        </a>
+        <a href="admin.html#tab-robot" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
+        </a>
+        <a href="admin.html#tab-profile" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile
+        </a>
+        <a href="admin-working-hours.html" class="nav-item-btn" id="nav-item-working-hours-link" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏰</span> Working Hours
+        </a>
+        <a href="admin-calander.html" class="nav-item-btn" id="nav-item-admin-calendar" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📅</span> Class & Shift Calendar
+        </a>
+        <a href="admin-profile.html" class="nav-item-btn" id="nav-item-admin-profile" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👤</span> Profile
+        </a>
+        <a href="admin.html#tab-settings" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⚙️</span> Language & Settings
+        </a>
+      </nav>
+
+      <!-- User Profile & Session Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" style="cursor: pointer;" title="Active Profile"
+          role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <img id="sidebar-user-photo" src="" alt="Avatar"
+              style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main">
+      <!-- Topbar Header -->
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle navigation menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-title-block">
+            <h1>🎂 Member Birthday Alert & Greetings</h1>
+            <span class="topbar-subtitle">PostgreSQL Grounded • Personalized AI Kiosk Wishes & Multi-Channel Celebration</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group -->
+          <div class="topbar-routine-group" id="topbar-routine-group">
+            <a href="admin-routine-tracker.html" class="topbar-routine-badge status-out" id="topbar-routine-badge" title="Click to view full Routine Tracker">
+              <span class="topbar-status-dot"></span>
+              <span id="topbar-routine-text">PUNCHED OUT</span>
+            </a>
+
+            <div class="topbar-punch-btns">
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-in" id="topbar-btn-punch-in" title="Punch In (Start Daily Shift)">
+                <span>🟢</span>
+                <span class="topbar-btn-text">Punch In</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-break" id="topbar-btn-break" title="Take or Resume Routine Break" disabled>
+                <span id="topbar-break-icon">☕</span>
+                <span class="topbar-btn-text" id="topbar-break-text">Break</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-out" id="topbar-btn-punch-out" title="Punch Out (End Daily Shift)" disabled>
+                <span>⏹️</span>
+                <span class="topbar-btn-text">Punch Out</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="topbar-divider-vert"></div>
+
+          <!-- Message Link Icon -->
+          <a href="admin-messages.html" class="topbar-nav-icon-link" id="topbar-message-link" title="Member Messages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="topbar-counter-badge" id="topbar-message-badge" style="display: none;">0</span>
+          </a>
+
+          <!-- Notification Link Icon -->
+          <a href="admin-notification.html" class="topbar-nav-icon-link" id="topbar-notification-link" title="Notifications & System Announcements">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="topbar-counter-badge topbar-counter-red" id="topbar-notification-badge" style="display: none;">0</span>
+          </a>
+
+          <div class="topbar-divider-vert"></div>
+
+          <span class="badge badge-green font-mono text-xs" id="topbar-db-status">● PostgreSQL Connected</span>
+          <button class="btn btn-green btn-sm" id="btn-refresh-birthdays">
+            🔄 Refresh Birthdays
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Body Container -->
+      <main class="admin-body">
+        <div class="birthday-page-container">
+
+          <!-- Festive Banner (Shown if celebrants exist today) -->
+          <div class="today-celebration-banner" id="today-banner" style="display: none;">
+            <div class="banner-content">
+              <div class="banner-emoji">🎉🎂</div>
+              <div>
+                <h3 style="margin: 0; font-size: 1.15rem; color: #fff; font-weight: 800;">
+                  Today's Birthday Celebrations!
+                </h3>
+                <p id="today-banner-sub" style="margin: 3px 0 0; font-size: 0.85rem; color: #e2e8f0;">
+                  Send warm wishes to members celebrating their special day today!
+                </p>
+              </div>
+            </div>
+            <div id="today-banner-actions"></div>
+          </div>
+
+          <!-- Automatic birthday wishes (members + personal trainers) -->
+          <div class="admin-card auto-wish-card" id="auto-wish-card">
+            <div class="auto-wish-main">
+              <div class="auto-wish-icon" aria-hidden="true">🤖</div>
+              <div>
+                <h3>Automatic birthday wishes <span class="auto-wish-pill" id="auto-wish-pill">Checking…</span></h3>
+                <p id="auto-wish-text">Loading…</p>
+                <p class="auto-wish-sub" id="auto-wish-today"></p>
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-run-wishes" title="Send today's birthday wishes now instead of waiting for the scheduled time">🎉 Send today's wishes now</button>
+          </div>
+
+          <!-- Metric Quick Stats -->
+          <div class="bday-stats-grid">
+            <div class="stat-card-bday stat-card-gold">
+              <div class="stat-icon-wrap" style="color: #facc15; background: rgba(250,204,21,0.1);">🎂</div>
+              <div class="stat-meta">
+                <h4>Today's Birthdays</h4>
+                <div class="stat-val" id="stat-today-count">0</div>
+              </div>
+            </div>
+
+            <div class="stat-card-bday stat-card-cyan">
+              <div class="stat-icon-wrap" style="color: #38bdf8; background: rgba(56,189,248,0.1);">📅</div>
+              <div class="stat-meta">
+                <h4>Upcoming in 7 Days</h4>
+                <div class="stat-val" id="stat-week-count">0</div>
+              </div>
+            </div>
+
+            <div class="stat-card-bday stat-card-purple">
+              <div class="stat-icon-wrap" style="color: #a855f7; background: rgba(168,85,247,0.1);">🗓️</div>
+              <div class="stat-meta">
+                <h4>This Month</h4>
+                <div class="stat-val" id="stat-month-count">0</div>
+              </div>
+            </div>
+
+            <div class="stat-card-bday">
+              <div class="stat-icon-wrap" style="color: var(--accent-green); background: rgba(0,230,118,0.1);">👥</div>
+              <div class="stat-meta">
+                <h4>Total DOBs Recorded</h4>
+                <div class="stat-val" id="stat-total-dob">0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls: Filter Tabs & Search -->
+          <div class="filter-tabs-row">
+            <div class="filter-btn-group" id="filter-btn-group">
+              <button class="tab-pill active" data-tab="all">All</button>
+              <button class="tab-pill" data-tab="today">🎂 Today</button>
+              <button class="tab-pill" data-tab="thisWeek">📅 This Week</button>
+              <button class="tab-pill" data-tab="thisMonth">🗓️ This Month</button>
+            </div>
+
+            <div class="who-filter" id="bday-type-group" role="group" aria-label="Show">
+              <button type="button" class="who-chip on" data-type="all" aria-pressed="true">Everyone</button>
+              <button type="button" class="who-chip" data-type="member" aria-pressed="false"><span class="who-dot member"></span>Members</button>
+              <button type="button" class="who-chip" data-type="trainer" aria-pressed="false"><span class="who-dot trainer"></span>Trainers</button>
+            </div>
+
+            <div class="search-input-box">
+              <span class="search-icon-inside">🔍</span>
+              <input type="text" id="bday-search-input" placeholder="Search name, code, phone..." />
+            </div>
+          </div>
+
+          <!-- Week cards / month calendar (shown on the This Week and This Month tabs) -->
+          <div id="bday-visual" class="bv-wrap" hidden></div>
+
+          <!-- Data Table Card -->
+          <div class="admin-card" id="bday-table-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="font-size: 1rem; font-weight: 700; color: #fff;">Birthdays Directory & Wish Log</h3>
+                <span style="font-size: 0.78rem; color: var(--text-dim);">Members and personal trainers. Everyone is wished automatically in Messages; members can also be wished on WhatsApp.</span>
+              </div>
+            </div>
+
+            <div class="table-responsive" style="overflow-x: auto;">
+              <table class="data-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);">
+                    <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">ID</th>
+                    <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Name</th>
+                    <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Contact Info</th>
+                    <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Date of Birth</th>
+                    <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Age Turning</th>
+                    <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Timeline / Countdown</th>
+                    <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim);">Wish Status</th>
+                    <th style="padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="bday-table-body">
+                  <tr>
+                    <td colspan="8" style="padding: 2rem; text-align: center; color: var(--text-dim);">
+                      ⏳ Loading member birthdays...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+
+          <!-- Personal trainer birthdays -->
+          <div class="admin-card" style="padding: 0; overflow: hidden; margin-top: 1.25rem;" id="trainer-bday-card" hidden>
+            <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);">
+              <h3 style="font-size: 1rem; font-weight: 700; color: #fff;">🏋️ Personal Trainer Birthdays</h3>
+              <span style="font-size: 0.78rem; color: var(--text-dim);" id="trainer-bday-note">Loading trainers…</span>
+            </div>
+            <div class="table-responsive" style="overflow-x: auto;">
+              <table class="data-table tb-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead><tr>
+                  <th>Trainer</th><th>Contact</th><th>Date of Birth</th><th>Age Turning</th><th>Countdown</th><th>Wish Status</th><th style="text-align:right">Actions</th>
+                </tr></thead>
+                <tbody id="trainer-bday-body"><tr><td colspan="7" class="tb-empty">⏳ Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Send Birthday Wish -->
+  <div class="modal-overlay" id="modal-send-wish">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🎉 Send Birthday Wish</h3>
+        <button class="btn-close-modal" id="btn-close-wish-modal">&times;</button>
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.75rem;">
+          Send personalized gym birthday greeting via WhatsApp or copy message text for SMS / Email.
+        </p>
+        <div class="form-group">
+          <label>Member:</label>
+          <div id="wish-preview-recipient" style="font-weight: 700; color: #fff;">-</div>
+        </div>
+        <div class="form-group">
+          <label>Birthday Greeting Preview:</label>
+          <textarea id="wish-preview-text" class="form-control-dark" rows="4" readonly style="font-size: 0.82rem; line-height: 1.5;"></textarea>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <a id="btn-whatsapp-wish-direct" href="#" target="_blank" class="btn btn-green" style="text-align: center; text-decoration: none; justify-content: center; display: inline-flex; align-items: center; gap: 6px;">
+          📱 Open & Wish on WhatsApp
+        </a>
+        <button type="button" class="btn btn-outline" id="btn-copy-wish-text">📋 Copy Wish Message</button>
+        <button type="button" class="btn btn-outline" id="btn-dismiss-wish-modal">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Edit DOB -->
+  <div class="modal-overlay" id="modal-edit-dob">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="dob-modal-title">✏️ Update Member Date of Birth</h3>
+        <button class="btn-close-modal" id="btn-close-dob-modal">&times;</button>
+      </div>
+      <form id="form-edit-dob">
+        <input type="hidden" id="dob-member-id" />
+        <input type="hidden" id="dob-kind" value="member" />
+        <div class="form-group">
+          <label id="dob-name-label">Member Name:</label>
+          <div id="dob-member-name" style="font-weight: 700; color: #fff;">-</div>
+        </div>
+        <div class="form-group">
+          <label for="input-member-dob">Date of Birth (YYYY-MM-DD) *</label>
+          <input type="date" id="input-member-dob" class="form-control-dark" required />
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 1.25rem;">
+          <button type="button" class="btn btn-outline" id="btn-cancel-dob" style="flex: 1;">Cancel</button>
+          <button type="submit" class="btn btn-green" style="flex: 2;">Save Date of Birth</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 8px;"></div>
+
+  <!-- Application Script -->
+  <script type="module">
+    import { adminApi } from './js/admin/adminApi.js';
+
+    const state = {
+      data: null,
+      activeTab: 'all',
+      searchQuery: '',
+    };
+
+    function showToast(message, isError = false) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        background: ${isError ? '#ef4444' : '#13161f'};
+        color: #fff;
+        border: 1px solid ${isError ? '#b91c1c' : '#00e676'};
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: opacity 0.3s ease;
+      `;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    async function hydrateUser() {
+      try {
+        let userRes = await adminApi.getCurrentUser();
+        if (!userRes.success) {
+          const loginRes = await adminApi.redirectToLogin().catch(() => null);
+          if (loginRes && loginRes.success) {
+            userRes = await adminApi.getCurrentUser();
+          }
+        }
+        if (userRes.success && userRes.data) {
+          const u = userRes.data;
+          const fullName = u.fullName || u.full_name || u.username || 'Nandan.B';
+          const username = u.username || 'nandanb449';
+          const role = (u.role || 'owner').toUpperCase();
+
+          document.getElementById('sidebar-user-fullname').textContent = fullName;
+          document.getElementById('sidebar-user-handle').textContent = `@${username}`;
+          const pill = document.getElementById('sidebar-role-pill');
+          if (pill) {
+            pill.textContent = role;
+            pill.className = `role-badge-pill role-${role.toLowerCase()}`;
+          }
+        }
+      } catch (err) {
+        console.warn('[BirthdayAlert] Auth hydration warning:', err.message);
+      }
+    }
+
+    // ---------- automatic wishes + trainer birthdays ----------
+    const escH = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const bdayApi = async (path, opts = {}) => {
+      const r = await fetch('/api/v1/members' + path, { ...opts, headers: adminApi.getHeaders(true) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || j.success === false) throw new Error(j.error?.message || j.error || j.message || `Request failed (${r.status})`);
+      return j.data;
+    };
+    const hourLabel = (h) => new Date(2000, 0, 1, h).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+
+    function renderAutoStatus(st) {
+      const pill = document.getElementById('auto-wish-pill');
+      const on = st.enabled;
+      pill.textContent = on ? 'ON' : 'OFF';
+      pill.className = `auto-wish-pill ${on ? 'on' : 'off'}`;
+      const who = [st.channels.members ? 'members' : null, st.channels.trainers ? 'personal trainers' : null].filter(Boolean).join(' and ');
+      let text = on
+        ? `Every day from ${hourLabel(st.wishHour)}, ${who || 'nobody (messaging is not switched on)'} with a birthday get a personal wish from “Virtex Gym Team” in their Messages. Each person is wished once.`
+        : 'Automatic wishes are switched off on the server (AUTO_BIRTHDAY_WISHES=false). You can still send today’s wishes with the button.';
+      if (!st.channels.trainers) text += ' Trainer wishes need database migrations 026 and 027.';
+      document.getElementById('auto-wish-text').textContent = text;
+      const w = st.wishedToday || { members: [], trainers: [] };
+      const names = [...w.members, ...w.trainers.map((n) => `${n} (trainer)`)];
+      document.getElementById('auto-wish-today').innerHTML = names.length
+        ? `✅ Wished today: <strong>${names.map(escH).join(', ')}</strong>`
+        : 'Nobody has been wished today yet.';
+    }
+    async function loadAutoStatus() {
+      try { renderAutoStatus(await bdayApi('/birthday-auto')); }
+      catch (e) { document.getElementById('auto-wish-text').textContent = `Could not load the automatic wish status: ${e.message}`; }
+    }
+    document.getElementById('btn-run-wishes').addEventListener('click', async (e) => {
+      const btn = e.currentTarget; btn.disabled = true;
+      try {
+        const { result, status } = await bdayApi('/birthday-auto/run', { method: 'POST' });
+        renderAutoStatus(status);
+        const n = (result.members?.length || 0) + (result.trainers?.length || 0);
+        showToast(n ? `🎉 Sent ${n} birthday wish${n === 1 ? '' : 'es'}.` : (result.skipped ? `Not sent: ${result.skipped}.` : 'Everyone with a birthday today has already been wished.'), !!result.failed?.length);
+        await loadBirthdayData();
+      } catch (err) { showToast(err.message || 'Could not send wishes.', true); }
+      finally { btn.disabled = false; }
+    });
+
+    function renderTrainers(data) {
+      const body = document.getElementById('trainer-bday-body');
+      const note = document.getElementById('trainer-bday-note');
+      if (!data.available) {
+        note.textContent = 'Trainer birthdays need database migration 027.';
+        body.innerHTML = '<tr><td colspan="7" class="tb-empty">Not available yet.</td></tr>';
+        return;
+      }
+      const q = (state.searchQuery || '').toLowerCase();
+      const rows = data.trainers.filter((t) => !q || `${t.full_name} ${t.trainer_code || ''} ${t.phone || ''}`.toLowerCase().includes(q));
+      const withDob = data.trainers.filter((t) => t.date_of_birth).length;
+      note.textContent = `${withDob} of ${data.trainers.length} trainers have a date of birth recorded. Trainers are wished automatically on their birthday.`;
+      body.innerHTML = rows.length ? rows.map((t) => {
+        const d = t.days_until_birthday;
+        const when = t.date_of_birth == null ? '<span class="tb-dim">Add date of birth</span>'
+          : d === 0 ? '<span class="tb-today">🎂 Today!</span>' : d === 1 ? 'Tomorrow' : `In ${d} days`;
+        const sent = t.birthday_wish_sent_at
+          ? `<span class="badge-paid" title="${escH(new Date(t.birthday_wish_sent_at).toLocaleString())}">Sent (${escH(new Date(t.birthday_wish_sent_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }))})</span>`
+          : '<span class="tb-dim">Pending</span>';
+        return `<tr class="${d === 0 ? 'tb-row-today' : ''}">
+          <td><b>${escH(t.full_name)}</b><div class="tb-dim">${escH(t.trainer_code || '')}${t.specialty ? ' · ' + escH(t.specialty) : ''}</div></td>
+          <td>${escH(t.phone || '—')}<div class="tb-dim">${escH(t.email || '')}</div></td>
+          <td>${t.date_of_birth ? escH(t.birthday_formatted) : '<span class="tb-dim">—</span>'}</td>
+          <td>${t.date_of_birth ? escH(t.turning_age) : '—'}</td>
+          <td>${when}</td>
+          <td>${sent}</td>
+          <td style="text-align:right"><button class="action-btn" data-trainer-dob="${Number(t.id)}" data-name="${escH(t.full_name)}" data-dob="${escH(t.dob_iso || '')}" title="Edit date of birth">✏️ DOB</button></td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="7" class="tb-empty">No trainers match.</td></tr>';
+      body.querySelectorAll('[data-trainer-dob]').forEach((b) => b.addEventListener('click', () => openDobModal({ id: b.dataset.trainerDob, name: b.dataset.name, dob: b.dataset.dob, kind: 'trainer' })));
+    }
+    let trainerData = null;
+    async function loadTrainers() {
+      try { trainerData = await bdayApi('/birthday-trainers'); renderTrainers(trainerData); renderTable(); }
+      catch (e) { document.getElementById('trainer-bday-note').textContent = `Could not load trainers: ${e.message}`; }
+    }
+
+    async function loadBirthdayData() {
+      loadAutoStatus(); loadTrainers();
+      try {
+        const res = await adminApi.getBirthdayAlerts();
+        if (res.success && res.data) {
+          state.data = res.data;
+          renderStats();
+          renderTable();
+        } else {
+          showToast(res.error || 'Failed to load birthdays.', true);
+        }
+      } catch (err) {
+        console.error('[BirthdayAlert] Error:', err);
+        showToast('Error loading birthday alerts.', true);
+      }
+    }
+
+    function renderStats() {
+      if (!state.data) return;
+      const s = state.data.summary || {};
+      document.getElementById('stat-today-count').textContent = s.todayCount || 0;
+      document.getElementById('stat-week-count').textContent = s.thisWeekCount || 0;
+      document.getElementById('stat-month-count').textContent = s.thisMonthCount || 0;
+      document.getElementById('stat-total-dob').textContent = `${s.totalWithDob || 0} / ${s.totalMembers || 0}`;
+
+      // Render Festive Banner if anyone has a birthday today
+      const banner = document.getElementById('today-banner');
+      if (state.data.today && state.data.today.length > 0) {
+        banner.style.display = 'flex';
+        const names = state.data.today.map((m) => `<strong>${m.full_name}</strong> (Turning ${m.turning_age})`).join(', ');
+        document.getElementById('today-banner-sub').innerHTML = `Happy Birthday to ${names}!`;
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+
+
+    // ---------- Week cards & month calendar ----------
+    state.monthOffset = 0; // 0 = this month on the This Month tab
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const ymd = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    const isLeap = (y) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+    const sameMd = (iso, d) => {
+      // Birthday (from YYYY-MM-DD, no time zone shift) falls on date d? Feb 29 → Feb 28 in non-leap years.
+      const [, mm, dd] = iso.split('-').map(Number);
+      const day = mm === 2 && dd === 29 && !isLeap(d.getFullYear()) ? 28 : dd;
+      return mm === d.getMonth() + 1 && day === d.getDate();
+    };
+    const initials = (n) => String(n || '?').trim().split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+
+    /** Members and trainers with a date of birth, matching the search box. */
+    function celebrants() {
+      const q = (state.searchQuery || '').toLowerCase();
+      const members = (state.data?.all || []).filter((m) => m.dob_iso).map((m) => ({
+        kind: 'member', id: m.id, name: m.full_name, code: m.member_code, phone: m.phone, dob: m.dob_iso,
+        wishedAt: m.birthday_wish_sent_at,
+      }));
+      const trainers = (trainerData?.trainers || []).filter((t) => t.dob_iso).map((t) => ({
+        kind: 'trainer', id: t.id, name: t.full_name, code: t.trainer_code, phone: t.phone, dob: t.dob_iso,
+        wishedAt: t.birthday_wish_sent_at,
+      }));
+      const who = state.typeFilter === 'member' ? members : state.typeFilter === 'trainer' ? trainers : [...members, ...trainers];
+      return who.filter((c) => !q || `${c.name} ${c.code || ''} ${c.phone || ''}`.toLowerCase().includes(q));
+    }
+    const turning = (c, d) => d.getFullYear() - Number(c.dob.slice(0, 4));
+    const wishedThisYear = (c, d) => c.wishedAt && new Date(c.wishedAt) > new Date(d.getTime() - 30 * 86400000);
+
+    function personCardHtml(c, d) {
+      const sent = wishedThisYear(c, d);
+      return `<div class="bv-person">
+          <span class="bv-avatar ${c.kind}">${escH(initials(c.name))}</span>
+          <div class="bv-person-main">
+            <b>${escH(c.name)}</b>
+            <small>${c.kind === 'trainer' ? 'Trainer' : escH(c.code || 'Member')} · turning ${turning(c, d)}</small>
+          </div>
+          ${sent ? '<span class="bv-sent" title="Wish sent">✓ Wished</span>'
+            : c.kind === 'member' ? `<button type="button" class="bv-wish" data-bv-wish="${c.id}" data-name="${escH(c.name)}" data-phone="${escH(c.phone || '')}">🎉 Wish</button>`
+            : '<span class="bv-auto" title="Trainers are wished automatically in Messages">Auto</span>'}
+        </div>`;
+    }
+
+    function weekCardsHtml() {
+      const all = celebrants();
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      let total = 0;
+      const cards = Array.from({ length: 8 }, (_, i) => {
+        const d = new Date(today); d.setDate(today.getDate() + i);
+        const people = all.filter((c) => sameMd(c.dob, d));
+        total += people.length;
+        const label = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : d.toLocaleDateString(undefined, { weekday: 'long' });
+        return `<section class="bv-day${i === 0 ? ' is-today' : ''}${people.length ? ' has-bday' : ''}" aria-label="${escH(label)}">
+            <header><span class="bv-day-name">${escH(label)}</span><span class="bv-day-date">${escH(d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }))}</span></header>
+            ${people.length ? people.map((c) => personCardHtml(c, d)).join('') : '<p class="bv-empty">No birthdays</p>'}
+          </section>`;
+      }).join('');
+      return `<div class="bv-head"><div><h3>📅 This Week</h3><span>${total ? `${total} birthday${total === 1 ? '' : 's'} in the next 7 days` : 'No birthdays in the next 7 days'}</span></div></div>
+        <div class="bv-week">${cards}</div>${noDobHint()}`;
+    }
+
+    function monthCalendarHtml() {
+      const all = celebrants();
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const first = new Date(today.getFullYear(), today.getMonth() + state.monthOffset, 1);
+      const daysIn = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+      const lead = (first.getDay() + 6) % 7; // Monday-first grid
+      let total = 0; let cells = '';
+      for (let i = 0; i < lead; i++) cells += '<div class="bv-cell bv-blank" aria-hidden="true"></div>';
+      for (let day = 1; day <= daysIn; day++) {
+        const d = new Date(first.getFullYear(), first.getMonth(), day);
+        const people = all.filter((c) => sameMd(c.dob, d));
+        total += people.length;
+        const isToday = ymd(d) === ymd(today);
+        const past = d < today;
+        cells += `<div class="bv-cell${isToday ? ' is-today' : ''}${past ? ' is-past' : ''}${people.length ? ' has-bday' : ''}">
+            <span class="bv-num">${day}</span>
+            ${people.slice(0, 3).map((c) => `<span class="bv-chip ${c.kind}" title="${escH(`${c.name} · turning ${turning(c, d)}${c.kind === 'trainer' ? ' · trainer' : ''}`)}">🎂 ${escH(c.name.split(/\s+/)[0])}</span>`).join('')}
+            ${people.length > 3 ? `<span class="bv-more" title="${escH(people.slice(3).map((c) => c.name).join(', '))}">+${people.length - 3} more</span>` : ''}
+          </div>`;
+      }
+      const title = first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+      const dows = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((w) => `<div class="bv-dow">${w}</div>`).join('');
+      return `<div class="bv-head">
+          <div><h3>🗓️ ${escH(title)}</h3><span>${total ? `${total} birthday${total === 1 ? '' : 's'} this month` : 'No birthdays this month'}</span></div>
+          <div class="bv-nav">
+            <button type="button" data-bv-month="-1" aria-label="Previous month">‹</button>
+            <button type="button" data-bv-month="0" ${state.monthOffset === 0 ? 'disabled' : ''}>This month</button>
+            <button type="button" data-bv-month="1" aria-label="Next month">›</button>
+          </div>
+        </div>
+        <div class="bv-cal" role="grid" aria-label="Birthdays in ${escH(title)}">${dows}${cells}</div>
+        <p class="bv-legend"><span class="bv-chip member">🎂 Member</span><span class="bv-chip trainer">🎂 Trainer</span></p>${noDobHint()}`;
+    }
+
+    function noDobHint() {
+      const missing = (state.data?.all || []).filter((m) => !m.dob_iso).length + (trainerData?.trainers || []).filter((t) => !t.dob_iso).length;
+      return missing ? `<p class="bv-hint">${missing} member${missing === 1 ? '' : 's'}/trainer${missing === 1 ? '' : 's'} have no date of birth yet — add it in the All Members tab (✏️ DOB) to see them here.</p>` : '';
+    }
+
+    function bindVisual(root) {
+      root.querySelectorAll('[data-bv-wish]').forEach((b) => b.addEventListener('click', () => openWishModal({ id: b.dataset.bvWish, name: b.dataset.name, phone: b.dataset.phone })));
+      root.querySelectorAll('[data-bv-month]').forEach((b) => b.addEventListener('click', () => {
+        const step = Number(b.dataset.bvMonth);
+        state.monthOffset = step === 0 ? 0 : state.monthOffset + step;
+        renderTable();
+      }));
+    }
+
+    function getFilteredList() {
+      if (!state.data) return [];
+      let members = [];
+      if (state.activeTab === 'today') members = state.data.today || [];
+      else if (state.activeTab === 'thisWeek') members = state.data.thisWeek || [];
+      else if (state.activeTab === 'thisMonth') members = state.data.thisMonth || [];
+      else members = state.data.all || [];
+      members = members.map((m) => ({ ...m, kind: 'member' }));
+
+      // Trainers use the same columns (trainer code in the ID column, specialty under the name).
+      const curMonth = new Date().getMonth() + 1;
+      const trainers = (trainerData?.trainers || []).map((t) => ({
+        ...t, kind: 'trainer', member_code: t.trainer_code, plan_name: t.specialty,
+      })).filter((t) => {
+        if (state.activeTab === 'all') return true;
+        if (!t.dob_iso) return false;
+        if (state.activeTab === 'today') return t.days_until_birthday === 0;
+        if (state.activeTab === 'thisWeek') return t.days_until_birthday >= 0 && t.days_until_birthday <= 7;
+        if (state.activeTab === 'thisMonth') return Number(t.dob_iso.slice(5, 7)) === curMonth;
+        return true;
+      });
+
+      let list = state.typeFilter === 'member' ? members : state.typeFilter === 'trainer' ? trainers : [...members, ...trainers];
+      if (state.activeTab !== 'all') list.sort((a, b) => (a.days_until_birthday ?? 999) - (b.days_until_birthday ?? 999));
+
+      if (state.searchQuery) {
+        const q = state.searchQuery.toLowerCase();
+        list = list.filter((m) =>
+          (m.full_name && m.full_name.toLowerCase().includes(q)) ||
+          (m.member_code && m.member_code.toLowerCase().includes(q)) ||
+          (m.phone && m.phone.includes(q))
+        );
+      }
+
+      return list;
+    }
+
+    function renderTable() {
+      const visual = document.getElementById('bday-visual');
+      const tableCard = document.getElementById('bday-table-card');
+      if (state.activeTab === 'thisWeek' || state.activeTab === 'thisMonth') {
+        tableCard.hidden = true; visual.hidden = false;
+        visual.innerHTML = state.activeTab === 'thisWeek' ? weekCardsHtml() : monthCalendarHtml();
+        bindVisual(visual);
+        return;
+      }
+      tableCard.hidden = false; visual.hidden = true;
+      const tbody = document.getElementById('bday-table-body');
+      tbody.innerHTML = '';
+      const list = getFilteredList();
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="padding: 2.5rem; text-align: center; color: var(--text-dim);">
+              Nobody found in this category.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      list.forEach((m) => {
+        const tr = document.createElement('tr');
+        tr.style.cssText = 'border-bottom: 1px solid var(--border); transition: background 0.15s;';
+        tr.onmouseover = () => tr.style.background = 'rgba(255,255,255,0.02)';
+        tr.onmouseout = () => tr.style.background = 'transparent';
+
+        let countdownBadge = '<span style="color: var(--text-dim); font-size: 0.78rem;">DOB not recorded</span>';
+        if (m.date_of_birth) {
+          if (m.days_until_birthday === 0) {
+            countdownBadge = `<span class="badge-today">🎉 Birthday Today!</span>`;
+          } else if (m.days_until_birthday === 1) {
+            countdownBadge = `<span class="badge-soon">⚡ Tomorrow!</span>`;
+          } else if (m.days_until_birthday <= 7) {
+            countdownBadge = `<span class="badge-soon">In ${m.days_until_birthday} days</span>`;
+          } else {
+            countdownBadge = `<span style="color: var(--text-gray); font-size: 0.78rem;">In ${m.days_until_birthday} days</span>`;
+          }
+        }
+
+        let wishStatus = '<span style="color: var(--text-dim); font-size: 0.78rem;">Pending</span>';
+        if (m.birthday_wish_sent_at) {
+          const sentDate = new Date(m.birthday_wish_sent_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+          wishStatus = `<span class="badge-paid" title="${new Date(m.birthday_wish_sent_at).toLocaleString()}">Sent (${sentDate})</span>`;
+        }
+
+        const formattedDob = m.date_of_birth
+          ? `${m.birthday_formatted} (${new Date(m.date_of_birth).getFullYear()})`
+          : '<span style="color: var(--text-dim); font-style: italic;">Set DOB</span>';
+
+        tr.innerHTML = `
+          <td style="padding: 12px 16px;">
+            <span class="badge ${m.kind === 'trainer' ? 'badge-trainer-id' : 'badge-green'} font-mono text-xs">${escH(m.member_code || '—')}</span>
+          </td>
+          <td style="padding: 12px 16px;">
+            <div class="who-name-row"><span style="font-weight: 700; color: #fff;">${escH(m.full_name)}</span>
+              <span class="who-tag ${m.kind}">${m.kind === 'trainer' ? '🏋️ Trainer' : '👤 Member'}</span></div>
+            <div style="font-size: 0.75rem; color: ${m.kind === 'trainer' ? '#a5b4fc' : '#38bdf8'};">${escH(m.plan_name || (m.kind === 'trainer' ? 'Personal trainer' : 'Standard'))}</div>
+          </td>
+          <td style="padding: 12px 16px; font-size: 0.82rem; color: var(--text-gray);">
+            <div>${escH(m.phone || '—')}</div>
+            <div style="font-size: 0.75rem; color: var(--text-dim);">${escH(m.email || 'No email')}</div>
+          </td>
+          <td style="padding: 12px 16px; font-size: 0.85rem; color: #fff;">
+            ${formattedDob}
+          </td>
+          <td style="padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #facc15; font-weight: 700;">
+            ${m.date_of_birth ? `${m.turning_age} yrs` : '-'}
+          </td>
+          <td style="padding: 12px 16px;">
+            ${countdownBadge}
+          </td>
+          <td style="padding: 12px 16px;">
+            ${wishStatus}
+          </td>
+          <td style="padding: 12px 16px; text-align: right;">
+            <div style="display: flex; gap: 6px; justify-content: flex-end;">
+              ${m.kind === 'trainer'
+                ? '<span class="who-auto" title="Trainers are wished automatically in Messages on their birthday">🤖 Auto wish</span>'
+                : `<button class="action-btn action-btn-wish" data-action="wish" data-id="${m.id}" data-name="${escH(m.full_name)}" data-phone="${escH(m.phone || '')}" title="Send Birthday Wish">
+                🎉 Wish
+              </button>`}
+              <button class="action-btn" data-action="edit-dob" data-kind="${m.kind}" data-id="${m.id}" data-name="${escH(m.full_name)}" data-dob="${escH(m.dob_iso || '')}" title="Edit Date of Birth">
+                ✏️ DOB
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Bind actions
+      tbody.querySelectorAll('button[data-action]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const action = btn.getAttribute('data-action');
+          const id = btn.getAttribute('data-id');
+          if (action === 'wish') {
+            openWishModal({
+              id,
+              name: btn.getAttribute('data-name'),
+              phone: btn.getAttribute('data-phone'),
+            });
+          } else if (action === 'edit-dob') {
+            openDobModal({
+              id,
+              name: btn.getAttribute('data-name'),
+              dob: btn.getAttribute('data-dob'),
+              kind: btn.getAttribute('data-kind') || 'member',
+            });
+          }
+        });
+      });
+    }
+
+    // Modal: Wish
+    async function openWishModal({ id, name, phone }) {
+      try {
+        const res = await adminApi.sendBirthdayWish(id);
+        if (res.success && res.data) {
+          document.getElementById('wish-preview-recipient').textContent = `${name} (${phone})`;
+          document.getElementById('wish-preview-text').value = res.data.wishMessage;
+          document.getElementById('btn-whatsapp-wish-direct').href = res.data.whatsappUrl;
+          document.getElementById('modal-send-wish').style.display = 'flex';
+          showToast(`🎉 Birthday greeting prepared for ${name}`);
+        } else {
+          showToast(res.error || 'Failed to prepare greeting.', true);
+        }
+      } catch (err) {
+        showToast('Error sending birthday wish.', true);
+      }
+    }
+
+    document.getElementById('btn-close-wish-modal').addEventListener('click', () => {
+      document.getElementById('modal-send-wish').style.display = 'none';
+    });
+    document.getElementById('btn-dismiss-wish-modal').addEventListener('click', () => {
+      document.getElementById('modal-send-wish').style.display = 'none';
+      loadBirthdayData();
+    });
+    document.getElementById('btn-copy-wish-text').addEventListener('click', () => {
+      const text = document.getElementById('wish-preview-text').value;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Birthday wish copied to clipboard!');
+      });
+    });
+
+    // Modal: Edit DOB
+    function openDobModal({ id, name, dob, kind = 'member' }) {
+      document.getElementById('dob-kind').value = kind;
+      document.getElementById('dob-modal-title').textContent = kind === 'trainer' ? '✏️ Update Trainer Date of Birth' : '✏️ Update Member Date of Birth';
+      document.getElementById('dob-name-label').textContent = kind === 'trainer' ? 'Trainer Name:' : 'Member Name:';
+      document.getElementById('input-member-dob').max = new Date().toISOString().slice(0, 10);
+      document.getElementById('dob-member-id').value = id;
+      document.getElementById('dob-member-name').textContent = name;
+      document.getElementById('input-member-dob').value = dob || '';
+      document.getElementById('modal-edit-dob').style.display = 'flex';
+    }
+
+    document.getElementById('btn-close-dob-modal').addEventListener('click', () => {
+      document.getElementById('modal-edit-dob').style.display = 'none';
+    });
+    document.getElementById('btn-cancel-dob').addEventListener('click', () => {
+      document.getElementById('modal-edit-dob').style.display = 'none';
+    });
+
+    document.getElementById('form-edit-dob').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('dob-member-id').value;
+      const dateOfBirth = document.getElementById('input-member-dob').value;
+      try {
+        const res = document.getElementById('dob-kind').value === 'trainer'
+          ? await bdayApi(`/birthday-trainers/${encodeURIComponent(id)}/dob`, { method: 'PATCH', body: JSON.stringify({ dateOfBirth }) })
+              .then((data) => ({ success: true, data }), (e) => ({ success: false, error: e.message }))
+          : await adminApi.updateMemberDob(id, dateOfBirth);
+        if (res.success) {
+          showToast('✅ Date of birth updated successfully!');
+          document.getElementById('modal-edit-dob').style.display = 'none';
+          await loadBirthdayData();
+        } else {
+          showToast(res.error || 'Failed to update date of birth.', true);
+        }
+      } catch (err) {
+        showToast('Error updating date of birth.', true);
+      }
+    });
+
+    // Filter Buttons
+    state.typeFilter = 'all';
+    document.querySelectorAll('#bday-type-group .who-chip').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.typeFilter = btn.dataset.type;
+        document.querySelectorAll('#bday-type-group .who-chip').forEach((b) => {
+          const on = b === btn; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+        });
+        renderTable();
+      });
+    });
+
+    document.querySelectorAll('#filter-btn-group .tab-pill').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#filter-btn-group .tab-pill').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.activeTab = btn.getAttribute('data-tab');
+        renderTable();
+      });
+    });
+
+    // Search Input
+    let searchDebounce;
+    document.getElementById('bday-search-input').addEventListener('input', (e) => {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(() => {
+        state.searchQuery = e.target.value.trim();
+        if (trainerData) renderTrainers(trainerData);
+        renderTable();
+      }, 300);
+    });
+
+    document.getElementById('btn-refresh-birthdays').addEventListener('click', () => {
+      loadBirthdayData();
+      showToast('🔄 Refreshed member birthdays');
+    });
+
+    // Mobile Sidebar Toggle
+    document.getElementById('btn-sidebar-toggle')?.addEventListener('click', () => {
+      document.getElementById('admin-sidebar')?.classList.toggle('open');
+    });
+
+    // Logout
+    document.getElementById('btn-logout')?.addEventListener('click', async () => {
+      await adminApi.logout();
+      window.location.href = 'index.html';
+    });
+
+    // Init
+    (async () => {
+      await hydrateUser();
+      await loadBirthdayData();
+    })();
+  </script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+</body>
+
+</html>
+

@@ -8,10 +8,10 @@
 
 export const LOCALIZED_CONTENT = {
   'en-IN': {
-    welcome: 'Welcome to PulseCore Fitness! I am FitBot, your AI Receptionist. How can I power your workout today?',
+    welcome: 'Welcome to Virtex Fitness! I am your AI Receptionist. How can I power your workout today?',
     placeholder: 'Ask about plans, timings, trainers, or tap the mic...',
     listeningText: 'Listening... Speak in English',
-    speakingText: 'FitBot is speaking...',
+    speakingText: 'Receptionist is speaking...',
     idleText: 'Ready. Ask a question or use voice control.',
     quickChips: [
       'What are your gym hours?',
@@ -23,10 +23,10 @@ export const LOCALIZED_CONTENT = {
     statusOffline: 'ESP32 Base Offline',
   },
   'kn-IN': {
-    welcome: 'ಪಲ್ಸ್‌ಕೋರ್ ಫಿಟ್‌ನೆಸ್‌ಗೆ ಸುಸ್ವಾಗತ! ನಾನು ನಿಮ್ಮ ಎಐ ರಿಸೆಪ್ಷನಿಸ್ಟ್ ಫಿಟ್‌ಬಾಟ್. ಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?',
+    welcome: 'ವರ್ಟೆಕ್ಸ್ ಫಿಟ್‌ನೆಸ್‌ಗೆ ಸುಸ್ವಾಗತ! ನಾನು ನಿಮ್ಮ ಎಐ ರಿಸೆಪ್ಷನಿಸ್ಟ್. ಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?',
     placeholder: 'ಜಿಮ್ ಸಮಯ, ಶುಲ್ಕ ಅಥವಾ ತರಬೇತುದಾರರ ಬಗ್ಗೆ ಕೇಳಿ...',
     listeningText: 'ಕೇಳಿಸಿಕೊಳ್ಳುತ್ತಿದ್ದೇನೆ... ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ',
-    speakingText: 'ಫಿಟ್‌ಬಾಟ್ ಮಾತನಾಡುತ್ತಿದೆ...',
+    speakingText: 'ರಿಸೆಪ್ಷನಿಸ್ಟ್ ಮಾತನಾಡುತ್ತಿದ್ದಾರೆ...',
     idleText: 'ಸಿದ್ಧವಾಗಿದೆ. ಮೈಕ್ ಒತ್ತಿ ಅಥವಾ ಪ್ರಶ್ನೆ ಟೈಪ್ ಮಾಡಿ.',
     quickChips: [
       'ಜಿಮ್ ತೆರೆಯುವ ಸಮಯ ಎಷ್ಟು?',
@@ -38,10 +38,10 @@ export const LOCALIZED_CONTENT = {
     statusOffline: 'ಇಎಸ್‌ಪಿ32 ಆಫ್‌ಲೈನ್ ಆಗಿದೆ',
   },
   'hi-IN': {
-    welcome: 'पल्सकोर फिटनेस में आपका स्वागत है! मैं आपका एआई रिसेप्शनिस्ट फिटबॉट हूँ। आज मैं आपकी क्या मदद करूँ?',
+    welcome: 'वर्टेक्स फिटनेस में आपका स्वागत है! मैं आपका एआई रिसेप्शनिस्ट हूँ। आज मैं आपकी क्या मदद करूँ?',
     placeholder: 'जिम टाइमिंग, फीस या ट्रेनर के बारे में पूछें...',
     listeningText: 'सुन रहा हूँ... हिंदी में बोलें',
-    speakingText: 'फिटबॉट बोल रहा है...',
+    speakingText: 'रिसेप्शनिस्ट बोल रहा है...',
     idleText: 'तैयार है। माइक दबाएं या सवाल टाइप करें।',
     quickChips: [
       'जिम का समय क्या है?',

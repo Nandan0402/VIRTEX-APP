@@ -1,6 +1,7 @@
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../../backend/src/app.js';
+import { query, closePool } from '../../backend/src/config/database.js';
 
 describe('Backend API Integration Tests', () => {
   let server;
@@ -18,9 +19,13 @@ describe('Backend API Integration Tests', () => {
   });
 
   after(async () => {
+    try {
+      await query("DELETE FROM interaction_logs WHERE user_query = 'Hello robot!';");
+    } catch (_) {}
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }
+    await closePool();
   });
 
   test('GET /health returns online status', async () => {

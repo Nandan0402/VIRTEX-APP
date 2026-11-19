@@ -1,0 +1,69 @@
+/* =====================================================================
+   Virtex Member Portal — Achievements (member-achievements.html)
+   Cards / "Not Enough Data" styles come from member-progress.css.
+   ===================================================================== */
+.ac-tiles { display: grid; gap: 0.7rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mm-tile { border: 1px solid var(--mp-line); border-radius: 10px; padding: 0.7rem 0.8rem; min-width: 0; }
+.mm-tile > span { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; color: var(--mp-text-muted); }
+.mm-tile b { display: block; font-size: 1.4rem; margin-top: 3px; font-variant-numeric: tabular-nums; }
+.mm-tile small { display: block; font-size: 0.72rem; color: var(--mp-text-dim); }
+.ac-next { display: grid; gap: 0.8rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 1rem; }
+.ac-next-top { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 0.82rem; }
+.ac-next-top span { color: var(--mp-text-muted); }
+.ac-next small { font-size: 0.72rem; color: var(--mp-text-dim); }
+.ac-bar { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); overflow: hidden; margin: 6px 0 4px; }
+.ac-bar span { display: block; height: 100%; background: var(--mp-accent); }
+
+.ac-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.6rem; }
+.ac-chip { padding: 5px 10px; border-radius: 999px; border: 1px solid var(--mp-line); background: transparent; color: var(--mp-text-body); font-family: inherit; font-size: 0.78rem; cursor: pointer; }
+.ac-chip.on { background: var(--mp-accent); border-color: var(--mp-accent); color: #000; font-weight: 700; }
+.ac-month { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--mp-text-muted); margin: 1rem 0 0.4rem; }
+.ac-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ac-item { display: flex; gap: 12px; padding: 10px 12px; border: 1px solid var(--mp-line); border-radius: 10px; }
+.ac-icon { font-size: 1.4rem; line-height: 1; padding-top: 2px; }
+.ac-body { min-width: 0; }
+.ac-body b { font-size: 0.92rem; color: var(--mp-text); }
+.ac-body p { margin: 2px 0 6px; font-size: 0.8rem; color: var(--mp-text-body); }
+.ac-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.72rem; color: var(--mp-text-dim); }
+.ac-v { padding: 1px 7px; border-radius: 999px; border: 1px solid var(--mp-line); font-weight: 700; white-space: nowrap; }
+.ac-v-staff_issued, .ac-v-trainer_verified { color: var(--mp-accent); border-color: var(--mp-accent-border); }
+.ac-v-system, .ac-v-staff_logged { color: #93c5fd; border-color: rgba(147, 197, 253, 0.4); }
+.ac-v-self_logged { color: #cbd5e1; }
+.ac-link { background: none; border: 0; padding: 0; color: var(--mp-accent); cursor: pointer; font: inherit; text-decoration: underline; }
+
+.ac-certs { display: grid; gap: 0.8rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.ac-cert { display: flex; flex-direction: column; gap: 4px; padding: 0.9rem; border-radius: 12px; border: 1px solid var(--mp-accent-border); background: linear-gradient(160deg, rgba(0, 230, 118, 0.07), transparent 60%); min-width: 0; }
+.ac-cert-kind { font-size: 0.7rem; font-weight: 700; color: var(--mp-text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.ac-cert b { font-size: 0.98rem; }
+.ac-cert > span { font-size: 0.8rem; color: var(--mp-text-body); }
+.ac-cert small { font-size: 0.72rem; color: var(--mp-text-dim); }
+.ac-cert code { font-size: 0.72rem; color: var(--mp-text-muted); word-break: break-all; }
+.ac-cert-actions { display: flex; gap: 6px; margin-top: 6px; }
+.ac-cert-actions .btn { padding: 4px 12px; font-size: 0.78rem; text-decoration: none; }
+
+.ac-pending { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ac-pending li { display: flex; gap: 10px; padding: 8px 10px; border: 1px dashed rgba(148, 163, 184, 0.35); border-radius: 10px; }
+.ac-pending b { display: block; font-size: 0.86rem; }
+.ac-pending small { color: var(--mp-text-muted); font-size: 0.75rem; }
+.ac-rules summary { cursor: pointer; font-weight: 700; font-size: 0.9rem; }
+.ac-rules ul { margin: 0.6rem 0 0; padding-left: 1.1rem; font-size: 0.8rem; color: var(--mp-text-body); display: grid; gap: 4px; }
+
+/* Certificate view */
+.ac-dialog { max-width: min(720px, calc(100vw - 32px)); width: 100%; border: 1px solid var(--mp-line); border-radius: 14px; background: #0b0d12; color: var(--mp-text); padding: 1rem; }
+.ac-dialog::backdrop { background: rgba(0, 0, 0, 0.7); }
+.ac-paper { background: #fffdf7; color: #1f2937; border: 6px double #b08d3c; border-radius: 6px; padding: 2rem 1.5rem; text-align: center; font-family: Georgia, 'Times New Roman', serif; }
+.ac-paper-org { letter-spacing: 3px; text-transform: uppercase; font-size: 0.8rem; color: #6b7280; font-family: inherit; }
+.ac-paper h2 { margin: 0.4rem 0 1rem; font-size: 1.6rem; color: #111827; }
+.ac-paper p { margin: 0.25rem 0; }
+.ac-paper-name { font-size: 1.5rem; font-weight: 700; color: #111827; margin: 0.5rem 0 !important; }
+.ac-paper-title { font-size: 1.15rem; font-style: italic; }
+.ac-paper-foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 1.5rem; font-size: 0.78rem; color: #4b5563; }
+.ac-dialog-note { font-size: 0.75rem; color: var(--mp-text-dim); margin: 0.6rem 0; }
+.ac-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+
+@media print {
+  body.ac-printing > *:not(.ac-dialog) { display: none !important; }
+  body.ac-printing .ac-dialog { position: static; border: 0; max-width: none; background: #fff; }
+  body.ac-printing .ac-dialog-note, body.ac-printing .ac-dialog-actions { display: none; }
+}
+@media (max-width: 700px) { .ac-tiles { grid-template-columns: 1fr; } .ac-next { grid-template-columns: 1fr; } }

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Client Performance Center</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/modules/admin-performance.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <script src="js/vendor/chart.umd.js"></script>
+</head>
+
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation (Auto-rendered with 16 categories by adminSidebarNav.js) -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <!-- Rendered dynamically by adminSidebarNav.js -->
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Canvas -->
+    <div class="admin-main-wrap">
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-brand">
+            <span class="topbar-title">Client Performance Center</span>
+            <span class="badge badge-green font-mono text-xs">REAL DATABASE METRICS</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group Mounted by topbarRoutineNav.js -->
+        </div>
+      </header>
+
+      <main class="admin-body">
+        <div class="admin-content-wrap" style="padding: 1.5rem; max-width: 1400px; margin: 0 auto;">
+          <!-- Header Title & Action Buttons -->
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 4px;">
+                <a href="admin.html" style="color: var(--text-dim); text-decoration: none;">Virtex Admin</a> /
+                <span style="color: var(--text-gray);">Client Performance</span> /
+                <span style="color: var(--green);">Performance Center</span>
+              </div>
+              <h1
+                style="font-size: 1.6rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px;">
+                <span>🏃</span> Client Performance Center
+              </h1>
+              <p style="font-size: 0.88rem; color: var(--text-gray); margin-top: 4px;">
+                Real-time member athletic progression, strength 1RM velocity, attendance rates, and transformation
+                milestones grounded in PostgreSQL records.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <a href="admin-members.html" class="btn btn-outline" style="text-decoration: none;">👥 Members
+                Directory</a>
+              <a href="admin-assign-membertopersonal-trainer.html" class="btn btn-outline"
+                style="text-decoration: none;">🤝 PT Assignments</a>
+              <button class="btn btn-green" onclick="window.location.reload();">🔄 Refresh Data</button>
+            </div>
+          </div>
+
+          <!-- KPI Summary Strip -->
+          <div class="perf-header-stats">
+            <div class="perf-stat-pill">
+              <div>
+                <div class="perf-stat-title">Total Tracked</div>
+                <div class="perf-stat-val" id="perf-kpi-total">--</div>
+              </div>
+              <div style="font-size: 1.6rem; opacity: 0.7;">👥</div>
+            </div>
+            <div class="perf-stat-pill" style="border-left: 3px solid var(--green);">
+              <div>
+                <div class="perf-stat-title" style="color: var(--green);">On Track</div>
+                <div class="perf-stat-val" id="perf-kpi-ontrack" style="color: var(--green);">--</div>
+              </div>
+              <div style="font-size: 1.6rem; color: var(--green);">🔥</div>
+            </div>
+            <div class="perf-stat-pill" style="border-left: 3px solid #38bdf8;">
+              <div>
+                <div class="perf-stat-title" style="color: #38bdf8;">Improving</div>
+                <div class="perf-stat-val" id="perf-kpi-improving" style="color: #38bdf8;">--</div>
+              </div>
+              <div style="font-size: 1.6rem; color: #38bdf8;">📈</div>
+            </div>
+            <div class="perf-stat-pill" style="border-left: 3px solid #f59e0b;">
+              <div>
+                <div class="perf-stat-title" style="color: #f59e0b;">Needs Attention</div>
+                <div class="perf-stat-val" id="perf-kpi-attention" style="color: #f59e0b;">--</div>
+              </div>
+              <div style="font-size: 1.6rem; color: #f59e0b;">⚠️</div>
+            </div>
+            <div class="perf-stat-pill" style="border-left: 3px solid #8a90a2;">
+              <div>
+                <div class="perf-stat-title">Insufficient Data</div>
+                <div class="perf-stat-val" id="perf-kpi-insufficient" style="color: #8a90a2;">--</div>
+              </div>
+              <div style="font-size: 1.6rem; color: #8a90a2;">⚪</div>
+            </div>
+          </div>
+
+          <!-- Search & Filter Toolbar -->
+          <div class="perf-filter-toolbar">
+            <div class="perf-search-wrap">
+              <span class="perf-search-icon">🔍</span>
+              <input type="text" id="perf-search" class="perf-search-input"
+                placeholder="Search by member name, code, or phone..." autocomplete="off">
+            </div>
+
+            <select id="perf-trainer-filter" class="perf-select" title="Filter by assigned personal trainer">
+              <option value="">All Trainers & Coaches</option>
+            </select>
+
+            <select id="perf-goal-filter" class="perf-select" title="Filter by fitness goal">
+              <option value="">All Fitness Goals</option>
+              <option value="Hypertrophy">Hypertrophy & Muscle Gain</option>
+              <option value="Fat Loss">Fat Loss & Leaning</option>
+              <option value="Strength">Strength & Powerlifting</option>
+              <option value="Mobility">Functional Mobility & Flexibility</option>
+              <option value="Cardio">Cardiovascular Endurance</option>
+            </select>
+
+            <select id="perf-status-filter" class="perf-select" title="Filter by progress status">
+              <option value="">All Progress Statuses</option>
+              <option value="on_track">🔥 On Track</option>
+              <option value="improving">📈 Improving</option>
+              <option value="needs_attention">⚠️ Needs Attention</option>
+              <option value="insufficient_data">⚪ Insufficient Data</option>
+            </select>
+          </div>
+
+          <div id="strength"></div>
+          <div id="cardio"></div>
+          <div id="leaderboard"></div>
+          <!-- Performance Cards Grid -->
+          <div class="perf-cards-grid" id="perf-cards-grid">
+            <!-- Cards populated dynamically by clientPerformance.js -->
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Detailed Member Analytics Modal Backdrop -->
+  <div class="perf-modal-backdrop" id="perf-analytics-modal">
+    <div class="perf-modal-container">
+      <div class="perf-modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div
+            style="font-size: 1.8rem; background: rgba(0, 230, 118, 0.12); width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            🏃
+          </div>
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 2px;"
+              id="perf-modal-member-name">
+              Member Analytics
+            </h3>
+            <div style="font-size: 0.76rem; color: var(--text-dim);" id="perf-modal-member-meta">
+              Loading member details...
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-xs" onclick="window.closeMemberAnalytics()" style="padding: 6px 12px;">✕
+          Close</button>
+      </div>
+
+      <div id="perf-modal-content">
+        <!-- Injected dynamically by clientPerformance.js -->
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script type="module" src="js/admin/clientPerformance.js"></script>
+</body>
+
+</html>

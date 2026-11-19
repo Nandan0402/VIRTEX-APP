@@ -1,0 +1,50 @@
+/* =====================================================================
+   Virtex Member Portal — Workout Log (member-workout-logs.html)
+   ===================================================================== */
+.wl-section { padding: 1.1rem 1.25rem; min-width: 0; }
+.wl-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 0.9rem; }
+.wl-head h2 { margin: 0; font-size: 1rem; font-weight: 700; }
+.wl-sub { color: var(--mp-text-muted); font-size: 0.78rem; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
+
+/* Record form */
+.wl-ex { border: 1px solid var(--mp-line); border-radius: 11px; padding: 0.75rem 0.85rem; margin: 0 0 0.7rem; }
+.wl-ex-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.wl-ex-select { flex: 1; min-width: 200px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--mp-line); background: var(--bg-input, #090a0f); color: var(--mp-text); font-family: inherit; }
+.wl-target { font-size: 0.75rem; color: var(--mp-text-muted); }
+.wl-sets { display: grid; gap: 6px; margin-bottom: 0.5rem; }
+.wl-set { display: grid; grid-template-columns: 54px 1fr 1fr 34px; gap: 8px; align-items: center; font-size: 0.8rem; color: var(--mp-text-muted); }
+.wl-set input { width: 100%; box-sizing: border-box; padding: 7px 9px; border-radius: 7px; border: 1px solid var(--mp-line); background: var(--bg-input, #090a0f); color: var(--mp-text); font-family: inherit; }
+.wl-set input:focus, .wl-ex-select:focus { outline: 2px solid var(--mp-accent); outline-offset: 0; }
+.wl-icon { background: transparent; border: 1px solid var(--mp-line); color: var(--mp-text-muted); border-radius: 7px; padding: 5px 7px; cursor: pointer; font-family: inherit; }
+.wl-icon:hover { color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+.wl-status-preview { margin: 0.8rem 0; font-size: 0.82rem; color: var(--mp-text-body); }
+.wl-err { color: #f87171; font-size: 0.82rem; }
+.wl-err:empty { display: none; }
+
+/* History + feedback */
+.wl-cols { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); align-items: start; }
+.wl-filters { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.78rem; color: var(--mp-text-muted); }
+.wl-filters label { display: flex; align-items: center; gap: 6px; }
+.wl-log { border: 1px solid var(--mp-line); border-radius: 11px; padding: 0.85rem 0.95rem; margin-bottom: 0.7rem; background: rgba(255, 255, 255, 0.015); }
+.wl-log-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.wl-log-date { font-weight: 700; font-size: 0.9rem; }
+.wl-log-title { color: var(--mp-text-body); font-size: 0.84rem; margin-top: 2px; }
+.wl-log-status { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.wl-log-status small { font-size: 0.72rem; color: var(--mp-text-muted); }
+.wl-stats { display: flex; gap: 12px; flex-wrap: wrap; margin: 0.6rem 0; font-size: 0.8rem; color: var(--mp-text-body); }
+.wl-table td { vertical-align: top; }
+.wl-ex-name { font-weight: 700; }
+.wl-rep { display: inline-block; margin: 0 8px 4px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; }
+.wl-pr { color: #fbbf24; font-size: 0.66rem; border: 1px solid rgba(251, 191, 36, 0.5); border-radius: 4px; padding: 0 4px; }
+.wl-notes { margin: 0.5rem 0 0; font-size: 0.82rem; color: var(--mp-text-body); white-space: pre-wrap; }
+.wl-fb { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.wl-fb li { border-left: 3px solid var(--mp-accent); padding: 0.4rem 0.75rem; background: rgba(0, 230, 118, 0.04); border-radius: 0 8px 8px 0; }
+.wl-fb p { margin: 3px 0 0; font-size: 0.85rem; white-space: pre-wrap; line-height: 1.5; }
+
+@media (max-width: 1000px) { .wl-cols { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .wl-set { grid-template-columns: 1fr 1fr 34px; }
+  .wl-set span { grid-column: 1 / -1; }
+  .wl-log-status { align-items: flex-start; }
+}

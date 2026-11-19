@@ -1,0 +1,197 @@
+/* Virtex Fitness — home / portal gateway (index.html). Self-contained: does not affect the sign-in pages. */
+:root {
+  --bg: #0b0d12;
+  --bg-2: #10131a;
+  --card: #131722;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --text: #f8fafc;
+  --body: #cbd5e1;
+  --muted: #94a3b8;
+  --green: #00e676;
+  --cyan: #22d3ee;
+  --indigo: #818cf8;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --radius: 18px;
+  --max: 1200px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body.vx-home {
+  margin: 0;
+  background: var(--bg);
+  color: var(--body);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+a { color: inherit; }
+h1, h2, h3 { color: var(--text); margin: 0; letter-spacing: -0.02em; }
+:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 8px; }
+
+.vx-skip { position: absolute; left: -9999px; top: 10px; z-index: 100; background: var(--green); color: #04130b; padding: 8px 14px; border-radius: 8px; font-weight: 700; text-decoration: none; }
+.vx-skip:focus { left: 12px; }
+
+/* ---------- Buttons ---------- */
+.vx-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 20px; border-radius: 12px; font-weight: 700; font-size: 0.95rem;
+  text-decoration: none; border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.vx-btn:hover { transform: translateY(-1px); }
+.vx-btn-primary, .vx-btn-green { background: var(--green); color: #04130b; box-shadow: 0 8px 24px rgba(0, 230, 118, 0.25); }
+.vx-btn-primary:hover, .vx-btn-green:hover { box-shadow: 0 10px 28px rgba(0, 230, 118, 0.38); }
+.vx-btn-cyan { background: var(--cyan); color: #041318; box-shadow: 0 8px 24px rgba(34, 211, 238, 0.22); }
+.vx-btn-indigo { background: var(--indigo); color: #0b0c1f; box-shadow: 0 8px 24px rgba(129, 140, 248, 0.25); }
+.vx-btn-glass { background: rgba(255, 255, 255, 0.08); color: var(--text); border-color: rgba(255, 255, 255, 0.22); backdrop-filter: blur(8px); }
+.vx-btn-glass:hover { background: rgba(255, 255, 255, 0.14); }
+.vx-btn-ghost { background: transparent; color: var(--text); border-color: var(--line-2); padding: 9px 16px; font-size: 0.88rem; }
+.vx-btn-ghost:hover { border-color: var(--green); color: var(--green); }
+
+/* ---------- Top bar ---------- */
+.vx-nav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 24px;
+  padding: 14px max(20px, calc((100vw - var(--max)) / 2));
+  background: rgba(11, 13, 18, 0.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.vx-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+.vx-mark { width: 36px; height: 36px; flex-shrink: 0; }
+.vx-mark-sm { width: 24px; height: 24px; }
+.vx-wordmark { color: var(--text); font-weight: 800; font-size: 1.12rem; letter-spacing: 0.06em; line-height: 1; display: flex; flex-direction: column; }
+.vx-wordmark small { font: 600 0.62rem 'JetBrains Mono', monospace; letter-spacing: 0.28em; color: var(--green); margin-top: 3px; }
+.vx-nav-links { display: flex; gap: 22px; margin-left: auto; }
+.vx-nav-links a { text-decoration: none; color: var(--muted); font-size: 0.9rem; font-weight: 600; }
+.vx-nav-links a:hover { color: var(--text); }
+
+/* ---------- Hero ---------- */
+.vx-hero { position: relative; flex: 1; min-height: calc(100vh - 65px); display: flex; align-items: center; overflow: hidden; isolation: isolate; }
+.vx-hero-media { position: absolute; inset: 0; background: #11141c url('../assets/images/gym-building.jpg') center / cover no-repeat; z-index: -2; }
+.vx-hero-shade {
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(8, 10, 14, 0.94) 0%, rgba(8, 10, 14, 0.78) 42%, rgba(8, 10, 14, 0.25) 100%),
+    linear-gradient(0deg, var(--bg) 0%, rgba(11, 13, 18, 0) 38%);
+}
+.vx-hero-inner { width: 100%; max-width: var(--max); margin: 0 auto; padding: 60px 20px 48px; }
+.vx-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid rgba(0, 230, 118, 0.35); background: rgba(0, 230, 118, 0.08); color: #a7f3d0;
+  font: 600 0.72rem 'JetBrains Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.vx-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.6); animation: vx-ping 2s infinite; }
+@keyframes vx-ping { 0% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.55); } 70% { box-shadow: 0 0 0 8px rgba(0, 230, 118, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); } }
+.vx-hero h1 { font-size: clamp(2.3rem, 5.4vw, 4.2rem); font-weight: 800; line-height: 1.04; margin: 18px 0 16px; max-width: 14ch; }
+.vx-grad { background: linear-gradient(90deg, var(--green), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.vx-lead { max-width: 54ch; font-size: clamp(1rem, 1.4vw, 1.12rem); color: #d1d9e6; margin: 0 0 28px; }
+.vx-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.vx-hero-facts { list-style: none; display: flex; flex-wrap: wrap; gap: 12px 36px; padding: 0; margin: 40px 0 0; }
+.vx-hero-facts li { display: flex; align-items: baseline; gap: 10px; }
+.vx-hero-facts strong { font-size: 1.6rem; color: var(--text); font-weight: 800; }
+.vx-hero-facts span { color: var(--muted); font-size: 0.88rem; }
+
+
+/* ---------- Sections ---------- */
+.vx-section { max-width: var(--max); margin: 0 auto; padding: 64px 20px; }
+.vx-section-head { margin-bottom: 28px; }
+.vx-section-head h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 800; }
+.vx-section-head p { color: var(--muted); margin: 6px 0 0; }
+
+/* ---------- Portal cards ---------- */
+.vx-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.vx-card {
+  --c: var(--green);
+  position: relative; display: flex; flex-direction: column; gap: 12px;
+  padding: 26px; border-radius: var(--radius); background: linear-gradient(180deg, var(--card), var(--bg-2));
+  border: 1px solid var(--line); overflow: hidden;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.vx-card::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--c); opacity: 0.9; }
+.vx-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--c) 45%, transparent); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35); }
+.vx-c-green { --c: var(--green); }
+.vx-c-cyan { --c: var(--cyan); }
+.vx-c-indigo { --c: var(--indigo); }
+.vx-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.vx-icon { width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); border: 1px solid color-mix(in srgb, var(--c) 30%, transparent); }
+.vx-icon svg { width: 24px; height: 24px; }
+.vx-tag { font: 600 0.7rem 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--c); padding: 4px 10px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 35%, transparent); white-space: nowrap; }
+.vx-card h3 { font-size: 1.35rem; font-weight: 800; margin-top: 6px; }
+.vx-card > p { margin: 0; color: var(--body); font-size: 0.95rem; }
+.vx-points { list-style: none; padding: 0; margin: 4px 0 8px; display: grid; gap: 8px; }
+.vx-points li { position: relative; padding-left: 24px; color: var(--muted); font-size: 0.9rem; }
+.vx-points li::before { content: ''; position: absolute; left: 0; top: 0.45em; width: 14px; height: 8px; border-left: 2px solid var(--c); border-bottom: 2px solid var(--c); transform: rotate(-45deg); }
+.vx-card-actions { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 8px; }
+.vx-card-actions .vx-btn { flex: 1 1 100%; }
+.vx-link { color: var(--muted); font-size: 0.86rem; font-weight: 600; text-decoration: none; }
+.vx-link:hover { color: var(--c); }
+
+/* ---------- Status (classes written by js/portal.js are styled here) ---------- */
+.vx-status { padding-top: 8px; }
+.vx-status-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.vx-stat { display: flex; flex-direction: column; gap: 8px; padding: 18px; border-radius: 14px; background: var(--bg-2); border: 1px solid var(--line); min-width: 0; }
+.vx-stat-label { font: 600 0.72rem 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.vx-stat-sub { color: var(--muted); font-size: 0.82rem; overflow-wrap: anywhere; }
+.telemetry-badge { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; max-width: 100%; padding: 6px 12px; border-radius: 999px; font-weight: 700; font-size: 0.86rem; border: 1px solid var(--line-2); color: var(--text); overflow-wrap: anywhere; }
+.status-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+.status-indicator.online { background: var(--green); box-shadow: 0 0 10px rgba(0, 230, 118, 0.7); }
+.status-indicator.offline { background: var(--red); }
+.badge-online { background: rgba(0, 230, 118, 0.1); border-color: rgba(0, 230, 118, 0.35); color: #bbf7d0; }
+.badge-offline { background: rgba(248, 113, 113, 0.1); border-color: rgba(248, 113, 113, 0.35); color: #fecaca; }
+.badge-warning { background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.35); color: #fde68a; }
+.badge-warning .status-indicator { background: var(--amber); }
+.badge-neutral { background: rgba(129, 140, 248, 0.1); border-color: rgba(129, 140, 248, 0.3); color: #c7d2fe; }
+.badge-neutral .status-indicator { background: var(--indigo); }
+
+/* ---------- Footer ---------- */
+.vx-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  padding: 26px max(20px, calc((100vw - var(--max)) / 2)); border-top: 1px solid var(--line); color: var(--muted); font-size: 0.86rem;
+}
+.vx-footer-brand { display: inline-flex; align-items: center; gap: 10px; }
+.vx-footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+.vx-footer-links a { color: var(--muted); text-decoration: none; }
+.vx-footer-links a:hover { color: var(--text); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  .vx-cards { grid-template-columns: 1fr; max-width: 640px; }
+  .vx-status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .vx-nav { gap: 12px; padding: 12px 16px; }
+  .vx-nav-links { gap: 14px; }
+  .vx-nav-links a { font-size: 0.84rem; }
+  .vx-nav-cta { margin-left: auto; }
+  .vx-hero { min-height: auto; }
+  .vx-hero-inner { padding: 88px 16px 48px; }
+  .vx-hero-shade { background: linear-gradient(180deg, rgba(8, 10, 14, 0.55) 0%, rgba(8, 10, 14, 0.88) 55%, var(--bg) 100%); }
+  .vx-hero-actions .vx-btn { flex: 1 1 100%; }
+  .vx-hero-facts { gap: 10px 22px; margin-top: 28px; }
+  .vx-hero-facts strong { font-size: 1.3rem; }
+  .vx-section { padding: 44px 16px; }
+  .vx-card { padding: 22px 20px; }
+  .vx-card-actions .vx-btn { flex: 1 1 100%; }
+  .vx-status-grid { grid-template-columns: 1fr; }
+  .vx-footer { padding: 22px 16px; flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 380px) {
+  .vx-wordmark small { display: none; }
+  .vx-nav-cta { padding: 8px 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .vx-live-dot { animation: none; }
+  .vx-btn, .vx-card { transition: none; }
+}

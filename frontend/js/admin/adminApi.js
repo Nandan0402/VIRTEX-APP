@@ -1,12 +1,12 @@
 /**
- * adminApi.js - Centralized HTTP Client Module for PulseCore Admin Console
+ * adminApi.js - Centralized HTTP Client Module for Virtex Admin Console
  * Connects directly to PostgreSQL-backed Express REST API endpoints (/api/v1/*).
  * Enforces JWT authentication, RBAC headers, error extraction, and request tracing.
  */
 
 const BASE_URL = '/api/v1';
-const TOKEN_KEY = 'pulsecore_admin_jwt_token';
-const USER_KEY = 'pulsecore_admin_user_profile';
+const TOKEN_KEY = 'virtex_admin_jwt_token';
+const USER_KEY = 'virtex_admin_user_profile';
 
 export const adminApi = {
   // =========================================================================
@@ -14,7 +14,7 @@ export const adminApi = {
   // =========================================================================
 
   getToken() {
-    return localStorage.getItem(TOKEN_KEY) || null;
+    return localStorage.getItem(TOKEN_KEY) || localStorage.getItem('pulsecore_admin_jwt_token') || localStorage.getItem('token') || null;
   },
 
   setToken(token) {
@@ -22,12 +22,13 @@ export const adminApi = {
       localStorage.setItem(TOKEN_KEY, token);
     } else {
       localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem('pulsecore_admin_jwt_token');
     }
   },
 
   getStoredUser() {
     try {
-      const data = localStorage.getItem(USER_KEY);
+      const data = localStorage.getItem(USER_KEY) || localStorage.getItem('pulsecore_admin_user_profile');
       return data ? JSON.parse(data) : null;
     } catch {
       return null;
@@ -39,6 +40,7 @@ export const adminApi = {
       localStorage.setItem(USER_KEY, JSON.stringify(user));
     } else {
       localStorage.removeItem(USER_KEY);
+      localStorage.removeItem('pulsecore_admin_user_profile');
     }
   },
 
@@ -100,6 +102,19 @@ export const adminApi = {
   },
 
   /**
+   * No valid admin session: send the user to the admin login page, returning here afterwards.
+   * Returns a promise that never resolves so the calling page stops while navigating.
+   * (Replaces the old hard-coded auto-login with a demo owner account.)
+   */
+  redirectToLogin() {
+    this.setToken(null);
+    this.setStoredUser(null);
+    const here = window.location.pathname + window.location.search + window.location.hash;
+    window.location.href = `/admin-auth.html?next=${encodeURIComponent(here)}`;
+    return new Promise(() => {});
+  },
+
+  /**
    * Retrieve active user profile and verify token validity
    */
   async getCurrentUser() {
@@ -114,8 +129,39 @@ export const adminApi = {
       if (!res.ok || !body.success) {
         throw new Error(body.error || 'Failed to authenticate');
       }
-      this.setStoredUser(body.data.user);
-      return { success: true, data: body.data.user };
+      const user = body.data?.user || body.data;
+      if (user) {
+        user.fullName = user.fullName || user.full_name || user.name || user.username;
+        user.avatarUrl = user.avatarUrl || user.avatar_url || null;
+        this.setStoredUser(user);
+      }
+      return { success: true, data: user };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  /**
+   * Update active user profile and synchronize with PostgreSQL
+   */
+  async updateUserProfile(profileData) {
+    try {
+      const res = await fetch(`${BASE_URL}/auth/profile`, {
+        method: 'PUT',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(profileData),
+      });
+      const body = await res.json();
+      if (!res.ok || !body.success) {
+        throw new Error(body.error || 'Failed to update profile');
+      }
+      const user = body.data?.user || body.data;
+      if (user) {
+        user.fullName = user.fullName || user.full_name || user.name || user.username;
+        user.avatarUrl = user.avatarUrl || user.avatar_url || null;
+        this.setStoredUser(user);
+      }
+      return { success: true, data: user, message: body.message };
     } catch (err) {
       return { success: false, error: err.message };
     }
@@ -149,7 +195,14 @@ export const adminApi = {
   async getGymProfile() {
     try {
       const res = await fetch(`${BASE_URL}/gym/info`);
-      return await res.json();
+      const body = await res.json();
+      if (body && body.data) {
+        body.profile = body.data;
+        if (body.data.operating_hours && !body.data.hours) {
+          body.data.hours = body.data.operating_hours;
+        }
+      }
+      return body;
     } catch (err) {
       return { success: false, error: err.message };
     }
@@ -235,7 +288,7 @@ export const adminApi = {
   // 4. MEMBERS DIRECTORY (CRUD + Search + Pagination)
   // =========================================================================
 
-  async getMembers({ search = '', status = 'all', page = 1, limit = 10 } = {}) {
+  async getMembers({ search = '', status = 'all', page = 1, limit = 10, training = '' } = {}) {
     try {
       const params = new URLSearchParams({
         search,
@@ -243,6 +296,7 @@ export const adminApi = {
         page: String(page),
         limit: String(limit),
       });
+      if (training) params.set('training', training);
       const res = await fetch(`${BASE_URL}/members?${params.toString()}`, {
         headers: this.getHeaders(true),
       });
@@ -290,6 +344,79 @@ export const adminApi = {
     }
   },
 
+  async payMemberFees(memberId, paymentData) {
+    try {
+      const res = await fetch(`${BASE_URL}/members/${memberId}/pay-fees`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(paymentData),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getFeesAlerts({ status = 'all', search = '' } = {}) {
+    try {
+      const params = new URLSearchParams({ status, search });
+      const res = await fetch(`${BASE_URL}/members/fees-alert?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async sendFeeAlert(memberId) {
+    try {
+      const res = await fetch(`${BASE_URL}/members/${memberId}/send-fee-alert`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getBirthdayAlerts() {
+    try {
+      const res = await fetch(`${BASE_URL}/members/birthday-alert`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async sendBirthdayWish(memberId) {
+    try {
+      const res = await fetch(`${BASE_URL}/members/${memberId}/send-birthday-wish`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async updateMemberDob(memberId, dateOfBirth) {
+    try {
+      const res = await fetch(`${BASE_URL}/members/${memberId}/dob`, {
+        method: 'PATCH',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ dateOfBirth }),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
   async getMemberHistory(memberId) {
     try {
       const res = await fetch(`${BASE_URL}/members/history/${memberId}`, {
@@ -309,7 +436,11 @@ export const adminApi = {
     try {
       const q = status && status !== 'all' ? `?status=${encodeURIComponent(status)}` : '';
       const res = await fetch(`${BASE_URL}/trainers${q}`);
-      return await res.json();
+      const body = await res.json();
+      if (body && body.data) {
+        body.trainers = body.data;
+      }
+      return body;
     } catch (err) {
       return { success: false, error: err.message };
     }
@@ -367,13 +498,165 @@ export const adminApi = {
   },
 
   // =========================================================================
+  // 5B. PERSONAL TRAINER ASSIGNMENTS & MONTHLY FEES
+  // =========================================================================
+
+  async getTrainerAssignments({ search = '', trainerId = 'all', status = 'all', paymentStatus = 'all' } = {}) {
+    try {
+      const params = new URLSearchParams({ search, trainerId, status, paymentStatus });
+      const res = await fetch(`${BASE_URL}/trainers/assignments?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getTrainerAssignmentsSummary() {
+    try {
+      const res = await fetch(`${BASE_URL}/trainers/assignments/summary`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async createTrainerAssignment(assignmentData) {
+    try {
+      const res = await fetch(`${BASE_URL}/trainers/assignments`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(assignmentData),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async updateTrainerAssignment(id, assignmentData) {
+    try {
+      const res = await fetch(`${BASE_URL}/trainers/assignments/${id}`, {
+        method: 'PUT',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(assignmentData),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async deleteTrainerAssignment(id) {
+    try {
+      const res = await fetch(`${BASE_URL}/trainers/assignments/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  // =========================================================================
+  // 5C. ROUTINE TRACKER (PUNCH IN, BREAK, PUNCH OUT)
+  // =========================================================================
+
+  async getRoutineStatus() {
+    try {
+      const res = await fetch(`${BASE_URL}/routine/current`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async routinePunchIn(notes = '') {
+    try {
+      const res = await fetch(`${BASE_URL}/routine/punch-in`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ notes }),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async routineStartBreak(reason = 'Routine Break') {
+    try {
+      const res = await fetch(`${BASE_URL}/routine/break-start`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ reason }),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async routineEndBreak() {
+    try {
+      const res = await fetch(`${BASE_URL}/routine/break-end`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async routinePunchOut(notes = '') {
+    try {
+      const res = await fetch(`${BASE_URL}/routine/punch-out`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ notes }),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getRoutineHistory({ date = '', userId = '', limit = 50, offset = 0 } = {}) {
+    try {
+      const params = new URLSearchParams();
+      if (date) params.append('date', date);
+      if (userId) params.append('userId', userId);
+      params.append('limit', String(limit));
+      params.append('offset', String(offset));
+
+      const res = await fetch(`${BASE_URL}/routine/history?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  // =========================================================================
   // 6. ANNOUNCEMENTS / NOTICEBOARD (CRUD)
   // =========================================================================
 
   async getAnnouncements(activeOnly = false) {
     try {
       const res = await fetch(`${BASE_URL}/announcements?activeOnly=${activeOnly}`);
-      return await res.json();
+      const body = await res.json();
+      if (body && body.data) {
+        body.announcements = body.data;
+      }
+      return body;
     } catch (err) {
       return { success: false, error: err.message };
     }
@@ -488,12 +771,37 @@ export const adminApi = {
     }
   },
 
-  async updateEnquiryStatus(id, { status, notes }) {
+  async updateEnquiryStatus(id, { status, notes, customizationType }) {
     try {
       const res = await fetch(`${BASE_URL}/admin/enquiries/${id}`, {
         method: 'PATCH',
         headers: this.getHeaders(true),
-        body: JSON.stringify({ status, notes }),
+        body: JSON.stringify({ status, notes, customizationType }),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async createEnquiry(payload) {
+    try {
+      const res = await fetch(`${BASE_URL}/members/enquiry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async deleteEnquiry(id) {
+    try {
+      const res = await fetch(`${BASE_URL}/admin/enquiries/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(true),
       });
       return await res.json();
     } catch (err) {
@@ -507,7 +815,9 @@ export const adminApi = {
 
   async getRecentInteractions(limit = 30) {
     try {
-      const res = await fetch(`${BASE_URL}/interactions?limit=${limit}`);
+      const res = await fetch(`${BASE_URL}/interactions?limit=${limit}`, {
+        headers: this.getHeaders(true),   // endpoint now requires an admin session
+      });
       return await res.json();
     } catch (err) {
       return { success: false, error: err.message };
@@ -603,6 +913,187 @@ export const adminApi = {
   async getHardwareLogs(limit = 20) {
     try {
       const res = await fetch(`${BASE_URL}/robot/hardware-logs?limit=${limit}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  // =========================================================================
+  // 10. VIRTEX ANALYTICS & INTERACTION MONITORING
+  // =========================================================================
+
+  async getAnalyticsOverview({ startDate, endDate, period } = {}) {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    if (period) params.append('period', period);
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/overview?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getAnalyticsCheckIns({ startDate, endDate, period } = {}) {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    if (period) params.append('period', period);
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/check-ins?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getAnalyticsEnquiries({ startDate, endDate } = {}) {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/enquiries?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getAnalyticsFaqs({ startDate, endDate, limit = 10 } = {}) {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    if (limit) params.append('limit', limit);
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/faqs?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getAnalyticsLanguages({ startDate, endDate } = {}) {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/languages?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getAnalyticsTrainers() {
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/trainers`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getAnalyticsRobot({ startDate, endDate } = {}) {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/robot?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getAnalyticsRobotCommands({ page = 1, limit = 10, search = '', status = '', startDate, endDate } = {}) {
+    const params = new URLSearchParams();
+    params.append('page', page);
+    params.append('limit', limit);
+    if (search) params.append('search', search);
+    if (status) params.append('status', status);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/robot-commands?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getAnalyticsAiPerformance({ startDate, endDate } = {}) {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/ai-performance?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getAnalyticsFailedInteractions({ page = 1, limit = 10, search = '', startDate, endDate } = {}) {
+    const params = new URLSearchParams();
+    params.append('page', page);
+    params.append('limit', limit);
+    if (search) params.append('search', search);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/failed-interactions?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getAnalyticsSummary({ period = 'weekly', startDate, endDate } = {}) {
+    const params = new URLSearchParams();
+    params.append('period', period);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/summary?${params.toString()}`, {
+        headers: this.getHeaders(true),
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getAnalyticsReport({ period = 'weekly', startDate, endDate } = {}) {
+    const params = new URLSearchParams();
+    params.append('period', period);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    try {
+      const res = await fetch(`${BASE_URL}/admin/analytics/report?${params.toString()}`, {
         headers: this.getHeaders(true),
       });
       return await res.json();

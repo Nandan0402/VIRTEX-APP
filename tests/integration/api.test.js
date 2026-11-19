@@ -2,8 +2,9 @@ import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../../backend/src/app.js';
 import { config } from '../../backend/src/config/env.js';
+import { query, closePool } from '../../backend/src/config/database.js';
 
-describe('PulseCore Robot REST API Integration Test Suite', () => {
+describe('Virtex Robot REST API Integration Test Suite', () => {
   let server;
   let baseUrl;
   let adminToken;
@@ -21,9 +22,13 @@ describe('PulseCore Robot REST API Integration Test Suite', () => {
   });
 
   after(async () => {
+    try {
+      await query("DELETE FROM interaction_logs WHERE user_query = 'Are lockers available?' AND latency_ms = 250;");
+    } catch (_) {}
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }
+    await closePool();
   });
 
   // 1. Health

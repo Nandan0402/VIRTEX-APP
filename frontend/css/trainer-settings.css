@@ -1,0 +1,21 @@
+/* Trainer Hub → Settings: login details + admin-authorised password requests */
+.ts-list, .ts-pass { display: flex; flex-direction: column; }
+.ts-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.ts-label { color: #94a3b8; font-size: 0.85rem; font-weight: 600; }
+.ts-value { color: #f1f5f9; font-size: 0.9rem; text-align: right; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; min-width: 0; overflow-wrap: anywhere; }
+.ts-dots { letter-spacing: 2px; color: #cbd5e1; }
+.ts-pass { margin-top: 14px; }
+.ts-note { font-size: 0.8rem; line-height: 1.5; margin: 10px 0 14px; }
+.ts-form { display: flex; flex-direction: column; gap: 4px; }
+.ts-pending { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(250, 204, 21, 0.35); background: rgba(250, 204, 21, 0.07); font-size: 0.88rem; }
+.ts-pending .badge { align-self: flex-start; }
+.ts-history { margin-top: 16px; }
+.ts-mt { display: block; margin-bottom: 6px; }
+.ts-hrow { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 10px; padding: 7px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.84rem; color: #cbd5e1; }
+.ts-hnote { flex-basis: 100%; font-size: 0.78rem; }
+.ts-sound { display: inline-flex !important; align-items: center; gap: 8px; margin-right: 10px; cursor: pointer; }
+.ts-sound input { width: 18px; height: 18px; accent-color: #00e676; }
+@media (max-width: 600px) {
+  .ts-row { flex-direction: column; align-items: flex-start; gap: 3px; }
+  .ts-value { text-align: left; justify-content: flex-start; }
+}

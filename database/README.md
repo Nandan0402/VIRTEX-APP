@@ -1,4 +1,4 @@
-# 🐘 PostgreSQL Database Architecture: PulseCore AI Gym Receptionist Robot
+# 🐘 PostgreSQL Database Architecture: Virtex AI Gym Receptionist Robot
 
 This directory contains the complete database schema, security rules, seed records, and example production SQL queries for the Gym Receptionist Robot.
 

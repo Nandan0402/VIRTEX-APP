@@ -1,0 +1,2751 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Class & Facility Schedule Calendar</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root,
+    html {
+      color-scheme: dark !important;
+      --accent-green: #00e676;
+      --accent-green-dark: #00b050;
+      --accent-green-glow: rgba(0, 230, 118, 0.28);
+      --green: #00e676;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.18) #0e1017;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0e1017 !important;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18) !important;
+      border-radius: 4px !important;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00e676 !important;
+    }
+
+    /* Dedicated Calendar Styles */
+    .calendar-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .calendar-stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .calendar-stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .calendar-stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      background: rgba(0, 230, 118, 0.1);
+      color: var(--accent-green);
+    }
+
+    .calendar-stat-info h4 {
+      margin: 0;
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .calendar-stat-info .stat-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Calendar Controls Bar */
+    .cal-controls-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .cal-nav-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .cal-title-display {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      min-width: 190px;
+      text-align: center;
+      letter-spacing: -0.3px;
+    }
+
+    .cal-view-switch {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-pill);
+      padding: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      gap: 3px;
+    }
+
+    .cal-view-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #e2e8f0 !important;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cal-view-btn:hover {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .cal-view-btn.active {
+      background: #00e676 !important;
+      color: #000000 !important;
+      font-weight: 800 !important;
+      border-color: #00e676 !important;
+      box-shadow: 0 2px 12px rgba(0, 230, 118, 0.55) !important;
+    }
+
+    #view-month-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    /* Month View Grid */
+    .cal-month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      width: 100%;
+      min-width: 650px;
+      box-sizing: border-box;
+    }
+
+    .cal-weekday-header {
+      background: rgba(19, 22, 31, 0.95);
+      padding: 0.75rem 0.25rem;
+      text-align: center;
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      letter-spacing: 0.8px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .cal-weekday-header.weekend {
+      color: var(--accent-green);
+    }
+
+    .cal-day-cell {
+      background: var(--bg-card);
+      min-height: 110px;
+      padding: 0.45rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .cal-day-cell:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .cal-day-cell.other-month {
+      opacity: 0.35;
+      background: rgba(11, 13, 20, 0.7);
+    }
+
+    .cal-day-cell.is-today {
+      background: rgba(0, 230, 118, 0.06);
+      border: 1px solid rgba(0, 230, 118, 0.45);
+    }
+
+    .cal-day-num {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-width: 0;
+      margin-bottom: 2px;
+    }
+
+    .cal-day-cell.is-today .cal-day-num {
+      color: var(--accent-green);
+    }
+
+    .today-pill-tag {
+      font-size: 0.6rem;
+      background: #00e676 !important;
+      color: #05070a !important;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-weight: 800;
+      text-transform: uppercase;
+      display: inline-block;
+      line-height: 1.2;
+    }
+
+    /* Event Badges inside Month Day Cell */
+    .cal-event-pill {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 3px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: transform 0.1s ease, filter 0.1s ease;
+      border: 1px solid transparent;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .cal-event-pill span,
+    .cal-event-pill strong {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .cal-event-pill:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.2);
+    }
+
+    .cal-event-zumba {
+      background: rgba(236, 72, 153, 0.18);
+      color: #f472b6;
+      border-color: rgba(236, 72, 153, 0.35);
+    }
+
+    .cal-event-yoga {
+      background: rgba(139, 92, 246, 0.18);
+      color: #c084fc;
+      border-color: rgba(139, 92, 246, 0.35);
+    }
+
+    .cal-event-hiit {
+      background: rgba(249, 115, 22, 0.18);
+      color: #fb923c;
+      border-color: rgba(249, 115, 22, 0.35);
+    }
+
+    .cal-event-gym {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--accent-green);
+      border-color: rgba(0, 230, 118, 0.3);
+    }
+
+    .cal-event-event {
+      background: rgba(59, 130, 246, 0.18);
+      color: #60a5fa;
+      border-color: rgba(59, 130, 246, 0.35);
+    }
+
+    .cal-event-birthday-member {
+      background: rgba(236, 72, 153, 0.22);
+      color: #f472b6;
+      border-color: rgba(236, 72, 153, 0.45);
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(244, 114, 182, 0.15);
+    }
+
+    .cal-event-birthday-trainer {
+      background: rgba(168, 85, 247, 0.22);
+      color: #c084fc;
+      border-color: rgba(168, 85, 247, 0.45);
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(192, 132, 252, 0.15);
+    }
+
+    .cal-event-fee-due {
+      background: rgba(239, 68, 68, 0.22);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.45);
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(248, 113, 113, 0.15);
+    }
+
+    .cal-event-fee-paid {
+      background: rgba(0, 230, 118, 0.18);
+      color: #00e676;
+      border-color: rgba(0, 230, 118, 0.4);
+    }
+
+    /* Payment Tabs & Modals Styles */
+    .pay-tabs-nav {
+      display: flex;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 5px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .pay-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #94a3b8;
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .pay-tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .pay-tab-btn.active {
+      background: rgba(0, 230, 118, 0.15);
+      color: #00e676;
+      border-color: rgba(0, 230, 118, 0.4);
+      font-weight: 700;
+    }
+
+    .pay-tab-content {
+      display: none;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-top: 0.75rem;
+    }
+
+    .pay-tab-content.active {
+      display: block;
+    }
+
+    .qr-box-container {
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .badge-pink {
+      background: rgba(236, 72, 153, 0.2);
+      color: #f472b6;
+      border: 1px solid rgba(236, 72, 153, 0.4);
+    }
+
+    .badge-purple {
+      background: rgba(168, 85, 247, 0.2);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.4);
+    }
+
+    .badge-red {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    /* Week View Styles */
+    .cal-week-view {
+      display: none;
+      flex-direction: column;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+    }
+
+    .cal-week-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(7, minmax(130px, 1fr));
+      min-width: 950px;
+    }
+
+    .cal-week-time-label {
+      padding: 0.6rem 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      text-align: right;
+    }
+
+    .cal-week-day-col {
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      min-height: 48px;
+      padding: 3px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    /* Day / Agenda View */
+    .cal-agenda-view {
+      display: none;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .agenda-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .agenda-card:hover {
+      border-color: rgba(0, 230, 118, 0.35);
+      transform: translateX(3px);
+    }
+
+    .agenda-time-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .agenda-info {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .agenda-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .agenda-meta {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Modal Sheet Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 7, 12, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      box-sizing: border-box;
+    }
+
+    .modal-dialog {
+      background: #11141d;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(0, 230, 118, 0.15);
+      animation: modalFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.96) translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #141824;
+      flex-shrink: 0;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-close-modal {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      color: #94a3b8;
+      width: 34px;
+      height: 34px;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .btn-close-modal:hover {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      transform: scale(1.05);
+    }
+
+    .modal-body {
+      padding: 1.5rem 1.75rem;
+      overflow-y: auto;
+      box-sizing: border-box;
+      flex: 1 1 auto;
+    }
+
+    .modal-footer {
+      padding: 1.15rem 1.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.85rem;
+      background: #141824;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="admin.html#tab-overview" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📊</span> Overview & Stats
+        </a>
+        <a href="admin-members.html" class="nav-item-btn " id="nav-item-members" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👥</span> Members
+        </a>
+        <a href="admin-feessalert.html" class="nav-item-btn" id="nav-item-fees-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💰</span> Fees Alert
+        </a>
+        <a href="admin-birthdayalert.html" class="nav-item-btn" id="nav-item-birthday-alert"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🎂</span> Birthday Alert
+        </a>
+        <a href="admin-messages.html" class="nav-item-btn " id="nav-item-messages" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📩</span> Message
+        </a>
+        <a href="admin-notification.html" class="nav-item-btn " id="nav-item-notifications"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📢</span> Notification
+        </a>
+        <a href="admin-personaltraniner.html" class="nav-item-btn " id="nav-item-trainers"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏋️</span> Personal Trainer
+        </a>
+        <a href="admin-assign-membertoperonal traniner.html" class="nav-item-btn" id="nav-item-assign-trainer"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤝</span> Assign PT & Fees
+        </a>
+        <a href="admin-routine-tracker.html" class="nav-item-btn" id="nav-item-routine-tracker"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏱️</span> Routine Tracker
+        </a>
+        <a href="admin.html#tab-plans" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💳</span> Membership Plans
+        </a>
+        <a href="admin.html#tab-faqs" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">❓</span> FAQs / Knowledge Base
+        </a>
+        <a href="admin.html#tab-robot" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
+        </a>
+        <a href="admin.html#tab-profile" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile
+        </a>
+        <a href="admin-working-hours.html" class="nav-item-btn " id="nav-item-working-hours-link"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏰</span> Working Hours
+        </a>
+        <a href="admin-calander.html" class="nav-item-btn active" id="nav-item-admin-calendar" aria-current="page"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📅</span> Class & Shift Calendar
+        </a>
+        <a href="admin-profile.html" class="nav-item-btn " id="nav-item-admin-profile" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👤</span> Profile
+        </a>
+        <a href="admin.html#tab-settings" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⚙️</span> Language & Settings
+        </a>
+      </nav>
+
+      <!-- User Profile & Session Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" style="cursor: pointer;" title="Active Profile"
+          role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <img id="sidebar-user-photo" src="" alt="Avatar"
+              style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+            </div>
+            <div class="user-meta-row">
+              <span class="user-handle font-mono" id="sidebar-user-handle">@nandanb449</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+          </div>
+          <button class="btn-sidebar-logout btn-logout" id="btn-logout" title="Log Out" aria-label="End active session">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Column -->
+    <div class="admin-main">
+      <!-- Top App Bar -->
+      <header class="admin-topbar" role="banner">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Sidebar Menu">☰</button>
+          <h1 class="topbar-title">Class & Facility Schedule Calendar</h1>
+        </div>
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group -->
+          <div class="topbar-routine-group" id="topbar-routine-group">
+            <a href="admin-routine-tracker.html" class="topbar-routine-badge status-out" id="topbar-routine-badge"
+              title="Click to view full Routine Tracker">
+              <span class="topbar-status-dot"></span>
+              <span id="topbar-routine-text">PUNCHED OUT</span>
+            </a>
+
+            <div class="topbar-punch-btns">
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-in" id="topbar-btn-punch-in"
+                title="Punch In (Start Daily Shift)">
+                <span>🟢</span>
+                <span class="topbar-btn-text">Punch In</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-break" id="topbar-btn-break"
+                title="Take or Resume Routine Break" disabled>
+                <span id="topbar-break-icon">☕</span>
+                <span class="topbar-btn-text" id="topbar-break-text">Break</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-out" id="topbar-btn-punch-out"
+                title="Punch Out (End Daily Shift)" disabled>
+                <span>⏹️</span>
+                <span class="topbar-btn-text">Punch Out</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="topbar-divider-vert"></div>
+
+          <!-- Message Link Icon -->
+          <a href="admin-messages.html" class="topbar-nav-icon-link" id="topbar-message-link"
+            title="Member Messages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="topbar-counter-badge" id="topbar-message-badge" style="display: none;">0</span>
+          </a>
+
+          <!-- Notification Link Icon -->
+          <a href="admin-notification.html" class="topbar-nav-icon-link" id="topbar-notification-link"
+            title="Notifications & System Announcements">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="topbar-counter-badge topbar-counter-red" id="topbar-notification-badge"
+              style="display: none;">0</span>
+          </a>
+
+          <div class="topbar-divider-vert"></div>
+
+          <button class="btn btn-green btn-sm" id="btn-open-create-modal">
+            ➕ Schedule Class / Event
+          </button>
+          <a href="admin-working-hours.html" class="btn btn-outline btn-sm">
+            ⏰ Edit Working Hours
+          </a>
+        </div>
+      </header>
+
+      <!-- Main Body -->
+      <main class="admin-body">
+        <!-- Toast Notification Banner -->
+        <div id="toast-banner" class="toast-banner" role="alert" aria-live="polite"></div>
+
+        <div class="calendar-container">
+          <div id="classes"></div>
+          <!-- Calendar Metric Quick Cards -->
+          <div class="calendar-stats-row">
+            <div class="calendar-stat-card">
+              <div class="calendar-stat-icon">💃</div>
+              <div class="calendar-stat-info">
+                <h4>Today's Sessions</h4>
+                <div class="stat-val" id="stat-classes-count">--</div>
+              </div>
+            </div>
+
+            <div class="calendar-stat-card">
+              <div class="calendar-stat-icon">🏋️</div>
+              <div class="calendar-stat-info">
+                <h4>Coaches On Duty</h4>
+                <div class="stat-val" id="stat-trainers-duty">--</div>
+              </div>
+            </div>
+
+            <div class="calendar-stat-card">
+              <div class="calendar-stat-icon" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;">🎂</div>
+              <div class="calendar-stat-info">
+                <h4>Birthdays This Month</h4>
+                <div class="stat-val" id="stat-birthdays-count" style="color: #f472b6;">--</div>
+                <div class="text-xs text-dim font-mono" id="stat-birthdays-sub"
+                  style="font-size: 0.72rem; margin-top: 2px;">--</div>
+              </div>
+            </div>
+
+            <div class="calendar-stat-card">
+              <div class="calendar-stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">💳</div>
+              <div class="calendar-stat-info">
+                <h4>Remaining Fee Dues</h4>
+                <div class="stat-val" id="stat-fee-dues-amount" style="color: #f87171;">--</div>
+                <div class="text-xs text-dim font-mono" id="stat-fee-dues-sub"
+                  style="font-size: 0.72rem; margin-top: 2px;">--</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Calendar Controls & Navigation Bar -->
+          <div class="cal-controls-bar">
+            <div class="cal-nav-group">
+              <button class="btn btn-outline btn-sm" id="btn-cal-prev" title="Previous Month">◀</button>
+              <button class="btn btn-outline btn-sm" id="btn-cal-today">Today</button>
+              <button class="btn btn-outline btn-sm" id="btn-cal-next" title="Next Month">▶</button>
+              <div class="cal-title-display" id="cal-month-title">November 2026</div>
+            </div>
+
+            <!-- Category Filter Selector -->
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="text-xs text-dim">Filter:</span>
+              <select id="cal-filter-category" class="select-filter" style="font-size: 0.78rem; padding: 5px 10px;">
+                <option value="all">🌟 All Events & Classes</option>
+                <option value="birthdays">🎂 Birthdays (Members & Coaches)</option>
+                <option value="fees">💳 Remaining Fee Dues & Payments</option>
+                <option value="zumba">💃 Zumba & Aerobics</option>
+                <option value="yoga">🧘 Yoga & Pilates</option>
+                <option value="hiit">🔥 HIIT & CrossFit</option>
+                <option value="gym">🏋️ General Gym (Floor)</option>
+                <option value="event">📢 Bootcamps & Challenges</option>
+              </select>
+            </div>
+
+            <!-- View Switcher (Month, Week, Day) -->
+            <div class="cal-view-switch">
+              <button class="cal-view-btn active" data-view="month" id="btn-view-month">📅 Month</button>
+              <button class="cal-view-btn" data-view="week" id="btn-view-week">📆 Week</button>
+              <button class="cal-view-btn" data-view="agenda" id="btn-view-agenda">📋 Day Agenda</button>
+            </div>
+          </div>
+
+          <!-- View 1: Month View Grid -->
+          <div id="view-month-container">
+            <div class="cal-month-grid" id="cal-month-grid">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- View 2: Week View Timeline -->
+          <div class="cal-week-view" id="view-week-container">
+            <div class="cal-week-grid" id="cal-week-grid">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- View 3: Day Agenda View -->
+          <div class="cal-agenda-view" id="view-agenda-container">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- Studio & Room Allocations -->
+          <section id="rooms" class="admin-card" style="background: #11141e; border: 1px solid #1e2433; border-radius: 12px; padding: 22px; margin-top: 24px;">
+            <h3 style="color: #fff; font-size: 1.15rem; margin: 0 0 4px 0;">🏢 Studio & Room Allocations</h3>
+            <p style="font-size: 0.84rem; color: #94a3b8; margin: 0 0 16px 0;">Studio utilization, equipment setup, and training-area capacity.</p>
+            <div style="text-align: center; padding: 2.5rem 1rem; border: 1px dashed #1e2433; border-radius: 10px;">
+              <div style="font-size: 2.25rem; margin-bottom: 8px;">🏢</div>
+              <h4 style="color: #fff; margin: 0 0 6px 0;">No studios configured</h4>
+              <p style="color: #64748b; font-size: 0.88rem; margin: 0;">Studios and rooms will appear here once they are set up.</p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Schedule New Class or Special Event -->
+  <div class="modal-overlay" id="modal-create-schedule" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-title">➕ Schedule Class / Special Session</h3>
+        <button class="btn-close-modal" id="btn-close-modal" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-create-session">
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div>
+            <label class="form-label" for="sess-title">Class / Event Title *</label>
+            <input type="text" id="sess-title" class="form-input" placeholder="e.g. Morning Zumba Energy, Sunset Yoga"
+              required />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label class="form-label" for="sess-category">Class Category *</label>
+              <select id="sess-category" class="form-input" required>
+                <option value="zumba">💃 Zumba & Aerobics</option>
+                <option value="yoga">🧘 Yoga & Pilates</option>
+                <option value="hiit">🔥 HIIT & CrossFit</option>
+                <option value="gym">🏋️ General Gym (Floor)</option>
+                <option value="event">📢 Bootcamp / Event</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="sess-date">Session Date *</label>
+              <input type="date" id="sess-date" class="form-input" required />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label class="form-label" for="sess-start">Start Time *</label>
+              <input type="time" id="sess-start" class="form-input" value="06:00" required />
+            </div>
+            <div>
+              <label class="form-label" for="sess-end">End Time *</label>
+              <input type="time" id="sess-end" class="form-input" value="08:30" required />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label class="form-label" for="sess-trainer">Lead Coach / Trainer</label>
+              <select id="sess-trainer" class="form-input">
+                <option value="Meera">Meera (Zumba & Aerobics)</option>
+                <option value="Arjun">Arjun (Strength & Conditioning)</option>
+                <option value="Karan">Karan (CrossFit & HIIT)</option>
+                <option value="Pooja">Pooja (Yoga & Meditation)</option>
+                <option value="Floor Staff">General Floor Staff</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="sess-room">Studio / Area</label>
+              <select id="sess-room" class="form-input">
+                <option value="Studio 1">Studio 1 (Mirror Dance Floor)</option>
+                <option value="Studio 2">Studio 2 (Yoga & Core)</option>
+                <option value="CrossFit Arena">CrossFit & Functional Deck</option>
+                <option value="Main Gym Floor">Main Weight Training Floor</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="form-label" for="sess-notes">Notes / Special Instructions</label>
+            <input type="text" id="sess-notes" class="form-input"
+              placeholder="e.g. Bring hydration bottle, towels provided" />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; align-items: end;">
+            <div>
+              <label class="form-label" for="sess-capacity">Capacity (places) *</label>
+              <input type="number" id="sess-capacity" class="form-input" min="1" max="500" step="1" value="20" required />
+            </div>
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; padding-bottom: 0.6rem;">
+              <input type="checkbox" id="sess-registration" checked /> Members can register online
+            </label>
+          </div>
+          <p id="sess-error" class="text-xs" style="color: #f87171; margin: 0;" role="alert"></p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancel-modal">Cancel</button>
+          <button type="submit" class="btn btn-green">Save to Calendar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Event Details Drawer -->
+  <div class="modal-overlay" id="modal-event-detail" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="detail-title">Class Details</h3>
+        <button class="btn-close-modal" id="btn-close-detail">&times;</button>
+      </div>
+      <div class="modal-body" id="detail-body" style="display: flex; flex-direction: column; gap: 0.85rem;">
+        <!-- Filled dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="btn-dismiss-detail">Close</button>
+        <button type="button" class="btn btn-green" id="btn-announce-detail">📢 Send to Kiosk Display</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Pay Remaining Member Fees -->
+  <div class="modal-overlay" id="modal-pay-fees" role="dialog" aria-modal="true" style="z-index: 2200;">
+    <div class="modal-dialog" style="max-width: 620px; width: 100%;">
+      <div class="modal-header">
+        <h3 style="display: flex; align-items: center; gap: 8px;">
+          <span>💳</span> Settle Remaining Membership Fees
+        </h3>
+        <button class="btn-close-modal" id="btn-close-pay-modal">&times;</button>
+      </div>
+      <div class="modal-body"
+        style="display: flex; flex-direction: column; gap: 1.15rem; max-height: 80vh; overflow-y: auto;">
+        <!-- Member Fee Summary Card -->
+        <div
+          style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.15rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+            <div>
+              <h4 id="pay-member-name" style="margin: 0; color: #fff; font-size: 1.1rem; font-weight: 700;">Member Name
+              </h4>
+              <div class="text-xs text-dim font-mono" id="pay-member-meta" style="margin-top: 2px;">GYM000 • +91 00000
+                00000</div>
+            </div>
+            <span class="badge badge-outline font-mono" id="pay-plan-badge" style="text-transform: uppercase;">Standard
+              Plan</span>
+          </div>
+
+          <!-- Fee Stat Breakdown Grid -->
+          <div
+            style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; background: rgba(0, 0, 0, 0.35); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.06);">
+            <div>
+              <div class="text-xs text-dim">TOTAL PLAN FEE</div>
+              <div class="font-mono" id="pay-total-fee"
+                style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-top: 2px;">₹0.00</div>
+            </div>
+            <div>
+              <div class="text-xs text-dim">AMOUNT PAID</div>
+              <div class="font-mono" id="pay-amount-paid"
+                style="font-size: 1.05rem; font-weight: 700; color: var(--accent-green); margin-top: 2px;">₹0.00</div>
+            </div>
+            <div>
+              <div class="text-xs text-dim" style="color: #f87171;">REMAINING DUE</div>
+              <div class="font-mono" id="pay-fee-due"
+                style="font-size: 1.15rem; font-weight: 800; color: #f87171; margin-top: 2px;">₹0.00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Amount Radio Choices -->
+        <div>
+          <label class="form-label" style="margin-bottom: 0.45rem;">Select Payment Amount</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <label
+              style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem; cursor: pointer;">
+              <input type="radio" name="fee-pay-choice" id="choice-pay-full" value="full" checked
+                style="accent-color: var(--accent-green);" />
+              <div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: #fff;">Pay Full Remaining</div>
+                <div class="font-mono text-xs text-dim" id="label-pay-full-amount">₹0.00</div>
+              </div>
+            </label>
+
+            <label
+              style="display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem; cursor: pointer;">
+              <input type="radio" name="fee-pay-choice" id="choice-pay-custom" value="custom"
+                style="accent-color: var(--accent-green);" />
+              <div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: #fff;">Custom Installment</div>
+                <div class="text-xs text-dim">Partial Payment</div>
+              </div>
+            </label>
+          </div>
+
+          <div id="container-custom-amount" style="display: none; margin-top: 0.65rem;">
+            <label class="form-label text-xs" for="pay-custom-amount-input">Custom Installment Amount (₹) *</label>
+            <input type="number" id="pay-custom-amount-input" class="form-input font-mono"
+              placeholder="Enter amount to pay" min="1" step="1" />
+          </div>
+        </div>
+
+        <!-- Remaining Payment Modes -->
+        <div>
+          <label class="form-label" style="margin-bottom: 0.45rem;">Remaining Payment Options & Modes</label>
+          <div class="pay-tabs-nav">
+            <button type="button" class="pay-tab-btn active" data-tab="upi">📱 UPI / QR Code</button>
+            <button type="button" class="pay-tab-btn" data-tab="card">💳 Card & POS Swipe</button>
+            <button type="button" class="pay-tab-btn" data-tab="netbanking">🏦 Bank Transfer</button>
+            <button type="button" class="pay-tab-btn" data-tab="cash">💵 Cash at Desk</button>
+            <button type="button" class="pay-tab-btn" data-tab="whatsapp">📲 WhatsApp Link</button>
+          </div>
+
+          <!-- Mode 1: UPI / Dynamic QR -->
+          <div class="pay-tab-content active" id="pane-pay-upi">
+            <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.75rem;">
+              <div class="qr-box-container">
+                <!-- SVG simulated high-res QR code with Virtex Logo -->
+                <svg width="140" height="140" viewBox="0 0 100 100" fill="#000">
+                  <rect width="100" height="100" fill="#ffffff" />
+                  <!-- Corner Finders -->
+                  <rect x="5" y="5" width="26" height="26" fill="#000" />
+                  <rect x="8" y="8" width="20" height="20" fill="#fff" />
+                  <rect x="12" y="12" width="12" height="12" fill="#000" />
+
+                  <rect x="69" y="5" width="26" height="26" fill="#000" />
+                  <rect x="72" y="8" width="20" height="20" fill="#fff" />
+                  <rect x="76" y="12" width="12" height="12" fill="#000" />
+
+                  <rect x="5" y="69" width="26" height="26" fill="#000" />
+                  <rect x="8" y="72" width="20" height="20" fill="#fff" />
+                  <rect x="12" y="76" width="12" height="12" fill="#000" />
+
+                  <!-- Data Matrix Dots -->
+                  <circle cx="45" cy="15" r="3" fill="#000" />
+                  <circle cx="55" cy="15" r="3" fill="#000" />
+                  <circle cx="40" cy="25" r="3" fill="#000" />
+                  <circle cx="60" cy="25" r="3" fill="#000" />
+                  <circle cx="15" cy="45" r="3" fill="#000" />
+                  <circle cx="25" cy="45" r="3" fill="#000" />
+                  <circle cx="75" cy="45" r="3" fill="#000" />
+                  <circle cx="85" cy="45" r="3" fill="#000" />
+                  <circle cx="15" cy="55" r="3" fill="#000" />
+                  <circle cx="25" cy="55" r="3" fill="#000" />
+                  <circle cx="75" cy="55" r="3" fill="#000" />
+                  <circle cx="85" cy="55" r="3" fill="#000" />
+                  <circle cx="45" cy="75" r="3" fill="#000" />
+                  <circle cx="55" cy="75" r="3" fill="#000" />
+                  <circle cx="40" cy="85" r="3" fill="#000" />
+                  <circle cx="60" cy="85" r="3" fill="#000" />
+                  <!-- Center Virtex Dot -->
+                  <rect x="42" y="42" width="16" height="16" rx="4" fill="#00e676" />
+                  <circle cx="50" cy="50" r="4" fill="#05070a" />
+                </svg>
+              </div>
+
+              <div>
+                <div class="text-xs text-dim">OFFICIAL GYM UPI VPA</div>
+                <div
+                  style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; font-weight: 700; color: var(--accent-green); margin: 3px 0 6px 0;">
+                  virtex@okaxis
+                </div>
+                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
+                  <span class="badge badge-outline text-xs">GPay</span>
+                  <span class="badge badge-outline text-xs">PhonePe</span>
+                  <span class="badge badge-outline text-xs">Paytm</span>
+                  <span class="badge badge-outline text-xs">BHIM</span>
+                </div>
+              </div>
+
+              <div style="width: 100%; text-align: left;">
+                <label class="form-label text-xs" for="pay-upi-utr">UPI UTR / Reference ID (Optional)</label>
+                <input type="text" id="pay-upi-utr" class="form-input font-mono text-xs"
+                  placeholder="e.g. 334982109842" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Mode 2: Card & POS -->
+          <div class="pay-tab-content" id="pane-pay-card">
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div>
+                <label class="form-label text-xs" for="pay-card-name">Cardholder Name</label>
+                <input type="text" id="pay-card-name" class="form-input text-xs" placeholder="Name on card" />
+              </div>
+              <div>
+                <label class="form-label text-xs" for="pay-card-number">Card Number</label>
+                <input type="text" id="pay-card-number" class="form-input font-mono text-xs"
+                  placeholder="•••• •••• •••• 4242" maxlength="19" />
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div>
+                  <label class="form-label text-xs" for="pay-card-expiry">Expiry Date</label>
+                  <input type="text" id="pay-card-expiry" class="form-input font-mono text-xs" placeholder="MM/YY"
+                    maxlength="5" />
+                </div>
+                <div>
+                  <label class="form-label text-xs" for="pay-card-cvv">CVV</label>
+                  <input type="password" id="pay-card-cvv" class="form-input font-mono text-xs" placeholder="•••"
+                    maxlength="4" autocomplete="cc-csc" />
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-simulate-pos"
+                style="width: 100%; margin-top: 4px; border-color: rgba(0,230,118,0.3); color: var(--accent-green);">
+                ⚡ Simulate Reception POS Terminal Swipe / Tap
+              </button>
+            </div>
+          </div>
+
+          <!-- Mode 3: Net Banking -->
+          <div class="pay-tab-content" id="pane-pay-netbanking">
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div>
+                <label class="form-label text-xs" for="pay-bank-select">Select Member Bank</label>
+                <select id="pay-bank-select" class="form-input text-xs">
+                  <option value="HDFC">HDFC Bank</option>
+                  <option value="ICICI">ICICI Bank</option>
+                  <option value="SBI">State Bank of India</option>
+                  <option value="Axis">Axis Bank</option>
+                  <option value="Kotak">Kotak Mahindra Bank</option>
+                </select>
+              </div>
+
+              <!-- Beneficiary Details Box -->
+              <div
+                style="background: rgba(0, 0, 0, 0.4); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: var(--radius-sm); padding: 0.75rem; font-size: 0.78rem;">
+                <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">VIRTEX FITNESS BENEFICIARY ACCOUNT
+                </div>
+                <div class="text-dim">Account No: <strong
+                    style="color: #fff; font-family: monospace;">50200088921134</strong></div>
+                <div class="text-dim">IFSC Code: <strong
+                    style="color: #fff; font-family: monospace;">HDFC0001234</strong></div>
+                <div class="text-dim">Branch: Indiranagar, Bangalore</div>
+              </div>
+
+              <div>
+                <label class="form-label text-xs" for="pay-bank-ref">IMPS / NEFT Reference ID</label>
+                <input type="text" id="pay-bank-ref" class="form-input font-mono text-xs"
+                  placeholder="e.g. IMPS202611078821" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Mode 4: Cash at Desk -->
+          <div class="pay-tab-content" id="pane-pay-cash">
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div>
+                <label class="form-label text-xs" for="pay-cash-tendered">Cash Tendered / Received (₹)</label>
+                <input type="number" id="pay-cash-tendered" class="form-input font-mono"
+                  placeholder="Enter cash given by member" min="0" step="1" />
+              </div>
+
+              <div
+                style="background: rgba(0, 230, 118, 0.05); border: 1px solid rgba(0, 230, 118, 0.2); border-radius: var(--radius-sm); padding: 0.85rem; display: flex; align-items: center; justify-content: space-between;">
+                <span class="text-xs text-dim">CHANGE TO RETURN:</span>
+                <span class="font-mono" id="pay-cash-change"
+                  style="font-size: 1.15rem; font-weight: 800; color: var(--accent-green);">₹0.00</span>
+              </div>
+
+              <label
+                style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #94a3b8; cursor: pointer;">
+                <input type="checkbox" id="pay-cash-print-receipt" checked style="accent-color: var(--accent-green);" />
+                Print Official Virtex Cash Receipt & Stamp
+              </label>
+            </div>
+          </div>
+
+          <!-- Mode 5: WhatsApp Payment Link -->
+          <div class="pay-tab-content" id="pane-pay-whatsapp">
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; text-align: center;">
+              <div style="font-size: 2.2rem; margin-top: 4px;">📲</div>
+              <div style="font-size: 0.9rem; font-weight: 700; color: #fff;">Direct Member Payment Link</div>
+              <p class="text-xs text-dim" style="margin: 0; line-height: 1.4;">
+                Generate an instant UPI/Razorpay payment link and share it directly with the member on WhatsApp.
+              </p>
+
+              <div
+                style="background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.65rem; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <span class="font-mono text-xs" id="pay-link-url"
+                  style="color: var(--accent-green); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  https://pay.virtexfitness.in/inv/GYM...
+                </span>
+                <button type="button" class="btn btn-outline btn-sm" id="btn-copy-pay-link"
+                  style="font-size: 0.72rem; padding: 4px 8px; flex-shrink: 0;">
+                  📋 Copy
+                </button>
+              </div>
+
+              <button type="button" class="btn btn-green btn-sm" id="btn-send-whatsapp-invoice" style="width: 100%;">
+                💬 Open & Send via Member WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Optional Payment Notes -->
+        <div>
+          <label class="form-label text-xs" for="pay-fee-notes">Payment Remarks / Staff Notes</label>
+          <input type="text" id="pay-fee-notes" class="form-input text-xs"
+            placeholder="e.g. Cleared at front desk with manager approval" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="btn-cancel-pay-modal">Cancel</button>
+        <button type="button" class="btn btn-green" id="btn-confirm-pay-modal" style="font-weight: 800;">
+          💳 Confirm & Settle Payment
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Birthday Details & Celebration -->
+  <div class="modal-overlay" id="modal-birthday-detail" role="dialog" aria-modal="true" style="z-index: 2200;">
+    <div class="modal-dialog" style="max-width: 500px; width: 100%; text-align: center;">
+      <div class="modal-header" style="justify-content: center; position: relative;">
+        <h3 style="display: flex; align-items: center; gap: 8px;">
+          <span id="bday-icon-header">🎂</span> Birthday Celebration
+        </h3>
+        <button class="btn-close-modal" id="btn-close-bday-modal"
+          style="position: absolute; right: 1.25rem;">&times;</button>
+      </div>
+
+      <div class="modal-body"
+        style="display: flex; flex-direction: column; gap: 1rem; align-items: center; padding: 1.75rem 1.5rem;">
+        <!-- Festive Avatar -->
+        <div
+          style="width: 76px; height: 76px; border-radius: 50%; background: rgba(236, 72, 153, 0.15); border: 2px solid #f472b6; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; box-shadow: 0 0 20px rgba(244, 114, 182, 0.35);"
+          id="bday-avatar-box">
+          🎂
+        </div>
+
+        <div>
+          <h3 id="bday-name" style="margin: 0; color: #fff; font-size: 1.3rem; font-weight: 800;">Full Name</h3>
+          <div style="margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span class="badge" id="bday-role-badge">GYM MEMBER</span>
+            <span class="badge badge-outline font-mono text-xs" id="bday-code">GYM001</span>
+          </div>
+        </div>
+
+        <!-- Birthday Highlight Box -->
+        <div
+          style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; width: 100%; box-sizing: border-box;">
+          <div style="font-size: 0.85rem; color: #f472b6; font-weight: 700; margin-bottom: 4px;" id="bday-date-line">
+            Birthday: 15 November
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-dim);" id="bday-sub-line">
+            Plan: Platinum Annual • Age Turning: 30
+          </div>
+        </div>
+
+        <!-- Cheerful Virtex Birthday Message -->
+        <div
+          style="background: rgba(0, 230, 118, 0.06); border: 1px dashed rgba(0, 230, 118, 0.3); border-radius: var(--radius-sm); padding: 0.85rem; font-size: 0.84rem; color: #e2e8f0; line-height: 1.45;">
+          🎉 <em>"Wishing you a very Happy Birthday from everyone at Virtex Fitness! Here's to crushing personal
+            records, incredible health, and pure strength this upcoming year!"</em>
+        </div>
+
+        <!-- Birthday Action Buttons -->
+        <div style="display: flex; flex-direction: column; gap: 0.65rem; width: 100%;">
+          <button type="button" class="btn btn-green" id="btn-bday-whatsapp" style="width: 100%; font-weight: 700;">
+            💬 Wish on WhatsApp (+91 ...)
+          </button>
+          <button type="button" class="btn btn-outline" id="btn-bday-fitbot"
+            style="width: 100%; border-color: rgba(236,72,153,0.4); color: #f472b6;">
+            🤖 Wish via FitBot Voice & Wave Gesture
+          </button>
+          <a id="btn-bday-call" href="#" class="btn btn-outline btn-sm"
+            style="width: 100%; text-decoration: none; justify-content: center;">
+            📞 Call Person
+          </a>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content: center;">
+        <button type="button" class="btn btn-outline" id="btn-dismiss-bday-modal" style="width: 100%;">Dismiss</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal: Confirmation Dialog (Centered) -->
+  <div class="modal-overlay" id="modal-confirm" role="dialog" aria-modal="true" style="z-index: 2500;">
+    <div class="modal-dialog"
+      style="max-width: 440px; text-align: center; border: 1px solid rgba(239, 68, 68, 0.4); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95); padding: 2rem 1.75rem;">
+      <div style="font-size: 3rem; line-height: 1; margin-bottom: 0.85rem;" id="modal-confirm-icon">🚪</div>
+      <h3 id="modal-confirm-title" style="margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 700; color: #fff;">
+        Sign Out</h3>
+      <p id="modal-confirm-message"
+        style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 1.75rem; line-height: 1.5;">
+        Are you sure you want to log out of Virtex Admin Console?
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button type="button" class="btn btn-outline" id="modal-confirm-cancel-btn"
+          style="flex: 1; padding: 0.75rem 1rem; font-weight: 600;">Cancel</button>
+        <button type="button" class="btn btn-green" id="modal-confirm-ok-btn"
+          style="flex: 1; padding: 0.75rem 1rem; font-weight: 700;">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar Controller Script -->
+  <script type="module">
+    import { adminApi } from './js/admin/adminApi.js';
+
+    // Application State for Calendar
+    const calState = {
+      currentDate: new Date(),
+      selectedDate: new Date(),
+      activeView: 'month',
+      categoryFilter: 'all',
+      scheduleEvents: [],
+      customEvents: [],
+      operatingHours: [],
+      trainers: [],
+      members: [],
+    };
+
+    let activeFeeMember = null;
+    let activePaymentTab = 'upi';
+
+    function showToast(msg, isErr = false) {
+      const banner = document.getElementById('toast-banner');
+      if (!banner) return;
+      banner.textContent = msg;
+      banner.className = `toast-banner show ${isErr ? 'toast-error' : 'toast-success'}`;
+      clearTimeout(banner._timer);
+      banner._timer = setTimeout(() => {
+        banner.className = 'toast-banner';
+      }, 3500);
+    }
+
+    // Hydrate User Session (Identical to admin-profile.html)
+    async function hydrateUser() {
+      try {
+        const userRes = await adminApi.getCurrentUser();
+        if (userRes.success && userRes.user) {
+          const u = userRes.user;
+          const fullName = u.fullName || u.full_name || u.username || 'Nandan.B';
+          const username = u.username || 'nandanb449';
+          const role = (u.role || 'owner').toUpperCase();
+
+          document.getElementById('sidebar-user-fullname').textContent = fullName;
+          document.getElementById('sidebar-user-handle').textContent = `@${username}`;
+
+          const pill = document.getElementById('sidebar-role-pill');
+          if (pill) {
+            pill.textContent = role;
+            pill.className = `role-badge-pill role-${role.toLowerCase()}`;
+          }
+
+          const photoEl = document.getElementById('sidebar-user-photo');
+          const initialsEl = document.getElementById('sidebar-user-initials');
+          if (u.avatar_url || u.avatarUrl) {
+            if (photoEl) {
+              photoEl.src = u.avatar_url || u.avatarUrl;
+              photoEl.style.display = 'block';
+            }
+            if (initialsEl) initialsEl.style.display = 'none';
+          } else {
+            if (photoEl) photoEl.style.display = 'none';
+            if (initialsEl) {
+              initialsEl.textContent = fullName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
+              initialsEl.style.display = 'inline';
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Calendar] Auth hydration notice:', err.message);
+      }
+    }
+
+    // ---- Saved in-gym classes (online_classes, class_type 'in_person'), shared with the Member Portal ----
+    const CLASS_STATUS_LABEL = { scheduled: 'Registration open', registration_closed: 'Registration closed', cancelled: 'Cancelled', completed: 'Completed' };
+    function calEsc(v) {
+      return v === null || v === undefined ? '' : String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    async function classApi(method, path, body) {
+      const token = adminApi.getToken();
+      const res = await fetch(`/api/v1/admin/classes${path}`, {
+        method,
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      return res.json().catch(() => ({ success: false, message: `Request failed (${res.status})` }));
+    }
+    const pad2 = (n) => String(n).padStart(2, '0');
+    async function loadSavedClasses() {
+      try {
+        const res = await classApi('GET', '?class_type=in_person');
+        const rows = Array.isArray(res?.data) ? res.data : [];
+        calState.customEvents = rows.map((c) => {
+          const s = new Date(c.scheduled_at);
+          const e = new Date(s.getTime() + (Number(c.duration_mins) || 0) * 60000);
+          const lines = String(c.description || '').split('\n');
+          const room = lines[0].startsWith('Studio / Area: ') ? lines.shift().slice('Studio / Area: '.length) : '';
+          return {
+            id: `class-${c.id}`, classId: c.id,
+            date: new Date(s.getFullYear(), s.getMonth(), s.getDate()),
+            title: c.status === 'cancelled' ? `${c.title} (cancelled)` : c.title,
+            category: c.category, start: `${pad2(s.getHours())}:${pad2(s.getMinutes())}`, end: `${pad2(e.getHours())}:${pad2(e.getMinutes())}`,
+            trainer: c.instructor_name || 'General Floor Staff', room, notes: lines.join('\n'),
+            capacity: Number(c.max_participants) || 0, booked: Number(c.active_registrations) || 0, status: c.status,
+          };
+        });
+      } catch (err) {
+        console.warn('[Calendar] Could not load saved classes:', err.message);
+      }
+    }
+
+    // Populate Lead Coach / Trainer Dropdown from PostgreSQL Trainers
+    function populateTrainerDropdown() {
+      const selectEl = document.getElementById('sess-trainer');
+      if (!selectEl) return;
+      if (Array.isArray(calState.trainers) && calState.trainers.length > 0) {
+        const opts = calState.trainers.map((t) => {
+          const spec = t.specialty ? ` (${t.specialty})` : '';
+          return `<option value="${calEsc(t.id)}">${calEsc(t.full_name)}${calEsc(spec)}</option>`;
+        });
+        opts.push('<option value="">General Floor Staff</option>');
+        selectEl.innerHTML = opts.join('');
+      }
+    }
+
+    // Helper: parse date representation safely
+    function parseDateParts(dobVal) {
+      if (!dobVal) return null;
+      if (typeof dobVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dobVal)) {
+        const [y, m, d] = dobVal.split('-').map(Number);
+        return { year: y, month: m - 1, day: d };
+      }
+      const d = new Date(dobVal);
+      if (isNaN(d.getTime())) return null;
+      return { year: d.getFullYear(), month: d.getMonth(), day: d.getDate() };
+    }
+
+    // Load Operating Hours, Trainers, and Members from PostgreSQL
+    async function loadScheduleData() {
+      try {
+        // Class sessions are no longer generated from the gym's opening hours
+        // (opening hours are managed on the Working Hours page), so the gym profile isn't loaded here.
+        const [trainerRes, annRes, memRes] = await Promise.all([
+          adminApi.getTrainers().catch(() => ({ success: false })),
+          adminApi.getAnnouncements().catch(() => ({ success: false })),
+          adminApi.getMembers({ limit: 100 }).catch(() => ({ success: false })),
+        ]);
+
+        const trainersList = trainerRes?.data || trainerRes?.trainers || [];
+        if (trainerRes?.success && Array.isArray(trainersList)) {
+          calState.trainers = trainersList;
+        }
+        const annList = annRes?.data || annRes?.announcements || [];
+        if (annRes?.success && Array.isArray(annList)) {
+          calState.announcements = annList;
+        }
+        const membersList = memRes?.data || memRes?.members || [];
+        if (Array.isArray(membersList)) {
+          calState.members = membersList;
+        }
+
+        populateTrainerDropdown();
+        await loadSavedClasses();
+        generateMonthlyEvents();
+        renderActiveView();
+        updateStatsRow();
+      } catch (err) {
+        console.error('[Calendar] Error loading schedule data:', err);
+      }
+    }
+
+    // Generate Calendar Event Objects for current month based on operating_hours, birthdays, and fee dues
+    function generateMonthlyEvents() {
+      const events = [];
+      const year = calState.currentDate.getFullYear();
+      const month = calState.currentDate.getMonth();
+
+      // 1. Personal Trainer Birthdays (recurring every year in their birth month)
+      if (Array.isArray(calState.trainers)) {
+        calState.trainers.forEach((trainer) => {
+          if (!trainer.date_of_birth) return;
+          const dob = parseDateParts(trainer.date_of_birth);
+          if (!dob) return;
+
+          if (dob.month === month) {
+            const ageTurning = year - dob.year;
+            events.push({
+              id: `birthday-trainer-${trainer.id}-${year}`,
+              date: new Date(year, month, dob.day),
+              title: `🎉 Coach Birthday: ${trainer.full_name}`,
+              category: 'birthday-trainer',
+              start: 'All Day',
+              end: `Turning ${ageTurning}`,
+              trainer: trainer.full_name,
+              room: 'Gym Floor & Reception',
+              notes: `Celebrate Coach ${trainer.full_name}'s Birthday! Specialty: ${trainer.specialty || 'Floor Coach'}`,
+              isBirthday: true,
+              birthdayType: 'trainer',
+              person: trainer,
+              age: ageTurning,
+              dob: dob,
+            });
+          }
+        });
+      }
+
+      // 2. Member Birthdays (recurring every year in their birth month)
+      if (Array.isArray(calState.members)) {
+        calState.members.forEach((member) => {
+          if (!member.date_of_birth) return;
+          const dob = parseDateParts(member.date_of_birth);
+          if (!dob) return;
+
+          if (dob.month === month) {
+            const ageTurning = year - dob.year;
+            events.push({
+              id: `birthday-member-${member.id}-${year}`,
+              date: new Date(year, month, dob.day),
+              title: `🎂 Member Birthday: ${member.full_name}`,
+              category: 'birthday-member',
+              start: 'All Day',
+              end: `Turning ${ageTurning}`,
+              trainer: 'FitBot AI & Front Desk',
+              room: 'Virtex Reception Desk',
+              notes: `Wish member ${member.full_name} a Happy Birthday! Plan: ${member.plan_name || 'Standard'}`,
+              isBirthday: true,
+              birthdayType: 'member',
+              person: member,
+              age: ageTurning,
+              dob: dob,
+            });
+          }
+        });
+      }
+
+      // 3. Member Remaining Fee Dues & Payment Deadlines
+      if (Array.isArray(calState.members)) {
+        calState.members.forEach((member) => {
+          const dueAmt = parseFloat(member.fee_due);
+          if (isNaN(dueAmt) || dueAmt <= 0) return;
+
+          let dueDay = 10;
+          if (member.fee_due_date) {
+            const parsedDue = parseDateParts(member.fee_due_date);
+            if (parsedDue) {
+              if (parsedDue.month === month && parsedDue.year === year) {
+                dueDay = parsedDue.day;
+              } else if (parsedDue.year < year || (parsedDue.year === year && parsedDue.month < month)) {
+                // Overdue: surface on 1st of viewed month
+                dueDay = 1;
+              } else {
+                return;
+              }
+            }
+          }
+
+          events.push({
+            id: `fee-due-${member.id}-${year}-${month}`,
+            date: new Date(year, month, dueDay),
+            title: `💳 Fee Due: ${member.full_name} (₹${dueAmt.toLocaleString('en-IN')})`,
+            category: 'fee-due',
+            start: 'Fee Due',
+            end: `₹${dueAmt.toLocaleString('en-IN')}`,
+            trainer: member.plan_name || 'Active Membership',
+            room: 'Reception Cash/Card/UPI',
+            notes: `Total Plan Fee: ₹${parseFloat(member.fee_amount || 0).toLocaleString('en-IN')} | Paid: ₹${parseFloat(member.fee_paid || 0).toLocaleString('en-IN')} | Remaining Due: ₹${dueAmt.toLocaleString('en-IN')}`,
+            isFeeDue: true,
+            member: member,
+            feeDue: dueAmt,
+          });
+        });
+      }
+
+      // Merge user-scheduled custom sessions
+      if (Array.isArray(calState.customEvents)) {
+        calState.customEvents.forEach((evt) => {
+          if (evt.date && evt.date.getFullYear() === year && evt.date.getMonth() === month) {
+            events.push(evt);
+          }
+        });
+      }
+
+      // Strict Deduplication to guarantee no duplicate events
+      const seen = new Set();
+      const uniqueEvents = events.filter((e) => {
+        const dStr = `${e.date.getFullYear()}-${e.date.getMonth()}-${e.date.getDate()}`;
+        const key = `${dStr}_${e.start}_${e.end}_${e.title}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      // Sort: Birthdays & Fee Dues first, then chronologically by time
+      uniqueEvents.sort((a, b) => {
+        const dDiff = a.date.getTime() - b.date.getTime();
+        if (dDiff !== 0) return dDiff;
+        const priorityA = a.isBirthday ? 1 : a.isFeeDue ? 2 : 3;
+        const priorityB = b.isBirthday ? 1 : b.isFeeDue ? 2 : 3;
+        if (priorityA !== priorityB) return priorityA - priorityB;
+        return a.start.localeCompare(b.start);
+      });
+
+      calState.scheduleEvents = uniqueEvents;
+    }
+
+    function detectCategory(title = '') {
+      const t = String(title).toLowerCase();
+      if (t.includes('zumba') || t.includes('dance') || t.includes('aerobics')) return 'zumba';
+      if (t.includes('yoga') || t.includes('pilates') || t.includes('stretch')) return 'yoga';
+      if (t.includes('hiit') || t.includes('crossfit') || t.includes('bootcamp')) return 'hiit';
+      if (t.includes('challenge') || t.includes('event')) return 'event';
+      return 'gym';
+    }
+
+    function getTrainerForCategory(cat) {
+      if (Array.isArray(calState.trainers) && calState.trainers.length > 0) {
+        const match = calState.trainers.find((t) => {
+          const spec = (t.specialty || '').toLowerCase();
+          if (cat === 'zumba' && (spec.includes('zumba') || spec.includes('dance') || spec.includes('aerobic'))) return true;
+          if (cat === 'yoga' && (spec.includes('yoga') || spec.includes('pilates') || spec.includes('zen') || spec.includes('stretch'))) return true;
+          if (cat === 'hiit' && (spec.includes('hiit') || spec.includes('crossfit') || spec.includes('strength') || spec.includes('cardio'))) return true;
+          return false;
+        });
+        if (match) return match.full_name;
+
+        const onFloor = calState.trainers.find((t) => t.status === 'on_floor') || calState.trainers[0];
+        return onFloor.full_name;
+      }
+      return 'Coach On Duty';
+    }
+
+    function getRoomForCategory(cat) {
+      if (cat === 'zumba') return 'Studio 1 (Dance Floor)';
+      if (cat === 'yoga') return 'Studio 2 (Zen Terrace)';
+      if (cat === 'hiit') return 'CrossFit Functional Deck';
+      return 'Main Workout Floor';
+    }
+
+    // Render Views
+    function renderActiveView() {
+      const monthView = document.getElementById('view-month-container');
+      const weekView = document.getElementById('view-week-container');
+      const agendaView = document.getElementById('view-agenda-container');
+
+      if (calState.activeView === 'month') {
+        monthView.style.display = 'block';
+        weekView.style.display = 'none';
+        agendaView.style.display = 'none';
+        renderMonthGrid();
+      } else if (calState.activeView === 'week') {
+        monthView.style.display = 'none';
+        weekView.style.display = 'flex';
+        agendaView.style.display = 'none';
+        renderWeekTimeline();
+      } else {
+        monthView.style.display = 'none';
+        weekView.style.display = 'none';
+        agendaView.style.display = 'flex';
+        renderAgendaList();
+      }
+
+      // Update Header Title
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      const titleEl = document.getElementById('cal-month-title');
+      if (titleEl) {
+        titleEl.textContent = `${monthNames[calState.currentDate.getMonth()]} ${calState.currentDate.getFullYear()}`;
+      }
+    }
+
+    // Render Month Grid
+    function renderMonthGrid() {
+      const grid = document.getElementById('cal-month-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const headers = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      headers.forEach((h, idx) => {
+        const headerEl = document.createElement('div');
+        headerEl.className = `cal-weekday-header ${idx >= 5 ? 'weekend' : ''}`;
+        headerEl.textContent = h;
+        grid.appendChild(headerEl);
+      });
+
+      const year = calState.currentDate.getFullYear();
+      const month = calState.currentDate.getMonth();
+      const firstDayOfMonth = new Date(year, month, 1);
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+
+      let startDay = firstDayOfMonth.getDay() - 1;
+      if (startDay === -1) startDay = 6;
+
+      const totalDays = lastDayOfMonth.getDate();
+      const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+      const today = new Date();
+      const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+      // 1. Prev month trailing days
+      for (let i = startDay - 1; i >= 0; i--) {
+        const dayCell = document.createElement('div');
+        dayCell.className = 'cal-day-cell other-month';
+        dayCell.innerHTML = `<div class="cal-day-num">${prevMonthLastDay - i}</div>`;
+        grid.appendChild(dayCell);
+      }
+
+      // 2. Current Month days
+      for (let day = 1; day <= totalDays; day++) {
+        const dayCell = document.createElement('div');
+        const isToday = isCurrentMonth && today.getDate() === day;
+        dayCell.className = `cal-day-cell ${isToday ? 'is-today' : ''}`;
+
+        dayCell.innerHTML = `
+          <div class="cal-day-num">
+            <span>${day}</span>
+            ${isToday ? '<span class="today-pill-tag">Today</span>' : ''}
+          </div>
+        `;
+
+        // Filter events for this day
+        const dayEvents = calState.scheduleEvents.filter((e) => {
+          const matchDate = e.date.getDate() === day && e.date.getMonth() === month && e.date.getFullYear() === year;
+          if (!matchDate) return false;
+          if (calState.categoryFilter === 'birthdays') {
+            return e.isBirthday === true;
+          }
+          if (calState.categoryFilter === 'fees') {
+            return e.isFeeDue === true;
+          }
+          if (calState.categoryFilter !== 'all' && e.category !== calState.categoryFilter) return false;
+          return true;
+        });
+
+        // Sort events so Birthdays (1) and Fee Dues (2) take top priority over regular classes (3)
+        dayEvents.sort((a, b) => {
+          const pA = a.isBirthday ? 1 : a.isFeeDue ? 2 : 3;
+          const pB = b.isBirthday ? 1 : b.isFeeDue ? 2 : 3;
+          if (pA !== pB) return pA - pB;
+          return (a.start || '').localeCompare(b.start || '');
+        });
+
+        // Display up to 3 event pills
+        dayEvents.slice(0, 3).forEach((evt) => {
+          const pill = document.createElement('div');
+          pill.className = `cal-event-pill cal-event-${evt.category}`;
+          pill.title = `${evt.title} • ${evt.notes || evt.trainer || ''}`;
+
+          if (evt.isBirthday && evt.birthdayType === 'trainer') {
+            const trnName = evt.person?.full_name?.replace(/^Coach\s+/i, '') || evt.trainer || '';
+            pill.innerHTML = `<span>🎉</span> <strong style="overflow:hidden;text-overflow:ellipsis;">Coach ${trnName}</strong> <span class="badge badge-purple" style="font-size:0.58rem;padding:1px 4px;margin-left:auto;flex-shrink:0;">Coach</span>`;
+          } else if (evt.isBirthday && evt.birthdayType === 'member') {
+            const memName = evt.person?.full_name || '';
+            pill.innerHTML = `<span>🎂</span> <strong style="overflow:hidden;text-overflow:ellipsis;">${memName}</strong> <span class="badge badge-pink" style="font-size:0.58rem;padding:1px 4px;margin-left:auto;flex-shrink:0;">Member</span>`;
+          } else if (evt.isFeeDue) {
+            const memFirstName = evt.member?.full_name?.split(' ')[0] || '';
+            pill.innerHTML = `<span>💳</span> <strong>₹${Number(evt.feeDue).toLocaleString('en-IN')} Due</strong> <span style="opacity:0.85;font-size:0.62rem;margin-left:auto;flex-shrink:0;">${memFirstName}</span>`;
+          } else {
+            pill.innerHTML = `<span class="font-mono" style="font-size:0.64rem;color:var(--text-dim);font-weight:700;flex-shrink:0;">${evt.start}</span> <span style="overflow:hidden;text-overflow:ellipsis;">${calEsc(evt.title)}</span>`;
+          }
+
+          pill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (evt.isBirthday) {
+              openBirthdayDetail(evt);
+            } else if (evt.isFeeDue) {
+              openFeePaymentModal(evt.member);
+            } else {
+              openEventDetail(evt);
+            }
+          });
+          dayCell.appendChild(pill);
+        });
+
+        if (dayEvents.length > 3) {
+          const morePill = document.createElement('span');
+          morePill.className = 'text-xs text-dim font-mono';
+          morePill.style.fontSize = '0.65rem';
+          morePill.textContent = `+${dayEvents.length - 3} more`;
+          dayCell.appendChild(morePill);
+        }
+
+        dayCell.addEventListener('click', () => {
+          calState.selectedDate = new Date(year, month, day);
+          calState.activeView = 'agenda';
+          updateViewButtons();
+          renderActiveView();
+        });
+
+        grid.appendChild(dayCell);
+      }
+
+      // 3. Next month trailing days
+      const filledCells = startDay + totalDays;
+      const remainingCells = (filledCells % 7 === 0) ? 0 : 7 - (filledCells % 7);
+      for (let d = 1; d <= remainingCells; d++) {
+        const dayCell = document.createElement('div');
+        dayCell.className = 'cal-day-cell other-month';
+        dayCell.innerHTML = `<div class="cal-day-num">${d}</div>`;
+        grid.appendChild(dayCell);
+      }
+    }
+
+    // Render Week View Timeline
+    function renderWeekTimeline() {
+      const container = document.getElementById('cal-week-grid');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const curr = new Date(calState.selectedDate);
+      let dayOfWeek = curr.getDay() - 1;
+      if (dayOfWeek === -1) dayOfWeek = 6;
+      const monday = new Date(curr);
+      monday.setDate(curr.getDate() - dayOfWeek);
+
+      const timeHeader = document.createElement('div');
+      timeHeader.className = 'cal-weekday-header';
+      timeHeader.textContent = 'Time';
+      container.appendChild(timeHeader);
+
+      const weekDays = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        weekDays.push(d);
+
+        const dHeader = document.createElement('div');
+        dHeader.className = `cal-weekday-header ${i >= 5 ? 'weekend' : ''}`;
+        dHeader.innerHTML = `${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i]} <span style="color:#fff;">${d.getDate()}</span>`;
+        container.appendChild(dHeader);
+      }
+
+      for (let hour = 6; hour <= 21; hour++) {
+        const timeLabel = document.createElement('div');
+        timeLabel.className = 'cal-week-time-label';
+        const hStr = hour.toString().padStart(2, '0') + ':00';
+        timeLabel.textContent = hStr;
+        container.appendChild(timeLabel);
+
+        for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+          const colDate = weekDays[dayIdx];
+          const col = document.createElement('div');
+          col.className = 'cal-week-day-col';
+
+          const eventsInHour = calState.scheduleEvents.filter((e) => {
+            if (e.date.getDate() !== colDate.getDate() || e.date.getMonth() !== colDate.getMonth() || e.date.getFullYear() !== colDate.getFullYear()) return false;
+            if (e.isBirthday || e.isFeeDue) {
+              return hour === 6; // Surface full-day alerts at top hour
+            }
+            const startH = parseInt(e.start.split(':')[0], 10);
+            return startH === hour;
+          });
+
+          eventsInHour.forEach((evt) => {
+            const card = document.createElement('div');
+            card.className = `cal-event-pill cal-event-${evt.category}`;
+            card.style.padding = '4px 8px';
+
+            if (evt.isBirthday && evt.birthdayType === 'trainer') {
+              const trnName = evt.person?.full_name?.replace(/^Coach\s+/i, '') || evt.trainer || '';
+              card.innerHTML = `<span>🎉</span> <strong style="overflow:hidden;text-overflow:ellipsis;">Coach ${trnName}</strong> <span class="badge badge-purple" style="font-size:0.58rem;padding:1px 4px;margin-left:auto;flex-shrink:0;">Coach</span>`;
+            } else if (evt.isBirthday && evt.birthdayType === 'member') {
+              const memName = evt.person?.full_name || '';
+              card.innerHTML = `<span>🎂</span> <strong style="overflow:hidden;text-overflow:ellipsis;">${memName}</strong> <span class="badge badge-pink" style="font-size:0.58rem;padding:1px 4px;margin-left:auto;flex-shrink:0;">Member</span>`;
+            } else if (evt.isFeeDue) {
+              const memFirstName = evt.member?.full_name?.split(' ')[0] || '';
+              card.innerHTML = `<span>💳</span> <strong>₹${Number(evt.feeDue).toLocaleString('en-IN')} Due</strong> <span style="opacity:0.85;font-size:0.62rem;margin-left:auto;flex-shrink:0;">${memFirstName}</span>`;
+            } else {
+              card.innerHTML = `<span class="font-mono" style="font-size:0.64rem;color:var(--text-dim);font-weight:700;flex-shrink:0;">${evt.start}</span> <span style="overflow:hidden;text-overflow:ellipsis;">${calEsc(evt.title)}</span>`;
+            }
+
+            card.addEventListener('click', () => {
+              if (evt.isBirthday) openBirthdayDetail(evt);
+              else if (evt.isFeeDue) openFeePaymentModal(evt.member);
+              else openEventDetail(evt);
+            });
+            col.appendChild(card);
+          });
+
+          container.appendChild(col);
+        }
+      }
+    }
+
+    // Render Agenda / Day View
+    function renderAgendaList() {
+      const container = document.getElementById('view-agenda-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const sel = calState.selectedDate;
+      const dayEvents = calState.scheduleEvents.filter((e) => {
+        const match = e.date.getDate() === sel.getDate() && e.date.getMonth() === sel.getMonth() && e.date.getFullYear() === sel.getFullYear();
+        if (!match) return false;
+        if (calState.categoryFilter === 'birthdays') return e.isBirthday;
+        if (calState.categoryFilter === 'fees') return e.isFeeDue;
+        if (calState.categoryFilter !== 'all' && e.category !== calState.categoryFilter) return false;
+        return true;
+      });
+
+      const dayHeader = document.createElement('div');
+      dayHeader.style.display = 'flex';
+      dayHeader.style.alignItems = 'center';
+      dayHeader.style.justifyContent = 'space-between';
+      dayHeader.style.padding = '0.5rem 0';
+      dayHeader.innerHTML = `
+        <h3 style="margin: 0; color: #fff;">
+          Agenda for ${sel.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+        </h3>
+        <span class="badge badge-green font-mono">${dayEvents.length} Items</span>
+      `;
+      container.appendChild(dayHeader);
+
+      if (dayEvents.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'card';
+        empty.style.textAlign = 'center';
+        empty.style.padding = '3rem 1rem';
+        empty.innerHTML = `
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏖️</div>
+          <h4 style="color: #fff; margin: 0 0 0.5rem 0;">No Events on this Date</h4>
+          <p class="text-dim text-xs" style="margin: 0 0 1rem 0;">No birthdays, pending fee dues, or scheduled classes for this date.</p>
+          <button class="btn btn-green btn-sm" id="btn-agenda-add-slot">+ Schedule a Class for this Day</button>
+        `;
+        empty.querySelector('#btn-agenda-add-slot')?.addEventListener('click', () => {
+          openCreateModalWithDate(sel);
+        });
+        container.appendChild(empty);
+        return;
+      }
+
+      dayEvents.forEach((evt) => {
+        const card = document.createElement('div');
+        card.className = 'agenda-card';
+
+        if (evt.isBirthday) {
+          const isTrainer = evt.birthdayType === 'trainer';
+          card.style.borderLeft = isTrainer ? '4px solid #c084fc' : '4px solid #f472b6';
+          card.innerHTML = `
+            <div class="agenda-time-pill" style="color: ${isTrainer ? '#c084fc' : '#f472b6'};">
+              <span>${isTrainer ? '🎉' : '🎂'}</span> All Day
+            </div>
+            <div class="agenda-info">
+              <div class="agenda-title">
+                <span>${calEsc(evt.title)}</span>
+                <span class="badge ${isTrainer ? 'badge-purple' : 'badge-pink'}" style="font-size: 0.72rem;">Turning ${evt.age || ''}</span>
+              </div>
+              <div class="agenda-meta">
+                <span>👤 ${evt.person?.full_name || 'Staff'} (${isTrainer ? 'Personal Trainer' : 'Gym Member'})</span>
+                <span>📞 ${evt.person?.phone || 'No phone'}</span>
+                <span>📧 ${evt.person?.email || 'No email'}</span>
+              </div>
+            </div>
+            <button class="btn btn-outline btn-sm btn-view-bday" style="border-color: ${isTrainer ? '#c084fc' : '#f472b6'}; color: ${isTrainer ? '#c084fc' : '#f472b6'}; font-weight: 700;">
+              🎂 Birthday Wish
+            </button>
+          `;
+          card.querySelector('.btn-view-bday')?.addEventListener('click', () => openBirthdayDetail(evt));
+        } else if (evt.isFeeDue) {
+          card.style.borderLeft = '4px solid #f87171';
+          card.innerHTML = `
+            <div class="agenda-time-pill" style="color: #f87171;">
+              <span>💳</span> Payment Due
+            </div>
+            <div class="agenda-info">
+              <div class="agenda-title">
+                <span>${calEsc(evt.title)}</span>
+                <span class="badge badge-red font-mono" style="font-size: 0.75rem;">₹${evt.feeDue.toLocaleString('en-IN')} Due</span>
+              </div>
+              <div class="agenda-meta">
+                <span>👤 Member: <strong>${evt.member?.full_name} (${evt.member?.member_code})</strong></span>
+                <span>📋 Plan: <strong>${evt.member?.plan_name}</strong></span>
+                <span>💰 Paid: ₹${parseFloat(evt.member?.fee_paid || 0).toLocaleString('en-IN')} / ₹${parseFloat(evt.member?.fee_amount || 0).toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+            <button class="btn btn-green btn-sm btn-pay-due" style="font-size: 0.8rem; font-weight: 700;">
+              💳 Settle / Pay Fees
+            </button>
+          `;
+          card.querySelector('.btn-pay-due')?.addEventListener('click', () => openFeePaymentModal(evt.member));
+        } else {
+          card.innerHTML = `
+            <div class="agenda-time-pill">
+              <span>⏰</span> ${evt.start} – ${evt.end}
+            </div>
+            <div class="agenda-info">
+              <div class="agenda-title">
+                <span>${calEsc(evt.title)}</span>
+                <span class="badge badge-outline text-xs" style="text-transform: uppercase;">${calEsc(evt.category)}</span>
+              </div>
+              <div class="agenda-meta">
+                <span>👤 Coach: <strong>${calEsc(evt.trainer)}</strong></span>
+                <span>📍 Location: <strong>${calEsc(evt.room)}</strong></span>
+                ${evt.notes ? `<span>📝 <em>${calEsc(evt.notes)}</em></span>` : ''}
+              </div>
+            </div>
+            <button class="btn btn-outline btn-sm btn-view-slot" style="font-size: 0.76rem;">
+              View Details
+            </button>
+          `;
+          card.querySelector('.btn-view-slot')?.addEventListener('click', () => openEventDetail(evt));
+        }
+
+        container.appendChild(card);
+      });
+    }
+
+    function openEventDetail(evt) {
+      const modal = document.getElementById('modal-event-detail');
+      const body = document.getElementById('detail-body');
+      const title = document.getElementById('detail-title');
+      if (!modal || !body) return;
+
+      title.textContent = evt.title;
+      const st = evt.classId ? CLASS_STATUS_LABEL[evt.status] || evt.status : null;
+      body.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+          <span class="badge badge-green font-mono text-xs">● ${evt.classId ? calEsc(st) : 'Active Schedule Session'}</span>
+          <span class="text-xs text-dim font-mono">${evt.date.toDateString()}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div>
+            <div class="text-dim text-xs">TIME SLOT</div>
+            <div style="font-weight: 700; color: #fff; font-family: monospace;">${evt.start} – ${evt.end}</div>
+          </div>
+          <div>
+            <div class="text-dim text-xs">CATEGORY</div>
+            <div style="font-weight: 700; color: #fff; text-transform: uppercase;">${calEsc(evt.category)}</div>
+          </div>
+          <div>
+            <div class="text-dim text-xs">INSTRUCTOR / COACH</div>
+            <div style="font-weight: 700; color: #fff;">${calEsc(evt.trainer)}</div>
+          </div>
+          <div>
+            <div class="text-dim text-xs">FLOOR / STUDIO</div>
+            <div style="font-weight: 700; color: #fff;">${calEsc(evt.room)}</div>
+          </div>
+          ${evt.classId ? `<div>
+            <div class="text-dim text-xs">MEMBER PLACES</div>
+            <div style="font-weight: 700; color: #fff; font-family: monospace;">${evt.booked} booked / ${evt.capacity} · ${Math.max(0, evt.capacity - evt.booked)} free</div>
+          </div>` : ''}
+        </div>
+        ${evt.notes ? `
+          <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+            <div class="text-dim text-xs" style="margin-bottom: 2px;">SESSION NOTES</div>
+            <div style="font-size: 0.85rem; color: #fff;">${calEsc(evt.notes)}</div>
+          </div>
+        ` : ''}
+        ${evt.classId && evt.status !== 'cancelled' && evt.status !== 'completed' ? `
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            ${evt.status === 'scheduled'
+              ? '<button type="button" class="btn btn-outline" data-class-status="registration_closed">Close registration</button>'
+              : '<button type="button" class="btn btn-outline" data-class-status="scheduled">Open registration</button>'}
+            <button type="button" class="btn btn-outline" data-class-status="cancelled" style="color: #f87171;">Cancel class</button>
+          </div>` : ''}
+      `;
+      body.querySelectorAll('[data-class-status]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const next = btn.dataset.classStatus;
+          if (next === 'cancelled' && !confirm(`Cancel "${evt.title}"? Members will see it as cancelled.`)) return;
+          btn.disabled = true;
+          const res = await classApi('PATCH', `/${evt.classId}/status`, { status: next }).catch(() => ({ success: false }));
+          if (!res.success) { btn.disabled = false; showToast(res.message || 'Could not update the class.', true); return; }
+          modal.style.display = 'none';
+          await loadSavedClasses();
+          generateMonthlyEvents();
+          renderActiveView();
+          updateStatsRow();
+          showToast(`Class "${evt.title}" — ${CLASS_STATUS_LABEL[next]}.`);
+        });
+      });
+
+      modal.style.display = 'flex';
+    }
+
+    // Modal: Open Remaining Fee Payment Options
+    function openFeePaymentModal(member) {
+      if (!member) return;
+      activeFeeMember = member;
+
+      const modal = document.getElementById('modal-pay-fees');
+      if (!modal) return;
+
+      const due = parseFloat(member.fee_due) || 0;
+      const paid = parseFloat(member.fee_paid) || 0;
+      const total = parseFloat(member.fee_amount) || (due + paid);
+
+      document.getElementById('pay-member-name').textContent = member.full_name;
+      document.getElementById('pay-member-meta').textContent = `${member.member_code} • ${member.phone || 'No Phone'}`;
+      document.getElementById('pay-plan-badge').textContent = member.plan_name || 'Membership Plan';
+
+      document.getElementById('pay-total-fee').textContent = `₹${total.toLocaleString('en-IN')}`;
+      document.getElementById('pay-amount-paid').textContent = `₹${paid.toLocaleString('en-IN')}`;
+      document.getElementById('pay-fee-due').textContent = `₹${due.toLocaleString('en-IN')}`;
+      document.getElementById('label-pay-full-amount').textContent = `₹${due.toLocaleString('en-IN')}`;
+
+      // Reset radio and custom container
+      document.getElementById('choice-pay-full').checked = true;
+      const customContainer = document.getElementById('container-custom-amount');
+      if (customContainer) customContainer.style.display = 'none';
+      const customInput = document.getElementById('pay-custom-amount-input');
+      if (customInput) customInput.value = due;
+
+      // Update cash tendered placeholder & change readout
+      const cashInput = document.getElementById('pay-cash-tendered');
+      if (cashInput) cashInput.value = '';
+      const changeEl = document.getElementById('pay-cash-change');
+      if (changeEl) changeEl.textContent = '₹0.00';
+
+      // Update WhatsApp link preview
+      const linkUrl = `https://pay.virtexfitness.in/inv/${member.member_code}?amt=${due}`;
+      const linkEl = document.getElementById('pay-link-url');
+      if (linkEl) linkEl.textContent = linkUrl;
+
+      // Reset active tab to UPI
+      switchPaymentTab('upi');
+
+      modal.style.display = 'flex';
+    }
+
+    // Modal: Open Birthday Details
+    function openBirthdayDetail(evt) {
+      const modal = document.getElementById('modal-birthday-detail');
+      if (!modal) return;
+
+      const p = evt.person || {};
+      const isTrainer = evt.birthdayType === 'trainer';
+
+      const iconH = document.getElementById('bday-icon-header');
+      if (iconH) iconH.textContent = isTrainer ? '🎉' : '🎂';
+
+      const avatarBox = document.getElementById('bday-avatar-box');
+      if (avatarBox) {
+        avatarBox.textContent = isTrainer ? '🎉' : '🎂';
+        avatarBox.style.borderColor = isTrainer ? '#c084fc' : '#f472b6';
+        avatarBox.style.background = isTrainer ? 'rgba(168, 85, 247, 0.15)' : 'rgba(236, 72, 153, 0.15)';
+      }
+
+      document.getElementById('bday-name').textContent = p.full_name || evt.title;
+      const roleBadge = document.getElementById('bday-role-badge');
+      if (roleBadge) {
+        roleBadge.textContent = isTrainer ? 'PERSONAL TRAINER' : 'GYM MEMBER';
+        roleBadge.className = isTrainer ? 'badge badge-purple font-mono' : 'badge badge-pink font-mono';
+      }
+      document.getElementById('bday-code').textContent = isTrainer ? (p.trainer_code || 'TRN') : (p.member_code || 'GYM');
+
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const dateText = evt.dob ? `${evt.dob.day} ${monthNames[evt.dob.month]}` : evt.date.toLocaleDateString();
+      document.getElementById('bday-date-line').textContent = `Birthday: ${dateText} (Turning ${evt.age || ''} Years Old)`;
+      document.getElementById('bday-sub-line').textContent = isTrainer
+        ? `Specialty: ${p.specialty || 'Floor Coach'} • Shift: ${p.shift_start || '06:00'} - ${p.shift_end || '14:00'}`
+        : `Plan: ${p.plan_name || 'Standard'} • Preferred Lang: ${p.preferred_language || 'en-IN'}`;
+
+      // Set up actions
+      const waBtn = document.getElementById('btn-bday-whatsapp');
+      if (waBtn) {
+        waBtn.onclick = () => {
+          const phone = (p.phone || '').replace(/[^0-9]/g, '');
+          const msg = encodeURIComponent(`Dear ${p.full_name}, Wishing you a very Happy Birthday from all of us at Virtex Fitness! 🎂🎉 May this year bring you peak health, strength, and joy!`);
+          window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+        };
+      }
+
+      const fitbotBtn = document.getElementById('btn-bday-fitbot');
+      if (fitbotBtn) {
+        fitbotBtn.onclick = () => {
+          showToast(`🤖 FitBot: "Happy Birthday ${p.full_name}! Queued celebratory wave gesture and fanfare voice greeting!"`);
+        };
+      }
+
+      const callBtn = document.getElementById('btn-bday-call');
+      if (callBtn) {
+        callBtn.href = `tel:${p.phone || ''}`;
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function switchPaymentTab(tabName) {
+      activePaymentTab = tabName;
+      document.querySelectorAll('.pay-tab-btn').forEach((btn) => {
+        if (btn.dataset.tab === tabName) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+
+      const panes = {
+        upi: 'pane-pay-upi',
+        card: 'pane-pay-card',
+        netbanking: 'pane-pay-netbanking',
+        cash: 'pane-pay-cash',
+        whatsapp: 'pane-pay-whatsapp',
+      };
+
+      Object.entries(panes).forEach(([t, paneId]) => {
+        const p = document.getElementById(paneId);
+        if (p) {
+          if (t === tabName) p.classList.add('active');
+          else p.classList.remove('active');
+        }
+      });
+    }
+
+    function updateStatsRow() {
+      const today = new Date();
+      const year = calState.currentDate.getFullYear();
+      const month = calState.currentDate.getMonth();
+      const dateNum = today.getDate();
+
+      const todayEvents = calState.scheduleEvents.filter(
+        (e) => e.date.getFullYear() === today.getFullYear() && e.date.getMonth() === today.getMonth() && e.date.getDate() === dateNum && !e.isBirthday && !e.isFeeDue
+      );
+
+      // Stat 1: Today's Classes Count
+      const countEl = document.getElementById('stat-classes-count');
+      if (countEl) {
+        countEl.textContent = `${todayEvents.length} ${todayEvents.length === 1 ? 'Batch' : 'Batches'}`;
+      }
+
+      // Stat 2: Trainers on Duty (from PostgreSQL database)
+      const dutyEl = document.getElementById('stat-trainers-duty');
+      if (dutyEl) {
+        const onFloorCoaches = (calState.trainers || []).filter((t) => t.status === 'on_floor');
+        const count = onFloorCoaches.length > 0 ? onFloorCoaches.length : (calState.trainers || []).length;
+        dutyEl.textContent = `${count} ${count === 1 ? 'Coach' : 'Coaches'}`;
+      }
+
+      // Stat 3: Birthdays This Month
+      const birthdayEvents = calState.scheduleEvents.filter((e) => e.isBirthday);
+      const bdayEl = document.getElementById('stat-birthdays-count');
+      if (bdayEl) {
+        bdayEl.textContent = `${birthdayEvents.length} ${birthdayEvents.length === 1 ? 'Birthday' : 'Birthdays'}`;
+      }
+      const bdaySubEl = document.getElementById('stat-birthdays-sub');
+      if (bdaySubEl) {
+        const memCount = birthdayEvents.filter((e) => e.birthdayType === 'member').length;
+        const trnCount = birthdayEvents.filter((e) => e.birthdayType === 'trainer').length;
+        bdaySubEl.textContent = `${memCount} Members, ${trnCount} Coaches`;
+      }
+
+      // Stat 4: Remaining Fee Dues
+      const feeDueEvents = calState.scheduleEvents.filter((e) => e.isFeeDue);
+      const totalDueAmount = feeDueEvents.reduce((sum, e) => sum + (parseFloat(e.feeDue) || 0), 0);
+      const feeDueEl = document.getElementById('stat-fee-dues-amount');
+      if (feeDueEl) {
+        feeDueEl.textContent = `₹${totalDueAmount.toLocaleString('en-IN')}`;
+      }
+      const feeCountEl = document.getElementById('stat-fee-dues-sub');
+      if (feeCountEl) {
+        feeCountEl.textContent = `${feeDueEvents.length} Member ${feeDueEvents.length === 1 ? 'Due' : 'Dues'}`;
+      }
+    }
+
+    function updateViewButtons() {
+      document.querySelectorAll('.cal-view-btn').forEach((btn) => {
+        if (btn.dataset.view === calState.activeView) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    function openCreateModalWithDate(dateObj) {
+      const modal = document.getElementById('modal-create-schedule');
+      const dateInput = document.getElementById('sess-date');
+      if (dateInput && dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        dateInput.value = `${y}-${m}-${d}`;
+      }
+      if (modal) modal.style.display = 'flex';
+    }
+
+    // Event Listeners Initialization
+    function setupCalendarEvents() {
+      // Month Navigation
+      document.getElementById('btn-cal-prev')?.addEventListener('click', () => {
+        calState.currentDate.setMonth(calState.currentDate.getMonth() - 1);
+        generateMonthlyEvents();
+        renderActiveView();
+        updateStatsRow();
+      });
+
+      document.getElementById('btn-cal-next')?.addEventListener('click', () => {
+        calState.currentDate.setMonth(calState.currentDate.getMonth() + 1);
+        generateMonthlyEvents();
+        renderActiveView();
+        updateStatsRow();
+      });
+
+      document.getElementById('btn-cal-today')?.addEventListener('click', () => {
+        calState.currentDate = new Date();
+        calState.selectedDate = new Date();
+        generateMonthlyEvents();
+        renderActiveView();
+        updateStatsRow();
+      });
+
+      // View Switcher
+      document.querySelectorAll('.cal-view-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          calState.activeView = btn.dataset.view;
+          updateViewButtons();
+          renderActiveView();
+        });
+      });
+
+      // Filter Selector
+      document.getElementById('cal-filter-category')?.addEventListener('change', (e) => {
+        calState.categoryFilter = e.target.value;
+        renderActiveView();
+      });
+
+      // Modal open/close: Schedule Class
+      document.getElementById('btn-open-create-modal')?.addEventListener('click', () => {
+        openCreateModalWithDate(calState.selectedDate);
+      });
+
+      document.getElementById('btn-close-modal')?.addEventListener('click', () => {
+        document.getElementById('modal-create-schedule').style.display = 'none';
+      });
+
+      document.getElementById('btn-cancel-modal')?.addEventListener('click', () => {
+        document.getElementById('modal-create-schedule').style.display = 'none';
+      });
+
+      // Modal: Event Details Drawer
+      document.getElementById('btn-close-detail')?.addEventListener('click', () => {
+        document.getElementById('modal-event-detail').style.display = 'none';
+      });
+
+      document.getElementById('btn-dismiss-detail')?.addEventListener('click', () => {
+        document.getElementById('modal-event-detail').style.display = 'none';
+      });
+
+      document.getElementById('btn-announce-detail')?.addEventListener('click', () => {
+        document.getElementById('modal-event-detail').style.display = 'none';
+        showToast('📢 Synced session to AI Voice Receptionist & Kiosk display!');
+      });
+
+      // Modal: Pay Fees Listeners
+      document.getElementById('btn-close-pay-modal')?.addEventListener('click', () => {
+        document.getElementById('modal-pay-fees').style.display = 'none';
+      });
+
+      document.getElementById('btn-cancel-pay-modal')?.addEventListener('click', () => {
+        document.getElementById('modal-pay-fees').style.display = 'none';
+      });
+
+      // Radio change full vs custom amount
+      document.querySelectorAll('input[name="fee-pay-choice"]').forEach((radio) => {
+        radio.addEventListener('change', (e) => {
+          const customContainer = document.getElementById('container-custom-amount');
+          if (customContainer) {
+            customContainer.style.display = e.target.value === 'custom' ? 'block' : 'none';
+          }
+        });
+      });
+
+      // Payment Tabs switcher
+      document.querySelectorAll('.pay-tab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          switchPaymentTab(btn.dataset.tab);
+        });
+      });
+
+      // Cash tendered change calculation
+      document.getElementById('pay-cash-tendered')?.addEventListener('input', (e) => {
+        const tendered = parseFloat(e.target.value) || 0;
+        const isFull = document.getElementById('choice-pay-full').checked;
+        const dueAmt = parseFloat(activeFeeMember?.fee_due || 0);
+        const amountToPay = isFull ? dueAmt : (parseFloat(document.getElementById('pay-custom-amount-input').value) || 0);
+        const change = Math.max(0, tendered - amountToPay);
+        const changeEl = document.getElementById('pay-cash-change');
+        if (changeEl) changeEl.textContent = `₹${change.toLocaleString('en-IN')}`;
+      });
+
+      // Simulate POS swipe
+      document.getElementById('btn-simulate-pos')?.addEventListener('click', () => {
+        const cardNum = document.getElementById('pay-card-number');
+        const cardName = document.getElementById('pay-card-name');
+        const cardExp = document.getElementById('pay-card-expiry');
+        const cardCvv = document.getElementById('pay-card-cvv');
+        if (cardNum) cardNum.value = '4532 •••• •••• 9811';
+        if (cardName) cardName.value = activeFeeMember ? activeFeeMember.full_name : 'Customer';
+        if (cardExp) cardExp.value = '12/28';
+        if (cardCvv) cardCvv.value = '•••';
+
+        const notesInput = document.getElementById('pay-fee-notes');
+        if (notesInput) notesInput.value = 'Swiped on Counter POS EDC (Terminal #PC-01)';
+        showToast('⚡ Counter EDC Card Swipe Captured!');
+      });
+
+      // Copy WhatsApp Payment Link
+      document.getElementById('btn-copy-pay-link')?.addEventListener('click', () => {
+        const linkEl = document.getElementById('pay-link-url');
+        if (linkEl && linkEl.textContent) {
+          navigator.clipboard?.writeText(linkEl.textContent.trim());
+          showToast('📋 Payment link copied to clipboard!');
+        }
+      });
+
+      // Send WhatsApp Invoice
+      document.getElementById('btn-send-whatsapp-invoice')?.addEventListener('click', () => {
+        if (!activeFeeMember) return;
+        const phone = (activeFeeMember.phone || '').replace(/[^0-9]/g, '');
+        const linkEl = document.getElementById('pay-link-url');
+        const url = linkEl ? linkEl.textContent.trim() : '';
+        const isFull = document.getElementById('choice-pay-full').checked;
+        const amt = isFull ? activeFeeMember.fee_due : (document.getElementById('pay-custom-amount-input').value || activeFeeMember.fee_due);
+        const msg = encodeURIComponent(`Hi ${activeFeeMember.full_name}, here is your Virtex Gym fee invoice for ₹${amt}. Pay securely online: ${url}`);
+        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+      });
+
+      // Confirm & Record Fee Payment
+      document.getElementById('btn-confirm-pay-modal')?.addEventListener('click', async () => {
+        if (!activeFeeMember) return;
+
+        const isFull = document.getElementById('choice-pay-full').checked;
+        const totalDue = parseFloat(activeFeeMember.fee_due) || 0;
+        let amountToPay = totalDue;
+
+        if (!isFull) {
+          const customVal = parseFloat(document.getElementById('pay-custom-amount-input').value);
+          if (isNaN(customVal) || customVal <= 0) {
+            showToast('⚠️ Please enter a valid payment amount greater than ₹0.', true);
+            return;
+          }
+          amountToPay = customVal;
+        }
+
+        const methodNames = {
+          upi: 'UPI / QR Code',
+          card: 'Credit / Debit Card',
+          netbanking: 'Bank Transfer (Net Banking)',
+          cash: 'Cash at Reception Desk',
+          whatsapp: 'WhatsApp Online Link',
+        };
+
+        const paymentMethod = methodNames[activePaymentTab] || 'UPI / QR Code';
+        const notes = document.getElementById('pay-fee-notes')?.value?.trim() || '';
+
+        const confirmBtn = document.getElementById('btn-confirm-pay-modal');
+        if (confirmBtn) {
+          confirmBtn.disabled = true;
+          confirmBtn.textContent = 'Processing Payment...';
+        }
+
+        try {
+          const res = await adminApi.payMemberFees(activeFeeMember.id, {
+            amountPaid: amountToPay,
+            paymentMethod,
+            notes,
+          });
+
+          if (!res.success) {
+            throw new Error(res.error || 'Failed to record fee payment.');
+          }
+
+          document.getElementById('modal-pay-fees').style.display = 'none';
+          showToast(`✅ Payment of ₹${amountToPay.toLocaleString('en-IN')} recorded for ${activeFeeMember.full_name} via ${paymentMethod}!`);
+
+          // Reload fresh data from PostgreSQL
+          await loadScheduleData();
+        } catch (err) {
+          showToast(`❌ Error recording payment: ${err.message}`, true);
+        } finally {
+          if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = '💳 Confirm & Settle Payment';
+          }
+        }
+      });
+
+      // Modal: Birthday Details Listeners
+      document.getElementById('btn-close-bday-modal')?.addEventListener('click', () => {
+        document.getElementById('modal-birthday-detail').style.display = 'none';
+      });
+
+      document.getElementById('btn-dismiss-bday-modal')?.addEventListener('click', () => {
+        document.getElementById('modal-birthday-detail').style.display = 'none';
+      });
+
+      // Form Submit: Create New Session
+      document.getElementById('form-create-session')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('sess-title').value.trim();
+        const category = document.getElementById('sess-category').value;
+        const dateVal = document.getElementById('sess-date').value;
+        const start = document.getElementById('sess-start').value;
+        const end = document.getElementById('sess-end').value;
+        const trainer = document.getElementById('sess-trainer').value;
+        const room = document.getElementById('sess-room').value;
+        const notes = document.getElementById('sess-notes').value.trim();
+
+        const errEl = document.getElementById('sess-error');
+        const capacity = Number(document.getElementById('sess-capacity').value);
+        const registrationOpen = document.getElementById('sess-registration').checked;
+        if (errEl) errEl.textContent = '';
+        if (!title || !dateVal || !start || !end) return;
+        const [y, m, d] = dateVal.split('-').map(Number);
+        const [sh, sm] = start.split(':').map(Number);
+        const [eh, em] = end.split(':').map(Number);
+        const startAt = new Date(y, m - 1, d, sh, sm);
+        const durationMins = (eh * 60 + em) - (sh * 60 + sm);
+        const fail = (msg) => { if (errEl) errEl.textContent = msg; };
+        if (durationMins <= 0) return fail('End time must be after the start time.');
+        if (!Number.isInteger(capacity) || capacity < 1 || capacity > 500) return fail('Capacity must be a whole number from 1 to 500.');
+        if (startAt <= new Date()) return fail('Choose a start time in the future.');
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
+        try {
+          const res = await classApi('POST', '', {
+            title, category, class_type: 'in_person',
+            instructor_trainer_id: /^\d+$/.test(trainer) ? Number(trainer) : null,
+            scheduled_at: startAt.toISOString(), duration_mins: durationMins,
+            max_participants: capacity,
+            description: [`Studio / Area: ${room}`, notes].filter(Boolean).join('\n'),
+            status: registrationOpen ? 'scheduled' : 'registration_closed',
+          });
+          if (!res.success) return fail(res.message || res.error || 'Could not save the class.');
+          document.getElementById('modal-create-schedule').style.display = 'none';
+          document.getElementById('form-create-session').reset();
+          await loadSavedClasses();
+          generateMonthlyEvents();
+          renderActiveView();
+          updateStatsRow();
+          showToast(`✅ Scheduled "${title}" (${start} – ${end}) — saved and visible to members${registrationOpen ? '' : ' (registration closed)'}.`);
+        } catch (err) {
+          fail('Could not save the class — check your connection and try again.');
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
+        }
+      });
+
+      // Centered Custom Confirmation Modal
+      function confirmCenter({
+        title = 'Confirm Action',
+        message = 'Are you sure you want to proceed?',
+        icon = '🚪',
+        confirmText = 'Sign Out',
+        confirmClass = 'btn-green',
+        cancelText = 'Cancel',
+      } = {}) {
+        return new Promise((resolve) => {
+          const modal = document.getElementById('modal-confirm');
+          const titleEl = document.getElementById('modal-confirm-title');
+          const msgEl = document.getElementById('modal-confirm-message');
+          const iconEl = document.getElementById('modal-confirm-icon');
+          const okBtn = document.getElementById('modal-confirm-ok-btn');
+          const cancelBtn = document.getElementById('modal-confirm-cancel-btn');
+
+          if (!modal || !okBtn || !cancelBtn) {
+            resolve(window.confirm(message));
+            return;
+          }
+
+          if (titleEl) titleEl.textContent = title;
+          if (iconEl) iconEl.textContent = icon;
+          if (msgEl) msgEl.textContent = message;
+          if (okBtn) okBtn.textContent = confirmText;
+          if (cancelBtn) cancelBtn.textContent = cancelText;
+
+          modal.style.display = 'flex';
+
+          let resolved = false;
+          const cleanup = (val) => {
+            if (resolved) return;
+            resolved = true;
+            modal.style.display = 'none';
+            okBtn.removeEventListener('click', onOk);
+            cancelBtn.removeEventListener('click', onCancel);
+            window.removeEventListener('keydown', onKey);
+            modal.removeEventListener('click', onBackdrop);
+            resolve(val);
+          };
+
+          const onOk = (e) => { e.preventDefault(); cleanup(true); };
+          const onCancel = (e) => { e.preventDefault(); cleanup(false); };
+          const onKey = (e) => {
+            if (e.key === 'Escape') cleanup(false);
+            else if (e.key === 'Enter') cleanup(true);
+          };
+          const onBackdrop = (e) => {
+            if (e.target === modal) cleanup(false);
+          };
+
+          okBtn.addEventListener('click', onOk);
+          cancelBtn.addEventListener('click', onCancel);
+          window.addEventListener('keydown', onKey);
+          modal.addEventListener('click', onBackdrop);
+        });
+      }
+
+      // Sidebar Mobile Toggle
+      document.getElementById('btn-sidebar-toggle')?.addEventListener('click', () => {
+        document.getElementById('admin-sidebar')?.classList.toggle('open');
+      });
+
+      // Logout handler
+      document.getElementById('btn-logout')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const confirmed = await confirmCenter({
+          title: 'Sign Out',
+          message: 'Are you sure you want to log out of Virtex Admin Console?',
+          icon: '🚪',
+          confirmText: 'Sign Out',
+        });
+        if (confirmed) {
+          await adminApi.logout();
+          window.location.href = 'index.html';
+        }
+      });
+    }
+
+    // Initialize on page load
+    async function init() {
+      await hydrateUser();
+      setupCalendarEvents();
+      await loadScheduleData();
+
+      function handleCalendarHash() {
+        const hash = window.location.hash.toLowerCase();
+        if (hash === '#classes') {
+          const filterSelect = document.getElementById('cal-filter-category');
+          if (filterSelect) {
+            filterSelect.value = 'all';
+            filterSelect.dispatchEvent(new Event('change'));
+          }
+          document.getElementById('classes')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (hash === '#rooms') {
+          document.getElementById('rooms')?.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+      window.addEventListener('hashchange', handleCalendarHash);
+      handleCalendarHash();
+    }
+
+    init();
+  </script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+</body>
+
+</html>

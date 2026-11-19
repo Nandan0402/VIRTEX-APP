@@ -1,0 +1,14 @@
+/* =====================================================================
+   Virtex Trainer Portal — Clients (trainer-clients.html,
+   trainer-client-profile.html)
+   ===================================================================== */
+
+.tp-page-clients .admin-table td:first-child,
+.tp-page-client-profile .admin-table td:first-child { min-width: 160px; }
+.tp-page-clients .admin-table td:last-child { text-align: right; width: 1%; }
+
+/* Client profile: coaching feedback thread */
+.tp-comment { color: var(--tp-text-body); margin-top: 4px; white-space: pre-wrap; line-height: 1.45; }
+.tp-page-client-profile .tp-row { align-items: flex-start; }
+.tp-page-client-profile .tp-card-head .badge { margin-bottom: 0.8rem; }
+.tp-page-client-profile .tp-card-head .btn { margin-bottom: 0.8rem; }

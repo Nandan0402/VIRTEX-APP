@@ -1,0 +1,45 @@
+/* Admin → Diet Guide (admin-diet-nutrition.html). Builds on workout-guide.css (shared wg-* layout). */
+.dg-example { margin: 0; font-size: 0.86rem; color: #fde68a; background: rgba(250, 204, 21, 0.08); border: 1px solid rgba(250, 204, 21, 0.25); border-radius: 10px; padding: 0.55rem 0.75rem; }
+.dg-tips { margin: 0; padding-left: 1.2rem; display: grid; gap: 4px; font-size: 0.84rem; color: var(--text-gray); line-height: 1.45; }
+.dg-day { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.1rem 1.2rem; }
+.dg-day-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+.dg-day-head h3 { margin: 0; color: #fff; font-size: 1.05rem; }
+.dg-day-head span { font-size: 0.8rem; color: var(--text-dim); }
+.dg-day-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.9rem; }
+.dg-day-col { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 12px; padding: 0.8rem 0.9rem; }
+.dg-day-col h4 { margin: 0 0 0.5rem; color: #fff; font-size: 0.92rem; }
+.dg-day-col dl { margin: 0; display: grid; gap: 6px; }
+.dg-day-col dl > div { display: grid; grid-template-columns: 110px 1fr; gap: 8px; }
+.dg-day-col dt { font-size: 0.78rem; font-weight: 800; color: #4ade80; }
+.dg-day-col dd { margin: 0; font-size: 0.82rem; color: #e5e7eb; line-height: 1.4; }
+.dg-veg { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: var(--text-gray); margin-left: 4px; cursor: pointer; }
+.dg-veg input { accent-color: #22c55e; width: 15px; height: 15px; }
+.dg-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.dg-table th { text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border); }
+.dg-table td { padding: 0.5rem 0.6rem; border-bottom: 1px solid rgba(255, 255, 255, 0.04); color: #e5e7eb; vertical-align: top; }
+.dg-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dg-note { color: var(--text-dim) !important; font-size: 0.78rem; }
+.dg-dot { display: inline-block; width: 10px; height: 10px; border: 1.5px solid; border-radius: 2px; margin-right: 8px; vertical-align: -1px; position: relative; }
+.dg-dot::after { content: ''; position: absolute; inset: 2px; border-radius: 50%; background: currentColor; }
+.dg-dot.veg { color: #22c55e; }
+.dg-dot.nonveg { color: #ef4444; }
+.dg-legend { font-size: 0.76rem; color: var(--text-dim); margin: 0.2rem 0 0; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.dg-supps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.7rem; }
+.dg-supps li { display: flex; gap: 0.6rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 0.75rem 0.85rem; }
+.dg-supps b { color: #fff; font-size: 0.86rem; }
+.dg-supps p { margin: 3px 0 0; font-size: 0.78rem; color: var(--text-gray); line-height: 1.45; }
+@media (max-width: 640px) { .dg-day-col dl > div { grid-template-columns: 1fr; gap: 2px; } }
+/* keep wide food tables inside their card on small screens */
+.wg-wrap > * { min-width: 0; }
+#dg-foods .table-responsive { overflow-x: auto; max-width: 100%; }
+@media (max-width: 640px) {
+  .dg-table th:last-child, .dg-table td:last-child { display: none; }
+  .dg-table th, .dg-table td { padding: 0.45rem 0.4rem; }
+}
+
+/* Same guide inside the Member Portal (member-diet-plan.html) and Trainer Hub (trainer-diet-guide.html) */
+.wg-wrap.wg-embed { max-width: none; padding: 0; }
+.wg-shared { margin: 0; font-size: 0.82rem; color: #a7f3d0; background: rgba(0, 230, 118, 0.08); border: 1px solid rgba(0, 230, 118, 0.3); border-radius: 10px; padding: 0.55rem 0.8rem; }
+.dp-guide, .dp-plan-head { max-width: 1200px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 1.25rem 1.5rem 0; }
+.dp-plan-head { margin-top: 1.6rem; font-size: 1.15rem; color: #fff; padding-top: 1.4rem; border-top: 1px solid var(--border); }
+@media (max-width: 900px) { .dp-guide, .dp-plan-head { padding-left: 1rem; padding-right: 1rem; } }

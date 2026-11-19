@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • System Administration & Security</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/modules/admin-system.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation (Auto-rendered with 16 categories by adminSidebarNav.js) -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <!-- Rendered dynamically by adminSidebarNav.js -->
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Application Canvas -->
+    <div class="admin-main-wrap">
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-brand">
+            <span class="topbar-title">System Administration & Security</span>
+            <span class="badge badge-green font-mono text-xs">Category 15 • System Administration</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group Mounted by topbarRoutineNav.js -->
+        </div>
+      </header>
+
+      <main class="admin-body">
+        <div class="admin-content-wrap" style="padding: 1.5rem; max-width: 1400px; margin: 0 auto;">
+          <!-- Breadcrumb & Header -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 4px;">
+                <a href="admin.html" style="color: var(--text-dim); text-decoration: none;">Virtex Admin</a> / 
+                <span style="color: var(--text-gray);">System Administration</span> / 
+                <span style="color: var(--sys-accent);">Security & System Console</span>
+              </div>
+              <h1 style="font-size: 1.65rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px;">
+                <span>🛡️</span> System Administration & Security
+              </h1>
+              <p style="font-size: 0.9rem; color: var(--text-gray); margin-top: 4px;">
+                Granular RBAC permission overview, login activity, audit trail explorer, database backups, sanitized data exports, security monitoring, API status, and error logs.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <a href="admin-profile.html" class="btn btn-outline" style="text-decoration: none;">👤 Admin Profile</a>
+            </div>
+          </div>
+
+          <!-- Security Policy Banner -->
+          <div style="background: linear-gradient(90deg, rgba(0, 230, 118, 0.12) 0%, rgba(17, 20, 30, 0.95) 100%); border: 1px solid rgba(0, 230, 118, 0.3); border-left: 4px solid var(--sys-accent); border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 1.8rem;">🔒</span>
+              <div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 2px;">
+                  DATA PRIVACY & CREDENTIAL SAFEGUARD ACTIVE
+                </h4>
+                <p style="font-size: 0.82rem; color: #cbd5e1; margin: 0;">
+                  Passwords, bcrypt hashes, JWT signing secrets, and raw PII are strictly excluded from queries, logs, and exports.
+                </p>
+              </div>
+            </div>
+            <span class="badge-sys success">RBAC ENFORCED</span>
+          </div>
+
+          <!-- KPI Summary Deck (All 10 features synthesized) -->
+          <div class="sys-kpi-deck">
+            <div class="sys-kpi-card">
+              <div class="sys-kpi-icon" style="background: rgba(0, 230, 118, 0.1); color: var(--sys-accent);">👥</div>
+              <div class="sys-kpi-meta">
+                <span class="sys-kpi-val" id="kpi-total-staff">0</span>
+                <span class="sys-kpi-label">Staff Headcount</span>
+              </div>
+            </div>
+            <div class="sys-kpi-card">
+              <div class="sys-kpi-icon" style="background: rgba(255, 82, 82, 0.1); color: var(--sys-red);">🚫</div>
+              <div class="sys-kpi-meta">
+                <span class="sys-kpi-val" id="kpi-failed-logins">0</span>
+                <span class="sys-kpi-label">24h Failed Logins</span>
+              </div>
+            </div>
+            <div class="sys-kpi-card">
+              <div class="sys-kpi-icon" style="background: rgba(0, 176, 255, 0.1); color: var(--sys-blue);">⏱️</div>
+              <div class="sys-kpi-meta">
+                <span class="sys-kpi-val" id="kpi-system-uptime">0h 0m 0s</span>
+                <span class="sys-kpi-label">Process Uptime</span>
+              </div>
+            </div>
+            <div class="sys-kpi-card">
+              <div class="sys-kpi-icon" style="background: rgba(255, 171, 0, 0.1); color: var(--sys-amber);">⚠️</div>
+              <div class="sys-kpi-meta">
+                <span class="sys-kpi-val" id="kpi-open-errors">0</span>
+                <span class="sys-kpi-label">Open Error Logs</span>
+              </div>
+            </div>
+            <div class="sys-kpi-card">
+              <div class="sys-kpi-icon" style="background: rgba(179, 136, 255, 0.1); color: var(--sys-purple);">🔌</div>
+              <div class="sys-kpi-meta">
+                <span class="sys-kpi-val" id="kpi-healthy-integrations">5 / 5</span>
+                <span class="sys-kpi-label">APIs Healthy</span>
+              </div>
+            </div>
+            <div class="sys-kpi-card">
+              <div class="sys-kpi-icon" style="background: rgba(0, 230, 118, 0.1); color: var(--sys-accent);">💾</div>
+              <div class="sys-kpi-meta">
+                <span class="sys-kpi-val" id="kpi-backup-status">—</span>
+                <span class="sys-kpi-label">Database Backup</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Navigation (10 Features Structured into Dedicated Panes) -->
+          <div class="sys-nav-tabs">
+            <button class="sys-tab-btn active" data-tab="permissions">
+              <span>🛡️</span> Permissions & Roles
+            </button>
+            <button class="sys-tab-btn" data-tab="logins">
+              <span>🔑</span> Login Activity
+            </button>
+            <button class="sys-tab-btn" data-tab="audit">
+              <span>📜</span> Audit-Log Explorer
+            </button>
+            <button class="sys-tab-btn" data-tab="backups">
+              <span>💾</span> Database Backups
+              <span class="sys-tab-badge" id="tab-badge-backups">0</span>
+            </button>
+            <button class="sys-tab-btn" data-tab="exports">
+              <span>📤</span> Data Export Tools
+            </button>
+            <button class="sys-tab-btn" data-tab="security">
+              <span>🚨</span> Security Monitoring
+            </button>
+            <button class="sys-tab-btn" data-tab="integrations">
+              <span>🔌</span> API Integrations
+            </button>
+            <button class="sys-tab-btn" data-tab="health">
+              <span>🩺</span> System Health
+            </button>
+            <button class="sys-tab-btn" data-tab="errors">
+              <span>⚠️</span> Error Monitoring
+              <span class="sys-tab-badge" id="tab-badge-errors">0</span>
+            </button>
+            <button class="sys-tab-btn" data-tab="reports">
+              <span>📊</span> Activity Reports
+            </button>
+          </div>
+
+          <!-- TAB 1: PERMISSIONS & ROLES (FEATURE 1) -->
+          <div class="sys-tab-content" id="tab-content-permissions" style="display: block;">
+            <div style="margin-bottom: 1.5rem;">
+              <h3 style="font-size: 1.15rem; color: #fff; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+                <span>🛡️</span> Role-Based Access Control (RBAC) Framework
+              </h3>
+              <div class="sys-table-card">
+                <table class="sys-table">
+                  <thead>
+                    <tr>
+                      <th>Role</th>
+                      <th>Description</th>
+                      <th>Headcount</th>
+                      <th>Assigned Permissions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-roles-matrix">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <h3 style="font-size: 1.15rem; color: #fff; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+                <span>👥</span> Staff User Identity & Role Assignments
+              </h3>
+              <div class="sys-table-card">
+                <table class="sys-table">
+                  <thead>
+                    <tr>
+                      <th>Staff Member</th>
+                      <th>Email</th>
+                      <th>Assigned Role</th>
+                      <th>Account Status</th>
+                      <th>Last Login</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-staff-accounts">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: LOGIN ACTIVITY HISTORY (FEATURE 2) -->
+          <div class="sys-tab-content" id="tab-content-logins" style="display: none;">
+            <div class="sys-toolbar">
+              <div class="sys-toolbar-group">
+                <input type="text" class="sys-input" id="input-login-search" placeholder="🔍 Search username...">
+                <select class="sys-select" id="filter-login-status">
+                  <option value="all">All Login Events</option>
+                  <option value="success">Successful Logins</option>
+                  <option value="failure">Failed Attempts</option>
+                </select>
+              </div>
+              <div class="sys-toolbar-group">
+                <span class="badge badge-outline font-mono text-xs">Auth Ledger (Last 50 Events)</span>
+              </div>
+            </div>
+
+            <div class="sys-table-card">
+              <table class="sys-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Event</th>
+                    <th>Role</th>
+                    <th>IP Address</th>
+                    <th>User Agent / Client</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-login-activity">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 3: AUDIT-LOG EXPLORER (FEATURE 3) -->
+          <div class="sys-tab-content" id="tab-content-audit" style="display: none;">
+            <div class="sys-toolbar">
+              <div class="sys-toolbar-group">
+                <input type="text" class="sys-input" id="input-audit-search" placeholder="🔍 Search audit trail, IP, user...">
+                <select class="sys-select" id="filter-audit-event">
+                  <option value="all">All Audit Events</option>
+                  <option value="LOGIN_SUCCESS">LOGIN_SUCCESS</option>
+                  <option value="LOGIN_FAILURE">LOGIN_FAILURE</option>
+                  <option value="SETTINGS_UPDATED">SETTINGS_UPDATED</option>
+                  <option value="DATA_EXPORT">DATA_EXPORT</option>
+                  <option value="TOKEN_REVOKED">TOKEN_REVOKED</option>
+                </select>
+              </div>
+              <div class="sys-toolbar-group">
+                <span class="badge badge-outline font-mono text-xs">Immutable Audit Stream</span>
+              </div>
+            </div>
+
+            <div class="sys-table-card">
+              <table class="sys-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Actor</th>
+                    <th>Event Type</th>
+                    <th>Role</th>
+                    <th>Origin IP</th>
+                    <th>Audit Details Preview</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-audit-logs">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 4: DATABASE BACKUPS (FEATURE 4) -->
+          <div class="sys-tab-content" id="tab-content-backups" style="display: none;">
+            <div class="sys-toolbar">
+              <div class="sys-toolbar-group">
+                <span style="font-size: 0.88rem; color: #cbd5e1;">
+                  Database backups are created with <code>scripts\backup_db.ps1</code> (pg_dump into the project's <code>backups</code> folder).
+                </span>
+              </div>
+            </div>
+
+            <div class="sys-table-card">
+              <table class="sys-table">
+                <thead>
+                  <tr>
+                    <th>Backup Snapshot</th>
+                    <th>Type</th>
+                    <th>Size</th>
+                    <th>Integrity Status</th>
+                    <th>Created At</th>
+                    <th>SHA-256 Checksum</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-database-backups">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 5: DATA EXPORT TOOLS (FEATURE 5) -->
+          <div class="sys-tab-content" id="tab-content-exports" style="display: none;">
+            <div style="margin-bottom: 1.5rem;">
+              <h3 style="font-size: 1.15rem; color: #fff; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+                <span>📤</span> Secure Administrative Data Extraction
+              </h3>
+              <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1rem;">
+                All exported files are stripped of authentication hashes, passwords, API keys, and sensitive financial secrets.
+              </p>
+
+              <div class="export-grid">
+                <div class="export-card">
+                  <h4><span>👥</span> Active Members Roster</h4>
+                  <p>Member profile directory, codes, plan names, and join dates with masked phone numbers.</p>
+                  <div style="display:flex; gap:8px; margin-top:auto;">
+                    <button class="btn btn-sm btn-outline btn-trigger-export" data-entity="members" data-format="json">JSON</button>
+                    <button class="btn btn-sm btn-green btn-trigger-export" data-entity="members" data-format="csv">CSV</button>
+                  </div>
+                </div>
+
+                <div class="export-card">
+                  <h4><span>⏱️</span> Turnstile Attendance</h4>
+                  <p>RFID and voice check-in logs with timestamps, member codes, and access methods.</p>
+                  <div style="display:flex; gap:8px; margin-top:auto;">
+                    <button class="btn btn-sm btn-outline btn-trigger-export" data-entity="check_ins" data-format="json">JSON</button>
+                    <button class="btn btn-sm btn-green btn-trigger-export" data-entity="check_ins" data-format="csv">CSV</button>
+                  </div>
+                </div>
+
+                <div class="export-card">
+                  <h4><span>💰</span> Financial Ledger</h4>
+                  <p>Invoices, payment totals, fee categories, and transaction dates. Card details redacted.</p>
+                  <div style="display:flex; gap:8px; margin-top:auto;">
+                    <button class="btn btn-sm btn-outline btn-trigger-export" data-entity="finances" data-format="json">JSON</button>
+                    <button class="btn btn-sm btn-green btn-trigger-export" data-entity="finances" data-format="csv">CSV</button>
+                  </div>
+                </div>
+
+                <div class="export-card">
+                  <h4><span>📜</span> Security Audit Trail</h4>
+                  <p>Logins, setting modifications, and authorization events for security compliance.</p>
+                  <div style="display:flex; gap:8px; margin-top:auto;">
+                    <button class="btn btn-sm btn-outline btn-trigger-export" data-entity="audit_logs" data-format="json">JSON</button>
+                    <button class="btn btn-sm btn-green btn-trigger-export" data-entity="audit_logs" data-format="csv">CSV</button>
+                  </div>
+                </div>
+
+                <div class="export-card">
+                  <h4><span>🏋️</span> Equipment Asset Register</h4>
+                  <p>Gym equipment inventory, serial codes, condition ratings, and location zones.</p>
+                  <div style="display:flex; gap:8px; margin-top:auto;">
+                    <button class="btn btn-sm btn-outline btn-trigger-export" data-entity="equipment" data-format="json">JSON</button>
+                    <button class="btn btn-sm btn-green btn-trigger-export" data-entity="equipment" data-format="csv">CSV</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 style="font-size: 1.15rem; color: #fff; margin-bottom: 0.75rem;">Export Audit Ledger</h3>
+              <div class="sys-table-card">
+                <table class="sys-table">
+                  <thead>
+                    <tr>
+                      <th>Export Timestamp</th>
+                      <th>File Name</th>
+                      <th>Entity</th>
+                      <th>Format</th>
+                      <th>Volume</th>
+                      <th>Exporter</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-export-logs">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 6: SECURITY MONITORING (FEATURE 6) -->
+          <div class="sys-tab-content" id="tab-content-security" style="display: none;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+              <div class="health-metric-box">
+                <div class="health-metric-title">
+                  <span>Failed Logins (24h)</span>
+                  <span>🚨</span>
+                </div>
+                <div class="health-metric-value" id="sec-failed-24h" style="color: var(--sys-red);">0</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);">Brute-force safeguard active</div>
+              </div>
+
+              <div class="health-metric-box">
+                <div class="health-metric-title">
+                  <span>Blacklisted Tokens</span>
+                  <span>🚫</span>
+                </div>
+                <div class="health-metric-value" id="sec-blacklisted-tokens" style="color: var(--sys-amber);">0</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);">Revoked JWT sessions</div>
+              </div>
+
+              <div class="health-metric-box">
+                <div class="health-metric-title">
+                  <span>Active Staff Sessions</span>
+                  <span>👥</span>
+                </div>
+                <div class="health-metric-value" id="sec-active-sessions" style="color: var(--sys-accent);">0</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);">Logged-in authorized users</div>
+              </div>
+            </div>
+
+            <div class="admin-card" style="padding: 1.5rem; background: var(--sys-card-bg); border: 1px solid var(--sys-border); border-radius: 12px;">
+              <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                <span>🌐</span> Suspicious Origin IP Anomalies (Repeated Auth Failures)
+              </h3>
+              <div id="sec-suspicious-ips">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 7: API INTEGRATIONS (FEATURE 7) -->
+          <div class="sys-tab-content" id="tab-content-integrations" style="display: none;">
+            <div class="integration-grid" id="integrations-grid">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- TAB 8: SYSTEM HEALTH DASHBOARD (FEATURE 8) -->
+          <div class="sys-tab-content" id="tab-content-health" style="display: none;">
+            <div class="health-metrics-grid">
+              <div class="health-metric-box">
+                <div class="health-metric-title">
+                  <span>Runtime & Process</span>
+                  <span>⚙️</span>
+                </div>
+                <div id="health-runtime-info">Loading runtime metrics...</div>
+              </div>
+
+              <div class="health-metric-box">
+                <div class="health-metric-title">
+                  <span>Node.js Memory Heap</span>
+                  <span>🧠</span>
+                </div>
+                <div id="health-memory-info">Loading memory heap...</div>
+              </div>
+
+              <div class="health-metric-box">
+                <div class="health-metric-title">
+                  <span>Host CPU & Load</span>
+                  <span>💻</span>
+                </div>
+                <div id="health-cpu-info">Loading host metrics...</div>
+              </div>
+
+              <div class="health-metric-box">
+                <div class="health-metric-title">
+                  <span>PostgreSQL Pool</span>
+                  <span>🗄️</span>
+                </div>
+                <div id="health-db-pool-info">Loading connection pool...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 9: ERROR MONITORING (FEATURE 9) -->
+          <div class="sys-tab-content" id="tab-content-errors" style="display: none;">
+            <div class="sys-toolbar">
+              <div class="sys-toolbar-group">
+                <select class="sys-select" id="filter-error-status">
+                  <option value="all">All Error States</option>
+                  <option value="unresolved">Unresolved Exceptions</option>
+                  <option value="resolved">Resolved Issues</option>
+                </select>
+                <select class="sys-select" id="filter-error-type">
+                  <option value="all">All Error Types</option>
+                  <option value="HTTP_500">HTTP 500 Server Errors</option>
+                  <option value="HARDWARE_TIMEOUT">Hardware / IoT Timeouts</option>
+                  <option value="API_TIMEOUT">API External Timeouts</option>
+                  <option value="AUTH_ERROR">Authentication Exceptions</option>
+                </select>
+              </div>
+              <div class="sys-toolbar-group">
+                <button class="btn btn-outline" onclick="window.location.reload();">🔄 Refresh</button>
+              </div>
+            </div>
+
+            <div class="sys-table-card">
+              <table class="sys-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Error Code</th>
+                    <th>Category</th>
+                    <th>Error Description</th>
+                    <th>Occurrences</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-error-logs">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 10: APPLICATION ACTIVITY REPORTS (FEATURE 10) -->
+          <div class="sys-tab-content" id="tab-content-reports" style="display: none;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+              <div class="health-metric-box">
+                <div class="health-metric-title">
+                  <span>Total Check-Ins</span>
+                  <span>⏱️</span>
+                </div>
+                <div class="health-metric-value" id="rep-total-checkins" style="color: var(--sys-accent);">0</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);">All check-in modalities</div>
+              </div>
+
+              <div class="health-metric-box">
+                <div class="health-metric-title">
+                  <span>AI Voice Interactions</span>
+                  <span>💬</span>
+                </div>
+                <div class="health-metric-value" id="rep-total-interactions" style="color: var(--sys-blue);">0</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);">Kiosk receptionist queries</div>
+              </div>
+
+              <div class="health-metric-box">
+                <div class="health-metric-title">
+                  <span>Hardware Commands</span>
+                  <span>🤖</span>
+                </div>
+                <div class="health-metric-value" id="rep-total-commands" style="color: var(--sys-purple);">0</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);">Servo gesture executions</div>
+              </div>
+
+              <div class="health-metric-box">
+                <div class="health-metric-title">
+                  <span>Security Audit Entries</span>
+                  <span>📜</span>
+                </div>
+                <div class="health-metric-value" id="rep-total-audits" style="color: var(--sys-amber);">0</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);">Immutable security logs</div>
+              </div>
+            </div>
+
+            <div class="admin-card" style="padding: 1.5rem; background: var(--sys-card-bg); border: 1px solid var(--sys-border); border-radius: 12px;">
+              <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 0.75rem;">Application Activity Trends</h3>
+              <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0;">
+                All operational metrics are updated synchronously across reception kiosks, administrative consoles, and background cron routines.
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Component Scripts -->
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script src="js/admin/systemAdministration.js"></script>
+</body>
+</html>

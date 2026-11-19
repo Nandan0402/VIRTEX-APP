@@ -1,0 +1,17 @@
+/* Virtex Member Portal — FAQ & Help (member-faq.html). Builds on member-classes.css. */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
+.fq-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.fq-top .ac-chips { margin: 0; }
+.fq-search input { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--mp-line); background: var(--bg-input, #090a0f); color: var(--mp-text); font-family: inherit; width: min(320px, 80vw); }
+.fq-topics { margin-top: 0.8rem; margin-bottom: 0; }
+.fq-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.fq-item { border: 1px solid var(--mp-line); border-radius: 10px; overflow: hidden; }
+.fq-item.open { border-color: var(--mp-accent-border); }
+.fq-q { width: 100%; display: flex; justify-content: space-between; gap: 12px; align-items: center; text-align: left; padding: 12px 14px; background: transparent; border: 0; color: var(--mp-text); font-family: inherit; font-size: 0.92rem; font-weight: 600; cursor: pointer; }
+.fq-q:focus-visible { outline: 2px solid var(--mp-accent); outline-offset: -2px; }
+.fq-chev { font-size: 1.2rem; color: var(--mp-accent); flex-shrink: 0; }
+.fq-a { padding: 0 14px 12px; font-size: 0.86rem; line-height: 1.55; color: var(--mp-text-body); }
+.fq-tag { display: block; margin-top: 6px; font-size: 0.7rem; color: var(--mp-text-dim); }
+.fq-list mark { background: rgba(0, 230, 118, 0.25); color: inherit; border-radius: 3px; padding: 0 1px; }
+.fq-help .btn { text-decoration: none; margin-top: 4px; }
+.fq-en { margin-left: 6px; padding: 3px 10px; font-size: 0.78rem; }

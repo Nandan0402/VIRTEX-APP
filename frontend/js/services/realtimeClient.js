@@ -1,6 +1,6 @@
 /**
  * realtimeClient.js - Universal Frontend WebSocket Synchronization Client
- * Used by PulseCore Admin Console (/admin) and Member Kiosk (/kiosk.html)
+ * Used by Virtex Admin Console (/admin) and Member Kiosk (/kiosk.html)
  * 
  * Capabilities:
  * - Automatic protocol selection (ws: or wss:) based on window.location
@@ -24,10 +24,96 @@ export class RealtimeClient {
     this.pingTimer = null;
     this.maxReconnectDelay = 30000;
     this.isExplicitDisconnect = false;
+    this.isPageFrozen = false;
+
+    this.bindLifecycleListeners();
 
     if (autoConnect) {
       this.connect();
     }
+  }
+
+  bindLifecycleListeners() {
+    if (typeof window === 'undefined') return;
+
+    // Handle Page Entering Back-Forward Cache (bfcache) or Navigating Away
+    window.addEventListener('pagehide', () => {
+      this.isPageFrozen = true;
+      this.stopPingKeepalive();
+      if (this.reconnectTimer) {
+        clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = null;
+      }
+      if (this.ws) {
+        this.ws.onerror = null;
+        this.ws.onclose = null;
+        try {
+          this.ws.close(1000, 'Page entered Back-Forward Cache');
+        } catch (_) {}
+        this.ws = null;
+      }
+      this.setStatus('disconnected');
+    });
+
+    // Handle Page Restored from Back-Forward Cache
+    window.addEventListener('pageshow', (event) => {
+      this.isPageFrozen = false;
+      if (!this.isExplicitDisconnect && (event.persisted || !this.ws || this.ws.readyState !== WebSocket.OPEN)) {
+        this.reconnectAttempts = 0;
+        this.connect();
+      }
+    });
+
+    // Page Lifecycle API: freeze / resume (Chromium bfcache optimization)
+    if (typeof document !== 'undefined') {
+      document.addEventListener('freeze', () => {
+        this.isPageFrozen = true;
+        this.stopPingKeepalive();
+        if (this.reconnectTimer) {
+          clearTimeout(this.reconnectTimer);
+          this.reconnectTimer = null;
+        }
+        if (this.ws) {
+          this.ws.onerror = null;
+          this.ws.onclose = null;
+          try {
+            this.ws.close(1000, 'Page frozen');
+          } catch (_) {}
+          this.ws = null;
+        }
+        this.setStatus('disconnected');
+      });
+
+      document.addEventListener('resume', () => {
+        this.isPageFrozen = false;
+        if (!this.isExplicitDisconnect) {
+          this.reconnectAttempts = 0;
+          this.connect();
+        }
+      });
+
+      // Background tab optimization: pause keepalive when tab is hidden, resume when visible
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          this.stopPingKeepalive();
+        } else if (document.visibilityState === 'visible') {
+          this.isPageFrozen = false;
+          if (!this.isExplicitDisconnect) {
+            if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+              this.reconnectAttempts = 0;
+              this.connect();
+            } else {
+              this.startPingKeepalive();
+            }
+          }
+        }
+      });
+    }
+
+    window.addEventListener('beforeunload', () => {
+      this.isPageFrozen = true;
+      this.disconnect();
+    });
   }
 
   setToken(token) {
@@ -59,6 +145,9 @@ export class RealtimeClient {
   }
 
   connect() {
+    if (this.isPageFrozen) {
+      return;
+    }
     if (this.ws && (this.ws.readyState === WebSocket.CONNECTING || this.ws.readyState === WebSocket.OPEN)) {
       return;
     }
@@ -99,20 +188,27 @@ export class RealtimeClient {
 
       this.ws.onclose = () => {
         this.stopPingKeepalive();
-        if (!this.isExplicitDisconnect) {
-          this.setStatus('reconnecting');
-          this.scheduleReconnect();
-        } else {
+        if (this.isPageFrozen || this.isExplicitDisconnect) {
           this.setStatus('disconnected');
+          return;
         }
+        this.setStatus('reconnecting');
+        this.scheduleReconnect();
       };
 
       this.ws.onerror = (err) => {
-        console.warn('[RealtimeClient] WebSocket error:', err.message || err);
+        if (this.isPageFrozen || this.isExplicitDisconnect || (typeof document !== 'undefined' && document.visibilityState === 'hidden')) {
+          return;
+        }
+        if (this.reconnectAttempts === 0) {
+          console.debug('[RealtimeClient] WebSocket link interrupted; reconnecting...');
+        }
       };
     } catch (err) {
-      console.warn('[RealtimeClient] Connection creation failure:', err);
-      this.scheduleReconnect();
+      if (!this.isPageFrozen && !this.isExplicitDisconnect) {
+        console.debug('[RealtimeClient] Connection creation attempt paused:', err?.message || err);
+        this.scheduleReconnect();
+      }
     }
   }
 
@@ -210,7 +306,11 @@ export class RealtimeClient {
       this.reconnectTimer = null;
     }
     if (this.ws) {
-      this.ws.close();
+      this.ws.onerror = null;
+      this.ws.onclose = null;
+      try {
+        this.ws.close(1000, 'Explicit disconnect');
+      } catch (_) {}
       this.ws = null;
     }
     this.setStatus('disconnected');

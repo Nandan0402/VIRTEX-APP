@@ -1,0 +1,41 @@
+/* Virtex Member Portal — Gym Facilities (member-facilities.html). Builds on member-classes.css. */
+.fc-grid { display: grid; gap: 0.8rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.fc-zone { display: flex; flex-direction: column; gap: 4px; padding: 0.9rem; border: 1px solid var(--mp-line); border-radius: 12px; min-width: 0; }
+.fc-zone.off { border-style: dashed; opacity: 0.85; }
+.fc-zone-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+.fc-zone h3 { margin: 2px 0; font-size: 0.95rem; }
+.fc-zone .oc-out { white-space: normal; max-width: 100%; }
+.fc-warn { margin: 4px 0 0; font-size: 0.78rem; color: #fbbf24; }
+.oc-out { font-size: 0.72rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--mp-line); white-space: nowrap; }
+.oc-out-ok { color: var(--mp-accent); border-color: var(--mp-accent-border); }
+.oc-out-no { color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+.oc-out-warn { color: #fbbf24; border-color: rgba(251, 191, 36, 0.45); }
+.oc-out-na { color: var(--mp-text-muted); }
+.fc-hours { width: 100%; max-width: 460px; font-size: 0.85rem; margin-bottom: 0.6rem; }
+.fc-hours th { text-align: left; font-weight: 600; color: var(--mp-text-body); }
+.fc-hours th small { color: var(--mp-accent); font-weight: 400; }
+.fc-hours tr.is-today td, .fc-hours tr.is-today th { background: var(--mp-accent-soft); }
+.fc-closed { color: #f87171; font-weight: 600; }
+.pg-missing { color: var(--mp-text-dim); }
+.fc-branches { margin: 6px 0 0; padding-left: 1.1rem; font-size: 0.8rem; color: var(--mp-text-body); }
+.fc-sessions th { text-align: left; white-space: nowrap; font-weight: 600; vertical-align: top; }
+.fc-sess { display: inline-block; margin: 0 12px 4px 0; font-size: 0.8rem; white-space: nowrap; }
+.fc-sess b { color: var(--mp-accent); font-weight: 600; margin-right: 4px; }
+.pg-scroll { overflow-x: auto; max-width: 100%; }
+.pg-tbl { width: 100%; font-size: 0.8rem; }
+.pg-sub { display: block; font-size: 0.7rem; color: var(--mp-text-dim); }
+.mm-count { font-size: 0.75rem; font-weight: 400; color: var(--mp-text-dim); margin-left: 6px; }
+.co-notes summary { cursor: pointer; font-size: 0.78rem; color: var(--mp-text-muted); }
+.nt-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.nt-item { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 10px 12px; border: 1px solid var(--mp-line); border-radius: 10px; }
+.nt-ic { font-size: 1.2rem; }
+.nt-main b { font-size: 0.88rem; }
+.nt-main p { margin: 2px 0; font-size: 0.8rem; color: var(--mp-text-body); }
+.nt-main small { font-size: 0.7rem; color: var(--mp-text-dim); }
+.an-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.an-item { padding: 10px 12px; border-left: 3px solid var(--mp-line); border-radius: 6px; background: rgba(255, 255, 255, 0.02); }
+.an-item p { margin: 4px 0; font-size: 0.84rem; color: var(--mp-text-body); }
+.an-item small { font-size: 0.72rem; color: var(--mp-text-dim); }
+.an-important { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.06); }
+.an-schedule { border-left-color: #60a5fa; }
+@media (max-width: 600px) { .nt-item { grid-template-columns: 26px minmax(0, 1fr); } .nt-item .oc-out { grid-column: 2; justify-self: start; } }

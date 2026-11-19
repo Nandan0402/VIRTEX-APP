@@ -1,0 +1,78 @@
+/* =====================================================================
+   Virtex Member Portal — My Workouts (member-workouts.html)
+   ===================================================================== */
+.wk-none { color: var(--mp-text-dim); }
+.wk-sub { color: var(--mp-text-muted); font-size: 0.78rem; font-weight: 400; }
+.wk-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wk-chip { display: inline-block; padding: 2px 9px; margin: 0 4px 4px 0; border-radius: 999px; font-size: 0.72rem; border: 1px solid var(--mp-line); color: #cbd5e1; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
+
+/* Summary tiles */
+.wk-tiles { display: grid; gap: 0.85rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.wk-tile { background: var(--mp-surface); border: 1px solid var(--mp-line); border-radius: var(--mp-radius); padding: 0.95rem 1rem; }
+.wk-tile span { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--mp-text-muted); font-weight: 700; }
+.wk-tile b { display: block; font-size: 1.35rem; margin-top: 4px; }
+.wk-tile small { font-size: 0.74rem; color: var(--mp-text-dim); }
+.wk-tile a { color: var(--mp-accent); text-decoration: none; }
+
+/* Programme */
+.wk-program { padding: 1.15rem 1.25rem; }
+.wk-prog-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: flex-start; }
+.wk-prog-head h2 { margin: 0 0 6px; font-size: 1.15rem; font-weight: 800; }
+.wk-meta { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.wk-lock { font-size: 0.72rem; font-weight: 600; color: #94a3b8; border: 1px solid var(--mp-line); padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+.wk-desc { color: var(--mp-text-body); font-size: 0.86rem; margin: 0.6rem 0 0; line-height: 1.5; }
+.wk-trainer-note { margin-top: 0.75rem; padding: 0.65rem 0.85rem; border-radius: 9px; background: var(--mp-accent-soft); border: 1px solid var(--mp-accent-border); font-size: 0.85rem; }
+.wk-subhead { font-size: 0.92rem; margin: 1.1rem 0 0.6rem; }
+
+/* Weekly plan strip with completion status */
+.wk-plan { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.wk-plan-day { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 0.7rem 0.8rem;
+  border-radius: 10px; border: 1px solid var(--mp-line); background: rgba(255, 255, 255, 0.02); color: var(--mp-text); cursor: pointer; font-family: inherit;
+  transition: border-color 0.15s ease, background-color 0.15s ease; }
+.wk-plan-day:hover, .wk-plan-day:focus-visible { border-color: var(--mp-accent-border); outline: none; }
+.wk-plan-day.is-selected { border-color: var(--mp-accent); box-shadow: inset 0 0 0 1px var(--mp-accent); background: var(--mp-accent-soft); }
+.wk-plan-day b { font-size: 0.88rem; }
+.wk-plan-day small { font-size: 0.74rem; color: var(--mp-text-muted); min-height: 1em; }
+.wk-plan-day em { font-style: normal; font-size: 0.72rem; font-weight: 700; margin-top: 4px; }
+.wk-done em { color: #00e676; }
+.wk-done em::before { content: '✓ '; }
+.wk-next em { color: #fbbf24; }
+.wk-past em { color: #94a3b8; }
+.wk-todo em { color: var(--mp-text-dim); }
+.wk-today { position: absolute; top: 6px; right: 8px; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.6px; color: #000; background: var(--mp-accent); border-radius: 4px; padding: 1px 5px; }
+
+/* Day detail */
+.wk-day-slot { margin-top: 1rem; }
+.wk-day-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.wk-day-head h3 { margin: 0 0 6px; font-size: 1rem; }
+.wk-day-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.wk-focus { font-weight: 500; color: var(--mp-text-muted); }
+.wk-table td { vertical-align: top; }
+.wk-ex-name { font-weight: 700; }
+.wk-note { font-size: 0.78rem; color: var(--mp-text-body); margin-top: 4px; }
+.wk-how { margin-top: 4px; font-size: 0.78rem; }
+.wk-how summary { cursor: pointer; color: var(--mp-accent); }
+.wk-how p { margin: 4px 0 0; color: var(--mp-text-body); white-space: pre-wrap; line-height: 1.5; max-width: 60ch; }
+
+/* Completion form */
+.wk-log { margin-top: 1rem; padding: 1rem; border-radius: 12px; border: 1px solid var(--mp-accent-border); background: rgba(0, 230, 118, 0.04); }
+.wk-log h4 { margin: 0 0 4px; font-size: 0.95rem; }
+.wk-sets { border: 1px solid var(--mp-line); border-radius: 10px; padding: 0.6rem 0.8rem; margin: 0.6rem 0; }
+.wk-sets legend { font-weight: 700; font-size: 0.85rem; padding: 0 4px; }
+.wk-set-row { display: grid; grid-template-columns: 60px 1fr 1fr; gap: 8px; align-items: center; margin: 4px 0; font-size: 0.82rem; }
+.wk-set-row input { width: 100%; box-sizing: border-box; padding: 7px 9px; border-radius: 7px; border: 1px solid var(--mp-line); background: var(--bg-input, #090a0f); color: var(--mp-text); font-family: inherit; }
+.wk-set-row input:focus { outline: 2px solid var(--mp-accent); outline-offset: 0; }
+.wk-err { color: #f87171; font-size: 0.82rem; min-height: 0; }
+.wk-err:empty { display: none; }
+
+.wk-empty { padding: 1rem; }
+.wk-empty-links { display: flex; justify-content: center; padding-bottom: 1rem; }
+.wk-past { padding: 0.9rem 1.2rem; font-size: 0.85rem; }
+.wk-past summary { cursor: pointer; font-weight: 700; }
+.wk-past ul { margin: 0.6rem 0 0; padding-left: 1.2rem; display: grid; gap: 4px; color: var(--mp-text-body); }
+
+@media (max-width: 600px) {
+  .wk-plan { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wk-day-actions, .wk-day-actions .btn { width: 100%; }
+}

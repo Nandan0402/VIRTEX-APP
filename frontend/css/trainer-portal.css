@@ -1,0 +1,18 @@
+/* =====================================================================
+   Virtex Trainer Portal — compatibility index (no rules of its own).
+   The portal styles now live in the split files below; trainer-*.html
+   pages link them directly. This index only exists so any page that
+   still links trainer-portal.css keeps the full portal styling.
+   ===================================================================== */
+@import url('trainer-style.css');
+@import url('trainer-components.css');
+@import url('trainer-forms.css');
+@import url('trainer-animations.css');
+@import url('trainer-dashboard.css');
+@import url('trainer-clients.css');
+@import url('trainer-workouts.css');
+@import url('trainer-diet.css');
+@import url('trainer-schedule.css');
+@import url('trainer-performance.css');
+@import url('trainer-profile.css');
+@import url('trainer-responsive.css');

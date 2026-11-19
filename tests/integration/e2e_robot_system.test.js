@@ -1,6 +1,7 @@
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../../backend/src/app.js';
+import { query, closePool } from '../../backend/src/config/database.js';
 import { config } from '../../backend/src/config/env.js';
 
 describe('End-to-End System Integration: Kiosk, Backend, Database & ESP32 Hardware Lifecycle', () => {
@@ -36,9 +37,13 @@ describe('End-to-End System Integration: Kiosk, Backend, Database & ESP32 Hardwa
   });
 
   after(async () => {
+    try {
+      await query("DELETE FROM interaction_logs WHERE user_query = 'ಜಿಮ್ ಸಮಯ ಎಷ್ಟು?';");
+    } catch (_) {}
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }
+    await closePool();
   });
 
   // Flow Step 1: System Health & Database Connectivity Check

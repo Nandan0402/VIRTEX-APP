@@ -10,7 +10,7 @@ class PortalController {
   }
 
   init() {
-    console.log('[Portal] Initializing PulseCore Gateway Telemetry...');
+    console.log('[Portal] Initializing Virtex Gateway Telemetry...');
     this.pollAll();
     setInterval(() => this.pollAll(), 4000);
   }

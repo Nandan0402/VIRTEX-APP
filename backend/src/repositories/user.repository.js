@@ -14,10 +14,10 @@ export async function findByUsernameOrEmail(identifier, client) {
   try {
     const userSql = `
       SELECT u.id, u.username, u.email, u.password_hash, u.full_name, u.role, u.is_active,
-             u.member_id, u.trainer_id, u.last_login_at, r.role_code, r.permissions
+             u.member_id, u.trainer_id, u.last_login_at, u.avatar_url, r.role_code, r.permissions
       FROM users u
       LEFT JOIN roles r ON u.role_id = r.id
-      WHERE (LOWER(u.username) = LOWER($1) OR LOWER(u.email) = LOWER($1))
+      WHERE (LOWER(u.username) = LOWER($1) OR LOWER(u.email) = LOWER($1) OR u.phone = $1)
       LIMIT 1;
     `;
     const userRes = await executor.query(userSql, [cleanId]);
@@ -34,29 +34,11 @@ export async function findByUsernameOrEmail(identifier, client) {
       return u;
     }
   } catch (e) {
-    // Fall through to admin_users
+    console.error('[UserRepository] findByUsernameOrEmail failed:', e.message);
   }
 
-  // 2. Legacy fallback to admin_users
-  try {
-    const adminSql = `
-      SELECT id, username, email, password_hash, full_name, role, is_active, last_login_at
-      FROM admin_users
-      WHERE (LOWER(username) = LOWER($1) OR LOWER(email) = LOWER($1))
-      LIMIT 1;
-    `;
-    const adminRes = await executor.query(adminSql, [cleanId]);
-    if (adminRes.rowCount > 0) {
-      const admin = adminRes.rows[0];
-      return {
-        ...admin,
-        permissions: admin.role === 'superadmin' ? ['*'] : ['members.view', 'trainers.self'],
-      };
-    }
-  } catch (e) {
-    // Ignored
-  }
-
+  // NOTE: the legacy admin_users login fallback was removed (single authentication
+  // system = users table). admin_users rows are left untouched in the database.
   return null;
 }
 
@@ -70,8 +52,8 @@ export async function findById(id, client) {
 
   try {
     const userSql = `
-      SELECT u.id, u.username, u.email, u.full_name, u.role, u.is_active,
-             u.member_id, u.trainer_id, u.last_login_at, u.created_at, r.role_code, r.permissions
+      SELECT u.id, u.username, u.email, u.full_name, u.role, u.phone, u.is_active,
+             u.member_id, u.trainer_id, u.last_login_at, u.created_at, u.avatar_url, r.role_code, r.permissions
       FROM users u
       LEFT JOIN roles r ON u.role_id = r.id
       WHERE u.id = $1
@@ -82,28 +64,10 @@ export async function findById(id, client) {
       return userRes.rows[0];
     }
   } catch (e) {
-    // Fall through
+    console.error('[UserRepository] findById failed:', e.message);
   }
 
-  try {
-    const adminSql = `
-      SELECT id, username, email, full_name, role, is_active, last_login_at, created_at
-      FROM admin_users
-      WHERE id = $1
-      LIMIT 1;
-    `;
-    const adminRes = await executor.query(adminSql, [id]);
-    if (adminRes.rowCount > 0) {
-      return {
-        ...adminRes.rows[0],
-        permissions: adminRes.rows[0].role === 'superadmin' ? ['*'] : ['members.view'],
-      };
-    }
-  } catch (e) {
-    // Fall through
-  }
-
-  return null;
+  return null; // legacy admin_users fallback removed (single authentication system)
 }
 
 /**
@@ -115,11 +79,6 @@ export async function updateLastLogin(id, client) {
   const executor = client || { query };
   try {
     await executor.query(`UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = $1;`, [id]);
-  } catch (e) {
-    // Ignored
-  }
-  try {
-    await executor.query(`UPDATE admin_users SET last_login_at = CURRENT_TIMESTAMP WHERE id = $1;`, [id]);
   } catch (e) {
     // Ignored
   }
@@ -289,3 +248,126 @@ export async function createUser(userData, client) {
   ]);
   return res.rows[0];
 }
+
+/**
+ * Find or create a user by Google ID or email
+ * Links Google ID to existing local account if found, or provisions a new user.
+ * @param {Object} data - { googleId, email, fullName, role, avatarUrl }
+ * @param {import('pg').PoolClient} [client]
+ */
+export async function findOrCreateGoogleUser(data, client) {
+  const { googleId, email, fullName, role = 'member', avatarUrl = null } = data;
+  const executor = client || { query };
+  const cleanEmail = String(email || '').trim().toLowerCase();
+
+  // 1. Look for existing user by google_id or email
+  const existingSql = `
+    SELECT u.id, u.username, u.email, u.full_name, u.role, u.is_active,
+           u.member_id, u.trainer_id, u.last_login_at, u.avatar_url, u.google_id,
+           r.role_code, r.permissions
+    FROM users u
+    LEFT JOIN roles r ON u.role_id = r.id
+    WHERE u.google_id = $1 OR LOWER(u.email) = $2
+    LIMIT 1;
+  `;
+  const existingRes = await executor.query(existingSql, [googleId, cleanEmail]);
+
+  if (existingRes.rowCount > 0) {
+    const user = existingRes.rows[0];
+
+    // Link google_id or update avatar if missing
+    const updates = [];
+    const params = [];
+    let pIdx = 1;
+
+    if (!user.google_id) {
+      updates.push(`google_id = $${pIdx++}`, `auth_provider = 'google'`);
+      params.push(googleId);
+      user.google_id = googleId;
+    }
+    if (avatarUrl && !user.avatar_url) {
+      updates.push(`avatar_url = $${pIdx++}`);
+      params.push(avatarUrl);
+      user.avatar_url = avatarUrl;
+    }
+
+    if (updates.length > 0) {
+      params.push(user.id);
+      await executor.query(`UPDATE users SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${pIdx};`, params);
+    }
+
+    // Attach permissions
+    if (!user.permissions) {
+      if (user.role === 'owner' || user.role === 'superadmin') user.permissions = ['*'];
+      else if (user.role === 'manager') user.permissions = ['members:*', 'trainers:*', 'plans:*', 'reports:view'];
+      else if (user.role === 'trainer') user.permissions = ['schedules:read', 'schedules:write:self'];
+      else if (user.role === 'member') user.permissions = ['members:read:self', 'members:checkin:self'];
+      else user.permissions = [];
+    }
+    return user;
+  }
+
+  // 2. No login yet: only a member or trainer the GYM already registered with this email gets a login, with
+  //    THEIR role. The role sent by the browser is ignored, so Google can never create owner/manager accounts.
+  let memberId = null;
+  let trainerId = null;
+  let assignedRole = null;
+
+  try {
+    const memRes = await executor.query(`SELECT id, full_name FROM members WHERE LOWER(email) = $1 LIMIT 1;`, [cleanEmail]);
+    if (memRes.rowCount > 0) {
+      memberId = memRes.rows[0].id;
+      assignedRole = 'member';
+    } else {
+      const trRes = await executor.query(`SELECT id, full_name FROM trainers WHERE LOWER(email) = $1 LIMIT 1;`, [cleanEmail]);
+      if (trRes.rowCount > 0) {
+        trainerId = trRes.rows[0].id;
+        assignedRole = 'trainer';
+      }
+    }
+  } catch (err) {
+    // Ignore lookup errors
+  }
+
+  if (!assignedRole) return null;   // unknown Google email → refused (accounts are created by the admin)
+
+  // Generate unique username
+  let baseUsername = cleanEmail.split('@')[0].replace(/[^a-z0-9_]/g, '_').slice(0, 24);
+  if (!baseUsername) baseUsername = 'user';
+  let username = baseUsername;
+  let suffix = Math.floor(100 + Math.random() * 900);
+
+  const checkUser = await executor.query(`SELECT 1 FROM users WHERE LOWER(username) = $1 LIMIT 1;`, [username]);
+  if (checkUser.rowCount > 0) {
+    username = `${baseUsername}_${suffix}`;
+  }
+
+  const insertSql = `
+    INSERT INTO users (
+      username, email, full_name, google_id, auth_provider, role, is_active,
+      member_id, trainer_id, avatar_url, created_at, updated_at
+    )
+    VALUES ($1, $2, $3, $4, 'google', $5, TRUE, $6, $7, $8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    RETURNING id, username, email, full_name, role, is_active, member_id, trainer_id, avatar_url, created_at;
+  `;
+  const insertRes = await executor.query(insertSql, [
+    username,
+    cleanEmail,
+    fullName || username,
+    googleId,
+    assignedRole,
+    memberId,
+    trainerId,
+    avatarUrl,
+  ]);
+  const newUser = insertRes.rows[0];
+
+  if (newUser.role === 'owner' || newUser.role === 'superadmin') newUser.permissions = ['*'];
+  else if (newUser.role === 'manager') newUser.permissions = ['members:*', 'trainers:*', 'plans:*', 'reports:view'];
+  else if (newUser.role === 'trainer') newUser.permissions = ['schedules:read', 'schedules:write:self'];
+  else if (newUser.role === 'member') newUser.permissions = ['members:read:self', 'members:checkin:self'];
+  else newUser.permissions = [];
+
+  return newUser;
+}
+

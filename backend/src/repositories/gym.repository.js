@@ -71,6 +71,30 @@ export async function updateGymSettings(settings, client) {
     checkinCooldownMinutes !== undefined ? checkinCooldownMinutes : null,
   ]);
 
+  // Also synchronize gym_profile table if present
+  try {
+    await executor.query(`
+      UPDATE gym_profile
+      SET gym_name = COALESCE($1, gym_name),
+          tagline = COALESCE($2, tagline),
+          phone = COALESCE($3, phone),
+          email = COALESCE($4, email),
+          address = COALESCE($5, address),
+          operating_hours = COALESCE($6, operating_hours),
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = 1;
+    `, [
+      gymName || null,
+      tagline || null,
+      phone || null,
+      email || null,
+      address || null,
+      operatingHours ? JSON.stringify(operatingHours) : null,
+    ]);
+  } catch (e) {
+    // Non-fatal if gym_profile is absent
+  }
+
   return result.rows[0] || null;
 }
 

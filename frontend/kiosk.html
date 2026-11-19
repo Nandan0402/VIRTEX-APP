@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AI Gym Receptionist Robot - PulseCore Fitness. Interactive voice assistant powered by ESP32, Node.js, and PostgreSQL.">
-  <title>PulseCore Fitness • AI Gym Receptionist Robot</title>
+  <meta name="description" content="AI Gym Reception - Virtex Fitness. Interactive voice assistant powered by Node.js and PostgreSQL.">
+  <title>Virtex Fitness • AI Gym Reception</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,13 +18,12 @@
       <div class="header-brand">
         <div class="brand-logo" aria-hidden="true">
           <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-svg">
-            <rect width="32" height="32" rx="8" fill="#12141a" stroke="#00e676" stroke-width="2"/>
-            <path d="M7 16H11L14 9L18 23L21 16H25" stroke="#00e676" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#12141a" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
         <div class="brand-text">
-          <h1 class="brand-title" id="gym-brand-title">PULSECORE <span class="text-green">FITNESS</span></h1>
-          <p class="brand-subtitle" id="gym-brand-subtitle">AI Receptionist Robot Station</p>
+          <h1 class="brand-title" id="gym-brand-title">VIRTEX <span class="text-green">FITNESS</span></h1>
+          <p class="brand-subtitle" id="gym-brand-subtitle">AI Reception Desk</p>
         </div>
       </div>
 
@@ -64,7 +64,7 @@
     <main class="main-container" id="main-content">
       <!-- Section 1: Hero Interactive Receptionist Station -->
       <section class="receptionist-hero-grid" aria-label="AI Receptionist Desk">
-        <!-- Left Column: Animated Robot Avatar & Voice Controls -->
+        <!-- Left Column: Voice Controls (robot avatar removed) -->
         <div class="card robot-kiosk-card">
           <div class="kiosk-header">
             <span class="kiosk-tag text-green font-mono">STATION #01 • ENTRANCE</span>
@@ -72,9 +72,6 @@
               <span aria-hidden="true">🔊</span> Speak Aloud
             </button>
           </div>
-
-          <!-- Animated Robot Avatar Container -->
-          <div id="robot-avatar-container" class="avatar-view-mount"></div>
 
           <!-- Real-Time Voice Waveform Visualizer -->
           <div id="voice-visualizer-container" class="visualizer-mount"></div>
@@ -112,7 +109,7 @@
           <div class="chips-container" id="prompt-chips-wrapper" role="group" aria-label="Suggested Questions"></div>
 
           <!-- Question Input Form -->
-          <form id="chat-input-form" class="chat-form" role="search" aria-label="Ask FitBot a question">
+          <form id="chat-input-form" class="chat-form" role="search" aria-label="Ask the receptionist a question">
             <div class="input-wrap">
               <input 
                 type="text" 
@@ -135,10 +132,10 @@
         <div id="announcements-container"></div>
       </section>
 
-      <!-- Section 2: Quick Member Check-in & Hardware Base Telemetry -->
-      <section class="operations-grid" aria-label="Operations and Hardware Telemetry">
+      <!-- Section 2: Quick Member Check-in & Today's Feed
+           (robot hardware status/servo controls live in the admin console: Robot Telemetry & Controls) -->
+      <section class="operations-grid" aria-label="Member Check-In">
         <!-- Quick Member Check-In -->
-        <div class="column-ops">
           <div class="card checkin-kiosk-card">
             <div class="card-header">
               <div class="header-title">
@@ -170,12 +167,6 @@
             </div>
             <ul id="recent-checkins-list" class="recent-checkins-feed" role="list"></ul>
           </div>
-        </div>
-
-        <!-- Hardware & Servos Telemetry Card -->
-        <div class="column-hardware">
-          <div id="robot-status-container"></div>
-        </div>
       </section>
 
       <!-- Section 3: Trainer Floor Availability Board -->
@@ -194,16 +185,6 @@
         <div id="membership-plans-grid" class="plans-grid"></div>
       </section>
 
-      <!-- Section 5: Interactive Knowledge Base & FAQs -->
-      <section class="faq-knowledge-section" id="faq-knowledge-section" aria-label="Knowledge Base and FAQs">
-        <div id="faqs-container"></div>
-      </section>
-
-      <!-- Section 6: Operating Hours & Facility Contact Details -->
-      <section class="facility-info-grid" aria-label="Facility Hours and Location">
-        <div id="hours-container"></div>
-        <div id="contact-container"></div>
-      </section>
     </main>
 
     <!-- Membership Enquiry Modal Dialog -->
@@ -212,7 +193,7 @@
         <div class="modal-header">
           <div>
             <span class="modal-subtitle text-green font-mono">MEMBERSHIP ENQUIRY</span>
-            <h3 id="modal-title" class="modal-title">Join <span id="modal-plan-title">PulseCore Fitness</span></h3>
+            <h3 id="modal-title" class="modal-title">Join <span id="modal-plan-title">Virtex Fitness</span></h3>
           </div>
           <button class="modal-close-btn" aria-label="Close modal dialog">✕</button>
         </div>
@@ -250,8 +231,7 @@
     <!-- Application Footer -->
     <footer class="app-footer" role="contentinfo">
       <div class="footer-inner">
-        <p class="footer-copy" id="footer-copy-text">© 2026 PulseCore Fitness • AI Gym Receptionist Robot Base (ESP32 DevKit V1 + 3x SG90 Servos)</p>
-        <p class="footer-stack font-mono text-xs">Node.js Express • PostgreSQL • Web Speech API (EN / KN / HI)</p>
+        <p class="footer-copy" id="footer-copy-text">© 2026 Virtex Fitness</p>
       </div>
     </footer>
   </div>

@@ -40,11 +40,13 @@ export class RobotAvatarComponent {
     if (!this.container) return;
 
     let gestureLabel = 'Neutral Idle';
-    if (this.currentGesture === 'GREET_WAVE') gestureLabel = 'Waving Arm 👋';
-    else if (this.currentGesture === 'NOD_YES') gestureLabel = 'Affirmative Nod ✅';
-    else if (this.currentGesture === 'SHAKE_NO') gestureLabel = 'Head Shake ❌';
-    else if (this.currentGesture === 'LOOK_LEFT') gestureLabel = 'Looking Left ⬅️';
-    else if (this.currentGesture === 'LOOK_RIGHT') gestureLabel = 'Looking Right ➡️';
+    const gUpper = String(this.currentGesture || '').toUpperCase();
+    if (gUpper === 'GREET_WAVE' || gUpper === 'WAVE') gestureLabel = 'Waving Arm 👋';
+    else if (gUpper === 'NOD_YES' || gUpper === 'NOD') gestureLabel = 'Affirmative Nod ✅';
+    else if (gUpper === 'SHAKE_NO' || gUpper === 'SHAKE') gestureLabel = 'Head Shake ❌';
+    else if (gUpper === 'LOOK_LEFT') gestureLabel = 'Looking Left ⬅️';
+    else if (gUpper === 'LOOK_RIGHT') gestureLabel = 'Looking Right ➡️';
+    else if (gUpper === 'RESET_IDLE' || gUpper === 'IDLE') gestureLabel = 'Neutral Idle 🔄';
 
     let stateClass = `robot-state-${this.state}`;
     let gestureClass = `gesture-${this.currentGesture.toLowerCase()}`;

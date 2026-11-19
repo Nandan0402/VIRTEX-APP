@@ -1,5 +1,20 @@
 import * as trainerService from '../services/trainer.service.js';
 import { broadcast } from '../services/realtime.service.js';
+import { recordAdminPasswordSet } from '../repositories/passwordRequest.repository.js';
+
+/** Realtime payloads go to every connected screen: never include login credentials. */
+function publicTrainer(t) {
+  if (!t || typeof t !== 'object') return t;
+  const { user_account, user_account_note, ...rest } = t; // eslint-disable-line no-unused-vars
+  return rest;
+}
+
+/** Record that the admin set this coach's password (resolves any open request). Best effort. */
+async function auditAdminPasswordSet(req, trainer) {
+  if (!trainer?.user_account || !trainer.user_id) return;
+  try { await recordAdminPasswordSet(trainer.user_id, trainer.user_account.username, req.user, trainer.id); }
+  catch (e) { console.warn('[Trainer] password-set audit failed:', e.message); }
+}
 
 /**
  * GET /api/v1/trainers
@@ -57,7 +72,7 @@ export async function updateStatus(req, res, next) {
 
 export async function createTrainer(req, res, next) {
   try {
-    const { name, fullName, specialty, phone, email, bio, certifications, shiftStart, shiftEnd, shift } = req.body;
+    const { name, fullName, specialty, phone, email, bio, certifications, shiftStart, shiftEnd, shift, password, username } = req.body;
     const trainerName = fullName || name;
     if (!trainerName || !specialty || !phone) {
       return res.status(400).json({ success: false, error: 'Name, specialty, and phone are required.' });
@@ -84,9 +99,12 @@ export async function createTrainer(req, res, next) {
       shiftStart: parsedStart,
       shiftEnd: parsedEnd,
       status: req.body.status || 'on_floor',
+      password,
+      username,
     });
 
-    broadcast('TRAINER_CREATED', created, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
+    await auditAdminPasswordSet(req, created);
+    broadcast('TRAINER_CREATED', publicTrainer(created), { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.status(201).json({
       success: true,
       message: 'Trainer created successfully.',
@@ -105,7 +123,8 @@ export async function updateTrainer(req, res, next) {
       return res.status(404).json({ success: false, error: 'Trainer not found.' });
     }
 
-    broadcast('TRAINER_UPDATED', updated, { channel: 'all', triggeredBy: req.user?.username || 'admin' });
+    await auditAdminPasswordSet(req, updated);
+    broadcast('TRAINER_UPDATED', publicTrainer(updated), { channel: 'all', triggeredBy: req.user?.username || 'admin' });
     res.json({
       success: true,
       message: 'Trainer updated successfully.',

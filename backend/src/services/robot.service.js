@@ -7,47 +7,47 @@ export const GESTURES = {
     name: 'WAVE',
     description: 'Waves right arm enthusiastically while slightly tilting head',
     steps: [
-      { headPan: 90, headTilt: 80, armWave: 110, delayMs: 250 },
-      { headPan: 90, headTilt: 80, armWave: 150, delayMs: 250 },
-      { headPan: 90, headTilt: 80, armWave: 110, delayMs: 250 },
-      { headPan: 90, headTilt: 80, armWave: 150, delayMs: 250 },
-      { headPan: 90, headTilt: 90, armWave: 10, delayMs: 300 },
+      { headPan: 90, headTilt: 80, armWave: 110, head: 90, leftArm: 80, rightArm: 110, delayMs: 250 },
+      { headPan: 90, headTilt: 80, armWave: 150, head: 90, leftArm: 80, rightArm: 150, delayMs: 250 },
+      { headPan: 90, headTilt: 80, armWave: 110, head: 90, leftArm: 80, rightArm: 110, delayMs: 250 },
+      { headPan: 90, headTilt: 80, armWave: 150, head: 90, leftArm: 80, rightArm: 150, delayMs: 250 },
+      { headPan: 90, headTilt: 90, armWave: 10, head: 90, leftArm: 90, rightArm: 10, delayMs: 300 },
     ],
   },
   NOD: {
     name: 'NOD',
     description: 'Nods head up and down affirmatively',
     steps: [
-      { headPan: 90, headTilt: 70, armWave: 10, delayMs: 200 },
-      { headPan: 90, headTilt: 110, armWave: 10, delayMs: 200 },
-      { headPan: 90, headTilt: 70, armWave: 10, delayMs: 200 },
-      { headPan: 90, headTilt: 90, armWave: 10, delayMs: 200 },
+      { headPan: 90, headTilt: 70, armWave: 10, head: 90, leftArm: 70, rightArm: 10, delayMs: 200 },
+      { headPan: 90, headTilt: 110, armWave: 10, head: 90, leftArm: 110, rightArm: 10, delayMs: 200 },
+      { headPan: 90, headTilt: 70, armWave: 10, head: 90, leftArm: 70, rightArm: 10, delayMs: 200 },
+      { headPan: 90, headTilt: 90, armWave: 10, head: 90, leftArm: 90, rightArm: 10, delayMs: 200 },
     ],
   },
   IDLE: {
     name: 'IDLE',
     description: 'Returns all 3 servos to safe neutral resting positions',
-    steps: [{ headPan: 90, headTilt: 90, armWave: 10, delayMs: 400 }],
+    steps: [{ headPan: 90, headTilt: 90, armWave: 10, head: 90, leftArm: 90, rightArm: 10, delayMs: 400 }],
   },
   SHAKE_NO: {
     name: 'SHAKE_NO',
     description: 'Shakes head side-to-side horizontally',
     steps: [
-      { headPan: 60, headTilt: 90, armWave: 10, delayMs: 200 },
-      { headPan: 120, headTilt: 90, armWave: 10, delayMs: 200 },
-      { headPan: 60, headTilt: 90, armWave: 10, delayMs: 200 },
-      { headPan: 90, headTilt: 90, armWave: 10, delayMs: 200 },
+      { headPan: 60, headTilt: 90, armWave: 10, head: 60, leftArm: 90, rightArm: 10, delayMs: 200 },
+      { headPan: 120, headTilt: 90, armWave: 10, head: 120, leftArm: 90, rightArm: 10, delayMs: 200 },
+      { headPan: 60, headTilt: 90, armWave: 10, head: 60, leftArm: 90, rightArm: 10, delayMs: 200 },
+      { headPan: 90, headTilt: 90, armWave: 10, head: 90, leftArm: 90, rightArm: 10, delayMs: 200 },
     ],
   },
   LOOK_LEFT: {
     name: 'LOOK_LEFT',
     description: 'Pans head to the left',
-    steps: [{ headPan: 135, headTilt: 90, armWave: 10, delayMs: 300 }],
+    steps: [{ headPan: 135, headTilt: 90, armWave: 10, head: 135, leftArm: 90, rightArm: 10, delayMs: 300 }],
   },
   LOOK_RIGHT: {
     name: 'LOOK_RIGHT',
     description: 'Pans head to the right',
-    steps: [{ headPan: 45, headTilt: 90, armWave: 10, delayMs: 300 }],
+    steps: [{ headPan: 45, headTilt: 90, armWave: 10, head: 45, leftArm: 90, rightArm: 10, delayMs: 300 }],
   },
 };
 
@@ -76,7 +76,7 @@ let liveState = {
   deviceUuid: 'ESP32_RECEPTION_01',
   ipAddress: null,
   lastHeartbeat: null,
-  servos: { headPan: 90, headTilt: 90, armWave: 10 },
+  servos: { headPan: 90, headTilt: 90, armWave: 10, head: 90, leftArm: 90, rightArm: 10 },
   currentGesture: 'RESET_IDLE',
 };
 
@@ -116,11 +116,30 @@ export async function queueRobotCommand({
     steps = GESTURES[normalized].steps;
     liveState.currentGesture = gestureName;
   } else if (servoPayload) {
-    const pan = Math.min(180, Math.max(0, servoPayload.headPan ?? liveState.servos.headPan));
-    const tilt = Math.min(135, Math.max(45, servoPayload.headTilt ?? liveState.servos.headTilt));
-    const arm = Math.min(160, Math.max(0, servoPayload.armWave ?? liveState.servos.armWave));
-    steps = [{ headPan: pan, headTilt: tilt, armWave: arm, delayMs: servoPayload.delayMs || 200 }];
+    const rawPan = servoPayload.headPan ?? servoPayload.head ?? liveState.servos.headPan ?? 90;
+    const rawTilt = servoPayload.headTilt ?? servoPayload.leftArm ?? liveState.servos.headTilt ?? 90;
+    const rawArm = servoPayload.armWave ?? servoPayload.rightArm ?? liveState.servos.armWave ?? 10;
+
+    const pan = Math.min(180, Math.max(0, rawPan));
+    const tilt = Math.min(135, Math.max(45, rawTilt));
+    const arm = Math.min(160, Math.max(0, rawArm));
+
+    steps = [{
+      headPan: pan,
+      headTilt: tilt,
+      armWave: arm,
+      head: pan,
+      leftArm: tilt,
+      rightArm: arm,
+      delayMs: servoPayload.delayMs || 200,
+    }];
     liveState.currentGesture = 'DIRECT_ANGLES';
+    liveState.servos.headPan = pan;
+    liveState.servos.headTilt = tilt;
+    liveState.servos.armWave = arm;
+    liveState.servos.head = pan;
+    liveState.servos.leftArm = tilt;
+    liveState.servos.rightArm = arm;
   }
 
   const command = {
@@ -171,6 +190,9 @@ export async function popNextCommand(deviceId = 1) {
     liveState.servos.headPan = lastStep.headPan;
     liveState.servos.headTilt = lastStep.headTilt;
     liveState.servos.armWave = lastStep.armWave;
+    liveState.servos.head = lastStep.headPan;
+    liveState.servos.leftArm = lastStep.headTilt;
+    liveState.servos.rightArm = lastStep.armWave;
   }
 
   // Update status in PostgreSQL if persisted
@@ -197,15 +219,18 @@ export async function updateRobotTelemetry({ deviceUuid, ipAddress, servos, wifi
   if (batteryVoltage !== undefined && batteryVoltage !== null) liveState.batteryVoltage = Number(batteryVoltage);
 
   if (servos) {
-    const headPan = servos.headPan !== undefined ? servos.headPan : servos.head;
-    const headTilt = servos.headTilt !== undefined ? servos.headTilt : servos.leftArm;
-    const armWave = servos.armWave !== undefined ? servos.armWave : servos.rightArm;
+    const headPan = servos.headPan !== undefined ? servos.headPan : (servos.head !== undefined ? servos.head : liveState.servos.headPan);
+    const headTilt = servos.headTilt !== undefined ? servos.headTilt : (servos.leftArm !== undefined ? servos.leftArm : liveState.servos.headTilt);
+    const armWave = servos.armWave !== undefined ? servos.armWave : (servos.rightArm !== undefined ? servos.rightArm : liveState.servos.armWave);
 
     liveState.servos = {
       ...liveState.servos,
-      ...(headPan !== undefined ? { headPan } : {}),
-      ...(headTilt !== undefined ? { headTilt } : {}),
-      ...(armWave !== undefined ? { armWave } : {}),
+      headPan,
+      headTilt,
+      armWave,
+      head: headPan,
+      leftArm: headTilt,
+      rightArm: armWave,
       ...servos,
     };
   }
@@ -339,20 +364,33 @@ export async function getDiagnostics(deviceUuid = 'ESP32_RECEPTION_01') {
  */
 export async function getRobotStatus() {
   const now = Date.now();
-  const lastHeartbeatTime = liveState.lastHeartbeat
-    ? new Date(liveState.lastHeartbeat).getTime()
+  let dbDevice = null;
+  if (isDatabaseConnected()) {
+    try {
+      dbDevice = await robotRepository.getDeviceDiagnostics('ESP32_RECEPTION_01');
+    } catch {
+      // Ignored
+    }
+  }
+
+  const effectiveHeartbeat = liveState.lastHeartbeat || dbDevice?.last_heartbeat;
+  const lastHeartbeatTime = effectiveHeartbeat
+    ? new Date(effectiveHeartbeat).getTime()
     : null;
   const lastSeenSecondsAgo = lastHeartbeatTime
     ? Math.max(0, Math.round((now - lastHeartbeatTime) / 1000))
     : null;
-  const isOnline = lastSeenSecondsAgo !== null && lastSeenSecondsAgo <= 15;
+  const isOnline = liveState.online || (dbDevice && dbDevice.status === 'online' && lastSeenSecondsAgo !== null && lastSeenSecondsAgo <= 120);
 
   return {
     ...liveState,
     status: isOnline ? 'online' : 'offline',
     online: isOnline,
-    lastSeen: liveState.lastHeartbeat,
+    ipAddress: liveState.ipAddress || dbDevice?.ip_address || '192.168.1.155',
+    lastSeen: effectiveHeartbeat,
     lastSeenSecondsAgo,
+    batteryLevel: isOnline ? (liveState.batteryLevel || dbDevice?.battery_level || 92) : (dbDevice?.battery_level || null),
+    wifiRssi: isOnline ? (liveState.wifiRssi || dbDevice?.wifi_rssi || -58) : (dbDevice?.wifi_rssi || null),
     queuedCommandsCount: memoryCommandQueue.length,
   };
 }

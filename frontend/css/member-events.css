@@ -1,0 +1,24 @@
+/* =====================================================================
+   Virtex Member Portal — Events (member-events.html)
+   Builds on member-classes.css + member-courses.css (cards, chips, grid).
+   ===================================================================== */
+.ev-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.ev-groups { margin-top: -0.2rem; }
+.ev-live { color: #fbbf24; border-color: rgba(251, 191, 36, 0.45); }
+.ev-card.is-cancelled { opacity: 0.6; }
+.ev-card.is-cancelled h3 { text-decoration: line-through; }
+.ev-facts { font-size: 0.75rem; }
+.ev-mine { margin: 6px 0 0; padding: 6px 9px; border-radius: 8px; background: rgba(255, 255, 255, 0.04); font-size: 0.82rem; }
+.ev-mine.muted { color: var(--mp-text-dim); }
+.ev-mine small { display: block; font-size: 0.72rem; color: var(--mp-text-dim); }
+.ev-cert { font-size: 0.8rem; margin: 6px 0 0; }
+.ev-cert a { color: var(--mp-accent); }
+.ev-act { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; padding-top: 8px; }
+.ev-act .btn { padding: 6px 12px; font-size: 0.8rem; flex: 1; }
+.ev-board { margin-top: 8px; overflow-x: auto; }
+.ev-tbl { width: 100%; font-size: 0.8rem; }
+.ev-tbl td, .ev-tbl th { white-space: nowrap; }
+.ev-tbl tr.is-me td { background: var(--mp-accent-soft); font-weight: 700; }
+.co-notes summary { cursor: pointer; font-size: 0.75rem; color: var(--mp-text-muted); margin-top: 4px; }
+.co-notes p { font-size: 0.8rem; color: var(--mp-text-body); margin: 4px 0 0; }
+.mm-err { color: #f87171; font-size: 0.82rem; }

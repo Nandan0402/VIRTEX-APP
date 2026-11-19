@@ -14,13 +14,8 @@ export class MemberCardComponent {
 
     // 1. Standby State (Default)
     if (!member && !options.errorState) {
-      this.container.innerHTML = `
-        <div class="card member-standby-card" role="status">
-          <div class="standby-icon" aria-hidden="true">🪪</div>
-          <h4 class="standby-title">Fast Member Check-In</h4>
-          <p class="standby-desc">Enter your Member Code (e.g. <strong>GYM001</strong>) or 10-digit phone number below, or tell FitBot via microphone.</p>
-        </div>
-      `;
+      // Idle: show nothing — the check-in box above already has the heading and input hint.
+      this.container.innerHTML = '';
       return;
     }
 

@@ -1,0 +1,432 @@
+/**
+ * Virtex Admin - Gym Operations & Staff Management Stylesheet
+ * Integrates staff registration, profiles, roles & permissions,
+ * attendance reports, shift management, branch management, facility zones,
+ * maintenance logs, staff performance, and branch analytics.
+ */
+
+:root {
+  --ops-accent: #00e676;
+  --ops-blue: #00b0ff;
+  --ops-amber: #ffab00;
+  --ops-purple: #b388ff;
+  --ops-cyan: #00e5ff;
+  --ops-red: #ff5252;
+  --ops-card-bg: #11141e;
+  --ops-border: #1e2433;
+}
+
+/* Tab Navigation */
+.ops-nav-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--ops-border);
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.ops-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim, #94a3b8);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+}
+
+.ops-tab-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ops-tab-btn.active {
+  color: var(--ops-accent);
+  background: rgba(0, 230, 118, 0.08);
+  border-bottom-color: var(--ops-accent);
+}
+
+.ops-tab-badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 7px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ops-tab-btn.active .ops-tab-badge {
+  background: rgba(0, 230, 118, 0.2);
+  color: #00e676;
+}
+
+/* KPI Summary Deck */
+.ops-kpi-deck {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.ops-kpi-card {
+  background: var(--ops-card-bg);
+  border: 1px solid var(--ops-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ops-kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.ops-kpi-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.ops-kpi-val {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ops-kpi-label {
+  font-size: 0.75rem;
+  color: var(--text-dim, #94a3b8);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Filter Controls Bar */
+.ops-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ops-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.ops-search-input {
+  background: #0d1017;
+  border: 1px solid var(--ops-border);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  min-width: 250px;
+}
+
+.ops-select {
+  background: #0d1017;
+  border: 1px solid var(--ops-border);
+  color: #cbd5e1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+/* Staff Cards Grid */
+.staff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.staff-card {
+  background: var(--ops-card-bg);
+  border: 1px solid var(--ops-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.staff-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.staff-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.staff-avatar-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #1a2234;
+  color: #00e676;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.staff-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.staff-designation {
+  font-size: 0.78rem;
+  color: var(--text-dim, #94a3b8);
+  margin-top: 2px;
+}
+
+.staff-info-box {
+  background: #090c12;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.staff-info-row {
+  display: flex;
+  justify-content: space-between;
+  color: #cbd5e1;
+}
+
+/* Tables */
+.ops-table-wrap {
+  background: var(--ops-card-bg);
+  border: 1px solid var(--ops-border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.ops-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.ops-table th {
+  background: #0d1017;
+  color: var(--text-dim, #94a3b8);
+  padding: 12px 16px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--ops-border);
+}
+
+.ops-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #161a26;
+  color: #cbd5e1;
+  vertical-align: middle;
+}
+
+.ops-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Status & Role Badges */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.status-open {
+  background: rgba(0, 230, 118, 0.15);
+  color: #00e676;
+}
+
+.status-maintenance {
+  background: rgba(255, 171, 0, 0.15);
+  color: #ffab00;
+}
+
+.status-closed {
+  background: rgba(255, 82, 82, 0.15);
+  color: #ff5252;
+}
+
+.status-completed {
+  background: rgba(0, 230, 118, 0.15);
+  color: #00e676;
+}
+
+.status-scheduled {
+  background: rgba(0, 176, 255, 0.15);
+  color: #00b0ff;
+}
+
+.status-absent {
+  background: rgba(255, 82, 82, 0.2);
+  color: #ff5252;
+}
+
+/* Modals */
+.ops-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  padding: 1rem;
+}
+
+.ops-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ops-modal {
+  background: #131722;
+  border: 1px solid var(--ops-border);
+  border-radius: 12px;
+  max-width: 650px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  transform: translateY(20px);
+  transition: transform 0.2s ease;
+}
+
+.ops-modal-overlay.active .ops-modal {
+  transform: translateY(0);
+}
+
+.ops-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--ops-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ops-modal-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ops-modal-body {
+  padding: 1.5rem;
+}
+
+.ops-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--ops-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #0d1017;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.form-control {
+  width: 100%;
+  background: #0d1017;
+  border: 1px solid var(--ops-border);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-family: inherit;
+}
+
+.form-control:focus {
+  border-color: var(--ops-accent);
+  outline: none;
+}
+
+.form-control[readonly] {
+  background: #181c28;
+  color: #94a3b8;
+}
+
+/* Branch Analytics Grid */
+.branch-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.branch-stat-card {
+  background: var(--ops-card-bg);
+  border: 1px solid var(--ops-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+

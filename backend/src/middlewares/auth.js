@@ -1,3 +1,4 @@
+import { query } from '../config/database.js';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 import * as userRepository from '../repositories/user.repository.js';
@@ -56,6 +57,13 @@ export async function authenticateToken(req, res, next) {
           error: 'Session has been revoked or logged out. Please sign in again.',
         });
       }
+    }
+
+    // A login the admin froze or deleted loses access immediately, even with an unexpired token.
+    if (decoded.id) {
+      const acct = (await query('SELECT is_active FROM users WHERE id = $1', [decoded.id])).rows[0];
+      if (!acct) return res.status(401).json({ success: false, error: 'This login no longer exists. Please contact the gym.' });
+      if (acct.is_active === false) return res.status(401).json({ success: false, code: 'LOGIN_DISABLED', error: 'Your login has been frozen by the gym. Please contact the front desk.' });
     }
 
     req.user = decoded; // { id, username, role, fullName, permissions, memberId, trainerId, jti }

@@ -1,0 +1,26 @@
+/* =====================================================================
+   Virtex Trainer Portal — forms (on top of admin.css .form-group/.btn)
+   ===================================================================== */
+
+.tp-form-grid { display: grid; gap: 0.75rem 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.tp-form-actions { margin-top: 1rem; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+
+/* Inline checkbox labels ("Include shared templates", "Unread only" …) */
+.tp-body label.tp-muted { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.tp-body input[type="checkbox"] { accent-color: var(--tp-accent); width: 15px; height: 15px; }
+
+/* Date / time inputs reuse .select-filter; keep the native picker icon visible on dark */
+.tp-body input[type="date"],
+.tp-body input[type="time"],
+.tp-body input[type="datetime-local"] { color-scheme: dark; }
+
+.tp-body .form-group textarea { resize: vertical; min-height: 64px; }
+.tp-body .form-group input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.tp-body .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.tp-body .btn:focus-visible,
+.tp-body .select-filter:focus-visible,
+.tp-body .input-search:focus-visible { outline: 2px solid var(--tp-accent); outline-offset: 1px; }
+
+/* Coaching feedback form (client profile) */
+.tp-feedback-form { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.6rem; }

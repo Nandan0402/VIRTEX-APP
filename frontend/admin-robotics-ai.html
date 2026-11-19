@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • FitBot Robotics & Hardware Management</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/modules/admin-robotics.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation (Auto-rendered with 16 categories by adminSidebarNav.js) -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <!-- Rendered dynamically by adminSidebarNav.js -->
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Application Canvas -->
+    <div class="admin-main-wrap">
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-brand">
+            <span class="topbar-title">FitBot Robotics & Hardware Management</span>
+            <span class="badge badge-green font-mono text-xs">Category 12 • Robotics & Smart Gym</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group Mounted by topbarRoutineNav.js -->
+        </div>
+      </header>
+
+      <main class="admin-body">
+        <div class="admin-content-wrap" style="padding: 1.5rem; max-width: 1400px; margin: 0 auto;">
+          <!-- Breadcrumb & Header -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 4px;">
+                <a href="admin.html" style="color: var(--text-dim); text-decoration: none;">Virtex Admin</a> / 
+                <span style="color: var(--text-gray);">Robotics & Smart Gym</span> / 
+                <span style="color: var(--robot-accent);">FitBot Robotics Console</span>
+              </div>
+              <h1 style="font-size: 1.65rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px;">
+                <span>🤖</span> FitBot Robotics & Hardware Management
+              </h1>
+              <p style="font-size: 0.9rem; color: var(--text-gray); margin-top: 4px;">
+                Fleet registration, real-time health & sensor telemetry, battery diagnostics, Wi-Fi RSSI signal quality, hardware logs, safety safeguards, and device maintenance history.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <a href="kiosk.html" target="_blank" class="btn btn-outline" style="text-decoration: none;">🖥️ Open Kiosk Mode</a>
+              <button class="btn btn-green" id="btn-open-register-modal">➕ Register New Robot</button>
+            </div>
+          </div>
+
+          <!-- Safety Safeguard Banner -->
+          <div class="robot-safety-banner">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 1.8rem;">🛡️</span>
+              <div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 2px;">
+                  AUTONOMOUS SAFETY SAFEGUARDS ACTIVE
+                </h4>
+                <p style="font-size: 0.82rem; color: #cbd5e1; margin: 0;">
+                  Ultrasonic collision avoidance, emergency thermal cutoff, and torque limiters are armed. Physical servo actuators remain safeguarded.
+                </p>
+              </div>
+            </div>
+            <span class="badge-robot success">STATUS: SECURED</span>
+          </div>
+
+          <!-- KPI Summary Deck (All 11 features synthesized) -->
+          <div class="robot-kpi-deck">
+            <div class="robot-kpi-card">
+              <div class="robot-kpi-icon" style="background: rgba(0, 230, 118, 0.1); color: var(--robot-accent);">🤖</div>
+              <div class="robot-kpi-meta">
+                <span class="robot-kpi-val" id="kpi-total-devices">0</span>
+                <span class="robot-kpi-label">Registered Fleet</span>
+              </div>
+            </div>
+            <div class="robot-kpi-card">
+              <div class="robot-kpi-icon" style="background: rgba(0, 229, 255, 0.1); color: var(--robot-cyan);">⚡</div>
+              <div class="robot-kpi-meta">
+                <span class="robot-kpi-val" id="kpi-online-devices">0 / 0</span>
+                <span class="robot-kpi-label">Online Units</span>
+              </div>
+            </div>
+            <div class="robot-kpi-card">
+              <div class="robot-kpi-icon" style="background: rgba(255, 145, 0, 0.1); color: var(--robot-amber);">🔋</div>
+              <div class="robot-kpi-meta">
+                <span class="robot-kpi-val" id="kpi-avg-battery">0%</span>
+                <span class="robot-kpi-label">Fleet Avg Battery</span>
+              </div>
+            </div>
+            <div class="robot-kpi-card">
+              <div class="robot-kpi-icon" style="background: rgba(41, 121, 255, 0.1); color: var(--robot-blue);">📶</div>
+              <div class="robot-kpi-meta">
+                <span class="robot-kpi-val" id="kpi-avg-wifi">0 dBm</span>
+                <span class="robot-kpi-label">Avg Wi-Fi RSSI</span>
+              </div>
+            </div>
+            <div class="robot-kpi-card">
+              <div class="robot-kpi-icon" style="background: rgba(255, 23, 68, 0.1); color: var(--robot-red);">⚠️</div>
+              <div class="robot-kpi-meta">
+                <span class="robot-kpi-val" id="kpi-active-alerts">0</span>
+                <span class="robot-kpi-label">Unresolved Alerts</span>
+              </div>
+            </div>
+            <div class="robot-kpi-card">
+              <div class="robot-kpi-icon" style="background: rgba(213, 0, 249, 0.1); color: var(--robot-purple);">🛡️</div>
+              <div class="robot-kpi-meta">
+                <span class="robot-kpi-val" id="kpi-safety-events">0</span>
+                <span class="robot-kpi-label">Safety Incidents</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Navigation (11 Features Structured into 8 Core Views) -->
+          <div class="robot-nav-tabs">
+            <button class="robot-tab-btn active" data-tab="fleet">
+              <span>🤖</span> Robot Fleet & Registration
+              <span class="robot-tab-badge" id="tab-badge-fleet">0</span>
+            </button>
+            <button class="robot-tab-btn" data-tab="health">
+              <span>🩺</span> Health & Power
+            </button>
+            <button class="robot-tab-btn" data-tab="sensors">
+              <span>📡</span> Sensor Telemetry
+            </button>
+            <button class="robot-tab-btn" data-tab="activity">
+              <span>👋</span> Activity & Gestures
+            </button>
+            <button class="robot-tab-btn" data-tab="logs">
+              <span>📜</span> Hardware Event Logs
+            </button>
+            <button class="robot-tab-btn" data-tab="alerts">
+              <span>⚠️</span> Connection Alerts
+              <span class="robot-tab-badge" id="tab-badge-alerts">0</span>
+            </button>
+            <button class="robot-tab-btn" data-tab="maintenance">
+              <span>🔧</span> Maintenance Records
+            </button>
+            <button class="robot-tab-btn" data-tab="safety">
+              <span>🛡️</span> Safety Monitoring
+              <span class="robot-tab-badge" id="tab-badge-safety">0</span>
+            </button>
+            <button class="robot-tab-btn" data-tab="analytics">
+              <span>📊</span> Fleet Analytics
+            </button>
+            <button class="robot-tab-btn" data-tab="voice">
+              <span>🗣️</span> Voice & Prompt Lab
+            </button>
+          </div>
+
+          <!-- TAB 1: ROBOT FLEET & REGISTRATION (FEATURE 1) -->
+          <div class="robot-tab-content" id="tab-content-fleet" style="display: block;">
+            <div class="robot-toolbar">
+              <div class="robot-toolbar-group">
+                <input type="text" class="robot-search-input" id="input-fleet-search" placeholder="🔍 Search by name, UUID, IP...">
+                <select class="robot-select" id="filter-fleet-status">
+                  <option value="all">All Connection States</option>
+                  <option value="online">Online Units</option>
+                  <option value="offline">Offline Units</option>
+                </select>
+              </div>
+              <div class="robot-toolbar-group">
+                <button class="btn btn-outline" onclick="window.location.reload();">🔄 Refresh</button>
+              </div>
+            </div>
+
+            <!-- Fleet Cards Grid -->
+            <div class="robot-fleet-grid" id="fleet-cards-container">
+              <!-- Dynamically populated by renderFleetCards() -->
+            </div>
+          </div>
+
+          <!-- TAB 2: HEALTH, BATTERY & WI-FI (FEATURES 2, 3, 4) -->
+          <div class="robot-tab-content" id="tab-content-health" style="display: none;">
+            <div class="robot-toolbar">
+              <div class="robot-toolbar-group">
+                <label style="font-size: 0.85rem; color: var(--text-dim);">Selected Device:</label>
+                <select class="robot-select device-selector-sync" id="health-device-select" onchange="window.location.hash='#';">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+            </div>
+
+            <!-- Diagnostics Metrics Cards -->
+            <div class="diagnostics-grid">
+              <div class="diag-card">
+                <div class="diag-card-title">
+                  <span>Overall Health Score</span>
+                  <span>🩺</span>
+                </div>
+                <div class="diag-card-val" id="diag-health-score" style="color: var(--robot-accent);">-- / 100</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);" id="diag-health-status">System Initializing...</div>
+              </div>
+
+              <div class="diag-card">
+                <div class="diag-card-title">
+                  <span>Battery System</span>
+                  <span>🔋</span>
+                </div>
+                <div class="diag-card-val" id="diag-batt-volts" style="color: var(--robot-amber);">-- V</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);" id="diag-batt-hours">Calculating runtime...</div>
+              </div>
+
+              <div class="diag-card">
+                <div class="diag-card-title">
+                  <span>Wi-Fi Signal & IP</span>
+                  <span>📶</span>
+                </div>
+                <div class="diag-card-val" id="diag-wifi-quality" style="color: var(--robot-blue);">-- dBm</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);" id="diag-wifi-ip">IP Address</div>
+              </div>
+            </div>
+
+            <!-- Detailed Power & Wireless Gauges -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+              <div class="admin-card" style="padding: 1.5rem; background: var(--robot-card-bg); border: 1px solid var(--robot-border); border-radius: 12px;">
+                <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                  <span>🔋</span> Battery & Power Distribution
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                      <span style="font-size: 0.85rem; color: var(--text-dim);">Charge Level:</span>
+                      <span class="font-mono font-bold text-white" id="power-batt-text">--%</span>
+                    </div>
+                    <div class="robot-meter-bar" style="height: 10px;">
+                      <div class="robot-meter-fill green" id="power-batt-fill" style="width: 0%;"></div>
+                    </div>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                    <div class="robot-spec-item" style="background:#090c13; padding:10px; border-radius:8px;">
+                      <span class="robot-spec-title">Cell Voltage</span>
+                      <span class="robot-spec-value" id="power-batt-volts">-- V</span>
+                    </div>
+                    <div class="robot-spec-item" style="background:#090c13; padding:10px; border-radius:8px;">
+                      <span class="robot-spec-title">Charging State</span>
+                      <span class="robot-spec-value" id="power-batt-status">DISCHARGING</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="admin-card" style="padding: 1.5rem; background: var(--robot-card-bg); border: 1px solid var(--robot-border); border-radius: 12px;">
+                <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                  <span>📶</span> Wi-Fi Connectivity & Signal Quality
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                      <span style="font-size: 0.85rem; color: var(--text-dim);">Signal RSSI Strength:</span>
+                      <span class="font-mono font-bold text-white" id="wifi-rssi-val">-- dBm</span>
+                    </div>
+                    <div class="robot-meter-bar" style="height: 10px;">
+                      <div class="robot-meter-fill blue" id="wifi-rssi-fill" style="width: 0%;"></div>
+                    </div>
+                  </div>
+                  <div style="background:#090c13; padding:10px; border-radius:8px; margin-top:8px;">
+                    <span class="robot-spec-title">Connection Quality</span>
+                    <span class="robot-spec-value" id="wifi-quality-text" style="color: var(--robot-cyan);">CHECKING...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: SENSOR MONITORING & TELEMETRY (FEATURE 5) -->
+          <div class="robot-tab-content" id="tab-content-sensors" style="display: none;">
+            <div class="robot-toolbar">
+              <div class="robot-toolbar-group">
+                <select class="robot-select device-selector-sync" id="sensor-device-sync">
+                  <!-- Populated dynamically -->
+                </select>
+                <select class="robot-select" id="filter-sensor-type">
+                  <option value="all">All Sensor Types</option>
+                  <option value="ultrasonic">Ultrasonic Distance (HC-SR04)</option>
+                  <option value="pir">PIR Motion (HC-SR501)</option>
+                  <option value="thermal">Thermal Body Scan (AMG8833)</option>
+                  <option value="rfid">RFID Scanner (RC522)</option>
+                  <option value="lux">Ambient Light (BH1750)</option>
+                </select>
+              </div>
+              <div class="robot-toolbar-group">
+                <button class="btn btn-green" id="btn-open-sensor-modal">➕ Record Sensor Reading</button>
+              </div>
+            </div>
+
+            <div class="robot-table-card">
+              <table class="robot-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Device</th>
+                    <th>Sensor Type</th>
+                    <th>Sensor Name</th>
+                    <th>Reading</th>
+                    <th>Status</th>
+                    <th>Thresholds</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-sensor-telemetry">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 4: ROBOT ACTIVITY & GESTURES (FEATURE 6) -->
+          <div class="robot-tab-content" id="tab-content-activity" style="display: none;">
+            <div class="robot-toolbar">
+              <div class="robot-toolbar-group">
+                <select class="robot-select device-selector-sync" id="activity-device-sync">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+              <div class="robot-toolbar-group">
+                <span class="badge badge-outline font-mono text-xs">Autonomous Gesture Stream</span>
+              </div>
+            </div>
+
+            <div class="robot-table-card">
+              <table class="robot-table">
+                <thead>
+                  <tr>
+                    <th>Execution Time</th>
+                    <th>Device</th>
+                    <th>Command Type</th>
+                    <th>Choreographed Gesture</th>
+                    <th>Status</th>
+                    <th>Duration</th>
+                    <th>Trigger Source</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-robot-activity">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 5: HARDWARE EVENT LOGS (FEATURE 7) -->
+          <div class="robot-tab-content" id="tab-content-logs" style="display: none;">
+            <div class="robot-toolbar">
+              <div class="robot-toolbar-group">
+                <select class="robot-select device-selector-sync" id="logs-device-sync">
+                  <!-- Populated dynamically -->
+                </select>
+                <select class="robot-select" id="filter-log-level">
+                  <option value="all">All Log Levels</option>
+                  <option value="DEBUG">DEBUG</option>
+                  <option value="INFO">INFO</option>
+                  <option value="WARN">WARN</option>
+                  <option value="ERROR">ERROR</option>
+                </select>
+              </div>
+              <div class="robot-toolbar-group">
+                <span class="badge badge-outline font-mono text-xs">ESP32 UART / Flash Buffer</span>
+              </div>
+            </div>
+
+            <div class="robot-table-card">
+              <table class="robot-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Device</th>
+                    <th>Level</th>
+                    <th>Event Type</th>
+                    <th>Message</th>
+                    <th>Payload Preview</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-hardware-logs">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 6: CONNECTION ALERTS (FEATURE 8) -->
+          <div class="robot-tab-content" id="tab-content-alerts" style="display: none;">
+            <div class="robot-toolbar">
+              <div class="robot-toolbar-group">
+                <select class="robot-select" id="filter-alert-severity">
+                  <option value="all">All Severities</option>
+                  <option value="emergency">Emergency</option>
+                  <option value="critical">Critical</option>
+                  <option value="warning">Warning</option>
+                  <option value="info">Info</option>
+                </select>
+                <select class="robot-select" id="filter-alert-resolved">
+                  <option value="false">Active / Unresolved Only</option>
+                  <option value="true">Resolved Alerts</option>
+                  <option value="all">All Alerts</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="robot-table-card">
+              <table class="robot-table">
+                <thead>
+                  <tr>
+                    <th>Logged At</th>
+                    <th>Device</th>
+                    <th>Severity</th>
+                    <th>Alert Type</th>
+                    <th>Message</th>
+                    <th>Resolution</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-device-alerts">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 7: MAINTENANCE RECORDS (FEATURE 10) -->
+          <div class="robot-tab-content" id="tab-content-maintenance" style="display: none;">
+            <div class="robot-toolbar">
+              <div class="robot-toolbar-group">
+                <select class="robot-select device-selector-sync" id="maint-device-sync">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+              <div class="robot-toolbar-group">
+                <button class="btn btn-green" id="btn-open-maint-modal">➕ Schedule Maintenance</button>
+              </div>
+            </div>
+
+            <div class="robot-table-card">
+              <table class="robot-table">
+                <thead>
+                  <tr>
+                    <th>Device</th>
+                    <th>Service Type</th>
+                    <th>Scheduled Date</th>
+                    <th>Technician</th>
+                    <th>Estimated Cost</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-maintenance-records">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 8: SAFETY MONITORING (FEATURE 11) -->
+          <div class="robot-tab-content" id="tab-content-safety" style="display: none;">
+            <div class="robot-toolbar">
+              <div class="robot-toolbar-group">
+                <select class="robot-select device-selector-sync" id="safety-device-sync">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+              <div class="robot-toolbar-group">
+                <button class="btn btn-green" id="btn-open-safety-modal">➕ Log Safety Safeguard</button>
+              </div>
+            </div>
+
+            <div class="robot-table-card">
+              <table class="robot-table">
+                <thead>
+                  <tr>
+                    <th>Incident Time</th>
+                    <th>Device</th>
+                    <th>Severity</th>
+                    <th>Safeguard Trigger</th>
+                    <th>Action Taken</th>
+                    <th>Location Zone</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-safety-incidents">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 9: ROBOTICS FLEET ANALYTICS (FEATURE 9) -->
+          <div class="robot-tab-content" id="tab-content-analytics" style="display: none;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+              <div class="diag-card">
+                <div class="diag-card-title">
+                  <span>Total Commands Executed</span>
+                  <span>⚡</span>
+                </div>
+                <div class="diag-card-val" id="analytics-cmd-total" style="color: var(--robot-cyan);">0</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);">Since system deployment</div>
+              </div>
+
+              <div class="diag-card">
+                <div class="diag-card-title">
+                  <span>Command Success Rate</span>
+                  <span>🎯</span>
+                </div>
+                <div class="diag-card-val" id="analytics-cmd-success" style="color: var(--robot-accent);">100%</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);">Reliability verification</div>
+              </div>
+
+              <div class="diag-card">
+                <div class="diag-card-title">
+                  <span>Avg Execution Latency</span>
+                  <span>⏱️</span>
+                </div>
+                <div class="diag-card-val" id="analytics-avg-exec" style="color: var(--robot-blue);">320 ms</div>
+                <div style="font-size: 0.82rem; color: var(--text-dim);">ESP32 command dispatch roundtrip</div>
+              </div>
+            </div>
+
+            <div class="admin-card" style="padding: 1.5rem; background: var(--robot-card-bg); border: 1px solid var(--robot-border); border-radius: 12px;">
+              <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                <span>👋</span> Top Choreographed Gestures & Interactions
+              </h3>
+              <div id="analytics-top-gestures">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 10: MULTILINGUAL VOICE & PROMPT LAB (FEATURE: VOICE) -->
+          <div class="robot-tab-content" id="tab-content-voice" style="display: none;">
+            <div id="voice"></div>
+            <div class="robot-toolbar">
+              <div class="robot-toolbar-group">
+                <span class="badge badge-green font-mono">🗣️ Multilingual Speech Engine Active</span>
+                <span class="badge badge-outline font-mono text-xs">Web Speech API + FitBot AI Speech Synthesis</span>
+              </div>
+              <div class="robot-toolbar-group">
+                <button type="button" class="btn btn-outline btn-sm" id="btn-reset-voice-defaults">🔄 Reset Voice Defaults</button>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+              <!-- Card 1: Interactive TTS Voice Tester -->
+              <div class="admin-card" style="padding: 1.5rem; background: var(--robot-card-bg); border: 1px solid var(--robot-border); border-radius: 12px;">
+                <h3 style="font-size: 1.05rem; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                  <span>🎙️</span> FitBot Live Voice Synthesizer
+                </h3>
+
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                  <div>
+                    <label style="font-size: 0.82rem; color: #94a3b8; display: block; margin-bottom: 5px;">Broadcast Language</label>
+                    <select id="voice-lang-select" class="robot-select" style="width: 100%;">
+                      <option value="en-IN">English (India) - Namaste & Welcome</option>
+                      <option value="kn-IN">Kannada (ಕನ್ನಡ) - ಸುಸ್ವಾಗತ</option>
+                      <option value="hi-IN">Hindi (हिन्दी) - स्वागत है</option>
+                      <option value="en-US">English (US Standard)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style="font-size: 0.82rem; color: #94a3b8; display: block; margin-bottom: 5px;">Interaction Persona Preset</label>
+                    <select id="voice-persona-preset" class="robot-select" style="width: 100%;">
+                      <option value="welcome">Front Desk Welcome & Check-In</option>
+                      <option value="workout">Rep Counter & High-Energy Motivation</option>
+                      <option value="renewal">Graceful Membership Renewal Reminder</option>
+                      <option value="tour">Facility Tour & Amenities Guide</option>
+                    </select>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                      <label style="font-size: 0.82rem; color: #94a3b8; display: block; margin-bottom: 5px;">
+                        Pitch: <span id="label-voice-pitch" style="color: var(--robot-accent); font-family: monospace;">1.0</span>
+                      </label>
+                      <input type="range" id="voice-pitch-slider" min="0.5" max="1.5" step="0.1" value="1.0" style="width: 100%; accent-color: var(--robot-accent);">
+                    </div>
+                    <div>
+                      <label style="font-size: 0.82rem; color: #94a3b8; display: block; margin-bottom: 5px;">
+                        Speed / Rate: <span id="label-voice-rate" style="color: var(--robot-cyan); font-family: monospace;">1.0</span>
+                      </label>
+                      <input type="range" id="voice-rate-slider" min="0.7" max="1.4" step="0.05" value="1.0" style="width: 100%; accent-color: var(--robot-cyan);">
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style="font-size: 0.82rem; color: #94a3b8; display: block; margin-bottom: 5px;">Spoken Phrase / Speech Preview</label>
+                    <textarea id="voice-speech-input" class="robot-search-input" rows="3" style="width: 100%; font-size: 0.88rem; line-height: 1.4; resize: vertical;">Welcome to Virtex Fitness Club! Please scan your RFID tag or look into the kiosk camera to check in.</textarea>
+                  </div>
+
+                  <div style="display: flex; gap: 10px; align-items: center;">
+                    <button type="button" class="btn btn-green" id="btn-speak-voice" style="flex: 1;">
+                      <span>🔊</span> Speak Out Loud
+                    </button>
+                    <button type="button" class="btn btn-outline" id="btn-stop-voice" style="padding: 8px 14px;">
+                      <span>⏹️</span> Stop
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 2: Multilingual Prompt Templates -->
+              <div class="admin-card" style="padding: 1.5rem; background: var(--robot-card-bg); border: 1px solid var(--robot-border); border-radius: 12px;">
+                <h3 style="font-size: 1.05rem; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                  <span>📝</span> Receptionist & Kiosk Prompt Templates
+                </h3>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #94a3b8; margin-bottom: 4px;">
+                      <span>Template: Member Birthday Greeting</span>
+                      <span class="badge badge-outline text-xs">Multilingual</span>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); border: 1px solid #1e2433; border-radius: 6px; padding: 10px; font-size: 0.82rem; color: #cbd5e1; font-family: monospace;">
+                      "Happy Birthday, {{member_name}}! Virtex wishes you health and strength. Your special day workout shake is on us at the smoothie bar!"
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #94a3b8; margin-bottom: 4px;">
+                      <span>Template: Expiring Plan Notice (English / Kannada)</span>
+                      <span class="badge badge-outline text-xs">Bi-lingual</span>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); border: 1px solid #1e2433; border-radius: 6px; padding: 10px; font-size: 0.82rem; color: #cbd5e1; font-family: monospace;">
+                      "Namaskara {{member_name}}, your membership plan matures in {{days_left}} days. Tap the screen to renew instantly with UPI QR code."
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: #94a3b8; margin-bottom: 4px;">
+                      <span>Template: High-Five Rep Count Cheer</span>
+                      <span class="badge badge-outline text-xs">Servo Synchronized</span>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); border: 1px solid #1e2433; border-radius: 6px; padding: 10px; font-size: 0.82rem; color: #cbd5e1; font-family: monospace;">
+                      "Great set! That was rep number 10 at 120 kilos! Keep up the intensity!"
+                    </div>
+                  </div>
+
+                  <p style="font-size: 0.78rem; color: var(--text-dim); margin: 4px 0 0 0;">
+                    ℹ️ Example templates (read-only). Use the Voice Synthesizer on the left to preview how a phrase sounds.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODALS -->
+  <!-- ========================================== -->
+
+  <!-- 1. Modal: Register Robot Device -->
+  <div class="robot-modal-overlay" id="modal-register-device">
+    <div class="robot-modal">
+      <div class="robot-modal-header">
+        <h3><span>🤖</span> Register New Robot Device</h3>
+        <button class="btn-close-modal btn btn-sm btn-outline">✕</button>
+      </div>
+      <form id="form-register-device">
+        <div class="robot-modal-body">
+          <div class="robot-form-row">
+            <div class="robot-form-group">
+              <label>Device Name *</label>
+              <input type="text" id="reg-device-name" class="robot-form-control" placeholder="FitBot Floor Patrol Rover" required>
+            </div>
+            <div class="robot-form-group">
+              <label>Device UUID *</label>
+              <input type="text" id="reg-device-uuid" class="robot-form-control font-mono" placeholder="ESP32_FLOOR_ROVER_03" required>
+            </div>
+          </div>
+          <div class="robot-form-row">
+            <div class="robot-form-group">
+              <label>Device Model</label>
+              <input type="text" id="reg-device-model" class="robot-form-control" placeholder="FitBot Mobile Rover MK-I">
+            </div>
+            <div class="robot-form-group">
+              <label>Serial Number</label>
+              <input type="text" id="reg-device-sn" class="robot-form-control font-mono" placeholder="FB-MR-2026-03">
+            </div>
+          </div>
+          <div class="robot-form-row">
+            <div class="robot-form-group">
+              <label>IP Address</label>
+              <input type="text" id="reg-device-ip" class="robot-form-control font-mono" placeholder="192.168.1.160">
+            </div>
+            <div class="robot-form-group">
+              <label>MAC Address</label>
+              <input type="text" id="reg-device-mac" class="robot-form-control font-mono" placeholder="24:6F:28:B1:00:03">
+            </div>
+          </div>
+          <div class="robot-form-group">
+            <label>Location / Operating Zone</label>
+            <input type="text" id="reg-device-zone" class="robot-form-control" placeholder="Cardio Arena & Main Floor">
+          </div>
+        </div>
+        <div class="robot-modal-footer">
+          <button type="button" class="btn btn-outline btn-close-modal">Cancel</button>
+          <button type="submit" class="btn btn-green">Register Device</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Modal: Schedule Device Maintenance -->
+  <div class="robot-modal-overlay" id="modal-schedule-maint">
+    <div class="robot-modal">
+      <div class="robot-modal-header">
+        <h3><span>🔧</span> Schedule Device Maintenance</h3>
+        <button class="btn-close-modal btn btn-sm btn-outline">✕</button>
+      </div>
+      <form id="form-schedule-maint">
+        <div class="robot-modal-body">
+          <div class="robot-form-group">
+            <label>Robot Device *</label>
+            <select id="maint-device-id" class="robot-form-control device-selector-sync" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="robot-form-row">
+            <div class="robot-form-group">
+              <label>Service Type *</label>
+              <select id="maint-type" class="robot-form-control" required>
+                <option value="Servo Calibration">Servo Calibration & Alignment</option>
+                <option value="Battery Health Check">Battery Health Check & Cell Balancing</option>
+                <option value="Sensor Cleaning">Sensor Optics & Ultrasonic Cleaning</option>
+                <option value="Firmware OTA Update">Firmware OTA Flash Update</option>
+                <option value="Chassis Mechanical Check">Chassis & Gear Inspection</option>
+              </select>
+            </div>
+            <div class="robot-form-group">
+              <label>Scheduled Date *</label>
+              <input type="date" id="maint-date" class="robot-form-control" required>
+            </div>
+          </div>
+          <div class="robot-form-row">
+            <div class="robot-form-group">
+              <label>Technician Name *</label>
+              <input type="text" id="maint-tech" class="robot-form-control" placeholder="Rajesh Hardware Eng." required>
+            </div>
+            <div class="robot-form-group">
+              <label>Estimated Cost (₹)</label>
+              <input type="number" step="0.01" id="maint-cost" class="robot-form-control" placeholder="1500.00">
+            </div>
+          </div>
+          <div class="robot-form-group">
+            <label>Work Summary & Notes</label>
+            <textarea id="maint-summary" class="robot-form-control" rows="2" placeholder="Routine quarterly maintenance and motor angle calibration."></textarea>
+          </div>
+        </div>
+        <div class="robot-modal-footer">
+          <button type="button" class="btn btn-outline btn-close-modal">Cancel</button>
+          <button type="submit" class="btn btn-green">Schedule Service</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Modal: Record Sensor Reading -->
+  <div class="robot-modal-overlay" id="modal-record-sensor">
+    <div class="robot-modal">
+      <div class="robot-modal-header">
+        <h3><span>📡</span> Record Sensor Telemetry</h3>
+        <button class="btn-close-modal btn btn-sm btn-outline">✕</button>
+      </div>
+      <form id="form-record-sensor">
+        <div class="robot-modal-body">
+          <div class="robot-form-group">
+            <label>Robot Device *</label>
+            <select id="sensor-device-id" class="robot-form-control device-selector-sync" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="robot-form-row">
+            <div class="robot-form-group">
+              <label>Sensor Type *</label>
+              <select id="sensor-type" class="robot-form-control" required>
+                <option value="ultrasonic">Ultrasonic (Distance)</option>
+                <option value="pir">PIR (Motion Detection)</option>
+                <option value="thermal">Thermal (Body Temperature)</option>
+                <option value="rfid">RFID (Scan Detection)</option>
+                <option value="lux">Lux (Ambient Lighting)</option>
+              </select>
+            </div>
+            <div class="robot-form-group">
+              <label>Sensor Name *</label>
+              <input type="text" id="sensor-name" class="robot-form-control" placeholder="HC-SR04 Front Sensor" required>
+            </div>
+          </div>
+          <div class="robot-form-row">
+            <div class="robot-form-group">
+              <label>Reading Value *</label>
+              <input type="number" step="0.01" id="sensor-value" class="robot-form-control" placeholder="142.5" required>
+            </div>
+            <div class="robot-form-group">
+              <label>Unit *</label>
+              <input type="text" id="sensor-unit" class="robot-form-control" placeholder="cm, °C, lux" required>
+            </div>
+          </div>
+          <div class="robot-form-row">
+            <div class="robot-form-group">
+              <label>Threshold Min</label>
+              <input type="number" step="0.01" id="sensor-thresh-min" class="robot-form-control" placeholder="30.0">
+            </div>
+            <div class="robot-form-group">
+              <label>Threshold Max</label>
+              <input type="number" step="0.01" id="sensor-thresh-max" class="robot-form-control" placeholder="300.0">
+            </div>
+          </div>
+        </div>
+        <div class="robot-modal-footer">
+          <button type="button" class="btn btn-outline btn-close-modal">Cancel</button>
+          <button type="submit" class="btn btn-green">Log Reading</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Modal: Log Safety Safeguard -->
+  <div class="robot-modal-overlay" id="modal-log-safety">
+    <div class="robot-modal">
+      <div class="robot-modal-header">
+        <h3><span>🛡️</span> Log Safety Monitoring Event</h3>
+        <button class="btn-close-modal btn btn-sm btn-outline">✕</button>
+      </div>
+      <form id="form-log-safety">
+        <div class="robot-modal-body">
+          <div class="robot-form-group">
+            <label>Robot Device *</label>
+            <select id="safety-device-id" class="robot-form-control device-selector-sync" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="robot-form-row">
+            <div class="robot-form-group">
+              <label>Safety Event Type *</label>
+              <select id="safety-type" class="robot-form-control" required>
+                <option value="Ultrasonic Proximity Obstacle">Ultrasonic Proximity Obstacle</option>
+                <option value="Servo Torque Overcurrent Protection">Servo Torque Overcurrent Protection</option>
+                <option value="Thermal Body Temp Anomaly">Thermal Body Temp Anomaly</option>
+                <option value="Emergency Stop Interlock">Emergency Stop Interlock</option>
+                <option value="Loss of Wi-Fi Safety Auto-Halt">Loss of Wi-Fi Safety Auto-Halt</option>
+              </select>
+            </div>
+            <div class="robot-form-group">
+              <label>Severity Level *</label>
+              <select id="safety-severity" class="robot-form-control" required>
+                <option value="info">Info / Normal Avoidance</option>
+                <option value="warning">Warning</option>
+                <option value="critical">Critical</option>
+              </select>
+            </div>
+          </div>
+          <div class="robot-form-group">
+            <label>Action Taken *</label>
+            <input type="text" id="safety-action" class="robot-form-control" placeholder="Auto-braked and rotated head 15 deg away from obstacle" required>
+          </div>
+          <div class="robot-form-group">
+            <label>Zone Location</label>
+            <input type="text" id="safety-zone" class="robot-form-control" placeholder="Reception Kiosk Entrance">
+          </div>
+          <div class="robot-form-group">
+            <label>Notes</label>
+            <textarea id="safety-notes" class="robot-form-control" rows="2" placeholder="Obstacle resolved autonomously within 1.2s."></textarea>
+          </div>
+        </div>
+        <div class="robot-modal-footer">
+          <button type="button" class="btn btn-outline btn-close-modal">Cancel</button>
+          <button type="submit" class="btn btn-green">Log Safety Safeguard</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Component Scripts -->
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script src="js/admin/roboticsManagement.js"></script>
+</body>
+</html>

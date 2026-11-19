@@ -19,6 +19,7 @@ ON CONFLICT (role_code) DO UPDATE SET
 -- 2. Add relational links on users to members and trainers
 ALTER TABLE users ADD COLUMN IF NOT EXISTS member_id INTEGER REFERENCES members(id) ON DELETE SET NULL;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS trainer_id INTEGER REFERENCES trainers(id) ON DELETE SET NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_users_member_id ON users(member_id);
 CREATE INDEX IF NOT EXISTS idx_users_trainer_id ON users(trainer_id);
@@ -56,7 +57,7 @@ CREATE INDEX IF NOT EXISTS idx_auth_audit_created ON auth_audit_logs(created_at 
 -- Hashed using pgcrypto gen_salt('bf', 10)
 INSERT INTO users (username, email, password_hash, full_name, role_id, role, phone, is_active, member_id, trainer_id)
 VALUES
-    ('owner_manju', 'owner@pulsecorefitness.in', crypt('OwnerPass2026!', gen_salt('bf', 10)), 'Manju Owner', (SELECT id FROM roles WHERE role_code = 'owner'), 'owner', '+91 99000 00001', TRUE, NULL, NULL),
+    ('owner_manju', 'owner@virtexfitness.in', crypt('OwnerPass2026!', gen_salt('bf', 10)), 'Nandan.B', (SELECT id FROM roles WHERE role_code = 'owner'), 'owner', '+91 99000 00001', TRUE, NULL, NULL),
     ('member_rahul', 'rahul.sharma@example.com', crypt('MemberPass2026!', gen_salt('bf', 10)), 'Rahul Sharma', (SELECT id FROM roles WHERE role_code = 'member'), 'member', '9876543210', TRUE, 1, NULL)
 ON CONFLICT (username) DO UPDATE SET
     role = EXCLUDED.role,

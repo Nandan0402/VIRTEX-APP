@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Messages</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    .mm-wrap { max-width: 1300px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 1.25rem 1.5rem; }
+    .mm-title { margin: 0 0 1rem; }
+    .mm-title h1 { margin: 0; font-size: 1.6rem; color: var(--text-white); }
+    .mm-title p { margin: .2rem 0 0; color: var(--text-gray); font-size: .9rem; }
+    .mm-side-title { margin: 0; font-size: 1.05rem; color: var(--text-white); }
+    .mm-actions-row { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+    .mm-newgrp { background: transparent; border: 1px solid var(--border); color: var(--text-gray); border-radius: var(--radius-md); padding: 0 .8rem; font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; }
+    .mm-newgrp:hover, .mm-newgrp[aria-pressed="true"] { color: var(--text-white); border-color: rgba(245,158,11,.5); }
+    .mm-shell { display: grid; grid-template-columns: 330px minmax(0, 1fr); background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; height: calc(100vh - 200px); min-height: 460px; }
+    .mm-side { border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
+    .mm-side-head { padding: .85rem; border-bottom: 1px solid var(--border); display: grid; gap: .5rem; }
+    .mm-input { width: 100%; box-sizing: border-box; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-white); border-radius: var(--radius-sm); padding: .55rem .7rem; font: inherit; font-size: .85rem; }
+    .mm-input:focus { outline: none; border-color: var(--border-focus); }
+    textarea.mm-input { resize: vertical; min-height: 60px; }
+    .mm-tabs { display: flex; gap: 6px; }
+    .mm-tabs button { flex: 1; background: transparent; border: 1px solid var(--border); color: var(--text-gray); border-radius: var(--radius-pill); padding: .35rem .5rem; font: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; }
+    .mm-tabs button[aria-pressed="true"] { background: rgba(0,230,118,.12); border-color: rgba(0,230,118,.45); color: var(--green); }
+    .mm-seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 3px; gap: 3px; }
+    .mm-seg button { background: transparent; border: 0; color: var(--text-gray); border-radius: 7px; padding: .45rem; font: inherit; font-size: .82rem; font-weight: 800; cursor: pointer; }
+    .mm-seg button[aria-pressed="true"] { background: var(--bg-card-hover); color: var(--text-white); box-shadow: inset 0 0 0 1px var(--border); }
+    .mm-list { list-style: none; margin: 0; padding: .4rem; overflow-y: auto; flex: 1; display: grid; align-content: start; gap: 3px; }
+    .mm-item { width: 100%; display: flex; gap: .65rem; align-items: center; text-align: left; background: transparent; border: 1px solid transparent; border-radius: var(--radius-md); padding: .55rem .6rem; color: var(--text-white); font: inherit; cursor: pointer; }
+    .mm-item:hover { background: var(--bg-card-hover); }
+    .mm-item.on { background: rgba(0,230,118,.08); border-color: rgba(0,230,118,.35); }
+    .mm-item.closed { opacity: .6; }
+    .mm-av { flex: none; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,230,118,.1); border: 1px solid rgba(0,230,118,.35); color: var(--green); font-weight: 800; }
+    .mm-av.trn { background: rgba(56,189,248,.12); border-color: rgba(56,189,248,.45); color: #38bdf8; }
+    .mm-av.grp { border-radius: 10px; background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.45); color: #fbbf24; }
+    .mm-main { flex: 1; min-width: 0; display: grid; }
+    .mm-main b { font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mm-main small { color: var(--text-dim); font-size: .76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mm-item.unread .mm-main small { color: var(--text-white); font-weight: 600; }
+    .mm-meta { display: grid; justify-items: end; gap: 3px; font-size: .68rem; color: var(--text-dim); }
+    .mm-badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--green); color: #000; font-size: .7rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+    .mm-pill { font-size: .62rem; font-weight: 800; letter-spacing: .04em; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-dim); text-transform: uppercase; }
+    .mm-empty { color: var(--text-dim); font-size: .85rem; padding: 1rem .6rem; }
+    .mm-view { display: flex; flex-direction: column; min-width: 0; min-height: 0; position: relative; }
+    .mm-view.blank { align-items: center; justify-content: center; color: var(--text-dim); }
+    .mm-head { display: flex; align-items: center; gap: .7rem; padding: .8rem 1rem; border-bottom: 1px solid var(--border); }
+    .mm-head > div:not(.mm-head-actions) { display: grid; flex: 1; min-width: 0; }
+    .mm-head small { color: var(--text-dim); font-size: .75rem; }
+    .mm-head-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .mm-head-actions .btn { padding: .4rem .75rem; font-size: .78rem; }
+    .mm-back { display: none; }
+    .mm-body { display: flex; flex: 1; min-height: 0; }
+    .mm-conv { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    .mm-msgs { list-style: none; margin: 0; padding: 1rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: .5rem; }
+    .mm-day { align-self: center; font-size: .7rem; color: var(--text-dim); background: var(--bg-input); padding: .2rem .7rem; border-radius: 999px; }
+    .mm-msg { max-width: 72%; display: grid; gap: 2px; }
+    .mm-msg.mine { align-self: flex-end; justify-items: end; }
+    .mm-from { font-size: .7rem; font-weight: 700; color: var(--text-gray); padding: 0 4px; }
+    .mm-from.staff { color: #818cf8; }
+    .mm-role { display: inline-block; vertical-align: middle; margin-left: 4px; padding: 1px 7px; border-radius: 999px; font-size: .62rem; font-weight: 800; letter-spacing: .3px; text-transform: uppercase; line-height: 1.5; border: 1px solid; }
+    .mm-role-admin { color: #a5b4fc; background: rgba(129,140,248,.14); border-color: rgba(129,140,248,.45); }
+    .mm-role-trainer { color: #fdba74; background: rgba(251,146,60,.12); border-color: rgba(251,146,60,.45); }
+    .mm-role-member { color: #6ee7b7; background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.4); }
+    .mm-role-group { color: #fbbf24; background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.45); }
+    .mm-bubble { padding: .55rem .8rem; border-radius: 14px; font-size: .88rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--bg-card-hover); border: 1px solid var(--border); }
+    .mm-msg.mine .mm-bubble { background: rgba(0,230,118,.14); border-color: rgba(0,230,118,.35); }
+    .mm-msg small { font-size: .68rem; color: var(--text-dim); }
+    .mm-compose { display: flex; gap: .6rem; padding: .8rem 1rem; border-top: 1px solid var(--border); align-items: flex-end; }
+    .mm-compose textarea { flex: 1; resize: vertical; min-height: 44px; max-height: 200px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-white); border-radius: var(--radius-md); padding: .6rem .75rem; font: inherit; font-size: .88rem; }
+    .mm-compose textarea:focus { outline: none; border-color: var(--border-focus); }
+    .mm-foot { padding: 0 1rem .7rem; margin: 0; font-size: .72rem; color: var(--text-dim); }
+    .mm-err { color: var(--danger); font-size: .8rem; padding: .5rem 1rem 0; margin: 0; }
+    .mm-people { width: 290px; flex: none; border-left: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
+    .mm-people h3 { font-size: .8rem; margin: 0; padding: .8rem 1rem .4rem; color: var(--text-gray); text-transform: uppercase; letter-spacing: .05em; }
+    .mm-people .mm-side-head { border-bottom: 0; padding-top: 0; }
+    .mm-person { display: flex; align-items: center; gap: .55rem; padding: .4rem .5rem; border-radius: var(--radius-sm); font-size: .84rem; }
+    .mm-person:hover { background: var(--bg-card-hover); }
+    .mm-person > span:not(.mm-av) { flex: 1; min-width: 0; display: grid; }
+    .mm-person small { color: var(--text-dim); font-size: .7rem; }
+    .mm-person .mm-av { width: 28px; height: 28px; font-size: .75rem; }
+    .mm-mini { background: transparent; border: 1px solid var(--border); color: var(--text-gray); border-radius: var(--radius-sm); padding: .2rem .55rem; font: inherit; font-size: .72rem; font-weight: 700; cursor: pointer; }
+    .mm-mini:hover { color: var(--text-white); border-color: var(--text-dim); }
+    .mm-mini.add { color: var(--green); border-color: rgba(0,230,118,.4); }
+    .mm-mini.del:hover { color: var(--danger); border-color: var(--danger); }
+    .mm-form { padding: 1.25rem; overflow-y: auto; display: grid; gap: .9rem; align-content: start; }
+    .mm-form h2 { margin: 0; font-size: 1.05rem; }
+    .mm-form p { margin: 0; color: var(--text-gray); font-size: .82rem; }
+    .mm-form label { display: grid; gap: .35rem; font-size: .78rem; font-weight: 700; color: var(--text-gray); }
+    .mm-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    /* ✉️ New message — one picker for members and trainers */
+    .mm-newmsg { width: 100%; background: var(--green); color: #04130a; border: 0; border-radius: var(--radius-md); padding: .6rem .8rem; font: inherit; font-size: .88rem; font-weight: 800; cursor: pointer; }
+    .mm-newmsg:hover { filter: brightness(1.08); }
+    .mm-newmsg:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+    .mm-newmsg[aria-pressed="true"] { background: rgba(0,230,118,.15); color: var(--green); box-shadow: inset 0 0 0 1px rgba(0,230,118,.5); }
+    .nm-wrap { padding: 1rem 1.1rem; display: grid; gap: .85rem; overflow-y: auto; align-content: start; }
+    .nm-to { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 38px; padding: .4rem .5rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .nm-to > span.nm-ph { color: var(--text-dim); font-size: .82rem; padding-left: .2rem; }
+    .nm-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--bg-card-hover); border: 1px solid var(--border); color: var(--text-white); border-radius: 999px; padding: .15rem .3rem .15rem .65rem; font-size: .78rem; }
+    .nm-chip button { background: transparent; border: 0; color: var(--text-gray); cursor: pointer; font-size: .9rem; line-height: 1; padding: 0 .2rem; }
+    .nm-tools { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .nm-filter { background: transparent; border: 1px solid var(--border); color: var(--text-gray); border-radius: 999px; padding: .3rem .75rem; font: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; }
+    .nm-filter[aria-pressed="true"] { background: rgba(0,230,118,.12); border-color: rgba(0,230,118,.45); color: var(--green); }
+    .nm-tools .mm-input { flex: 1; min-width: 180px; }
+    .nm-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 280px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 4px; }
+    .nm-row { display: flex; align-items: center; gap: .6rem; width: 100%; background: transparent; border: 0; border-radius: 8px; padding: .45rem .55rem; color: var(--text-white); font: inherit; text-align: left; cursor: pointer; }
+    .nm-row:hover { background: var(--bg-card-hover); }
+    .nm-row[aria-pressed="true"] { background: rgba(0,230,118,.08); }
+    .nm-row .nm-box { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: .75rem; flex-shrink: 0; }
+    .nm-row[aria-pressed="true"] .nm-box { background: var(--green); border-color: var(--green); color: #04130a; }
+    .nm-row .mm-main small { display: block; }
+    .nm-done { background: rgba(0,230,118,.08); border: 1px solid rgba(0,230,118,.35); border-radius: var(--radius-md); padding: .7rem .85rem; font-size: .85rem; }
+    .nm-done.bad { background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.4); }
+    .nm-done ul { margin: .35rem 0 0; padding-left: 1.1rem; }
+    .nm-send { display: flex; gap: .6rem; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+    .mm-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,230,118,.1); border: 1px solid rgba(0,230,118,.35); color: var(--text-white); border-radius: 999px; padding: .2rem .35rem .2rem .7rem; font-size: .78rem; }
+    .mm-chip button { background: transparent; border: 0; color: var(--text-gray); cursor: pointer; font-size: .9rem; line-height: 1; }
+    .mm-results { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; max-height: 240px; overflow-y: auto; }
+    .mm-actions { display: flex; gap: .6rem; justify-content: flex-end; }
+    .mm-note { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; color: var(--text-gray); }
+    .mm-note h2 { color: var(--text-white); font-size: 1.05rem; margin: 0 0 .4rem; }
+    .mm-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    @media (max-width: 1100px) { .mm-people { position: absolute; right: 0; top: 62px; bottom: 0; background: var(--bg-card); z-index: 3; box-shadow: -12px 0 24px rgba(0,0,0,.4); } }
+    @media (max-width: 860px) {
+      .mm-wrap { padding: 1rem; }
+      .mm-shell { grid-template-columns: 1fr; height: calc(100vh - 150px); }
+      .mm-shell.has-thread .mm-side { display: none; }
+      .mm-shell:not(.has-thread) .mm-view { display: none; }
+      .mm-back { display: inline-flex; }
+      .mm-msg { max-width: 88%; }
+      .mm-people { width: 100%; }
+    }
+  </style>
+</head>
+
+<body class="mm-page">
+  <div class="admin-shell">
+    <!-- Sidebar Navigation (rendered by adminSidebarNav.js) -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <!-- Rendered dynamically by adminSidebarNav.js -->
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Application Canvas -->
+    <div class="admin-main-wrap">
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-brand">
+            <span class="topbar-title">Messages</span>
+            <span class="badge badge-green font-mono text-xs" id="mm-unread-badge" style="display:none"></span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group Mounted by topbarRoutineNav.js -->
+        </div>
+      </header>
+
+      <main class="admin-body">
+        <div class="mm-wrap" id="mm-root">
+          <div class="mm-title"><h1>Messages</h1><p>Chat 1-to-1 with members and trainers, or in groups</p></div>
+          <div id="mm-app"><div class="mm-note">Loading conversations…</div></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { adminApi } from './js/admin/adminApi.js';
+    import * as MX from './js/components/messageExtras.js';   // 📎 files + 📊 polls
+
+    const app = document.getElementById('mm-app');
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const time = (d) => new Date(d).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    const short = (d) => (new Date(d).toDateString() === new Date().toDateString() ? time(d) : new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }));
+    const dayLabel = (d) => {
+      const x = new Date(d); const t = new Date(); const y = new Date(); y.setDate(t.getDate() - 1);
+      if (x.toDateString() === t.toDateString()) return 'Today';
+      if (x.toDateString() === y.toDateString()) return 'Yesterday';
+      return x.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    };
+    // Role tags (names come from PostgreSQL via the API): Admin / Trainer / Member
+    const ROLE_TAG = { staff: ['Admin', 'admin'], admin: ['Admin', 'admin'], trainer: ['Trainer', 'trainer'], member: ['Member', 'member'] };
+    const tag = (role) => { const t = ROLE_TAG[role]; return t ? `<span class="mm-role mm-role-${t[1]}">${t[0]}</span>` : ''; };
+    const initial = (n) => esc((n || '?').trim().slice(0, 1).toUpperCase());
+
+    async function call(path, opts = {}) {
+      const res = await fetch('/api/v1/admin' + path, { ...opts, headers: adminApi.getHeaders(true) });
+      if (res.status === 401) { window.location.href = 'admin-auth.html'; throw new Error('Please sign in again.'); }
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || j.success === false) {
+        const e = new Error(j.error?.message || j.message || (typeof j.error === 'string' ? j.error : '') || `Request failed (${res.status})`);
+        e.status = res.status; throw e;
+      }
+      return j.data;
+    }
+    const post = (path, body, method = 'POST') => call(path, { method, body: JSON.stringify(body) });
+
+    // ---- state
+    const hashSection = () => (location.hash === '#groups' ? 'groups' : location.hash === '#trainers' ? 'trainers' : 'direct');
+    let section = hashSection();
+    let inbox = null; let groups = null; let tInbox = null;
+    let tthread = null;         // open trainer conversation
+    let tmode = 'inbox'; let allTrainers = null;
+    let thread = null;          // open direct conversation
+    let group = null;           // open group
+    let creating = false;       // new-group form open
+    let showPeople = false;     // members panel in a group
+    let mode = 'inbox'; let search = ''; let people = [];
+    let addSearch = ''; let addResults = [];
+    let form = { title: '', description: '', picked: [] }; let formSearch = ''; let formResults = [];
+    let draft = ''; let err = ''; let busy = false; let searchTimer;
+    // ✉️ New message: one picker for members and trainers (each person gets it in their own 1-to-1 chat)
+    const NM_MAX = 50;
+    let composing = false;
+    let nm = { filter: 'all', q: '', picked: [], body: '', members: null, done: null };
+
+    const setUrl = () => {
+      const id = section === 'groups' ? group?.id : section === 'trainers' ? tthread?.id : thread?.id;
+      history.replaceState(null, '', `admin-messages.html${id ? `?thread=${encodeURIComponent(id)}` : ''}`);
+    };
+    const anyOpen = () => composing || (section === 'groups' ? !!group || creating : section === 'trainers' ? !!tthread : !!thread);
+
+    // ---- trainers (trainer ↔ gym team)
+    function trainerListHtml() {
+      if (!tInbox?.available) return '<li class="mm-empty">Trainer messaging needs database migration 026.</li>';
+      const q = search.trim().toLowerCase();
+      if (tmode === 'new') {
+        const list = (allTrainers || []).filter((t) => !q || `${t.full_name} ${t.trainer_code || ''} ${t.specialty || ''}`.toLowerCase().includes(q));
+        if (allTrainers === null) return '<li class="mm-empty">Loading trainers…</li>';
+        if (!list.length) return '<li class="mm-empty">No matching trainers.</li>';
+        return list.map((t) => `<li><button type="button" class="mm-item" data-trainer="${Number(t.id)}">
+          <span class="mm-av trn">${initial(t.full_name)}</span>
+          <span class="mm-main"><b>${esc(t.full_name)} ${tag('trainer')}</b><small>${esc(t.specialty || '')}${t.trainer_code ? ' · ' + esc(t.trainer_code) : ''}</small></span></button></li>`).join('');
+      }
+      const rows = tInbox.threads.filter((t) => !q || `${t.trainer.name} ${t.trainer.code || ''}`.toLowerCase().includes(q));
+      if (!rows.length) return `<li class="mm-empty">${q ? 'No conversations match.' : 'No trainer has messaged the gym team yet. Use “+ New” to message a trainer.'}</li>`;
+      return rows.map((t) => `<li><button type="button" class="mm-item${tthread?.id === t.id ? ' on' : ''}${t.unread ? ' unread' : ''}" data-topen="${esc(t.id)}">
+        <span class="mm-av trn">${initial(t.trainer.name)}</span>
+        <span class="mm-main"><b>${esc(t.trainer.name)} ${tag('trainer')}</b><small>${t.lastMessage ? `${t.lastMessage.fromTrainer ? '' : 'Team: '}${esc(t.lastMessage.preview)}` : esc(t.trainer.specialty || 'No messages yet')}</small></span>
+        <span class="mm-meta">${t.lastMessage ? `<span>${esc(short(t.lastMessage.at))}</span>` : ''}${t.unread ? `<span class="mm-badge" aria-label="${t.unread} unread">${t.unread}</span>` : ''}</span>
+      </button></li>`).join('');
+    }
+    function trainerViewHtml() {
+      if (!tthread) return '<section class="mm-view blank"><p>Choose a trainer conversation.</p></section>';
+      const t = tthread.trainer;
+      return `<section class="mm-view" aria-label="Conversation with ${esc(t.name)}">
+        <header class="mm-head"><button type="button" class="btn btn-outline mm-back" id="mm-back" aria-label="Back">‹</button>
+          <span class="mm-av trn">${initial(t.name)}</span><div><b>${esc(t.name)} ${tag('trainer')}</b><small>Trainer${t.specialty ? ' · ' + esc(t.specialty) : ''}${t.code ? ' · ' + esc(t.code) : ''}</small></div></header>
+        <div class="mm-body"><div class="mm-conv"><ol class="mm-msgs" id="mm-msgs">${msgList(tthread.messages, false) || '<li class="mm-day">No messages yet — write the first one.</li>'}</ol>
+        ${composeHtml(tthread.canReply, 'Write a reply…', 'This conversation is closed.').replace('members see this', 'the trainer sees this')}</div></div>
+      </section>`;
+    }
+
+    async function findMembers(q) {
+      if (!q.trim()) return [];
+      const r = await adminApi.getMembers({ search: q.trim(), status: 'all', page: 1, limit: 15 });
+      const d = r && r.data;
+      return (Array.isArray(d) ? d : d?.members || d?.items || []).filter((m) => m && m.id);
+    }
+    const personRow = (m, btn) => `<li class="mm-person"><span class="mm-av">${initial(m.full_name || m.name)}</span>
+      <span><b>${esc(m.full_name || m.name)}</b><small>${esc(m.member_code || m.code || '')}</small></span>${btn}</li>`;
+
+    // ---- side list
+    function directListHtml() {
+      if (mode === 'new') {
+        if (!search.trim()) return '<li class="mm-empty">Type a member name, code, email or phone to start a conversation.</li>';
+        if (!people.length) return '<li class="mm-empty">No matching members.</li>';
+        return people.map((m) => `<li><button type="button" class="mm-item" data-member="${Number(m.id)}">
+          <span class="mm-av">${initial(m.full_name)}</span>
+          <span class="mm-main"><b>${esc(m.full_name)} ${tag('member')}</b><small>${esc(m.member_code || '')}${m.phone ? ' · ' + esc(m.phone) : ''}</small></span></button></li>`).join('');
+      }
+      const q = search.trim().toLowerCase();
+      const rows = inbox.threads.filter((t) => !q || `${t.member.name} ${t.member.code || ''}`.toLowerCase().includes(q));
+      if (!rows.length) return `<li class="mm-empty">${q ? 'No conversations match.' : 'No member has messaged the gym team yet. Use “+ New” to message a member.'}</li>`;
+      return rows.map((t) => `<li><button type="button" class="mm-item${thread?.id === t.id ? ' on' : ''}${t.unread ? ' unread' : ''}" data-open="${esc(t.id)}">
+        <span class="mm-av">${initial(t.member.name)}</span>
+        <span class="mm-main"><b>${esc(t.member.name)} ${tag('member')}</b><small>${t.lastMessage ? `${t.lastMessage.fromMember ? '' : 'Team: '}${esc(t.lastMessage.preview)}` : 'No messages yet'}</small></span>
+        <span class="mm-meta">${t.lastMessage ? `<span>${esc(short(t.lastMessage.at))}</span>` : ''}${t.unread ? `<span class="mm-badge" aria-label="${t.unread} unread">${t.unread}</span>` : ''}</span>
+      </button></li>`).join('');
+    }
+    /** One list for everything: members, trainers and groups, newest conversation first (like the member portal). */
+    function allListHtml() {
+      const q = search.trim().toLowerCase();
+      const items = [];
+      (inbox?.threads || []).forEach((t) => items.push({ kind: 'member', id: t.id, name: t.member.name, sub: t.member.code || '', at: t.lastMessage?.at, last: t.lastMessage ? `${t.lastMessage.fromMember ? '' : 'You: '}${t.lastMessage.preview}` : 'No messages yet', unread: t.unread, on: section === 'direct' && thread?.id === t.id, attr: 'data-open' }));
+      if (tInbox?.available) (tInbox.threads || []).forEach((t) => items.push({ kind: 'trainer', id: t.id, name: t.trainer.name, sub: t.trainer.code || '', at: t.lastMessage?.at, last: t.lastMessage ? `${t.lastMessage.fromTrainer ? '' : 'You: '}${t.lastMessage.preview}` : (t.trainer.specialty || 'No messages yet'), unread: t.unread, on: section === 'trainers' && tthread?.id === t.id, attr: 'data-topen' }));
+      if (groups?.available) (groups.groups || []).forEach((g) => items.push({ kind: 'group', id: g.id, name: g.title, sub: '', at: g.lastMessage?.at, last: g.lastMessage ? g.lastMessage.preview : `${g.memberCount} member${g.memberCount === 1 ? '' : 's'}`, unread: g.unread, on: section === 'groups' && group?.id === g.id, attr: 'data-group', closed: g.status !== 'active' }));
+      const rows = items.filter((x) => !q || `${x.name} ${x.sub} ${x.kind}`.toLowerCase().includes(q))
+        .sort((x, y) => new Date(y.at || 0) - new Date(x.at || 0));
+      if (!rows.length) return `<li class="mm-empty">${q ? 'No conversations match.' : 'No conversations yet. Use “✉️ New message” to write to a member or trainer.'}</li>`;
+      return rows.map((x) => `<li><button type="button" class="mm-item${x.on ? ' on' : ''}${x.unread ? ' unread' : ''}${x.closed ? ' closed' : ''}" ${x.attr}="${esc(x.id)}">
+        <span class="mm-av${x.kind === 'trainer' ? ' trn' : x.kind === 'group' ? ' grp' : ''}">${x.kind === 'group' ? '#' : initial(x.name)}</span>
+        <span class="mm-main"><b>${esc(x.name)} ${x.kind === 'group' ? '<span class="mm-role mm-role-group">Group</span>' : tag(x.kind)}</b><small>${esc(x.last)}</small></span>
+        <span class="mm-meta">${x.closed ? '<span class="mm-pill">Closed</span>' : x.at ? `<span>${esc(short(x.at))}</span>` : ''}${x.unread ? `<span class="mm-badge" aria-label="${x.unread} unread">${x.unread}</span>` : ''}</span>
+      </button></li>`).join('');
+    }
+    function groupListHtml() {
+      if (!groups.available) return '<li class="mm-empty">Groups need database migration 025.</li>';
+      const q = search.trim().toLowerCase();
+      const rows = groups.groups.filter((g) => !q || g.title.toLowerCase().includes(q));
+      if (!rows.length) return `<li class="mm-empty">${q ? 'No groups match.' : 'No groups yet. Use “+ New group” to create one.'}</li>`;
+      return rows.map((g) => `<li><button type="button" class="mm-item${group?.id === g.id ? ' on' : ''}${g.unread ? ' unread' : ''}${g.status !== 'active' ? ' closed' : ''}" data-group="${esc(g.id)}">
+        <span class="mm-av grp">#</span>
+        <span class="mm-main"><b>${esc(g.title)}</b><small>${g.lastMessage ? esc(g.lastMessage.preview) : `${g.memberCount} member${g.memberCount === 1 ? '' : 's'}`}</small></span>
+        <span class="mm-meta">${g.status !== 'active' ? '<span class="mm-pill">Closed</span>' : g.lastMessage ? `<span>${esc(short(g.lastMessage.at))}</span>` : ''}${g.unread ? `<span class="mm-badge" aria-label="${g.unread} unread">${g.unread}</span>` : ''}</span>
+      </button></li>`).join('');
+    }
+
+    // ---- main view
+    const msgList = (msgs, isGroup) => {
+      let last = '';
+      return msgs.map((m) => {
+        const day = dayLabel(m.sentAt); const sep = day !== last ? `<li class="mm-day">${esc(day)}</li>` : ''; last = day;
+        // Every message shows who wrote it: several admins share the gym inbox, so admin replies are named too.
+        const who = m.mine && m.senderRole === 'staff' && isGroup ? 'You' : String(m.senderName || '').replace(/ \(gym team\)$/, '');
+        const from = `<span class="mm-from${m.senderRole === 'staff' ? ' staff' : ''}">${esc(who)} ${tag(m.senderRole)}</span>`;
+        return `${sep}<li class="mm-msg ${m.mine ? 'mine' : 'theirs'}" data-mid="${esc(m.id)}">${from}<div class="mm-bubble">${esc(m.body)}</div>
+          <small>${esc(time(m.sentAt))}${m.mine && !isGroup ? ` · ${m.readAt ? '✓✓ Read' : '✓ Sent'}` : ''}</small></li>`;
+      }).join('');
+    };
+    const composeHtml = (canReply, placeholder, closedText) => (canReply
+      ? `${err ? `<p class="mm-err" role="alert">${esc(err)}</p>` : ''}<form class="mm-compose" id="mm-form"><label class="mm-sr" for="mm-body">Message</label>
+          <textarea id="mm-body" rows="2" maxlength="4000" placeholder="${esc(placeholder)}">${esc(draft)}</textarea>
+          <button type="submit" class="btn btn-green">Send</button></form><p class="mm-foot">Ctrl + Enter to send · members see this from you, with an ADMIN tag.</p>`
+      : `<p class="mm-foot" style="padding-top:.7rem">${esc(closedText)}</p>`);
+
+    function directViewHtml() {
+      if (!thread) return '<section class="mm-view blank"><p>Choose a conversation.</p></section>';
+      return `<section class="mm-view" aria-label="Conversation with ${esc(thread.member.name)}">
+        <header class="mm-head"><button type="button" class="btn btn-outline mm-back" id="mm-back" aria-label="Back">‹</button>
+          <span class="mm-av">${initial(thread.member.name)}</span><div><b>${esc(thread.member.name)} ${tag('member')}</b><small>${esc(thread.member.code || '')}</small></div></header>
+        <div class="mm-body"><div class="mm-conv"><ol class="mm-msgs" id="mm-msgs">${msgList(thread.messages, false) || '<li class="mm-day">No messages yet — write the first one.</li>'}</ol>
+        ${composeHtml(thread.canReply, 'Write a reply…', 'This conversation is closed.')}</div></div>
+      </section>`;
+    }
+
+    function newGroupHtml() {
+      const picked = form.picked.map((m) => `<span class="mm-chip">${esc(m.full_name)}<button type="button" data-unpick="${m.id}" aria-label="Remove ${esc(m.full_name)}">×</button></span>`).join('');
+      const results = formResults.filter((m) => !form.picked.some((p) => p.id === m.id))
+        .map((m) => personRow(m, `<button type="button" class="mm-mini add" data-pick="${m.id}">Add</button>`)).join('');
+      return `<section class="mm-view"><header class="mm-head"><button type="button" class="btn btn-outline mm-back" id="mm-back" aria-label="Back">‹</button>
+          <span class="mm-av grp">+</span><div><b>New group</b><small>Only the gym team can create groups</small></div></header>
+        <form class="mm-form" id="mm-new-group" novalidate>
+          <p>Members you add will see this group in their Messages and can post in it. They cannot add or remove people.</p>
+          <label>Group name<input class="mm-input" name="title" maxlength="80" required value="${esc(form.title)}" autocomplete="off"></label>
+          <label>Description <span style="font-weight:500;color:var(--text-dim)">optional</span><textarea class="mm-input" name="description" maxlength="300">${esc(form.description)}</textarea></label>
+          <label>Add members<input class="mm-input" id="mm-form-search" placeholder="Search name, code, email or phone…" value="${esc(formSearch)}" autocomplete="off"></label>
+          ${results ? `<ul class="mm-results">${results}</ul>` : formSearch.trim() ? '<p>No matching members.</p>' : ''}
+          <div><p style="margin-bottom:.4rem">${form.picked.length} member${form.picked.length === 1 ? '' : 's'} selected</p><div class="mm-chips">${picked}</div></div>
+          ${err ? `<p class="mm-err" role="alert" style="padding:0">${esc(err)}</p>` : ''}
+          <div class="mm-actions"><button type="button" class="btn btn-outline" id="mm-cancel-group">Cancel</button><button type="submit" class="btn btn-green">Create group</button></div>
+        </form></section>`;
+    }
+
+    function groupViewHtml() {
+      if (creating) return newGroupHtml();
+      if (!group) return '<section class="mm-view blank"><p>Choose a group, or create one with “+ New group”.</p></section>';
+      const active = group.status === 'active';
+      const addRows = addResults.filter((m) => !group.members.some((p) => p.id === m.id))
+        .map((m) => personRow(m, `<button type="button" class="mm-mini add" data-add="${m.id}">Add</button>`)).join('');
+      const panel = showPeople ? `<aside class="mm-people" aria-label="Group members">
+          <h3>Add members</h3>
+          <div class="mm-side-head"><input class="mm-input" id="mm-add-search" placeholder="Search members…" value="${esc(addSearch)}" autocomplete="off" aria-label="Search members to add"></div>
+          ${addRows ? `<ul class="mm-results" style="padding:0 .5rem">${addRows}</ul>` : ''}
+          <h3>${group.members.length} member${group.members.length === 1 ? '' : 's'}</h3>
+          <ul class="mm-list">${group.members.map((m) => personRow(m, `<button type="button" class="mm-mini del" data-remove="${m.id}" aria-label="Remove ${esc(m.name)}">Remove</button>`)).join('') || '<li class="mm-empty">Nobody yet — add members above.</li>'}</ul>
+        </aside>` : '';
+      return `<section class="mm-view" aria-label="Group ${esc(group.title)}">
+        <header class="mm-head"><button type="button" class="btn btn-outline mm-back" id="mm-back" aria-label="Back">‹</button>
+          <span class="mm-av grp">#</span><div><b>${esc(group.title)}${active ? '' : ' <span class="mm-pill">Closed</span>'}</b><small>${esc(group.description || `${group.members.length} member${group.members.length === 1 ? '' : 's'} + gym team`)}</small></div>
+          <div class="mm-head-actions">
+            <button type="button" class="btn btn-outline" id="mm-people-btn" aria-pressed="${showPeople}">👥 Members (${group.members.length})</button>
+            <button type="button" class="btn btn-outline" id="mm-rename">Rename</button>
+            <button type="button" class="btn btn-outline" id="mm-close">${active ? 'Close group' : 'Reopen'}</button>
+          </div></header>
+        <div class="mm-body"><div class="mm-conv"><ol class="mm-msgs" id="mm-msgs">${msgList(group.messages, true) || '<li class="mm-day">No messages yet — post the first one.</li>'}</ol>
+          ${composeHtml(active, 'Post to the group…', 'This group is closed: members can read it but nobody can post. Reopen it to continue.')}</div>${panel}</div>
+      </section>`;
+    }
+
+    // ---- ✉️ New message view
+    const nmKey = (x) => `${x.kind}:${x.id}`;
+    const nmPicked = (kind, id) => nm.picked.some((p) => p.kind === kind && p.id === id);
+    function nmCandidates() {
+      const q = nm.q.trim().toLowerCase();
+      const out = [];
+      if (nm.filter !== 'trainers') {
+        (nm.members || []).forEach((m) => out.push({ kind: 'member', id: Number(m.id), name: m.full_name, sub: [m.member_code, m.phone].filter(Boolean).join(' · ') }));
+      }
+      if (nm.filter !== 'members') {
+        (allTrainers || []).filter((t) => !q || `${t.full_name} ${t.trainer_code || ''} ${t.specialty || ''}`.toLowerCase().includes(q))
+          .forEach((t) => out.push({ kind: 'trainer', id: Number(t.id), name: t.full_name, sub: [t.specialty, t.trainer_code].filter(Boolean).join(' · ') }));
+      }
+      return out;
+    }
+    function newMessageHtml() {
+      const list = nmCandidates();
+      const loading = (nm.filter !== 'trainers' && nm.members === null) || (nm.filter !== 'members' && allTrainers === null);
+      const rows = list.map((x) => {
+        const on = nmPicked(x.kind, x.id);
+        return `<li><button type="button" class="nm-row" data-nm-pick="${esc(nmKey(x))}" aria-pressed="${on}">
+          <span class="nm-box" aria-hidden="true">${on ? '✓' : ''}</span>
+          <span class="mm-av${x.kind === 'trainer' ? ' trn' : ''}">${initial(x.name)}</span>
+          <span class="mm-main"><b>${esc(x.name)} ${tag(x.kind)}</b><small>${esc(x.sub || '')}</small></span></button></li>`;
+      }).join('');
+      const chips = nm.picked.map((x) => `<span class="nm-chip">${esc(x.name)} ${tag(x.kind)}<button type="button" data-nm-unpick="${esc(nmKey(x))}" aria-label="Remove ${esc(x.name)}">×</button></span>`).join('');
+      const nT = (allTrainers || []).length;
+      const done = nm.done ? `<div class="nm-done${nm.done.failed.length ? ' bad' : ''}" role="status">
+          ${nm.done.sent.length ? `✅ Sent to ${nm.done.sent.length}: ${nm.done.sent.map((x) => esc(x.name)).join(', ')}.` : ''}
+          ${nm.done.failed.length ? `<div>⚠️ Not sent to ${nm.done.failed.length}:<ul>${nm.done.failed.map((f) => `<li>${esc(f.name)} — ${esc(f.error)}</li>`).join('')}</ul></div>` : ''}</div>` : '';
+      return `<section class="mm-view" aria-label="New message">
+        <header class="mm-head"><button type="button" class="btn btn-outline mm-back" id="mm-back" aria-label="Back">‹</button>
+          <span class="mm-av">✉</span><div><b>New message</b><small>To members and trainers · each person gets it in their own private chat</small></div></header>
+        <form class="nm-wrap" id="nm-form" novalidate>
+          ${done}
+          <div><label class="mm-sr" id="nm-to-l">To</label><div class="nm-to" aria-labelledby="nm-to-l">${chips || '<span class="nm-ph">Pick people below…</span>'}</div>
+            <small class="mm-foot" style="padding:.3rem 0 0">${nm.picked.length} selected${nm.picked.length >= NM_MAX ? ` · maximum ${NM_MAX} at a time (use Announcements for everyone)` : ''}</small></div>
+          <div class="nm-tools" role="group" aria-label="Show">
+            <button type="button" class="nm-filter" data-nm-filter="all" aria-pressed="${nm.filter === 'all'}">All</button>
+            <button type="button" class="nm-filter" data-nm-filter="members" aria-pressed="${nm.filter === 'members'}">👥 Members</button>
+            <button type="button" class="nm-filter" data-nm-filter="trainers" aria-pressed="${nm.filter === 'trainers'}">🏋️ Trainers</button>
+            <input type="search" class="mm-input" id="nm-search" placeholder="Search name, code or phone…" value="${esc(nm.q)}" autocomplete="off" aria-label="Search members and trainers">
+          </div>
+          ${nm.filter !== 'members' && nT ? `<div class="nm-tools"><button type="button" class="nm-filter" id="nm-all-trainers">+ Select all ${nT} trainer${nT === 1 ? '' : 's'}</button>${nm.picked.length ? '<button type="button" class="nm-filter" id="nm-clear">Clear selection</button>' : ''}</div>` : ''}
+          <ul class="nm-list" aria-label="Members and trainers">${rows || `<li class="mm-empty">${loading ? 'Loading…' : 'Nobody matches.'}</li>`}</ul>
+          <label>Message<textarea class="mm-input" id="nm-body" rows="4" maxlength="4000" placeholder="Write your message…">${esc(nm.body)}</textarea></label>
+          ${err ? `<p class="mm-err" role="alert" style="padding:0">${esc(err)}</p>` : ''}
+          <div class="nm-send"><span class="mm-foot" style="padding:0">Members and trainers see this from you (with an ADMIN tag).</span>
+            <button type="submit" class="btn btn-green" id="nm-send" ${nm.picked.length && nm.body.trim() && !busy ? '' : 'disabled'}>${busy ? 'Sending…' : `Send${nm.picked.length ? ` to ${nm.picked.length}` : ''}`}</button></div>
+        </form>
+      </section>`;
+    }
+
+    // ---- render
+    function render() {
+      const unread = (inbox?.unreadTotal || 0) + (tInbox?.unreadTotal || 0) + (groups?.groups || []).reduce((n, g) => n + (g.unread || 0), 0);
+      const badge = document.getElementById('mm-unread-badge');
+      if (badge) { badge.style.display = unread ? '' : 'none'; badge.textContent = `${unread} unread`; }
+      const gUnread = (groups?.groups || []).reduce((n, g) => n + (g.unread || 0), 0);
+      const isG = section === 'groups'; const isT = section === 'trainers';
+      app.innerHTML = `<div class="mm-shell${anyOpen() ? ' has-thread' : ''}">
+        <aside class="mm-side" aria-label="Conversations">
+          <div class="mm-side-head">
+            <h2 class="mm-side-title">Conversations</h2>
+            <div class="mm-actions-row">
+              <button type="button" class="mm-newmsg" id="mm-newmsg" aria-pressed="${composing}">✉️ New message</button>
+              <button type="button" class="mm-newgrp" id="mm-new-group-btn" aria-pressed="${creating}" ${groups?.available ? '' : 'disabled'} title="Create a group (only admins can)">+ Group</button>
+            </div>
+            <input type="search" class="mm-input" id="mm-search" placeholder="Search conversations…" value="${esc(search)}" autocomplete="off" aria-label="Search conversations">
+          </div>
+          <ul class="mm-list">${allListHtml()}</ul>
+        </aside>${composing ? newMessageHtml() : isT ? trainerViewHtml() : isG ? groupViewHtml() : directViewHtml()}</div>`;
+      bind();
+      const box = app.querySelector('#mm-msgs'); if (box) box.scrollTop = box.scrollHeight;
+      // 📎 files + 📊 polls for the open conversation (member, trainer or group)
+      const openId = composing ? null : section === 'trainers' ? tthread?.id : section === 'groups' ? (creating ? null : group?.id) : thread?.id;
+      if (openId && box) {
+        const reopen = () => (section === 'trainers' ? openTrainer(openId) : section === 'groups' ? openGroup(openId) : openDirect(openId));
+        MX.tools(app.querySelector('#mm-form'), openId, reopen);
+        MX.decorate(box, openId).then(() => { box.scrollTop = box.scrollHeight; });
+      }
+    }
+
+    const refocus = (id, val) => { const n = app.querySelector(`#${id}`); if (n) { n.focus(); n.setSelectionRange(val.length, val.length); } };
+    function bind() {
+      const $ = (s) => app.querySelector(s); const $$ = (s) => app.querySelectorAll(s);
+      $$('[data-section]').forEach((b) => b.addEventListener('click', () => { section = b.dataset.section; search = ''; err = ''; draft = ''; creating = false; composing = false; setUrl(); render(); }));
+      $$('[data-mode]').forEach((b) => b.addEventListener('click', () => { mode = b.dataset.mode; search = ''; people = []; render(); $('#mm-search')?.focus(); }));
+      $$('[data-open]').forEach((b) => b.addEventListener('click', () => openDirect(b.dataset.open)));
+      $$('[data-topen]').forEach((b) => b.addEventListener('click', () => openTrainer(b.dataset.topen)));
+      $$('[data-trainer]').forEach((b) => b.addEventListener('click', () => startTrainer(Number(b.dataset.trainer))));
+      $$('[data-tmode]').forEach((b) => b.addEventListener('click', async () => {
+        tmode = b.dataset.tmode; search = ''; render(); $('#mm-search')?.focus();
+        if (tmode === 'new' && allTrainers === null) {
+          const r = await adminApi.getTrainers().catch(() => null);
+          allTrainers = (r?.data || r?.trainers || []).filter((t) => t && t.id); render(); app.querySelector('#mm-search')?.focus();
+        }
+      }));
+      $$('[data-member]').forEach((b) => b.addEventListener('click', () => startWith(Number(b.dataset.member))));
+      $$('[data-group]').forEach((b) => b.addEventListener('click', () => openGroup(b.dataset.group)));
+      $('#mm-new-group-btn')?.addEventListener('click', () => { composing = false; section = 'groups'; creating = true; group = null; showPeople = false; err = ''; form = { title: '', description: '', picked: [] }; formSearch = ''; formResults = []; setUrl(); render(); app.querySelector('#mm-new-group [name=title]')?.focus(); });
+      const s = $('#mm-search');
+      s.addEventListener('input', () => {
+        search = s.value; clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => { render(); refocus('mm-search', search); }, 0);
+      });
+      $('#mm-back')?.addEventListener('click', () => { composing = false; thread = null; tthread = null; group = null; creating = false; setUrl(); render(); });
+      // ✉️ New message
+      $('#mm-newmsg')?.addEventListener('click', openComposer);
+      const nf2 = $('#nm-form');
+      if (nf2) {
+        const keep = (id) => { const n = app.querySelector(`#${id}`); if (n) { n.focus(); const v = n.value; n.setSelectionRange(v.length, v.length); } };
+        $$('[data-nm-filter]').forEach((b) => b.addEventListener('click', () => { nm.filter = b.dataset.nmFilter; render(); }));
+        $$('[data-nm-pick]').forEach((b) => b.addEventListener('click', () => {
+          const [kind, id] = b.dataset.nmPick.split(':'); const n = Number(id);
+          if (nmPicked(kind, n)) nm.picked = nm.picked.filter((p) => !(p.kind === kind && p.id === n));
+          else if (nm.picked.length < NM_MAX) { const x = nmCandidates().find((c) => c.kind === kind && c.id === n); if (x) nm.picked.push(x); }
+          nm.done = null; render();
+        }));
+        $$('[data-nm-unpick]').forEach((b) => b.addEventListener('click', () => { const [kind, id] = b.dataset.nmUnpick.split(':'); nm.picked = nm.picked.filter((p) => !(p.kind === kind && p.id === Number(id))); render(); }));
+        $('#nm-all-trainers')?.addEventListener('click', () => {
+          (allTrainers || []).forEach((t) => { if (!nmPicked('trainer', Number(t.id)) && nm.picked.length < NM_MAX) nm.picked.push({ kind: 'trainer', id: Number(t.id), name: t.full_name, sub: t.specialty || '' }); });
+          nm.done = null; render();
+        });
+        $('#nm-clear')?.addEventListener('click', () => { nm.picked = []; render(); });
+        const ns = $('#nm-search');
+        ns.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
+        ns.addEventListener('input', () => {
+          nm.q = ns.value; clearTimeout(searchTimer);
+          searchTimer = setTimeout(async () => { await nmLoadMembers(); render(); keep('nm-search'); }, 250);
+        });
+        const nb = $('#nm-body');
+        nb.addEventListener('input', () => { nm.body = nb.value; const b = $('#nm-send'); if (b) b.disabled = !(nm.picked.length && nm.body.trim()) || busy; });
+        nb.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); nf2.requestSubmit(); } });
+        nf2.addEventListener('submit', (e) => { e.preventDefault(); sendNew(); });
+      }
+      // new group form
+      const nf = $('#mm-new-group');
+      if (nf) {
+        nf.title.addEventListener('input', () => { form.title = nf.title.value; });
+        nf.description.addEventListener('input', () => { form.description = nf.description.value; });
+        const fs = $('#mm-form-search');
+        fs.addEventListener('input', () => { formSearch = fs.value; clearTimeout(searchTimer); searchTimer = setTimeout(async () => { try { formResults = await findMembers(formSearch); } catch { formResults = []; } render(); refocus('mm-form-search', formSearch); }, 250); });
+        fs.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
+        $$('[data-pick]').forEach((b) => b.addEventListener('click', () => { const m = formResults.find((x) => x.id === Number(b.dataset.pick)); if (m) form.picked.push(m); render(); refocus('mm-form-search', formSearch); }));
+        $$('[data-unpick]').forEach((b) => b.addEventListener('click', () => { form.picked = form.picked.filter((x) => x.id !== Number(b.dataset.unpick)); render(); }));
+        $('#mm-cancel-group').addEventListener('click', () => { creating = false; err = ''; render(); });
+        nf.addEventListener('submit', (e) => { e.preventDefault(); createGroup(); });
+      }
+      // group actions
+      $('#mm-people-btn')?.addEventListener('click', () => { showPeople = !showPeople; render(); if (showPeople) $('#mm-add-search')?.focus(); });
+      $('#mm-rename')?.addEventListener('click', renameGroup);
+      $('#mm-close')?.addEventListener('click', toggleGroup);
+      const as = $('#mm-add-search');
+      as?.addEventListener('input', () => { addSearch = as.value; clearTimeout(searchTimer); searchTimer = setTimeout(async () => { try { addResults = await findMembers(addSearch); } catch { addResults = []; } render(); refocus('mm-add-search', addSearch); }, 250); });
+      $$('[data-add]').forEach((b) => b.addEventListener('click', () => addMember(Number(b.dataset.add))));
+      $$('[data-remove]').forEach((b) => b.addEventListener('click', () => removeMember(Number(b.dataset.remove))));
+      // compose
+      const f = $('#mm-form');
+      if (f) {
+        const ta = f.querySelector('#mm-body');
+        ta.addEventListener('input', () => { draft = ta.value; });
+        ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); f.requestSubmit(); } });
+        f.addEventListener('submit', (e) => { e.preventDefault(); send(); });
+      }
+    }
+
+    // ---- actions
+    async function reloadLists() {
+      [inbox, groups, tInbox] = await Promise.all([call('/member-messages'), call('/member-groups'), call('/trainer-messages').catch(() => ({ available: false, threads: [] }))]);
+    }
+    async function openTrainer(id) {
+      try { tthread = await call(`/trainer-messages/${encodeURIComponent(id)}`); composing = false; section = 'trainers'; err = ''; draft = ''; setUrl(); await reloadLists(); render(); app.querySelector('#mm-body')?.focus(); }
+      catch (e) { tthread = null; setUrl(); render(); alertBox('Conversation not available', e.message); }
+    }
+    async function startTrainer(trainerId) {
+      if (busy) return; busy = true;
+      try { const r = await post('/trainer-messages', { trainerId }); tmode = 'inbox'; search = ''; await openTrainer(r.id); }
+      catch (e) { alertBox('Could not start the conversation', e.message); }
+      finally { busy = false; }
+    }
+    async function openDirect(id) {
+      try { thread = await call(`/member-messages/${encodeURIComponent(id)}`); composing = false; section = 'direct'; err = ''; draft = ''; setUrl(); await reloadLists(); render(); app.querySelector('#mm-body')?.focus(); }
+      catch (e) { thread = null; setUrl(); render(); alertBox('Conversation not available', e.message); }
+    }
+    async function openGroup(id) {
+      try { group = await call(`/member-groups/${encodeURIComponent(id)}`); composing = false; section = 'groups'; creating = false; err = ''; draft = ''; addSearch = ''; addResults = []; setUrl(); await reloadLists(); render(); app.querySelector('#mm-body')?.focus(); }
+      catch (e) { group = null; setUrl(); render(); alertBox('Group not available', e.message); }
+    }
+    async function startWith(memberId) {
+      if (busy) return; busy = true;
+      try { const r = await post('/member-messages', { memberId }); mode = 'inbox'; search = ''; people = []; await openDirect(r.id); }
+      catch (e) { alertBox('Could not start the conversation', e.message); }
+      finally { busy = false; }
+    }
+    async function createGroup() {
+      if (busy) return; err = '';
+      if (form.title.trim().length < 2) { err = 'Give the group a name (at least 2 characters).'; render(); return; }
+      busy = true;
+      try { const r = await post('/member-groups', { title: form.title, description: form.description, memberIds: form.picked.map((m) => m.id) }); creating = false; showPeople = false; await openGroup(r.id); }
+      catch (e) { err = e.message; render(); }
+      finally { busy = false; }
+    }
+    async function addMember(id) {
+      try { await post(`/member-groups/${encodeURIComponent(group.id)}/members`, { memberIds: [id] }); group = await call(`/member-groups/${encodeURIComponent(group.id)}`); await reloadLists(); render(); refocus('mm-add-search', addSearch); }
+      catch (e) { alertBox('Could not add the member', e.message); }
+    }
+    async function removeMember(id) {
+      const m = group.members.find((x) => x.id === id);
+      if (!confirm(`Remove ${m ? m.name : 'this member'} from “${group.title}”? Their earlier messages stay in the group.`)) return;
+      try { await call(`/member-groups/${encodeURIComponent(group.id)}/members/${id}`, { method: 'DELETE' }); group = await call(`/member-groups/${encodeURIComponent(group.id)}`); await reloadLists(); render(); }
+      catch (e) { alertBox('Could not remove the member', e.message); }
+    }
+    async function renameGroup() {
+      const t = prompt('Group name', group.title);
+      if (t === null || t.trim() === group.title) return;
+      try { await post(`/member-groups/${encodeURIComponent(group.id)}`, { title: t }, 'PATCH'); await openGroup(group.id); }
+      catch (e) { alertBox('Could not rename the group', e.message); }
+    }
+    async function toggleGroup() {
+      const closing = group.status === 'active';
+      if (closing && !confirm(`Close “${group.title}”? Members can still read it, but nobody can post until you reopen it.`)) return;
+      try { await post(`/member-groups/${encodeURIComponent(group.id)}`, { status: closing ? 'archived' : 'active' }, 'PATCH'); await openGroup(group.id); }
+      catch (e) { alertBox('Could not update the group', e.message); }
+    }
+    async function send() {
+      const body = draft.trim();
+      if (!body || busy) return;
+      busy = true; const btn = app.querySelector('#mm-form button'); if (btn) btn.disabled = true;
+      try {
+        if (section === 'trainers') { await post(`/trainer-messages/${encodeURIComponent(tthread.id)}`, { body }); tthread = await call(`/trainer-messages/${encodeURIComponent(tthread.id)}`); }
+        else if (section === 'groups') { await post(`/member-groups/${encodeURIComponent(group.id)}/messages`, { body }); group = await call(`/member-groups/${encodeURIComponent(group.id)}`); }
+        else { await post(`/member-messages/${encodeURIComponent(thread.id)}`, { body }); thread = await call(`/member-messages/${encodeURIComponent(thread.id)}`); }
+        draft = ''; err = ''; await reloadLists();
+      } catch (e) { err = e.message || 'Could not send — your message is kept below.'; }
+      finally { busy = false; render(); app.querySelector('#mm-body')?.focus(); }
+    }
+    // ---- ✉️ New message actions
+    async function nmLoadMembers() {
+      try {
+        const r = await adminApi.getMembers({ search: nm.q.trim(), status: 'all', page: 1, limit: 25 });
+        const d = r && r.data;
+        nm.members = (Array.isArray(d) ? d : d?.members || d?.items || []).filter((m) => m && m.id);
+      } catch { nm.members = []; }
+    }
+    async function openComposer() {
+      composing = true; thread = null; tthread = null; group = null; creating = false; err = '';
+      nm = { filter: 'all', q: '', picked: [], body: '', members: nm.members, done: null };
+      setUrl(); render(); app.querySelector('#nm-search')?.focus();
+      const jobs = [];
+      if (nm.members === null) jobs.push(nmLoadMembers());
+      if (allTrainers === null) jobs.push(adminApi.getTrainers().then((r) => { allTrainers = (r?.data || r?.trainers || []).filter((t) => t && t.id); }).catch(() => { allTrainers = []; }));
+      if (jobs.length) { await Promise.all(jobs); if (composing) render(); }
+    }
+    /** Sends the same text to each picked person in their own 1-to-1 chat (existing APIs, one by one). */
+    async function sendNew() {
+      const body = nm.body.trim();
+      if (busy || !body || !nm.picked.length) return;
+      busy = true; err = ''; render();
+      const sent = []; const failed = []; let lastId = null;
+      for (const x of nm.picked) {
+        try {
+          const base = x.kind === 'trainer' ? '/trainer-messages' : '/member-messages';
+          const r = await post(base, x.kind === 'trainer' ? { trainerId: x.id } : { memberId: x.id });
+          await post(`${base}/${encodeURIComponent(r.id)}`, { body });
+          sent.push(x); lastId = r.id;
+        } catch (e) { failed.push({ ...x, error: e.message || 'Could not send' }); }
+      }
+      busy = false;
+      await reloadLists().catch(() => {});
+      if (sent.length === 1 && !failed.length) {
+        composing = false; const x = sent[0];
+        if (x.kind === 'trainer') { section = 'trainers'; await openTrainer(lastId); } else { section = 'direct'; await openDirect(lastId); }
+        return;
+      }
+      nm.done = { sent, failed };
+      nm.picked = failed.map(({ error, ...x }) => x); // keep only the ones that failed, so they can be retried
+      if (!failed.length) nm.body = '';
+      render();
+    }
+    function alertBox(title, msg) {
+      const n = document.createElement('div'); n.className = 'mm-note'; n.setAttribute('role', 'alert'); n.style.marginTop = '1rem';
+      n.innerHTML = `<h2>${esc(title)}</h2><p>${esc(msg)}</p>`;
+      app.appendChild(n); setTimeout(() => n.remove(), 6000);
+    }
+
+    window.addEventListener('hashchange', () => {
+      const want = hashSection();
+      if (want !== section && inbox) { section = want; search = ''; err = ''; creating = false; render(); }
+    });
+
+    (async () => {
+      try {
+        await reloadLists();
+        if (!inbox.available) {
+          app.innerHTML = '<div class="mm-note"><h2>Member messaging is not switched on yet</h2><p>It needs database migrations 008 (Trainer Hub communication) and 024 (gym-team messaging).</p></div>';
+          return;
+        }
+        const want = new URLSearchParams(location.search).get('thread');
+        if (want && (groups.groups || []).some((g) => g.id === want)) await openGroup(want);
+        else if (want && (tInbox?.threads || []).some((t) => t.id === want)) await openTrainer(want);
+        else if (want) await openDirect(want);
+        else if (window.innerWidth > 860) {
+          const newest = [
+            ...(inbox.threads || []).map((t) => ({ at: t.lastMessage?.at, go: () => openDirect(t.id) })),
+            ...(tInbox?.threads || []).map((t) => ({ at: t.lastMessage?.at, go: () => openTrainer(t.id) })),
+            ...(groups.groups || []).map((g) => ({ at: g.lastMessage?.at, go: () => openGroup(g.id) })),
+          ].filter((x) => x.at).sort((x, y) => new Date(y.at) - new Date(x.at))[0];
+          if (newest) await newest.go(); else render();
+        } else render();
+        setInterval(async () => {
+          if (busy || creating || composing || document.visibilityState !== 'visible' || ['mm-body', 'mm-search', 'mm-add-search', 'mm-form-search'].includes(document.activeElement?.id)) return;
+          try {
+            await reloadLists();
+            if (thread && section === 'direct') thread = await call(`/member-messages/${encodeURIComponent(thread.id)}`);
+            if (tthread && section === 'trainers') tthread = await call(`/trainer-messages/${encodeURIComponent(tthread.id)}`);
+            if (group && section === 'groups') group = await call(`/member-groups/${encodeURIComponent(group.id)}`);
+            render();
+          } catch { /* keep current view */ }
+        }, 30000);
+      } catch (e) {
+        if (e.status === 403) {
+          // Usually this browser is signed in with a member or trainer account (all portals share one session).
+          const u = adminApi.getStoredUser() || {};
+          const signIn = `admin-auth.html?${new URLSearchParams({ next: location.pathname + location.search + location.hash, ...(u.role && !['owner', 'manager'].includes(String(u.role).toLowerCase()) ? { wrongRole: String(u.role).toLowerCase() } : {}) })}`;
+          app.innerHTML = `<div class="mm-note"><h2>Sign in as the owner or a manager to see messages</h2>
+            <p>This browser is signed in as ${esc(u.fullName || u.username || 'another account')}${u.role ? ` (${esc(u.role)})` : ''}. Only the owner and managers can open the gym team inbox.</p>
+            <p><a class="btn btn-primary" href="${esc(signIn)}">Sign in as admin</a></p></div>`;
+          return;
+        }
+        app.innerHTML = `<div class="mm-note"><h2>Could not load member messages</h2><p>${esc(e.message)}</p></div>`;
+      }
+    })();
+
+    // Sidebar user card from the stored admin session
+    try {
+      const u = adminApi.getStoredUser();
+      if (u) {
+        const name = (u.fullName || u.full_name || u.name || u.username || 'Admin').trim();
+        const role = (u.role || 'owner').toLowerCase();
+        const handle = (u.username || u.email || '').split('@')[0];
+        const words = name.replace(/[^a-zA-Z0-9\s]/g, ' ').trim().split(/\s+/).filter(Boolean);
+        const initials = words.length >= 2 ? (words[0][0] + words[1][0]) : (words[0] || 'AD').slice(0, 2);
+        document.getElementById('sidebar-user-fullname').textContent = name;
+        document.getElementById('sidebar-user-initials').textContent = initials.toUpperCase();
+        if (handle) document.getElementById('sidebar-user-handle').textContent = `@${handle}`;
+        const pill = document.getElementById('sidebar-role-pill');
+        pill.textContent = role.toUpperCase();
+        pill.className = `role-badge-pill role-${role}`;
+        document.getElementById('sidebar-user-avatar').className = `user-avatar avatar-${role}`;
+      }
+    } catch (e) { /* keep defaults */ }
+
+    document.getElementById('btn-logout').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await adminApi.logout();
+      window.location.href = 'index.html';
+    });
+    document.getElementById('sidebar-user-card').addEventListener('click', () => {
+      window.location.href = 'admin-profile.html';
+    });
+  </script>
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+</body>
+
+</html>

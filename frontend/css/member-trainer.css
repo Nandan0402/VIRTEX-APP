@@ -1,0 +1,87 @@
+/* =====================================================================
+   Virtex Member Portal — My Trainer (member-trainer.html)
+   ===================================================================== */
+.tr-muted { color: var(--mp-text-muted); font-size: 0.8rem; }
+.tr-mono { font-family: 'JetBrains Mono', monospace; }
+.tr-chip { display: inline-block; padding: 2px 9px; margin: 0 4px 4px 0; border-radius: 999px; font-size: 0.74rem; border: 1px solid var(--mp-line); color: #cbd5e1; }
+.tr-tag { font-size: 0.7rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+.tr-tag-warn { color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.45); background: rgba(245, 158, 11, 0.1); }
+
+/* Empty state (no trainer assigned) */
+.tr-empty { text-align: center; padding: 2.5rem 1.5rem; }
+.tr-empty-ico { font-size: 2.6rem; margin-bottom: 0.4rem; }
+.tr-empty h2 { margin: 0 0 0.5rem; font-size: 1.2rem; }
+.tr-empty p { max-width: 520px; margin: 0.3rem auto; color: var(--mp-text-body); font-size: 0.9rem; line-height: 1.55; }
+.tr-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+
+/* Trainer profile */
+.tr-profile { display: flex; gap: 1.4rem; padding: 1.3rem; align-items: flex-start; flex-wrap: wrap;
+  background: linear-gradient(120deg, var(--mp-accent-soft), transparent 60%), var(--mp-surface); border-color: var(--mp-accent-border); }
+.tr-photo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 2px solid var(--mp-accent-border); display: block; }
+.tr-photo-initials { display: grid; place-items: center; font-size: 2.2rem; font-weight: 800; color: var(--mp-accent); background: var(--mp-accent-soft); }
+.tr-main { flex: 1; min-width: 240px; }
+.tr-name-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tr-name-row h2 { margin: 0; font-size: 1.4rem; font-weight: 800; }
+.tr-id { color: var(--mp-text-muted); font-size: 0.82rem; margin: 2px 0 0.9rem; }
+.tr-kv { display: grid; grid-template-columns: 150px 1fr; gap: 8px 14px; margin: 0; font-size: 0.88rem; }
+.tr-kv dt { color: var(--mp-text-muted); }
+.tr-kv dd { margin: 0; min-width: 0; }
+.tr-certs { margin: 0; padding-left: 1.1rem; }
+.tr-bio { margin: 0.9rem 0 0; color: var(--mp-text-body); font-size: 0.88rem; line-height: 1.55; white-space: pre-wrap; }
+
+/* Sections */
+.tr-cols { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tr-section { padding: 1.1rem 1.25rem; min-width: 0; }
+.tr-section h2 { margin: 0 0 0.9rem; font-size: 1rem; font-weight: 700; }
+.tr-contact { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.8rem; }
+.tr-contact li { display: flex; gap: 10px; align-items: flex-start; font-size: 0.86rem; }
+.tr-contact b { display: block; font-size: 0.8rem; color: var(--mp-text-muted); }
+.tr-contact a { color: var(--mp-accent); text-decoration: none; overflow-wrap: anywhere; }
+.tr-contact a:hover { text-decoration: underline; }
+.tr-contact small { display: block; color: var(--mp-text-dim); font-size: 0.72rem; margin-top: 2px; }
+.tr-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.tr-list li { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--mp-line); border-radius: 10px; background: rgba(255, 255, 255, 0.015); }
+.tr-list-main { flex: 1; min-width: 0; }
+.tr-when { display: flex; flex-direction: column; align-items: center; min-width: 74px; font-weight: 700; font-size: 0.82rem; }
+.tr-when span { color: var(--mp-accent); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; }
+.tr-feedback { margin: 4px 0 0; color: var(--mp-text-body); font-size: 0.86rem; white-space: pre-wrap; line-height: 1.5; }
+.tr-meter { height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); margin-top: 6px; overflow: hidden; }
+.tr-meter span { display: block; height: 100%; background: var(--mp-accent); }
+
+@media (max-width: 1000px) { .tr-cols { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .tr-profile { flex-direction: column; align-items: center; text-align: center; }
+  .tr-name-row { justify-content: center; }
+  .tr-kv { grid-template-columns: 1fr; gap: 2px; text-align: left; }
+  .tr-kv dd { margin-bottom: 8px; }
+}
+
+/* ⏰ My training times (member-training-times.js) */
+.tt-mount { max-width: 1200px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 1.25rem 1.5rem 0; }
+.tt-card { display: grid; gap: .9rem; }
+.tt-headrow { display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+.tt-headrow h2 { margin: 0; font-size: 1.05rem; }
+.tt-flash { background: rgba(0,230,118,.08); border: 1px solid rgba(0,230,118,.35); border-radius: 10px; padding: .55rem .8rem; font-size: .86rem; }
+.tt-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+.tt-slot { border: 1px solid var(--mp-line, rgba(255,255,255,.1)); border-radius: 12px; padding: .9rem 1rem; display: grid; gap: .45rem; align-content: start; }
+.tt-slot.empty { opacity: .8; }
+.tt-slot h3 { margin: 0; font-size: .9rem; color: var(--mp-text-muted, #94a3b8); font-weight: 700; }
+.tt-big { font-size: 1.25rem; font-weight: 800; color: #fff; }
+.tt-slot > .btn { justify-self: start; }
+.tt-pending { font-size: .84rem; color: #fcd34d; background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.4); border-radius: 10px; padding: .55rem .7rem; display: grid; gap: .45rem; }
+.tt-pending .btn { justify-self: start; }
+.tt-req-form { display: grid; gap: .55rem; }
+.tt-req-form label { display: grid; gap: 4px; font-size: .8rem; color: var(--mp-text-muted, #94a3b8); }
+.tt-req-form input { background: var(--bg-input, #0b0d14); border: 1px solid var(--mp-line, rgba(255,255,255,.12)); color: #fff; border-radius: 8px; padding: .45rem .55rem; font: inherit; }
+.tt-req-form input[type=time] { width: auto; display: inline-block; }
+.tt-btns { display: flex; gap: .5rem; flex-wrap: wrap; }
+.tt-hist summary { cursor: pointer; font-size: .84rem; color: var(--mp-text-muted, #94a3b8); }
+.tt-hist ul { margin: .5rem 0 0; padding-left: 1rem; display: grid; gap: .35rem; font-size: .84rem; }
+.tt-st { font-weight: 800; margin-right: .3rem; }
+.tt-st.approved { color: #6ee7b7; } .tt-st.rejected { color: #fca5a5; } .tt-st.cancelled { color: #94a3b8; }
+@media (max-width: 760px) { .tt-slots { grid-template-columns: 1fr; } .tt-mount { padding: 1rem 1rem 0; } }
+/* time pair on one line; pending note as a normal paragraph */
+.tt-req-form label.tt-pair { display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; }
+.tt-req-form label.tt-pair input[type=time] { width: 9.5rem; }
+.tt-pending { display: block; line-height: 1.5; }
+.tt-pending .btn { display: inline-flex; margin-top: .45rem; }

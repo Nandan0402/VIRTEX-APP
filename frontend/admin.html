@@ -1,25 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PulseCore Admin • AI Gym Receptionist Dashboard</title>
+  <title>Virtex Admin • AI Gym Receptionist Dashboard</title>
   <link rel="stylesheet" href="css/admin.css">
+  <style>
+    :root,
+    html {
+      color-scheme: dark !important;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.18) #0e1017;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0e1017 !important;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18) !important;
+      border-radius: 4px !important;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00e676 !important;
+    }
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <script src="js/vendor/chart.umd.js"></script>
+  <style>
+    /* Admin → Reports (simple) */
+    .rp-wrap { display: grid; gap: 1.1rem; }
+    .rp-wrap.is-loading { opacity: 0.6; transition: opacity 0.2s; }
+    .rp-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; }
+    .rp-head h2 { margin: 0; font-size: 1.35rem; color: #fff; }
+    .rp-head p { margin: 4px 0 0; color: var(--text-gray); font-size: 0.86rem; }
+    .rp-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-gray); }
+    .rp-controls label { font-weight: 700; color: #fff; }
+    .rp-select { background: var(--bg-input, #090a0f); color: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem 0.6rem; font: inherit; }
+    .rp-error { margin: 0; color: #fca5a5; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 10px; padding: 0.6rem 0.8rem; }
+    .rp-kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.9rem; }
+    .rp-kpi { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1rem 1.05rem; display: grid; gap: 6px; border-top: 3px solid var(--rp-c, #22c55e); }
+    .rp-leads { --rp-c: #f59e0b; } .rp-amount { --rp-c: #22c55e; } .rp-members { --rp-c: #38bdf8; } .rp-pt { --rp-c: #a78bfa; } .rp-gt { --rp-c: #f472b6; }
+    .rp-kpi-top { display: flex; align-items: center; gap: 8px; }
+    .rp-kpi-icon { font-size: 1.15rem; }
+    .rp-kpi-label { font-size: 0.78rem; font-weight: 700; color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.04em; }
+    .rp-kpi-value { font-size: 1.85rem; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; line-height: 1.1; }
+    .rp-kpi-foot { font-size: 0.74rem; color: var(--text-dim); }
+    .rp-chg { font-size: 0.75rem; font-weight: 700; }
+    .rp-chg.up { color: #4ade80; } .rp-chg.down { color: #f87171; } .rp-chg.flat { color: var(--text-gray); font-weight: 600; }
+    .rp-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; }
+    .rp-card { padding: 1rem 1.1rem; margin: 0; }
+    .rp-card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+    .rp-card-head h3 { margin: 0; font-size: 0.98rem; color: #fff; }
+    .rp-card-head span { font-size: 0.78rem; color: var(--text-dim); }
+    .rp-chart { position: relative; height: 260px; }
+    .rp-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .rp-table tr.rp-current td { background: rgba(34, 197, 94, 0.06); font-weight: 700; color: #fff; }
+    .rp-table tr.rp-delta td { border-top: 2px solid var(--border); font-weight: 700; color: var(--text-gray); }
+    .rp-tag { font-size: 0.65rem; font-weight: 800; color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.45); border-radius: 999px; padding: 1px 7px; margin-left: 4px; }
+    .rp-note { margin: 0.6rem 0 0; font-size: 0.75rem; color: var(--text-dim); }
+    @media (max-width: 1280px) { .rp-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 900px) { .rp-charts { grid-template-columns: 1fr; } .rp-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 520px) { .rp-kpis { grid-template-columns: 1fr; } }
+    /* Fees & Plans: who it is for + weekly planner */
+    .pl-for { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .pl-for label { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 999px; padding: .35rem .8rem; cursor: pointer; font-size: .85rem; }
+    .pl-for label:has(input:checked) { border-color: var(--green); background: rgba(0,230,118,.1); color: var(--text-white); }
+    .pl-quick { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: .5rem; }
+    .pl-week { display: grid; gap: 4px; }
+    .pl-day { display: grid; grid-template-columns: 44px minmax(0, 1fr) 122px 122px; gap: 6px; align-items: center; }
+    .pl-day b { font-size: .8rem; }
+    .pl-day select, .pl-day input { padding: .35rem .45rem !important; font-size: .8rem !important; min-width: 0; }
+    .pl-day[data-type="pt"] select { border-color: #a78bfa; } .pl-day[data-type="self"] select { border-color: #38bdf8; }
+    .pl-day[data-type="ladies"] select { border-color: #f472b6; }
+    .pl-legend { font-size: .72rem; color: var(--text-dim); margin: .4rem 0 0; }
+    .pl-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin: 0 3px 0 6px; }
+    .pl-dot.pt { background: #a78bfa; } .pl-dot.self { background: #38bdf8; } .pl-dot.ladies { background: #f472b6; } .pl-dot.rest { background: #64748b; }
+    .pl-sum { display: flex; gap: 4px; flex-wrap: wrap; }
+    .pl-chip { font-size: .68rem; font-weight: 800; border-radius: 999px; padding: 1px 7px; border: 1px solid; white-space: nowrap; }
+    .pl-chip.pt { color: #c4b5fd; border-color: rgba(167,139,250,.45); } .pl-chip.self { color: #7dd3fc; border-color: rgba(56,189,248,.45); }
+    .pl-chip.ladies { color: #f9a8d4; border-color: rgba(244,114,182,.45); }
+    .pl-aud { font-size: .72rem; font-weight: 800; border-radius: 999px; padding: 2px 8px; border: 1px solid var(--border); white-space: nowrap; }
+    .pl-aud.girls { color: #f9a8d4; border-color: rgba(244,114,182,.5); } .pl-aud.boys { color: #93c5fd; border-color: rgba(59,130,246,.5); }
+    @media (max-width: 560px) { .pl-day { grid-template-columns: 44px minmax(0, 1fr); } .pl-day input { grid-column: 2; } }
+  </style>
 </head>
+
 <body>
   <div class="admin-shell">
     <!-- Sidebar Navigation -->
     <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
       <div class="sidebar-header">
         <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect width="32" height="32" rx="8" fill="#13161f" stroke="#00e676" stroke-width="2"/>
-          <path d="M7 16H11L14 9L18 23L21 16H25" stroke="#00e676" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676"
+            stroke-width="1.6" />
+          <path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676" />
+          <path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee" />
+          <path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round"
+            stroke-linejoin="round" />
         </svg>
         <div class="sidebar-brand">
-          <h2>PULSECORE</h2>
+          <h2>VIRTEX</h2>
           <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
         </div>
       </div>
@@ -28,49 +124,117 @@
         <button class="nav-item-btn active" data-tab="tab-overview" aria-current="page">
           <span class="nav-icon" aria-hidden="true">📊</span> Overview & Stats
         </button>
-        <button class="nav-item-btn" data-tab="tab-members">
-          <span class="nav-icon" aria-hidden="true">👥</span> Members Directory
-        </button>
-        <button class="nav-item-btn" data-tab="tab-enquiries">
-          <span class="nav-icon" aria-hidden="true">📩</span> Enquiries & Leads
-        </button>
-        <button class="nav-item-btn" data-tab="tab-trainers">
-          <span class="nav-icon" aria-hidden="true">🏋️</span> Trainers & Floor Shifts
-        </button>
+        <a href="admin-members.html" class="nav-item-btn" id="nav-item-members" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👥</span> Members
+        </a>
+        <a href="admin-feessalert.html" class="nav-item-btn" id="nav-item-fees-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💰</span> Fees Alert
+        </a>
+        <a href="admin-birthdayalert.html" class="nav-item-btn" id="nav-item-birthday-alert"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🎂</span> Birthday Alert
+        </a>
+        <a href="admin-messages.html" class="nav-item-btn" id="nav-item-messages" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📩</span> Message
+        </a>
+        <a href="admin-notification.html" class="nav-item-btn" id="nav-item-notifications"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📢</span> Notification
+        </a>
+        <a href="admin-personaltraniner.html" class="nav-item-btn" id="nav-item-trainers"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏋️</span> Personal Trainer
+        </a>
+        <a href="admin-assign-membertopersonal-trainer.html" class="nav-item-btn" id="nav-item-assign-trainer"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤝</span> Assign PT & Fees
+        </a>
+        <a href="admin-routine-tracker.html" class="nav-item-btn" id="nav-item-routine-tracker"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏱️</span> Routine Tracker
+        </a>
         <button class="nav-item-btn" data-tab="tab-plans">
           <span class="nav-icon" aria-hidden="true">💳</span> Membership Plans
         </button>
-        <button class="nav-item-btn" data-tab="tab-faqs">
-          <span class="nav-icon" aria-hidden="true">❓</span> FAQs / Knowledge Base
-        </button>
-        <button class="nav-item-btn" data-tab="tab-announcements">
-          <span class="nav-icon" aria-hidden="true">📢</span> Noticeboard Announcements
-        </button>
-        <button class="nav-item-btn" data-tab="tab-robot">
-          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
-        </button>
         <button class="nav-item-btn" data-tab="tab-profile">
-          <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile & Hours
+          <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile
         </button>
+        <a href="admin-working-hours.html" class="nav-item-btn" id="nav-item-working-hours-link"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏰</span> Working Hours
+        </a>
+        <a href="admin-calander.html" class="nav-item-btn" id="nav-item-calendar-link" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📅</span> Class & Shift Calendar
+        </a>
+        <a href="admin-profile.html" class="nav-item-btn" id="nav-item-profile-link" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👤</span> Profile
+        </a>
         <button class="nav-item-btn" data-tab="tab-settings">
           <span class="nav-icon" aria-hidden="true">⚙️</span> Language & Settings
         </button>
       </nav>
 
-      <!-- Explicit Session & Pre-Auth Status (No Fake Auth) -->
+      <!-- User Profile & Session Footer -->
       <div class="sidebar-footer">
-        <div class="session-indicator">
-          <span class="session-role-pill" id="sidebar-role-pill">OWNER SESSION ACTIVE</span>
-          <p class="session-notice" id="sidebar-session-desc">Authenticated via PostgreSQL RBAC & JWT.</p>
-        </div>
-        <div style="display: flex; gap: 6px; margin-top: 6px;">
-          <button class="role-switcher-btn" id="btn-sidebar-role-switch" style="flex: 1;" aria-label="Switch RBAC Test Role">
-            🔄 Switch Role
+        <div class="sidebar-user-card" id="sidebar-user-card" title="Click to view profile" role="button" tabindex="0"
+          aria-label="Open User Profile">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <img id="sidebar-user-photo" src="" alt="Avatar"
+              style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+            </div>
+            <div class="user-meta-row">
+              <span class="user-handle font-mono" id="sidebar-user-handle">@nandanb449</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+          </div>
+          <button class="btn-sidebar-logout btn-logout" id="btn-logout" title="Log Out" aria-label="End active session">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
           </button>
-          <button class="btn-logout" id="btn-logout" style="flex: 1;" aria-label="End active session">
-            🚪 Logout
-          </button>
         </div>
+        <script>
+          (function () {
+            try {
+              var u = JSON.parse(localStorage.getItem('virtex_admin_user_profile') || 'null');
+              if (u) {
+                var name = (u.fullName || u.full_name || u.name || u.username || 'Nandan.B').trim();
+                if (name === 'Manju Owner') name = 'Nandan.B';
+                var rawUser = u.username || u.email || 'nandanb449';
+                var shortUser = (rawUser === 'owner_manju' || rawUser === 'nandanb449@gmail.com') ? 'nandanb449' : (rawUser.indexOf('@') > 0 ? rawUser.split('@')[0] : rawUser.replace(/^@/, ''));
+                var role = (u.role || 'owner').toLowerCase();
+                var words = name.replace(/[^a-zA-Z0-9\s]/g, ' ').trim().split(/\s+/).filter(Boolean);
+                var initials = words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : (words[0] ? words[0].slice(0, 2).toUpperCase() : shortUser.slice(0, 2).toUpperCase());
+                var elInit = document.getElementById('sidebar-user-initials');
+                var elPhoto = document.getElementById('sidebar-user-photo');
+                var elName = document.getElementById('sidebar-user-fullname');
+                var elHandle = document.getElementById('sidebar-user-handle');
+                var elRole = document.getElementById('sidebar-role-pill');
+                var elAv = document.getElementById('sidebar-user-avatar');
+                var avUrl = u.avatarUrl || u.avatar_url;
+                if (avUrl) {
+                  if (elPhoto) { elPhoto.src = avUrl; elPhoto.style.display = 'block'; }
+                  if (elInit) elInit.style.display = 'none';
+                } else {
+                  if (elPhoto) elPhoto.style.display = 'none';
+                  if (elInit) { elInit.textContent = initials; elInit.style.display = 'block'; }
+                }
+                if (elName) { elName.textContent = name; elName.title = name; }
+                if (elHandle) { elHandle.textContent = '@' + shortUser; elHandle.title = rawUser; }
+                if (elRole) { elRole.textContent = role.toUpperCase(); elRole.className = 'role-badge-pill role-' + role; }
+                if (elAv) { elAv.className = 'user-avatar avatar-' + role; }
+              }
+            } catch (e) { }
+          })();
+        </script>
       </div>
     </aside>
 
@@ -80,34 +244,61 @@
       <header class="admin-topbar" role="banner">
         <div class="topbar-left">
           <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Sidebar Menu">☰</button>
-          <h1 class="topbar-title" id="page-title">Overview & Statistics</h1>
+          <h1 class="topbar-title" id="page-title">Overview &amp; Statistics</h1>
         </div>
 
-        <div class="topbar-right">
-          <!-- Active Authenticated User & RBAC Role Pill -->
-          <div class="user-profile-badge" id="topbar-user-badge">
-            <span class="role-tag owner" id="topbar-role-tag">OWNER</span>
-            <span id="topbar-username" class="font-mono" style="font-size: 0.8rem; font-weight: 600;">owner_manju</span>
-            <button class="role-switcher-btn" id="btn-topbar-switch-role" title="Switch RBAC Test Account">Switch</button>
+        <div class="topbar-right" id="topbar-right-actions">
+          <!-- Routine Quick Punch Group -->
+          <div class="topbar-routine-group" id="topbar-routine-group">
+            <a href="admin-routine-tracker.html" class="topbar-routine-badge status-out" id="topbar-routine-badge"
+              title="Click to view full Routine Tracker">
+              <span class="topbar-status-dot"></span>
+              <span id="topbar-routine-text">PUNCHED OUT</span>
+            </a>
+
+            <div class="topbar-punch-btns">
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-in" id="topbar-btn-punch-in"
+                title="Punch In (Start Daily Shift)">
+                <span>🟢</span>
+                <span class="topbar-btn-text">Punch In</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-break" id="topbar-btn-break"
+                title="Take or Resume Routine Break" disabled>
+                <span id="topbar-break-icon">☕</span>
+                <span class="topbar-btn-text" id="topbar-break-text">Break</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-out" id="topbar-btn-punch-out"
+                title="Punch Out (End Daily Shift)" disabled>
+                <span>⏹️</span>
+                <span class="topbar-btn-text">Punch Out</span>
+              </button>
+            </div>
           </div>
 
-          <!-- ESP32 Hardware Status Indicator -->
-          <div class="status-pill" id="admin-robot-status-pill" title="ESP32 Hardware Base Link">
-            <span class="status-dot offline" id="admin-robot-dot" aria-hidden="true"></span>
-            <span id="admin-robot-text">ESP32 Offline</span>
-          </div>
+          <div class="topbar-divider-vert"></div>
 
-          <!-- Real-Time WebSocket Synchronization Status -->
-          <div class="status-pill" id="admin-sync-pill" title="Real-Time WebSocket Synchronization Status">
-            <span class="badge badge-green font-mono" id="topbar-live-sync-pill" style="font-size: 0.72rem; padding: 3px 8px;">● Live Sync</span>
-          </div>
-
-          <!-- Direct Links to Portal Gateway and Member Facing Kiosk -->
-          <a href="/" class="btn-view-kiosk" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-gray);" title="Return to Portal Landing Page">
-            🏠 Portal
+          <!-- Message Link Icon -->
+          <a href="admin-messages.html" class="topbar-nav-icon-link" id="topbar-message-link"
+            title="Member Messages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="topbar-counter-badge" id="topbar-message-badge" style="display: none;">0</span>
           </a>
-          <a href="/kiosk.html" target="_blank" class="btn-view-kiosk" title="Open reception kiosk in a new tab">
-            Open Kiosk UI ↗
+
+          <!-- Notification Link Icon -->
+          <a href="admin-notification.html" class="topbar-nav-icon-link" id="topbar-notification-link"
+            title="Notifications & System Announcements">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="topbar-counter-badge topbar-counter-red" id="topbar-notification-badge"
+              style="display: none;">0</span>
           </a>
         </div>
       </header>
@@ -121,55 +312,100 @@
         <!-- TAB 1: OVERVIEW & STATISTICS -->
         <!-- =============================================================== -->
         <section class="tab-panel active" id="tab-overview" role="tabpanel" aria-label="Overview & Stats">
-          <!-- Key Metric Cards -->
+          <p class="text-dim text-xs" style="margin: 0 0 0.75rem;">
+            Showing <span class="font-mono text-green" id="overview-period-label">Last 7 Days</span>
+            &middot; change the timeframe in
+            <a href="#tab-analytics"
+              onclick="window.adminApp && window.adminApp.switchTab('tab-analytics'); return false;"
+              style="color: var(--accent-green);">Charts &amp; Analytics</a>
+          </p>
+          <!-- Key Executive Metric Cards Grid -->
           <div class="stats-cards-grid">
             <div class="stat-card">
               <div class="stat-icon" aria-hidden="true">⚡</div>
               <div class="stat-meta">
-                <span class="stat-val font-mono" id="stat-daily-checkins">42</span>
-                <span class="stat-label">Today's Check-ins</span>
+                <span class="stat-val font-mono" id="stat-daily-checkins">0</span>
+                <span class="stat-label">Check-ins (<span id="stat-checkins-sub">Voice / Manual</span>)</span>
               </div>
             </div>
 
             <div class="stat-card">
-              <div class="stat-icon" aria-hidden="true">👥</div>
+              <div class="stat-icon" aria-hidden="true">📩</div>
               <div class="stat-meta">
-                <span class="stat-val font-mono" id="stat-total-members">310</span>
-                <span class="stat-label">Active Members</span>
+                <span class="stat-val font-mono" id="stat-total-enquiries">0</span>
+                <span class="stat-label">Leads (<span id="stat-conversion-rate" class="text-green">0%
+                    conv</span>)</span>
               </div>
             </div>
 
             <div class="stat-card">
               <div class="stat-icon" aria-hidden="true">💬</div>
               <div class="stat-meta">
-                <span class="stat-val font-mono" id="stat-queries-handled">128</span>
-                <span class="stat-label">AI Queries Handled</span>
+                <span class="stat-val font-mono" id="stat-queries-handled">0</span>
+                <span class="stat-label">AI Queries (<span id="stat-latency-p95" class="text-dim font-mono">p95:
+                    0ms</span>)</span>
               </div>
             </div>
 
             <div class="stat-card">
-              <div class="stat-icon" aria-hidden="true">🤖</div>
+              <div class="stat-icon" aria-hidden="true">🏋️</div>
               <div class="stat-meta">
-                <span class="stat-val font-mono text-green" id="stat-robot-uptime">99.4%</span>
-                <span class="stat-label">Hardware Base Uptime</span>
+                <span class="stat-val font-mono text-cyan" id="stat-trainers-floor">0</span>
+                <span class="stat-label">Floor Trainers (<span id="stat-floor-ratio" class="font-mono">Ratio:
+                    0:1</span>)</span>
               </div>
             </div>
           </div>
 
-          <!-- Multilingual Voice Distribution -->
-          <div class="card">
-            <div class="card-header">
-              <h3>Receptionist Speech Queries by Language</h3>
-              <span class="badge badge-green font-mono">Today's Ratio</span>
+          <!-- Quick Navigation Hub Cards to Kiosk Feed and Analytics -->
+          <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+            <!-- Hub Card: Revenue & Check-In Charts (Live Kiosk Activity Feed card removed) -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="card-header" style="margin-bottom: 0.75rem;">
+                  <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📈</span> Reports
+                  </h3>
+                  <span class="badge badge-cyan font-mono">Chart.js Visualizations</span>
+                </div>
+                <p class="text-dim text-xs" style="margin-bottom: 1rem;">
+                  Interactive 2x2 matrix of daily check-in volume, language distribution (EN/KN/HI), AI latency P95
+                  metrics, and membership enquiry acquisition funnel.
+                </p>
+              </div>
+              <div
+                style="margin-top: auto; padding-top: 0.75rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <span class="text-dim text-xs">Date-filtered trends & intent tables</span>
+                <button type="button" class="btn btn-outline btn-sm"
+                  onclick="window.adminApp && window.adminApp.switchTab('tab-analytics')">
+                  Open Charts & Analytics ➔
+                </button>
+              </div>
             </div>
-            <div class="lang-bars-grid" id="lang-stats-bars"></div>
           </div>
+        </section>
 
+        <!-- =============================================================== -->
+        <!-- TAB 1B: LIVE KIOSK ACTIVITY FEED -->
+        <!-- =============================================================== -->
+        <!-- Removed from the menu; kept hidden so existing scripts that reference its elements keep working.
+             Old links to #tab-kiosk open the Overview instead (see switchTab in js/admin/adminApp.js). -->
+        <section class="tab-panel" id="tab-kiosk" role="tabpanel" aria-label="Live Kiosk Activity Feed" hidden>
           <!-- Real-Time Interaction History Audit Table -->
-          <div class="card">
-            <div class="card-header">
-              <h3>Recent Receptionist Interactions Log</h3>
-              <button class="btn btn-outline btn-sm" id="btn-refresh-history">🔄 Refresh Feed</button>
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span>📡</span> Live Kiosk Conversational Activity Feed
+                </h3>
+                <p class="text-dim text-xs">Live conversational feed between kiosk members, walk-in leads, and FitBot AI
+                  Receptionist.</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <span class="badge badge-green font-mono">● Live WebSocket Connected</span>
+                <button class="btn btn-outline btn-sm" id="btn-refresh-history">🔄 Refresh Feed</button>
+              </div>
             </div>
             <div class="table-responsive">
               <table class="admin-table">
@@ -182,116 +418,106 @@
                     <th>Gesture</th>
                   </tr>
                 </thead>
-                <tbody id="history-table-body"></tbody>
+                <tbody id="history-table-body">
+                  <tr>
+                    <td colspan="5" class="loading-indicator">Listening for live kiosk interactions...</td>
+                  </tr>
+                </tbody>
               </table>
             </div>
           </div>
-        </section>
 
-        <!-- =============================================================== -->
-        <!-- TAB: MEMBERS DIRECTORY -->
-        <!-- =============================================================== -->
-        <section class="tab-panel" id="tab-members" role="tabpanel" aria-label="Members Directory">
-          <div class="card">
+          <!-- Failed & Ungrounded Interactions Monitor (Paginated & Searchable) -->
+          <div class="card" style="margin-bottom: 1.5rem;">
             <div class="card-header">
               <div>
-                <h3>Gym Members Directory</h3>
-                <p class="text-dim text-xs">Registered members with biometric/voice kiosk access and subscription status.</p>
+                <h3>Failed & Ungrounded Interactions Monitor</h3>
+                <p class="text-dim text-xs">Unrecognized queries, fallback responses, high-latency speech (&gt;2000ms),
+                  and negative sentiments.</p>
               </div>
-              <button class="btn btn-green btn-sm" id="btn-open-member-modal">+ Register Member</button>
+              <span class="badge badge-red font-mono" id="failed-rate-pill">0% Failure Rate</span>
             </div>
-
-            <!-- Search, Status Filter & Actions Toolbar -->
+            <!-- Search & Filter Bar -->
             <div class="table-toolbar">
               <div class="table-toolbar-left">
-                <input type="text" id="member-search-input" class="input-search" placeholder="🔍 Search name, code, phone, email..." />
-                <select id="member-status-filter" class="select-filter">
-                  <option value="all">All Statuses</option>
-                  <option value="active">Active Members</option>
-                  <option value="frozen">Frozen</option>
-                  <option value="expired">Expired</option>
-                </select>
-                <button class="btn btn-outline btn-sm" id="btn-refresh-members">🔄 Refresh</button>
+                <input type="text" id="failed-query-search" class="input-search"
+                  placeholder="🔍 Search failed query text or response..." />
+                <button class="btn btn-outline btn-sm" id="btn-refresh-failed">🔄 Search</button>
               </div>
-              <span class="text-dim text-xs font-mono" id="member-count-label">Loading members...</span>
+              <div class="pagination-controls" style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="btn btn-outline btn-xs" id="btn-failed-prev" disabled>◀ Prev</button>
+                <span class="text-xs font-mono text-dim" id="failed-page-info">Page 1 of 1</span>
+                <button class="btn btn-outline btn-xs" id="btn-failed-next" disabled>Next ▶</button>
+              </div>
             </div>
-
             <div class="table-responsive">
               <table class="admin-table">
                 <thead>
                   <tr>
-                    <th>Member ID</th>
-                    <th>Full Name</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th>Membership Plan</th>
+                    <th>Time</th>
+                    <th>User Query</th>
+                    <th>Robot Response</th>
                     <th>Language</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>Intent</th>
+                    <th>Latency</th>
                   </tr>
                 </thead>
-                <tbody id="members-table-body">
-                  <tr><td colspan="8" class="loading-indicator">Loading members from PostgreSQL...</td></tr>
+                <tbody id="failed-interactions-table-body">
+                  <tr>
+                    <td colspan="6" class="loading-indicator">Scanning interaction logs for fallback and ungrounded
+                      queries...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
-
-            <!-- Pagination Controls -->
-            <div class="pagination-bar" id="member-pagination-bar">
-              <span id="member-page-info">Page 1 of 1</span>
-              <div class="pagination-buttons">
-                <button id="btn-member-prev" disabled>◀ Previous</button>
-                <button id="btn-member-next" disabled>Next ▶</button>
-              </div>
-            </div>
           </div>
+
         </section>
 
         <!-- =============================================================== -->
-        <!-- TAB: ENQUIRIES & LEADS -->
+        <!-- TAB 1C: REVENUE & CHECK-IN CHARTS -->
         <!-- =============================================================== -->
-        <section class="tab-panel" id="tab-enquiries" role="tabpanel" aria-label="Enquiries & Leads">
-          <div class="card">
-            <div class="card-header">
+        <section class="tab-panel" id="tab-analytics" role="tabpanel" aria-label="Reports">
+          <div class="rp-wrap" id="rp-root">
+            <div class="rp-head">
               <div>
-                <h3>Reception Kiosk Enquiries & Leads</h3>
-                <p class="text-dim text-xs">Prospective visitors captured by FitBot at the front desk kiosk.</p>
+                <h2>📈 Reports</h2>
+                <p>Leads, money, members and trainers — this month compared with last month, and month by month.</p>
               </div>
-              <button class="btn btn-outline btn-sm" id="btn-refresh-enquiries">🔄 Refresh Leads</button>
+              <div class="rp-controls">
+                <label for="rp-from">From</label>
+                <select id="rp-from" class="rp-select" aria-describedby="rp-range-label"></select>
+                <span class="rp-to">to this month</span>
+                <button type="button" class="btn btn-outline btn-sm" id="rp-refresh">🔄 Refresh</button>
+              </div>
+            </div>
+            <p class="rp-error" id="rp-error" role="alert" hidden></p>
+
+            <div class="rp-kpis" id="rp-kpis" aria-live="polite"></div>
+
+            <div class="rp-charts">
+              <div class="card rp-card">
+                <div class="rp-card-head"><h3>💰 Amount collected per month</h3><span id="rp-amount-total"></span></div>
+                <div class="rp-chart"><canvas id="rp-chart-amount" aria-label="Amount collected per month"></canvas></div>
+              </div>
+              <div class="card rp-card">
+                <div class="rp-card-head"><h3>📊 Leads, new members &amp; PT clients</h3><span id="rp-growth-total"></span></div>
+                <div class="rp-chart"><canvas id="rp-chart-growth" aria-label="Leads and new members per month"></canvas></div>
+              </div>
             </div>
 
-            <div class="table-toolbar">
-              <div class="table-toolbar-left">
-                <input type="text" id="enquiry-search-input" class="input-search" placeholder="🔍 Search prospect name, phone..." />
-                <select id="enquiry-status-filter" class="select-filter">
-                  <option value="all">All Statuses</option>
-                  <option value="new">New Inquiries</option>
-                  <option value="contacted">Contacted</option>
-                  <option value="converted">Converted</option>
-                  <option value="closed">Closed</option>
-                </select>
+            <div class="card rp-card">
+              <div class="rp-card-head"><h3>🗓️ Month by month</h3><span id="rp-range-label"></span></div>
+              <div class="table-responsive">
+                <table class="admin-table rp-table">
+                  <thead><tr>
+                    <th>Month</th><th class="num">Amount</th><th class="num">Leads</th><th class="num">Leads joined</th>
+                    <th class="num">New members</th><th class="num">New PT clients</th><th class="num">New trainers</th>
+                  </tr></thead>
+                  <tbody id="rp-table-body"><tr><td colspan="7" class="loading-indicator">Loading…</td></tr></tbody>
+                </table>
               </div>
-              <span class="text-dim text-xs font-mono" id="enquiry-count-label">Loading enquiries...</span>
-            </div>
-
-            <div class="table-responsive">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Prospect Name</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th>Interested Plan</th>
-                    <th>Preferred Timing</th>
-                    <th>Notes</th>
-                    <th>Lead Status</th>
-                  </tr>
-                </thead>
-                <tbody id="enquiries-table-body">
-                  <tr><td colspan="8" class="loading-indicator">Loading leads from PostgreSQL...</td></tr>
-                </tbody>
-              </table>
+              <p class="rp-note">Amount = payments received (refunded / failed / pending not counted). Personal trainer = has at least one active PT client; other trainers are general (floor) trainers.</p>
             </div>
           </div>
         </section>
@@ -305,14 +531,16 @@
             <div class="card-header">
               <div>
                 <h3>ESP32 Hardware Diagnostics & Telemetry</h3>
-                <p class="text-dim text-xs">Live physical device health, power management, Wi-Fi signal, and GPIO pin mapping.</p>
+                <p class="text-dim text-xs">Live physical device health, power management, Wi-Fi signal, and GPIO pin
+                  mapping.</p>
               </div>
               <div style="display: flex; gap: 0.5rem; align-items: center;">
                 <span class="badge badge-dim font-mono" id="hw-diag-last-heartbeat">Heartbeat: Waiting...</span>
                 <button class="btn btn-outline btn-sm" id="btn-refresh-diagnostics">🔄 Refresh Telemetry</button>
               </div>
             </div>
-            <div class="form-grid-2" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 0.5rem;">
+            <div class="form-grid-2"
+              style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 0.5rem;">
               <div class="stat-card" style="padding: 0.75rem;">
                 <div class="stat-meta">
                   <span class="text-dim text-xs">Hardware Device ID</span>
@@ -329,13 +557,6 @@
               </div>
               <div class="stat-card" style="padding: 0.75rem;">
                 <div class="stat-meta">
-                  <span class="text-dim text-xs">Rechargeable Battery</span>
-                  <span class="font-mono text-green text-sm" id="hw-diag-battery">85% (4.10V)</span>
-                  <span class="text-dim" style="font-size: 0.7rem;">Li-Ion / Brownout Shield Active</span>
-                </div>
-              </div>
-              <div class="stat-card" style="padding: 0.75rem;">
-                <div class="stat-meta">
                   <span class="text-dim text-xs">Servo Power Supply</span>
                   <span class="font-mono text-green text-sm">Regulated 5V External</span>
                   <span class="text-dim" style="font-size: 0.7rem;">Common Ground • 1000µF Filter</span>
@@ -344,14 +565,16 @@
               <div class="stat-card" style="padding: 0.75rem;">
                 <div class="stat-meta">
                   <span class="text-dim text-xs">Physical Servo Mapping</span>
-                  <span class="font-mono text-xs" style="color: var(--text-light);">Head: GPIO 18 | Left: GPIO 19 | Right: GPIO 21</span>
+                  <span class="font-mono text-xs" style="color: var(--text-light);">Head: GPIO 18 | Left: GPIO 19 |
+                    Right: GPIO 21</span>
                   <span class="text-dim" style="font-size: 0.7rem;">PWM 50Hz • Angle Clamped</span>
                 </div>
               </div>
               <div class="stat-card" style="padding: 0.75rem;">
                 <div class="stat-meta">
                   <span class="text-dim text-xs">Fail-Safe State Machine</span>
-                  <span class="font-mono text-green text-xs" id="hw-diag-failsafe">Auto-Idle on Wi-Fi Loss (Active)</span>
+                  <span class="font-mono text-green text-xs" id="hw-diag-failsafe">Auto-Idle on Wi-Fi Loss
+                    (Active)</span>
                   <span class="text-dim" style="font-size: 0.7rem;">Firmware: v1.4.0-hardware</span>
                 </div>
               </div>
@@ -443,29 +666,53 @@
             </div>
           </div>
 
-          <!-- Diagnostics: Recent Hardware Commands & Dispatches -->
+          <!-- Robot Command History (Paginated, Searchable & Status-Filtered) -->
           <div class="card" style="margin-top: 1.5rem;">
             <div class="card-header">
               <div>
-                <h3>Hardware Motion Queue & Command History</h3>
-                <p class="text-dim text-xs">Real-time dispatches transmitted to ESP32 motor controller (GPIO 18, 19, 21).</p>
+                <h3>Robot Command History & Motor Execution Log</h3>
+                <p class="text-dim text-xs">Dispatched servo gestures, angles, queue status, and physical execution
+                  latency.</p>
               </div>
-              <button class="btn btn-outline btn-sm" id="btn-refresh-robot-logs">🔄 Refresh Dispatches</button>
+              <span class="badge badge-cyan font-mono" id="robot-total-commands-pill">0 Commands</span>
+            </div>
+            <!-- Search & Status Filter Bar -->
+            <div class="table-toolbar">
+              <div class="table-toolbar-left">
+                <input type="text" id="robot-command-search" class="input-search"
+                  placeholder="🔍 Search command type, gesture, trigger..." />
+                <select id="robot-command-status-filter" class="select-filter">
+                  <option value="all">All Statuses</option>
+                  <option value="executed">Executed</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                </select>
+                <button class="btn btn-outline btn-sm" id="btn-refresh-robot-commands">🔄 Filter</button>
+              </div>
+              <div class="pagination-controls" style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="btn btn-outline btn-xs" id="btn-robot-cmd-prev" disabled>◀ Prev</button>
+                <span class="text-xs font-mono text-dim" id="robot-cmd-page-info">Page 1 of 1</span>
+                <button class="btn btn-outline btn-xs" id="btn-robot-cmd-next" disabled>Next ▶</button>
+              </div>
             </div>
             <div class="table-responsive">
               <table class="admin-table">
                 <thead>
                   <tr>
-                    <th>Command ID</th>
+                    <th>ID</th>
                     <th>Type</th>
-                    <th>Gesture / Servo Payload</th>
+                    <th>Gesture / Payload</th>
+                    <th>Source</th>
                     <th>Status</th>
-                    <th>Triggered By</th>
-                    <th>Dispatched Time</th>
+                    <th>Execution Time</th>
+                    <th>Dispatched At</th>
                   </tr>
                 </thead>
-                <tbody id="robot-logs-table-body">
-                  <tr><td colspan="6" class="loading-indicator">Loading hardware logs from PostgreSQL...</td></tr>
+                <tbody id="robot-commands-table-body">
+                  <tr>
+                    <td colspan="7" class="loading-indicator">Loading robot command queue from PostgreSQL...</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -476,7 +723,8 @@
             <div class="card-header">
               <div>
                 <h3>Hardware Error & Diagnostics Log (<span class="font-mono text-green">robot_logs</span>)</h3>
-                <p class="text-dim text-xs">Firmware events, Wi-Fi drops, brownout warnings, and servo exception logs recorded in PostgreSQL.</p>
+                <p class="text-dim text-xs">Firmware events, Wi-Fi drops, brownout warnings, and servo exception logs
+                  recorded in PostgreSQL.</p>
               </div>
               <button class="btn btn-outline btn-sm" id="btn-refresh-hw-logs">🔄 Refresh Hardware Logs</button>
             </div>
@@ -493,56 +741,10 @@
                   </tr>
                 </thead>
                 <tbody id="robot-hw-logs-table-body">
-                  <tr><td colspan="6" class="loading-indicator">Loading hardware event logs from PostgreSQL...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </section>
-
-        <!-- =============================================================== -->
-        <!-- TAB 3: TRAINERS & SHIFT AVAILABILITY -->
-        <!-- =============================================================== -->
-        <section class="tab-panel" id="tab-trainers" role="tabpanel" aria-label="Trainers Management">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <h3>Personal Trainer Roster & Floor Shifts</h3>
-                <p class="text-dim text-xs">FitBot announces active trainers on the workout floor to inquiring gym members.</p>
-              </div>
-              <button class="btn btn-green btn-sm" id="btn-open-trainer-modal">+ Add Trainer</button>
-            </div>
-
-            <!-- Search & Status Filter Toolbar -->
-            <div class="table-toolbar">
-              <div class="table-toolbar-left">
-                <input type="text" id="trainer-search-input" class="input-search" placeholder="🔍 Search trainer name, specialty, code..." />
-                <select id="trainer-status-filter" class="select-filter">
-                  <option value="all">All Statuses</option>
-                  <option value="on_floor">🟢 On Floor</option>
-                  <option value="in_session">🟡 In Session</option>
-                  <option value="off_duty">⚪ Off Duty</option>
-                </select>
-                <button class="btn btn-outline btn-sm" id="btn-refresh-trainers">🔄 Refresh</button>
-              </div>
-              <span class="text-dim text-xs font-mono" id="trainer-count-label">Loading trainers...</span>
-            </div>
-
-            <div class="table-responsive">
-              <table class="admin-table">
-                <thead>
                   <tr>
-                    <th>Trainer Code</th>
-                    <th>Name</th>
-                    <th>Specialty</th>
-                    <th>Shift Hours</th>
-                    <th>Phone</th>
-                    <th>Floor Status</th>
-                    <th>Actions</th>
+                    <td colspan="6" class="loading-indicator">Loading hardware event logs from PostgreSQL...</td>
                   </tr>
-                </thead>
-                <tbody id="trainers-table-body"></tbody>
+                </tbody>
               </table>
             </div>
           </div>
@@ -555,15 +757,18 @@
           <div class="card">
             <div class="card-header">
               <div>
-                <h3>Gym Membership Plans & Pricing</h3>
-                <p class="text-dim text-xs">FitBot quotes these official rates when members ask about pricing or plans.</p>
+                <h3>💳 Fees &amp; Plans</h3>
+                <p class="text-dim text-xs">Each plan is a fee: price, duration, who it is for (Girls / Boys / Everyone) and a weekly planner
+                  (PT days, self-training days, ladies-only days). Members pick a plan when they are registered; unpaid fees show on
+                  <a href="admin-feessalert.html" class="text-green">Fees Due</a>.</p>
               </div>
-              <button class="btn btn-green btn-sm" id="btn-open-plan-modal">+ Create Plan</button>
+              <button class="btn btn-green btn-sm" id="btn-open-plan-modal">+ Create fee plan</button>
             </div>
 
             <div class="table-toolbar">
               <div class="table-toolbar-left">
-                <input type="text" id="plan-search-input" class="input-search" placeholder="🔍 Search plan name, code..." />
+                <input type="text" id="plan-search-input" class="input-search"
+                  placeholder="🔍 Search plan name, code..." />
                 <button class="btn btn-outline btn-sm" id="btn-refresh-plans">🔄 Refresh</button>
               </div>
               <span class="text-dim text-xs font-mono" id="plan-count-label">Loading plans...</span>
@@ -574,9 +779,10 @@
                 <thead>
                   <tr>
                     <th>Plan Name</th>
+                    <th>For</th>
                     <th>Duration</th>
-                    <th>Price (INR)</th>
-                    <th>Badge</th>
+                    <th>Fee (INR)</th>
+                    <th>Weekly plan</th>
                     <th>Key Perks</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -586,6 +792,7 @@
               </table>
             </div>
           </div>
+
         </section>
 
         <!-- =============================================================== -->
@@ -596,14 +803,16 @@
             <div class="card-header">
               <div>
                 <h3>Receptionist Knowledge Base (FAQs)</h3>
-                <p class="text-dim text-xs">Questions and answers programmed into FitBot for immediate speech responses.</p>
+                <p class="text-dim text-xs">Questions and answers programmed into FitBot for immediate speech responses.
+                </p>
               </div>
               <button class="btn btn-green btn-sm" id="btn-open-faq-modal">+ Add FAQ</button>
             </div>
 
             <div class="table-toolbar">
               <div class="table-toolbar-left">
-                <input type="text" id="faq-search-input" class="input-search" placeholder="🔍 Search question or answer keyword..." />
+                <input type="text" id="faq-search-input" class="input-search"
+                  placeholder="🔍 Search question or answer keyword..." />
                 <select id="faq-lang-filter" class="select-filter">
                   <option value="all">All Languages</option>
                   <option value="en-IN">English (en-IN)</option>
@@ -631,43 +840,7 @@
               </table>
             </div>
           </div>
-        </section>
 
-        <!-- =============================================================== -->
-        <!-- TAB 6: NOTICEBOARD ANNOUNCEMENTS -->
-        <!-- =============================================================== -->
-        <section class="tab-panel" id="tab-announcements" role="tabpanel" aria-label="Announcements">
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <h3>Gym Announcements & Broadcasts</h3>
-                <p class="text-dim text-xs">Notices highlighted by the receptionist robot at member check-in.</p>
-              </div>
-              <button class="btn btn-green btn-sm" id="btn-open-ann-modal">+ New Notice</button>
-            </div>
-
-            <div class="table-toolbar">
-              <div class="table-toolbar-left">
-                <button class="btn btn-outline btn-sm" id="btn-refresh-ann">🔄 Refresh Notices</button>
-              </div>
-              <span class="text-dim text-xs font-mono" id="ann-count-label">Loading notices...</span>
-            </div>
-
-            <div class="table-responsive">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Title</th>
-                    <th>Message</th>
-                    <th>Priority</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="announcements-table-body"></tbody>
-              </table>
-            </div>
-          </div>
         </section>
 
         <!-- =============================================================== -->
@@ -707,28 +880,24 @@
                 <textarea id="prof-address" rows="2" required></textarea>
               </div>
 
-              <h4 style="margin: 1.25rem 0 0.75rem; font-size: 0.95rem;">Weekly Operating Hours</h4>
-              <div class="form-grid-3">
-                <div class="form-group">
-                  <label>Mon – Fri (Open – Close)</label>
-                  <div style="display: flex; gap: 6px;">
-                    <input type="time" id="prof-weekday-open" value="06:00" />
-                    <input type="time" id="prof-weekday-close" value="22:00" />
+              <!-- Working Hours & Schedules Dedicated Manager Link -->
+              <div class="card"
+                style="margin-top: 1.25rem; border: 1px solid rgba(0, 230, 118, 0.25); background: rgba(0, 230, 118, 0.03); border-radius: var(--radius-md); padding: 1.15rem 1.25rem;">
+                <div
+                  style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.75rem;">⏰</span>
+                    <div>
+                      <h4 style="margin: 0 0 3px 0; color: #fff; font-size: 0.95rem;">Weekly Operating Hours & Custom
+                        Schedules</h4>
+                      <p class="text-xs text-dim" style="margin: 0;">Multi-shift daily schedules, Zumba/Yoga classes,
+                        and 24/7 hours are managed in the dedicated Working Hours console.</p>
+                    </div>
                   </div>
-                </div>
-                <div class="form-group">
-                  <label>Saturday (Open – Close)</label>
-                  <div style="display: flex; gap: 6px;">
-                    <input type="time" id="prof-sat-open" value="06:00" />
-                    <input type="time" id="prof-sat-close" value="21:00" />
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label>Sunday (Open – Close)</label>
-                  <div style="display: flex; gap: 6px;">
-                    <input type="time" id="prof-sun-open" value="07:00" />
-                    <input type="time" id="prof-sun-close" value="13:00" />
-                  </div>
+                  <a href="admin-working-hours.html" class="btn btn-outline btn-sm"
+                    style="color: var(--accent-green); border-color: rgba(0, 230, 118, 0.4); text-decoration: none; white-space: nowrap;">
+                    ⏰ Open Working Hours Manager ➔
+                  </a>
                 </div>
               </div>
 
@@ -768,12 +937,16 @@
 
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label for="setting-speech-rate">TTS Speech Rate: <span id="val-speech-rate" class="font-mono text-green">1.0x</span></label>
-                  <input type="range" id="setting-speech-rate" min="0.8" max="1.3" step="0.05" value="1.0" class="range-slider" />
+                  <label for="setting-speech-rate">TTS Speech Rate: <span id="val-speech-rate"
+                      class="font-mono text-green">1.0x</span></label>
+                  <input type="range" id="setting-speech-rate" min="0.8" max="1.3" step="0.05" value="1.0"
+                    class="range-slider" />
                 </div>
                 <div class="form-group">
-                  <label for="setting-speech-pitch">TTS Voice Pitch: <span id="val-speech-pitch" class="font-mono text-green">1.0</span></label>
-                  <input type="range" id="setting-speech-pitch" min="0.8" max="1.2" step="0.05" value="1.0" class="range-slider" />
+                  <label for="setting-speech-pitch">TTS Voice Pitch: <span id="val-speech-pitch"
+                      class="font-mono text-green">1.0</span></label>
+                  <input type="range" id="setting-speech-pitch" min="0.8" max="1.2" step="0.05" value="1.0"
+                    class="range-slider" />
                 </div>
               </div>
 
@@ -803,67 +976,53 @@
   </div>
 
   <!-- ================================================================= -->
-  <!-- MODAL: ADD TRAINER -->
-  <!-- ================================================================= -->
-  <div class="modal-backdrop" id="modal-trainer" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Add Personal Trainer</h3>
-        <button class="modal-close-btn" data-close-modal="modal-trainer">✕</button>
-      </div>
-      <form id="form-add-trainer">
-        <div class="form-group">
-          <label for="trn-name">Full Name *</label>
-          <input type="text" id="trn-name" required placeholder="e.g. Ramesh Kumar" />
-        </div>
-        <div class="form-group">
-          <label for="trn-specialty">Specialization *</label>
-          <input type="text" id="trn-specialty" required placeholder="e.g. Powerlifting & Hypertrophy" />
-        </div>
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label for="trn-phone">Phone Number (10 Digits) *</label>
-            <input type="tel" id="trn-phone" pattern="[0-9]{10}" required placeholder="9876543210" />
-          </div>
-          <div class="form-group">
-            <label for="trn-shift">Shift Timings</label>
-            <input type="text" id="trn-shift" value="06:00 AM - 02:00 PM" />
-          </div>
-        </div>
-        <button type="submit" class="btn btn-green btn-block">Save Trainer</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ================================================================= -->
   <!-- MODAL: CREATE MEMBERSHIP PLAN -->
   <!-- ================================================================= -->
   <div class="modal-backdrop" id="modal-plan" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Create Membership Plan</h3>
+        <h3 id="plan-modal-title">Create fee plan</h3>
         <button class="modal-close-btn" data-close-modal="modal-plan">✕</button>
       </div>
       <form id="form-add-plan">
+        <input type="hidden" id="plan-edit-id" value="">
         <div class="form-group">
           <label for="plan-name">Plan Name *</label>
           <input type="text" id="plan-name" required placeholder="e.g. Weekend Warrior" />
         </div>
         <div class="form-grid-2">
           <div class="form-group">
-            <label for="plan-price">Price (₹ INR) *</label>
+            <label for="plan-price">Fee (₹ INR) *</label>
             <input type="number" id="plan-price" min="1" required placeholder="2999" />
           </div>
           <div class="form-group">
-            <label for="plan-duration">Duration Label *</label>
-            <input type="text" id="plan-duration" required placeholder="e.g. 1 Month" />
+            <label for="plan-duration">Duration (Months) *</label>
+            <input type="number" id="plan-duration" min="1" max="60" step="1" required placeholder="e.g. 1" />
           </div>
         </div>
         <div class="form-group">
           <label for="plan-perks">Key Perks (Comma Separated)</label>
           <input type="text" id="plan-perks" placeholder="Full gym floor, Sauna, 1 Trainer Session" />
         </div>
-        <button type="submit" class="btn btn-green btn-block">Add Plan</button>
+        <div class="form-group">
+          <label>For *</label>
+          <div class="pl-for" role="radiogroup" aria-label="Who this plan is for">
+            <label><input type="radio" name="plan-audience" value="all" checked> 👥 Everyone</label>
+            <label><input type="radio" name="plan-audience" value="girls"> 👧 Girls</label>
+            <label><input type="radio" name="plan-audience" value="boys"> 👦 Boys</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Weekly planner <span class="text-dim" style="font-weight:500">— e.g. 3 days with personal trainer + 3 days on their own</span></label>
+          <div class="pl-quick">
+            <button type="button" class="btn btn-outline btn-sm" data-pl-preset="pt3self3">PT 3 + Self 3</button>
+            <button type="button" class="btn btn-outline btn-sm" data-pl-preset="ladies">+ Ladies-only Saturday</button>
+            <button type="button" class="btn btn-outline btn-sm" data-pl-preset="clear">Clear</button>
+          </div>
+          <div class="pl-week" id="plan-week"></div>
+          <p class="pl-legend"><span class="pl-dot pt"></span>PT = with personal trainer · <span class="pl-dot self"></span>Self = trains on their own · <span class="pl-dot ladies"></span>Ladies-only · <span class="pl-dot rest"></span>Rest</p>
+        </div>
+        <button type="submit" class="btn btn-green btn-block" id="plan-submit-btn">Add Plan</button>
       </form>
     </div>
   </div>
@@ -910,134 +1069,6 @@
     </div>
   </div>
 
-  <!-- ================================================================= -->
-  <!-- MODAL: ADD ANNOUNCEMENT -->
-  <!-- ================================================================= -->
-  <div class="modal-backdrop" id="modal-ann" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Publish Gym Notice</h3>
-        <button class="modal-close-btn" data-close-modal="modal-ann">✕</button>
-      </div>
-      <form id="form-add-ann">
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label for="ann-title">Notice Title *</label>
-            <input type="text" id="ann-title" required placeholder="e.g. Holiday Schedule" />
-          </div>
-          <div class="form-group">
-            <label for="ann-priority">Priority</label>
-            <select id="ann-priority">
-              <option value="normal">Normal Notice</option>
-              <option value="urgent">Urgent Alert</option>
-              <option value="event">Special Event</option>
-              <option value="maintenance">Maintenance</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="ann-msg">Message *</label>
-          <textarea id="ann-msg" rows="3" required placeholder="Details for gym members..."></textarea>
-        </div>
-        <button type="submit" class="btn btn-green btn-block">Broadcast Notice</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ================================================================= -->
-  <!-- MODAL: REGISTER GYM MEMBER -->
-  <!-- ================================================================= -->
-  <div class="modal-backdrop" id="modal-member" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Register Gym Member</h3>
-        <button class="modal-close-btn" data-close-modal="modal-member">✕</button>
-      </div>
-      <form id="form-add-member">
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label for="mem-name">Full Name *</label>
-            <input type="text" id="mem-name" required placeholder="e.g. Anand Murthy" />
-          </div>
-          <div class="form-group">
-            <label for="mem-phone">Phone Number (10 Digits) *</label>
-            <input type="tel" id="mem-phone" pattern="[0-9]{10}" required placeholder="9876543210" />
-          </div>
-        </div>
-
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label for="mem-email">Email Address</label>
-            <input type="email" id="mem-email" placeholder="anand@example.com" />
-          </div>
-          <div class="form-group">
-            <label for="mem-lang">Preferred Language</label>
-            <select id="mem-lang">
-              <option value="en-IN">English (en-IN)</option>
-              <option value="kn-IN">Kannada (kn-IN)</option>
-              <option value="hi-IN">Hindi (hi-IN)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label for="mem-plan">Initial Membership Plan</label>
-            <select id="mem-plan">
-              <option value="">Select a Plan...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="mem-status">Membership Status</label>
-            <select id="mem-status">
-              <option value="active">Active</option>
-              <option value="frozen">Frozen</option>
-              <option value="expired">Expired</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="mem-notes">Notes / Health Cautions</label>
-          <input type="text" id="mem-notes" placeholder="e.g. Knee injury rehab, morning workout preference" />
-        </div>
-
-        <button type="submit" class="btn btn-green btn-block">Register Member to Database</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ================================================================= -->
-  <!-- MODAL: MEMBER CHECK-IN HISTORY -->
-  <!-- ================================================================= -->
-  <div class="modal-backdrop" id="modal-member-history" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-card" style="max-width: 600px;">
-      <div class="modal-header">
-        <div>
-          <h3 id="history-modal-title">Member Check-In History</h3>
-          <span class="text-dim text-xs font-mono" id="history-modal-subtitle"></span>
-        </div>
-        <button class="modal-close-btn" data-close-modal="modal-member-history">✕</button>
-      </div>
-      <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Method</th>
-              <th>Plan</th>
-            </tr>
-          </thead>
-          <tbody id="member-history-table-body">
-            <tr><td colspan="3" class="loading-indicator">Loading history...</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="margin-top: 1rem; text-align: right;">
-        <button class="btn btn-outline btn-sm" data-close-modal="modal-member-history">Close</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ================================================================= -->
   <!-- MODAL: ROLE SWITCHER (RBAC DEMO & TESTING) -->
@@ -1052,40 +1083,48 @@
         <button class="modal-close-btn" data-close-modal="modal-role-switcher">✕</button>
       </div>
       <div class="role-select-card">
-        <button class="role-option-btn" data-account="owner_manju">
-          <div>
-            <strong>Manjunath (Owner)</strong>
-            <p class="text-dim text-xs">Full authority (*): Financials, facility settings, user provisioning, hardware.</p>
-          </div>
-          <span class="role-tag owner">OWNER</span>
-        </button>
 
-        <button class="role-option-btn" data-account="manager_priya">
-          <div>
-            <strong>Priya (Manager)</strong>
-            <p class="text-dim text-xs">Operations: Members, trainer schedules, lead inquiries, robot gestures.</p>
-          </div>
-          <span class="role-tag manager">MANAGER</span>
-        </button>
 
-        <button class="role-option-btn" data-account="head_trainer">
-          <div>
-            <strong>Arjun Patel (Trainer)</strong>
-            <p class="text-dim text-xs">Trainer: Update personal floor status, view permitted members, robot telemetry.</p>
-          </div>
-          <span class="role-tag trainer">TRAINER</span>
-        </button>
+        <div style="margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border);">
+          <a href="/kiosk.html" target="_blank" class="role-option-btn"
+            style="text-decoration: none; border-color: rgba(0, 230, 118, 0.35);">
+            <div>
+              <strong>Member Kiosk Station ↗</strong>
+              <p class="text-dim text-xs">Self-service voice & check-in terminal for gym members and guests.</p>
+            </div>
+            <span class="role-tag"
+              style="background: rgba(0, 230, 118, 0.15); color: var(--green); border: 1px solid var(--green);">MEMBERS</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <button class="role-option-btn" data-account="admin">
-          <div>
-            <strong>SuperAdmin (Legacy)</strong>
-            <p class="text-dim text-xs">Legacy administrative credentials (AdminPass2026!).</p>
-          </div>
-          <span class="role-tag owner">SUPERADMIN</span>
+  <!-- ================================================================= -->
+  <!-- MODAL: CONFIRM ACTION DIALOG (SCREEN CENTERED) -->
+  <!-- ================================================================= -->
+  <div class="modal-backdrop" id="modal-confirm" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card"
+      style="max-width: 440px; text-align: center; border: 1px solid rgba(239, 68, 68, 0.35); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);">
+      <div style="font-size: 2.75rem; line-height: 1; margin-bottom: 0.85rem;" id="modal-confirm-icon">🗑️</div>
+      <h3 id="modal-confirm-title" style="margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 700; color: #fff;">
+        Confirm Action</h3>
+      <p id="modal-confirm-message"
+        style="color: var(--text-gray); font-size: 0.92rem; margin-bottom: 1.5rem; line-height: 1.5;">
+        Delete this member and associated records?
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button type="button" class="btn btn-outline" id="modal-confirm-cancel-btn"
+          style="flex: 1; padding: 0.65rem 1rem;">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger" id="modal-confirm-ok-btn" style="flex: 1; padding: 0.65rem 1rem;">
+          Delete Member
         </button>
       </div>
     </div>
   </div>
+
 
   <!-- ================================================================= -->
   <!-- MODAL: LOGOUT / AUTH NOTICE MODAL -->
@@ -1098,7 +1137,8 @@
       </div>
       <div style="margin-bottom: 1.25rem; font-size: 0.9rem; color: var(--text-gray);">
         <p style="margin-bottom: 8px;">
-          Logging out will invalidate your cryptographic JWT token in PostgreSQL <code class="font-mono text-green">token_blacklist</code> and record an audit log entry.
+          Logging out will invalidate your cryptographic JWT token in PostgreSQL <code
+            class="font-mono text-green">token_blacklist</code> and record an audit log entry.
         </p>
       </div>
       <div style="display: flex; gap: 10px;">
@@ -1109,6 +1149,8 @@
   </div>
 
   <script type="module" src="js/admin/adminApp.js"></script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
 </body>
-</html>
 
+</html>

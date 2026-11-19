@@ -18,7 +18,7 @@ import * as userRepository from '../../backend/src/repositories/user.repository.
 import * as robotRepository from '../../backend/src/repositories/robot.repository.js';
 import { registerMemberWithPlan } from '../../backend/src/services/member.service.js';
 
-describe('PulseCore PostgreSQL Database Layer & Repository Suite', () => {
+describe('Virtex PostgreSQL Database Layer & Repository Suite', () => {
   before(async () => {
     const health = await checkDatabaseConnection();
     assert.equal(health.ok, true, 'Database must be reachable for database layer tests');
@@ -154,7 +154,7 @@ describe('PulseCore PostgreSQL Database Layer & Repository Suite', () => {
   test('gymRepository retrieves gym singleton profile', async () => {
     const settings = await gymRepository.getGymSettings();
     assert.ok(settings);
-    assert.equal(settings.gym_name, 'PulseCore Fitness');
+    assert.equal(settings.gym_name, 'Virtex Fitness');
     assert.ok(Array.isArray(settings.supported_languages));
   });
 

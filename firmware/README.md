@@ -1,6 +1,6 @@
-# PulseCore FitBot - ESP32 Physical Robot Integration Guide
+# Virtex FitBot - ESP32 Physical Robot Integration Guide
 
-This guide details the hardware specifications, electrical schematics, pinout mapping, power architecture, brownout protection, and Arduino C++ firmware deployment for the **PulseCore FitBot** physical receptionist robot.
+This guide details the hardware specifications, electrical schematics, pinout mapping, power architecture, brownout protection, and Arduino C++ firmware deployment for the **Virtex FitBot** physical receptionist robot.
 
 ---
 
@@ -176,3 +176,4 @@ If the local Wi-Fi router reboots, signal drops, or the Node.js backend restarts
 6. Upload Speed: `921600` or `115200`.
 7. Click **Upload**. If required by your board, hold the `BOOT` button until flashing starts.
 8. Open Serial Monitor at **115200 baud** to view real-time diagnostics.
+

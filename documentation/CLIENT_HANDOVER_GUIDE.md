@@ -1,4 +1,4 @@
-# 🤝 Client Handover Guide: PulseCore Gym Receptionist Robot
+# 🤝 Client Handover Guide: Virtex Gym Receptionist Robot
 
 This guide explains how to hand over the complete gym receptionist robot system to the **Gym Owner** so that **all billing, API keys, database credentials, and admin accounts belong entirely to the gym owner**, not the developer.
 
@@ -20,12 +20,12 @@ This guide explains how to hand over the complete gym receptionist robot system 
 ### Step 1: Create the Gym Owner's Google Gemini API Key
 
 > [!IMPORTANT]
-> The gym owner must perform this step using **their own gym Google account** (e.g. `pulsecoregym@gmail.com`).
+> The gym owner must perform this step using **their own gym Google account** (e.g. `virtexgym@gmail.com`).
 
 1. Ask the gym owner to open a browser and visit: **[https://aistudio.google.com/](https://aistudio.google.com/)**
 2. Sign in with the **Gym's official Google Account**.
 3. Click on the blue button: **"Get API key"** (or **"Create API key"**).
-4. Select **"Create API key in new project"** and name the project `PulseCore-Receptionist-AI`.
+4. Select **"Create API key in new project"** and name the project `Virtex-Receptionist-AI`.
 5. Copy the generated API key (it starts with `AIzaSy...`).
 6. Paste this key into the gym's production `.env` file:
    ```env
@@ -108,7 +108,7 @@ Before handing over the robot base, program the gym's Wi-Fi and device key into 
 
 ```cpp
 // Wi-Fi Credentials for the Gym's Network
-#define WIFI_SSID           "PulseCore_Reception_WiFi"
+#define WIFI_SSID           "Virtex_Reception_WiFi"
 #define WIFI_PASSWORD       "GymWifiPassword123"
 
 // The LAN IP address of the gym's computer running Node.js
@@ -136,7 +136,7 @@ psql -U postgres -d gym_robot_db
 INSERT INTO admin_users (username, email, password_hash, full_name, role, is_active)
 VALUES (
   'gymowner',
-  'owner@pulsecoregym.com',
+  'owner@virtexgym.com',
   crypt('OwnerInitialPass2026!', gen_salt('bf', 10)),
   'Gym General Manager',
   'superadmin',

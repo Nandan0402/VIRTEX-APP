@@ -1,15 +1,15 @@
 -- ==============================================================================
 -- Migration: 002_shared_seed_data.sql
--- Description: Development Seed Data for Shared PulseCore Kiosk & Admin Schema
+-- Description: Development Seed Data for Shared Virtex Kiosk & Admin Schema
 -- ==============================================================================
 
 -- 1. USERS & ROLES
 -- Ensure manager and receptionist staff exist with hashed passwords (bcrypt: 'ManagerPass2026!' & 'StaffPass2026!')
 INSERT INTO users (username, email, password_hash, full_name, role_id, role, phone, is_active)
 VALUES
-    ('manager_priya', 'priya.manager@pulsecorefitness.in', crypt('ManagerPass2026!', gen_salt('bf', 10)), 'Priya Deshmukh', 
+    ('manager_priya', 'priya.manager@virtexfitness.in', crypt('ManagerPass2026!', gen_salt('bf', 10)), 'Priya Deshmukh', 
      (SELECT id FROM roles WHERE role_code = 'manager'), 'manager', '+91 98765 00010', TRUE),
-    ('frontdesk_kavya', 'kavya.desk@pulsecorefitness.in', crypt('StaffPass2026!', gen_salt('bf', 10)), 'Kavya Gowda', 
+    ('frontdesk_kavya', 'kavya.desk@virtexfitness.in', crypt('StaffPass2026!', gen_salt('bf', 10)), 'Kavya Gowda', 
      (SELECT id FROM roles WHERE role_code = 'reception_staff'), 'reception_staff', '+91 98765 00011', TRUE)
 ON CONFLICT (username) DO NOTHING;
 
@@ -54,7 +54,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO robot_logs (device_id, log_level, event_type, message, payload)
 VALUES
     (1, 'INFO', 'boot', 'ESP32 DevKit V1 booted successfully. Firmware v1.2.0.', '{"heap_free": 184520, "reset_reason": "POWERON_RESET"}'::jsonb),
-    (1, 'INFO', 'network', 'Wi-Fi link established with PulseCore-AP. RSSI -58 dBm.', '{"ip": "192.168.1.150", "mac": "24:6F:28:B1:C4:80"}'::jsonb),
+    (1, 'INFO', 'network', 'Wi-Fi link established with Virtex-AP. RSSI -58 dBm.', '{"ip": "192.168.1.150", "mac": "24:6F:28:B1:C4:80"}'::jsonb),
     (1, 'INFO', 'servos', 'SG90 servo timers calibrated. Neutral angles initialized (90, 90, 10).', '{"servos": {"headPan": 90, "headTilt": 90, "armWave": 10}}'::jsonb),
     (1, 'WARN', 'brownout_check', 'Current spike detected during concurrent arm wave; smoothed via 470uF decoupling capacitor.', '{"current_ma_peak": 1280, "rail_voltage": 4.96}'::jsonb)
 ON CONFLICT DO NOTHING;

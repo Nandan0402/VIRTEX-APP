@@ -23,20 +23,35 @@ export async function getStatus(req, res, next) {
  */
 export async function postCommand(req, res, next) {
   try {
-    const { commandType = 'GESTURE', gesture, gestureName, angles, headPan, headTilt, armWave } = req.body;
+    const {
+      commandType = 'GESTURE',
+      gesture,
+      gestureName,
+      angles,
+      headPan,
+      headTilt,
+      armWave,
+      head,
+      leftArm,
+      rightArm,
+    } = req.body;
 
     const targetGesture = gesture || gestureName || null;
-    let servoPayload = null;
+    let servoPayload = req.body.servoPayload || null;
 
-    if (headPan !== undefined || headTilt !== undefined || armWave !== undefined) {
-      servoPayload = { headPan, headTilt, armWave };
-    } else if (angles) {
-      servoPayload = angles;
+    if (!servoPayload) {
+      if (headPan !== undefined || headTilt !== undefined || armWave !== undefined) {
+        servoPayload = { headPan, headTilt, armWave };
+      } else if (head !== undefined || leftArm !== undefined || rightArm !== undefined) {
+        servoPayload = { head, leftArm, rightArm };
+      } else if (angles) {
+        servoPayload = angles;
+      }
     }
 
     const command = await robotService.queueRobotCommand({
       deviceId: req.body.deviceId || 1,
-      commandType: targetGesture ? 'GESTURE' : 'DIRECT_ANGLES',
+      commandType: targetGesture ? 'GESTURE' : (commandType || 'DIRECT_ANGLES'),
       gestureName: targetGesture,
       servoPayload,
       triggeredBy: req.user ? `${req.user.role}:${req.user.username}` : (req.body.triggeredBy || 'api_client'),

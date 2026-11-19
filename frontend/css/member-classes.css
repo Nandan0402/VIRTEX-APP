@@ -1,0 +1,53 @@
+/* =====================================================================
+   Virtex Member Portal — Classes (member-classes.html)
+   ===================================================================== */
+.pg-wrap { display: grid; gap: 1rem; min-width: 0; }
+.pg-card { background: var(--mp-surface); border: 1px solid var(--mp-line); border-radius: var(--mp-radius); padding: 1rem 1.1rem; min-width: 0; }
+.pg-h { margin: 0 0 0.6rem; font-size: 1rem; font-weight: 700; color: var(--mp-text); }
+.pg-muted { color: var(--mp-text-muted); font-size: 0.82rem; margin: 0.2rem 0 0.6rem; }
+.pg-foot { color: var(--mp-text-dim); font-size: 0.75rem; margin: 0.8rem 0 0; }
+.mm-flash, .cl-flash { padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.85rem; }
+.mm-flash { border: 1px solid var(--mp-accent-border); background: var(--mp-accent-soft); color: var(--mp-text); }
+.cl-flash.err { border: 1px solid rgba(239, 68, 68, 0.45); background: rgba(239, 68, 68, 0.08); color: #fecaca; }
+
+.cl-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.cl-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.8rem; color: var(--mp-text-muted); }
+.cl-nav .btn { padding: 4px 12px; font-size: 0.78rem; }
+.ac-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0.5rem 0; }
+.ac-chip { padding: 5px 10px; border-radius: 999px; border: 1px solid var(--mp-line); background: transparent; color: var(--mp-text-body); font-family: inherit; font-size: 0.78rem; cursor: pointer; }
+.ac-chip.on { background: var(--mp-accent); border-color: var(--mp-accent); color: #000; font-weight: 700; }
+.cl-day { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--mp-text-muted); margin: 1rem 0 0.4rem; }
+.cl-list { display: grid; gap: 8px; }
+
+.cl-card { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--mp-line); border-radius: 12px; }
+.cl-card.cl-mine { border-color: var(--mp-accent-border); background: var(--mp-accent-soft); }
+.cl-card.is-cancelled { opacity: 0.6; }
+.cl-card.is-cancelled h3 { text-decoration: line-through; }
+.cl-time { display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+.cl-time b { font-size: 0.95rem; }
+.cl-time span, .cl-time small { font-size: 0.72rem; color: var(--mp-text-dim); }
+.cl-main { min-width: 0; }
+.cl-top { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.cl-group { font-size: 0.7rem; font-weight: 700; color: var(--mp-text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.cl-reg { font-size: 0.66rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--mp-line); white-space: nowrap; }
+.cl-reg-open { color: var(--mp-accent); border-color: var(--mp-accent-border); }
+.cl-reg-mine { color: #000; background: var(--mp-accent); border-color: var(--mp-accent); }
+.cl-reg-full { color: #fbbf24; border-color: rgba(251, 191, 36, 0.45); }
+.cl-reg-closed { color: var(--mp-text-muted); }
+.cl-reg-cancelled { color: #f87171; border-color: rgba(239, 68, 68, 0.45); }
+.cl-card h3 { margin: 3px 0 2px; font-size: 0.95rem; color: var(--mp-text); }
+.cl-meta { margin: 0; font-size: 0.78rem; color: var(--mp-text-body); }
+.cl-desc { margin: 4px 0 0; font-size: 0.75rem; color: var(--mp-text-dim); }
+.cl-slots { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.cl-slots small { font-size: 0.74rem; color: var(--mp-text-muted); white-space: nowrap; }
+.cl-bar { flex: 1; max-width: 160px; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.07); overflow: hidden; }
+.cl-bar span { display: block; height: 100%; background: var(--mp-accent); }
+.cl-full .cl-bar span { background: #fbbf24; }
+.cl-act { display: flex; flex-direction: column; gap: 6px; }
+.cl-act .btn { padding: 6px 14px; font-size: 0.8rem; white-space: nowrap; }
+
+@media (max-width: 600px) {
+  .cl-card { grid-template-columns: 58px minmax(0, 1fr); }
+  .cl-act { grid-column: 1 / -1; flex-direction: row; }
+  .cl-act .btn { flex: 1; }
+}

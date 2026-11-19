@@ -1,0 +1,467 @@
+/**
+ * Virtex Admin - System Administration & Security Stylesheet
+ * 
+ * Styled specifically for:
+ * 1. Admin and Staff Permission Overview (RBAC Matrix)
+ * 2. Login Activity History (IP, User-Agent, Status)
+ * 3. Audit-Log Explorer with Search & Filter
+ * 4. Database Backup Status, Verification & Snapshots
+ * 5. Sanitized Data Export Tools (JSON/CSV)
+ * 6. Security Activity Monitoring & Intrusion Safeguards
+ * 7. API Integration Status & Latency Monitors
+ * 8. System Health Dashboard (Node.js Heap, CPU, DB Pool)
+ * 9. Error Monitoring & Exception Resolvers
+ * 10. Application Activity Trend Reports
+ */
+
+:root {
+  --sys-accent: #00e676;
+  --sys-blue: #00b0ff;
+  --sys-purple: #b388ff;
+  --sys-amber: #ffab00;
+  --sys-red: #ff5252;
+  --sys-card-bg: #11141e;
+  --sys-card-hover: #161a27;
+  --sys-border: #1e2433;
+}
+
+/* Tab Navigation */
+.sys-nav-tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--sys-border);
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.sys-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim, #94a3b8);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+}
+
+.sys-tab-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sys-tab-btn.active {
+  color: var(--sys-accent);
+  background: rgba(0, 230, 118, 0.08);
+  border-bottom-color: var(--sys-accent);
+}
+
+.sys-tab-badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 7px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.sys-tab-btn.active .sys-tab-badge {
+  background: rgba(0, 230, 118, 0.2);
+  color: #00e676;
+}
+
+/* KPI Deck */
+.sys-kpi-deck {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sys-kpi-card {
+  background: var(--sys-card-bg);
+  border: 1px solid var(--sys-border);
+  border-radius: 12px;
+  padding: 1.15rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.sys-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.sys-kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.sys-kpi-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.sys-kpi-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.sys-kpi-label {
+  font-size: 0.78rem;
+  color: var(--text-dim, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+}
+
+/* Toolbar & Filter Rows */
+.sys-toolbar {
+  background: var(--sys-card-bg);
+  border: 1px solid var(--sys-border);
+  border-radius: 10px;
+  padding: 0.85rem 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.sys-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sys-input {
+  background: #0b0d14;
+  border: 1px solid var(--sys-border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  color: #fff;
+  font-size: 0.85rem;
+  outline: none;
+  min-width: 220px;
+}
+
+.sys-input:focus {
+  border-color: var(--sys-accent);
+}
+
+.sys-select {
+  background: #0b0d14;
+  border: 1px solid var(--sys-border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  color: #fff;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.sys-select:focus {
+  border-color: var(--sys-accent);
+}
+
+/* Data Tables */
+.sys-table-card {
+  background: var(--sys-card-bg);
+  border: 1px solid var(--sys-border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.sys-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.sys-table th {
+  background: #0d101a;
+  color: var(--text-dim, #94a3b8);
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--sys-border);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sys-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+}
+
+.sys-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Security Badges & Status */
+.badge-sys {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.badge-sys.success {
+  background: rgba(0, 230, 118, 0.15);
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.badge-sys.failure, .badge-sys.error, .badge-sys.critical {
+  background: rgba(255, 82, 82, 0.15);
+  color: #ff5252;
+  border: 1px solid rgba(255, 82, 82, 0.3);
+}
+
+.badge-sys.warning {
+  background: rgba(255, 171, 0, 0.15);
+  color: #ffab00;
+  border: 1px solid rgba(255, 171, 0, 0.3);
+}
+
+.badge-sys.info {
+  background: rgba(0, 176, 255, 0.15);
+  color: #00b0ff;
+  border: 1px solid rgba(0, 176, 255, 0.3);
+}
+
+/* Permission Tag Cloud */
+.perm-tag {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.72rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: #cbd5e1;
+  margin: 2px;
+}
+
+.perm-tag.all {
+  background: rgba(0, 230, 118, 0.15);
+  border-color: rgba(0, 230, 118, 0.3);
+  color: #00e676;
+  font-weight: 700;
+}
+
+/* Integration Grid */
+.integration-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.integration-card {
+  background: var(--sys-card-bg);
+  border: 1px solid var(--sys-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.integration-card:hover {
+  background: var(--sys-card-hover);
+  border-color: rgba(0, 230, 118, 0.3);
+}
+
+.integration-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.integration-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.integration-category {
+  font-size: 0.75rem;
+  color: var(--text-dim, #94a3b8);
+  margin-top: 2px;
+}
+
+.latency-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* System Health Metric Cards */
+.health-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.health-metric-box {
+  background: var(--sys-card-bg);
+  border: 1px solid var(--sys-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.health-metric-title {
+  font-size: 0.82rem;
+  color: var(--text-dim, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.health-metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Export Cards Grid */
+.export-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.export-card {
+  background: var(--sys-card-bg);
+  border: 1px solid var(--sys-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.export-card h4 {
+  font-size: 1.05rem;
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-card p {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Modals */
+.sys-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1.5rem;
+}
+
+.sys-modal-overlay.active {
+  display: flex;
+}
+
+.sys-modal {
+  background: #11141e;
+  border: 1px solid var(--sys-border);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  animation: sysModalFade 0.2s ease-out;
+}
+
+@keyframes sysModalFade {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.sys-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--sys-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sys-modal-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sys-modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sys-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--sys-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #0c0f17;
+  border-radius: 0 0 14px 14px;
+}
+

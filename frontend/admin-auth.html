@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Virtex Fitness Admin Console sign in for gym owners and managers.">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Admin Sign In · Virtex Fitness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/admin-auth.css">
+  <script>
+    // Google Sign-In only works on the web addresses registered for this client ID (http://localhost:3000).
+    // 127.0.0.1 is the same computer but a different address for Google, so switch to localhost.
+    if (location.hostname === '127.0.0.1' || location.hostname === '[::1]') location.replace(location.href.replace(location.hostname, 'localhost'));
+  </script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body class="aa-body">
+  <div class="aa-split">
+
+    <!-- ============ Brand panel ============ -->
+    <aside class="aa-brand-pane" aria-label="Virtex Admin Console">
+      <div class="aa-brand-media" aria-hidden="true"></div>
+      <div class="aa-brand-shade" aria-hidden="true"></div>
+
+      <a class="aa-logo" href="/" title="Back to Virtex home">
+        <svg class="aa-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#0f131b" stroke="#818cf8" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#818cf8"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#818cf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="aa-wordmark">VIRTEX<small>OPERATIONS</small></span>
+      </a>
+
+      <div class="aa-brand-copy">
+        <span class="aa-eyebrow">Admin Console</span>
+        <h2>Run the whole gym<br>from <span class="aa-grad">one console.</span></h2>
+        <ul class="aa-points">
+          <li><span class="aa-dot" aria-hidden="true"></span>Members, plans, fees and check-ins</li>
+          <li><span class="aa-dot" aria-hidden="true"></span>Trainer assignment, PT sessions and activity</li>
+          <li><span class="aa-dot" aria-hidden="true"></span>Analytics, announcements and the reception robot</li>
+        </ul>
+      </div>
+
+      <p class="aa-brand-foot">For gym owners and managers. Every sign-in is recorded in the security log.</p>
+    </aside>
+
+    <!-- ============ Sign-in panel ============ -->
+    <main class="aa-form-pane">
+      <div class="aa-form-wrap">
+        <a class="aa-logo aa-logo-mobile" href="/" title="Back to Virtex home">
+          <svg class="aa-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#0f131b" stroke="#818cf8" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#818cf8"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#818cf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="aa-wordmark">VIRTEX<small>OPERATIONS</small></span>
+        </a>
+
+        <header class="aa-head">
+          <span class="aa-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/></svg>Owners &amp; managers</span>
+          <h1 id="page-title">Sign in to Admin Console</h1>
+          <p id="page-subtitle">Use the username or email and password set up for your staff account.</p>
+        </header>
+
+        <div class="aa-tabs" role="tablist" aria-label="Sign in or sign up">
+          <button type="button" class="aa-tab" id="tab-signin" role="tab" aria-selected="true" aria-controls="admin-form">Sign in</button>
+          <button type="button" class="aa-tab" id="tab-signup" role="tab" aria-selected="false" aria-controls="signup-form">Sign up</button>
+        </div>
+
+        <div id="auth-alert" class="aa-alert" role="alert" aria-live="polite" hidden></div>
+
+        <!-- Sign up: all fields start empty. The account stays switched off until the gym owner approves it. -->
+        <form id="signup-form" class="aa-form" novalidate autocomplete="off" hidden>
+          <div class="aa-row">
+            <div class="aa-field"><label for="su-name">Full name</label>
+              <div class="aa-input-wrap aa-no-ico"><input type="text" id="su-name" maxlength="100" autocomplete="off"></div></div>
+            <div class="aa-field"><label for="su-phone">Phone <span class="aa-opt">optional</span></label>
+              <div class="aa-input-wrap aa-no-ico"><input type="tel" id="su-phone" maxlength="20" autocomplete="off"></div></div>
+          </div>
+          <div class="aa-field"><label for="su-email">Email (you will sign in with this)</label>
+            <div class="aa-input-wrap aa-no-ico"><input type="email" id="su-email" maxlength="150" autocomplete="off" autocapitalize="off" spellcheck="false"></div></div>
+          <div class="aa-row">
+            <div class="aa-field"><label for="su-pwd">Password <span class="aa-opt">min 8 characters</span></label>
+              <div class="aa-input-wrap aa-no-ico aa-has-eye"><input type="password" id="su-pwd" maxlength="128" autocomplete="new-password"><button type="button" class="aa-eye" data-eye="su-pwd" aria-label="Show password" aria-pressed="false">Show</button></div></div>
+            <div class="aa-field"><label for="su-pwd2">Confirm password</label>
+              <div class="aa-input-wrap aa-no-ico aa-has-eye"><input type="password" id="su-pwd2" maxlength="128" autocomplete="new-password"><button type="button" class="aa-eye" data-eye="su-pwd2" aria-label="Show password" aria-pressed="false">Show</button></div></div>
+          </div>
+          <p class="aa-note">Your account is switched on after the gym owner approves it. Until then you can't sign in.</p>
+          <button type="submit" id="su-submit" class="aa-submit">
+            <span class="aa-spinner" id="su-spinner" hidden aria-hidden="true"></span>
+            <span id="su-label">Send sign-up request</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        <form id="admin-form" class="aa-form" novalidate autocomplete="on">
+          <div class="aa-field">
+            <label for="login-id">Username or email</label>
+            <div class="aa-input-wrap">
+              <svg class="aa-input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+              <input type="text" id="login-id" placeholder="e.g. owner@virtexfitness.in" required autocomplete="username" autocapitalize="off" spellcheck="false">
+            </div>
+          </div>
+
+          <div class="aa-field">
+            <label for="login-pass">Password</label>
+            <div class="aa-input-wrap aa-has-eye">
+              <svg class="aa-input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              <input type="password" id="login-pass" placeholder="Enter your password" required autocomplete="current-password">
+              <button type="button" class="aa-eye" id="btn-toggle-pass" aria-label="Show password" aria-pressed="false">Show</button>
+            </div>
+            <p class="aa-caps" id="caps-warn" hidden>Caps Lock is on</p>
+          </div>
+
+          <button type="submit" id="btn-submit" class="aa-submit">
+            <span class="aa-spinner" id="btn-spinner" hidden aria-hidden="true"></span>
+            <span id="btn-label">Sign in</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        <div id="google-auth-section">
+          <div style="display: flex; align-items: center; margin: 18px 0; gap: 12px;">
+            <hr style="flex: 1; border: 0; border-top: 1px solid rgba(255, 255, 255, 0.12);">
+            <span style="color: #64748b; font-size: 0.78rem; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px;">or continue with</span>
+            <hr style="flex: 1; border: 0; border-top: 1px solid rgba(255, 255, 255, 0.12);">
+          </div>
+          <div id="google-signin-btn" style="width: 100%; display: flex; justify-content: center; min-height: 44px; margin-bottom: 8px;"></div>
+        </div>
+
+        <div class="aa-help">
+          <p><strong>New here?</strong> Use <strong>Sign up</strong> and the gym owner will approve your account.
+            <strong>Forgot your password?</strong> Ask the owner to reset it.</p>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const form = document.getElementById('admin-form');
+      const idInput = document.getElementById('login-id');
+      const passInput = document.getElementById('login-pass');
+      const alertBox = document.getElementById('auth-alert');
+      const submitBtn = document.getElementById('btn-submit');
+      const btnLabel = document.getElementById('btn-label');
+      const spinner = document.getElementById('btn-spinner');
+      const toggle = document.getElementById('btn-toggle-pass');
+      const caps = document.getElementById('caps-warn');
+
+      function showAlert(msg, type = 'error') {
+        alertBox.hidden = false;
+        alertBox.className = `aa-alert aa-alert-${type}`;
+        alertBox.textContent = String(msg); // text only, never HTML
+      }
+      function clearAlert() { alertBox.hidden = true; alertBox.textContent = ''; }
+      function setBusy(busy) {
+        submitBtn.disabled = busy; spinner.hidden = !busy;
+        btnLabel.textContent = busy ? 'Signing in…' : 'Sign in';
+      }
+
+      toggle.addEventListener('click', () => {
+        const show = passInput.type === 'password';
+        passInput.type = show ? 'text' : 'password';
+        toggle.textContent = show ? 'Hide' : 'Show';
+        toggle.setAttribute('aria-pressed', String(show));
+        toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        passInput.focus();
+      });
+      passInput.addEventListener('keyup', (e) => { caps.hidden = !(e.getModifierState && e.getModifierState('CapsLock')); });
+
+      // After login return to the page that sent us here (?next=/admin-members.html etc.),
+      // only allowing same-site relative paths; otherwise open the admin console.
+      function getNextUrl() {
+        const next = new URLSearchParams(window.location.search).get('next') || '';
+        if (next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/admin-auth')) return next;
+        return '/admin.html#tab-overview';
+      }
+
+      async function revoke(token) {
+        try { await fetch('/api/v1/auth/logout', { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: '{}' }); } catch { /* ignore */ }
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearAlert();
+        const identifier = idInput.value.trim();
+        const password = passInput.value;
+        if (!identifier || !password) {
+          showAlert('Enter your username or email and your password.');
+          (identifier ? passInput : idInput).focus();
+          return;
+        }
+        setBusy(true);
+        try {
+          const res = await fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: identifier, password }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 429) throw new Error(data.error || 'Too many sign-in attempts. Please wait a few minutes and try again.');
+          if (!res.ok || !data.success) throw new Error(data.error || 'Invalid username or password.');
+
+          // Members and trainers have their own portals: revoke the token instead of storing it here.
+          const role = String(data.data.user?.role || '').toLowerCase();
+          if (role === 'member' || role === 'trainer') {
+            await revoke(data.data.token);
+            throw new Error(role === 'member'
+              ? 'This is a member account. Please use Member sign in.'
+              : 'This is a trainer account. Please use Trainer sign in.');
+          }
+
+          localStorage.setItem('virtex_admin_jwt_token', data.data.token);
+          localStorage.setItem('virtex_admin_user_profile', JSON.stringify(data.data.user));
+          showAlert(`Welcome, ${data.data.user.fullName || 'admin'}. Opening the Admin Console…`, 'success');
+          passInput.value = '';
+          setTimeout(() => { window.location.href = getNextUrl(); }, 600);
+        } catch (err) {
+          showAlert(err.message || 'Sign in failed. Please try again.');
+          setBusy(false);
+        }
+      });
+
+      // ---- Sign in / Sign up tabs
+      const signupForm = document.getElementById('signup-form');
+      const tabIn = document.getElementById('tab-signin');
+      const tabUp = document.getElementById('tab-signup');
+      const title = document.getElementById('page-title');
+      const subtitle = document.getElementById('page-subtitle');
+      const helpBox = document.querySelector('.aa-help');
+      const formWrap = document.querySelector('.aa-form-wrap');
+      const clearSignup = () => { signupForm.reset(); ['su-name', 'su-phone', 'su-email', 'su-pwd', 'su-pwd2'].forEach((i) => { document.getElementById(i).value = ''; }); };
+      function setTab(which) {
+        const up = which === 'signup';
+        clearAlert();
+        tabIn.setAttribute('aria-selected', String(!up)); tabUp.setAttribute('aria-selected', String(up));
+        form.hidden = up; signupForm.hidden = !up; helpBox.hidden = up;
+        const googleSec = document.getElementById('google-auth-section'); if (googleSec) googleSec.hidden = up;
+        formWrap.classList.toggle('aa-wide', up);
+        title.textContent = up ? 'Create your admin account' : 'Sign in to Admin Console';
+        subtitle.textContent = up ? 'Fill in your details. The gym owner approves new admin accounts before you can sign in.' : 'Use the username or email and password set up for your staff account.';
+        if (up) { clearSignup(); document.getElementById('su-name').focus(); } else idInput.focus();
+      }
+      tabIn.addEventListener('click', () => setTab('signin'));
+      tabUp.addEventListener('click', () => setTab('signup'));
+
+      document.querySelectorAll('[data-eye]').forEach((btn) => btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.eye); const show = input.type === 'password';
+        input.type = show ? 'text' : 'password'; btn.textContent = show ? 'Hide' : 'Show';
+        btn.setAttribute('aria-pressed', String(show)); btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      }));
+
+      signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearAlert();
+        const v = (id) => document.getElementById(id).value.trim();
+        const fullName = v('su-name'); const email = v('su-email').toLowerCase(); const phone = v('su-phone');
+        const password = document.getElementById('su-pwd').value; const confirm = document.getElementById('su-pwd2').value;
+        const missing = [];
+        if (!fullName) missing.push('full name'); if (!email) missing.push('email'); if (!password) missing.push('password');
+        if (missing.length) { showAlert(`Please fill in: ${missing.join(', ')}.`); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { showAlert('Please enter a valid email address.'); return; }
+        if (password.length < 8) { showAlert('Password must be at least 8 characters.'); return; }
+        if (password !== confirm) { showAlert('Passwords do not match.'); return; }
+        const btn = document.getElementById('su-submit'); const sp = document.getElementById('su-spinner'); const lb = document.getElementById('su-label');
+        btn.disabled = true; sp.hidden = false; lb.textContent = 'Sending…';
+        try {
+          const res = await fetch('/api/v1/auth/admin-signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fullName, email, phone: phone || undefined, password }) });
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 429) throw new Error(data.error || 'Too many attempts. Please wait and try again.');
+          if (!res.ok || !data.success) throw new Error(data.error || 'Could not send your request. Please try again.');
+          clearSignup();
+          setTab('signin');
+          showAlert(data.message || 'Request sent. You can sign in once the owner approves it.', 'success');
+        } catch (err) { showAlert(err.message || 'Could not send your request. Please try again.'); }
+        finally { btn.disabled = false; sp.hidden = true; lb.textContent = 'Send sign-up request'; }
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mode') === 'signup') setTab('signup');
+      else {
+        const wrongRole = String(params.get('wrongRole') || '').toLowerCase();
+        if (wrongRole) {
+          // All portals share one browser session: explain why the admin page sent us here.
+          let who = ''; try { who = JSON.parse(localStorage.getItem('virtex_admin_user_profile') || 'null')?.fullName || ''; } catch { /* ignore */ }
+          const names = { member: 'a member', trainer: 'a trainer' };
+          showAlert(`This browser is signed in as ${names[wrongRole] || 'a non-admin account'}${who ? ` (${who})` : ''}. Sign in with an owner or manager account to open the Admin Console.`, 'info');
+        } else if (params.get('signedOut') === '1') showAlert('You have been signed out.', 'success');
+        idInput.focus();
+      }
+
+      // ---- Google OAuth 2.0 Sign-In
+      const GOOGLE_CLIENT_ID = '521224801754-9s3d6mfta7e501gcum6i4glkillrn98k.apps.googleusercontent.com';
+
+      window.handleGoogleCredentialResponse = async (response) => {
+        clearAlert();
+        setBusy(true);
+        try {
+          const res = await fetch('/api/v1/auth/google', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_token: response.credential, role: 'manager' })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.success) {
+            throw new Error(data.error || 'Google sign-in failed.');
+          }
+
+          const role = String(data.data.user?.role || '').toLowerCase();
+          if (role === 'member' || role === 'trainer') {
+            await revoke(data.data.token);
+            throw new Error(role === 'member'
+              ? 'This is a member account. Please use Member sign in.'
+              : 'This is a trainer account. Please use Trainer sign in.');
+          }
+
+          localStorage.setItem('virtex_admin_jwt_token', data.data.token);
+          localStorage.setItem('virtex_admin_user_profile', JSON.stringify(data.data.user));
+          showAlert(`Welcome, ${data.data.user.fullName || 'admin'}. Opening the Admin Console…`, 'success');
+          setTimeout(() => { window.location.href = getNextUrl(); }, 600);
+        } catch (err) {
+          showAlert(err.message || 'Google sign-in failed. Please try again.');
+          setBusy(false);
+        }
+      };
+
+      function initGoogleSignIn() {
+        if (window.google?.accounts?.id) {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: window.handleGoogleCredentialResponse,
+          });
+          const btnContainer = document.getElementById('google-signin-btn');
+          if (btnContainer) {
+            google.accounts.id.renderButton(btnContainer, {
+              theme: 'filled_black',
+              size: 'large',
+              width: Math.min(btnContainer.offsetWidth || 340, 360),
+              text: 'continue_with',
+              shape: 'pill'
+            });
+          }
+        } else {
+          // Give up after ~10 s (blocked network, ad blocker…) and say so instead of waiting forever.
+          initGoogleSignIn.tries = (initGoogleSignIn.tries || 0) + 1;
+          if (initGoogleSignIn.tries < 70) setTimeout(initGoogleSignIn, 150);
+          else { const b = document.getElementById('google-signin-btn'); if (b) b.innerHTML = '<small style="color:#94a3b8">Google sign-in could not load. Use your username and password, or reload the page.</small>'; }
+        }
+      }
+      initGoogleSignIn();
+    })();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+/* =====================================================================
+   Virtex Trainer Portal — Training (trainer-workouts.html,
+   trainer-exercise-library.html, trainer-workout-logs.html)
+   ===================================================================== */
+
+/* Programme builder (New programme modal) */
+.tp-day { padding: 0.8rem; margin-bottom: 0.6rem; border-left: 3px solid var(--tp-accent-border); }
+.tp-day .btn { margin-top: 0.4rem; }
+.tp-ex-row {
+  display: grid; gap: 0.5rem 0.75rem; align-items: end; margin-bottom: 6px;
+  grid-template-columns: 2fr 70px 90px 90px 40px;
+}
+.tp-ex-row .form-group { margin-bottom: 0; }
+.tp-ex-row .rm { padding: 8px 0; }
+
+/* Workout logs: one card per session */
+.tp-log-card { padding: 1rem; }
+.tp-log-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+
+.tp-page-workouts .admin-table td:last-child,
+.tp-page-exercise-library .admin-table td:last-child { text-align: right; width: 1%; }

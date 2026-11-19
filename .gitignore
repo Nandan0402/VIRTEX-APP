@@ -42,3 +42,13 @@ esp32/**/config.h
 *.sln
 *.sw?
 
+
+# Uploaded message files (private)
+backend/storage/
+
+# Scratch & test scripts
+scratch/
+
+# Google OAuth Secrets & Keys
+client_secret*.json
+*.credentials.json

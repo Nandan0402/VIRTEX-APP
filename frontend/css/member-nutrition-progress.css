@@ -1,0 +1,606 @@
+/**
+ * Virtex Member Portal — member-nutrition-progress.css
+ * Styling for member daily macro progress, hydration, meal completion,
+ * weekly nutrition history, 30-day trends, and Trainer Hub sync status.
+ */
+
+/* Layout & Sections */
+.np-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.np-header-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #181c27;
+  border: 1px solid #262c3d;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.np-date-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.np-date-nav .btn-date-nav {
+  background: #202636;
+  border: 1px solid #313a4f;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.np-date-nav .btn-date-nav:hover {
+  background: #2b344a;
+  border-color: #00e676;
+}
+
+.np-date-input {
+  background: #11141d;
+  border: 1px solid #313a4f;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.np-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Status Badges */
+.badge-np {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+}
+
+.badge-np.logged {
+  background: rgba(0, 230, 118, 0.15);
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.35);
+}
+
+.badge-np.missing {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px dashed rgba(245, 158, 11, 0.5);
+}
+
+.badge-np.zero-intake {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.badge-np.trainer-sync {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+/* Daily Overview Cards */
+.np-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.np-card {
+  background: #181c27;
+  border: 1px solid #262c3d;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.np-card:hover {
+  border-color: #38425d;
+}
+
+.np-card.card-hero {
+  border-color: rgba(0, 230, 118, 0.35);
+  background: linear-gradient(145deg, #181c27 0%, #152220 100%);
+}
+
+.np-card.is-missing {
+  border: 1px dashed #4b5563;
+  background: #141720;
+}
+
+.np-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.np-card-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.np-card-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.np-card-sub {
+  font-size: 0.82rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.np-card-sub strong {
+  color: #cbd5e1;
+}
+
+/* Progress Bars */
+.np-progress-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: #202636;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 0.85rem 0 0.5rem 0;
+}
+
+.np-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.fill-cal { background: linear-gradient(90deg, #00e676, #10b981); }
+.fill-prot { background: linear-gradient(90deg, #3b82f6, #6366f1); }
+.fill-carb { background: linear-gradient(90deg, #f59e0b, #eab308); }
+.fill-fat { background: linear-gradient(90deg, #ec4899, #f43f5e); }
+.fill-water { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
+
+/* Missing Data Notice in Daily Card */
+.np-missing-notice {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px dashed rgba(245, 158, 11, 0.35);
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: #fcd34d;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Meal Completion Breakdown */
+.np-meal-completion-section {
+  background: #181c27;
+  border: 1px solid #262c3d;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.np-meal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.np-meal-item-card {
+  background: #202636;
+  border: 1px solid #2d374d;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.np-meal-item-card.completed {
+  border-color: rgba(0, 230, 118, 0.35);
+  background: #1b2432;
+}
+
+.np-meal-item-card.missing {
+  border-style: dashed;
+  border-color: #3f4961;
+  opacity: 0.85;
+}
+
+.np-meal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.np-meal-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.np-meal-stats {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.np-meal-foods {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+/* Weekly History Table & Cards */
+.np-section-card {
+  background: #181c27;
+  border: 1px solid #262c3d;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.np-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.np-section-desc {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 1.25rem;
+}
+
+.np-table-wrap {
+  overflow-x: auto;
+}
+
+.np-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.np-table th {
+  padding: 0.85rem 1rem;
+  color: #94a3b8;
+  font-weight: 600;
+  background: #1c2230;
+  border-bottom: 2px solid #262c3d;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.np-table td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #262c3d;
+  color: #e2e8f0;
+}
+
+.np-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.np-table tr.row-missing {
+  background: rgba(245, 158, 11, 0.03);
+}
+
+.np-table tr.row-missing td {
+  color: #64748b;
+}
+
+.np-val-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+}
+
+.np-val-null {
+  color: #64748b;
+  font-style: italic;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Monthly Trends Section */
+.np-trends-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.np-trend-kpi {
+  background: #202636;
+  border: 1px solid #2d374d;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.np-trend-kpi-val {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #00e676;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.np-trend-kpi-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+  font-weight: 600;
+}
+
+/* 30-Day Trend Chart Visualizer */
+.np-chart-card {
+  background: #141822;
+  border: 1px solid #262c3d;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.np-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.np-chart-legend {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.np-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.np-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.np-legend-dot.target { background: #64748b; }
+.np-legend-dot.logged { background: #00e676; }
+.np-legend-dot.missing { background: #fbbf24; border: 1px dashed #d97706; }
+.np-legend-dot.zero { background: #3b82f6; }
+
+.np-timeline-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 180px;
+  padding-bottom: 25px;
+  position: relative;
+  border-bottom: 1px solid #2d374d;
+}
+
+.np-target-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed #64748b;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.np-target-label {
+  position: absolute;
+  right: 4px;
+  top: -18px;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.np-timeline-bar-wrap {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.np-timeline-bar {
+  width: 100%;
+  max-width: 18px;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.2s ease;
+  min-height: 4px;
+}
+
+.np-timeline-bar.logged {
+  background: #00e676;
+}
+
+.np-timeline-bar.logged:hover {
+  background: #69f0ae;
+  transform: scaleY(1.05);
+}
+
+.np-timeline-bar.missing {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(245, 158, 11, 0.2),
+    rgba(245, 158, 11, 0.2) 2px,
+    rgba(245, 158, 11, 0.4) 2px,
+    rgba(245, 158, 11, 0.4) 4px
+  );
+  border: 1px dashed #f59e0b;
+  min-height: 16px;
+}
+
+.np-timeline-bar.zero-intake {
+  background: #3b82f6;
+  min-height: 8px;
+}
+
+.np-timeline-date {
+  position: absolute;
+  bottom: -22px;
+  font-size: 0.65rem;
+  color: #64748b;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+
+/* Tooltip on Chart Bar */
+.np-bar-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  background: #0b0e14;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: #fff;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.np-timeline-bar-wrap:hover .np-bar-tooltip {
+  display: block;
+}
+
+/* Macro Ratio Bar */
+.np-macro-ratio-bar {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.np-macro-seg {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.np-seg-prot { background: #3b82f6; }
+.np-seg-carb { background: #f59e0b; }
+.np-seg-fat { background: #ec4899; }
+
+.np-macro-legend {
+  display: flex;
+  justify-content: space-around;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 0.5rem;
+}
+
+/* Trainer Hub Connection Banner */
+.np-trainer-banner {
+  background: linear-gradient(135deg, #1e1b4b 0%, #172554 100%);
+  border: 1px solid #4338ca;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.np-trainer-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.np-trainer-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #312e81;
+  border: 2px solid #818cf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.np-trainer-details h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.np-trainer-details p {
+  margin: 0.2rem 0 0 0;
+  font-size: 0.85rem;
+  color: #c7d2fe;
+}
+
+.np-trainer-sync-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+}
+
+@media (max-width: 768px) {
+  .np-trainer-sync-status {
+    align-items: flex-start;
+  }
+}
+

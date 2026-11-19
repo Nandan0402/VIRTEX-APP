@@ -1,0 +1,45 @@
+/* =====================================================================
+   Virtex Trainer Portal — Sessions & time (trainer-schedule.html,
+   trainer-pt-sessions.html, trainer-attendance.html)
+   ===================================================================== */
+
+.tp-page-schedule .admin-table td:nth-child(2),
+.tp-page-attendance .admin-table td:nth-child(n+2):nth-child(-n+5) { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; }
+
+.tp-page-pt-sessions .admin-table td:first-child { white-space: nowrap; }
+.tp-page-pt-sessions .admin-table td:last-child { text-align: right; width: 1%; }
+
+.tp-page-attendance #totals .tp-stat-value { color: var(--tp-accent); }
+
+/* ---------- Schedule calendar (4 weeks) ---------- */
+.tp-cal-nav { display: flex; gap: 6px; margin-bottom: 0.8rem; }
+.tp-cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.tp-cal-head { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--tp-text-muted); font-weight: 700; text-align: center; padding: 4px 0; }
+.tp-cal-day {
+  min-height: 92px; border: 1px solid var(--tp-line); border-radius: var(--tp-radius-sm); padding: 6px;
+  background: rgba(255, 255, 255, 0.015); display: flex; flex-direction: column; gap: 3px; min-width: 0; box-sizing: border-box;
+}
+.tp-cal-day[data-date] { cursor: pointer; }
+.tp-cal-day[data-date]:hover, .tp-cal-day[data-date]:focus-visible { border-color: var(--tp-accent-border); background: var(--tp-accent-soft); outline: none; }
+.tp-cal-day.is-past { opacity: 0.45; }
+.tp-cal-day.is-today { border-color: var(--tp-accent); box-shadow: inset 0 0 0 1px var(--tp-accent); }
+.tp-cal-num { font-size: 0.8rem; font-weight: 700; color: var(--tp-text); }
+.tp-cal-num span { color: var(--tp-accent); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; }
+.tp-cal-ev { font-size: 0.68rem; border-radius: 4px; padding: 2px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'JetBrains Mono', monospace; }
+.ev-shift { background: rgba(0, 230, 118, 0.12); color: var(--tp-accent); }
+.ev-off { background: rgba(255, 255, 255, 0.05); color: var(--tp-text-dim); text-decoration: line-through; }
+.ev-extra { background: rgba(56, 189, 248, 0.14); color: #38bdf8; }
+.ev-block { background: rgba(239, 68, 68, 0.14); color: #f87171; }
+.ev-session { background: rgba(167, 139, 250, 0.16); color: #c4b5fd; }
+.tp-cal-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.8rem; }
+.tp-cal-legend span { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; }
+
+@media (max-width: 600px) {
+  .tp-cal { gap: 3px; }
+  .tp-cal-day { min-height: 64px; padding: 3px; }
+  .tp-cal-head { font-size: 0.6rem; }
+  .tp-cal-ev { font-size: 0; padding: 0; height: 5px; }   /* phone: events collapse to colour bars */
+}
+
+/* Admin-rostered staff shifts on the calendar */
+.ev-roster { background: rgba(251, 191, 36, 0.14); color: #fbbf24; }

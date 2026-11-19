@@ -1,0 +1,16 @@
+/* =====================================================================
+   Virtex Trainer Portal — Account & communication (trainer-profile.html,
+   trainer-settings.html, trainer-messages.html, trainer-notifications.html)
+   ===================================================================== */
+
+.tp-page-profile .card form,
+.tp-page-settings .card form { display: flex; flex-direction: column; gap: 0.1rem; }
+.tp-page-profile .card form .btn,
+.tp-page-settings .card .btn { align-self: flex-start; margin-top: 0.4rem; }
+
+/* Messages: thread rows */
+.tp-page-messages .tp-row .tp-avatar { width: 32px; height: 32px; font-size: 0.8rem; }
+
+/* Notifications */
+.tp-notif-body { color: var(--tp-text-body); margin-top: 3px; }
+.tp-page-notifications .tp-row { align-items: flex-start; }

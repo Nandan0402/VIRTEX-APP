@@ -1,0 +1,86 @@
+/* =====================================================================
+   Virtex Member Portal — reusable sidebar (js/member/member-sidebar.js)
+   Load after member-style.css on every member-*.html page.
+   ===================================================================== */
+
+.mp-sidebar.ms-sidebar { display: flex; flex-direction: column; overflow: hidden; }  /* only .ms-nav scrolls */
+
+/* Brand */
+.ms-brand { display: flex; align-items: center; gap: 10px; padding: 1.05rem 1.1rem; border-bottom: 1px solid var(--mp-line); flex-shrink: 0; }
+.ms-logo { width: 32px; height: 32px; flex-shrink: 0; }
+.ms-brand h2 { margin: 0; font-size: 1rem; font-weight: 800; color: var(--mp-text); }
+.ms-brand span { display: block; font-size: 0.66rem; font-family: 'JetBrains Mono', monospace; color: var(--mp-accent); letter-spacing: 1px; }
+.ms-close { display: none; margin-left: auto; background: transparent; border: 1px solid var(--mp-line); color: var(--mp-text-muted);
+  border-radius: 7px; padding: 4px 8px; cursor: pointer; }
+
+/* Menu */
+.ms-nav { flex: 1; overflow-y: auto; padding: 0.6rem 0.6rem 1rem; scrollbar-width: thin; }
+.ms-list { list-style: none; margin: 0; padding: 0; }
+.ms-list { display: flex; flex-direction: column; gap: 2px; }
+.ms-link {
+  position: relative; display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box;
+  padding: 7px 10px; border-radius: 8px; border: none; background: transparent; cursor: pointer;
+  color: #a3aab8; text-decoration: none; font-family: inherit; font-size: 0.85rem; font-weight: 500; line-height: 1.3; text-align: left;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.ms-ico { width: 20px; text-align: center; flex-shrink: 0; }
+.ms-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ms-link:hover { background: rgba(255, 255, 255, 0.05); color: var(--mp-text); }
+.ms-link:focus-visible { outline: 2px solid var(--mp-accent); outline-offset: 1px; }
+
+/* Active page indicator: tinted row + accent bar on the left */
+.ms-link.active { background: var(--mp-accent-soft); color: var(--mp-accent); font-weight: 700; }
+.ms-link.active::before {
+  content: ''; position: absolute; left: -0.6rem; top: 6px; bottom: 6px; width: 3px; border-radius: 0 3px 3px 0; background: var(--mp-accent);
+}
+/* Thin spacing separates groups of related links — nothing expands or collapses */
+.ms-gap { margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+
+/* Tabs at the top of pages that share one sidebar link (Membership / Payments / Invoices …) */
+.ms-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 0.9rem; }
+.ms-tab { padding: 6px 13px; border-radius: 999px; border: 1px solid var(--mp-line); color: #a3aab8; text-decoration: none;
+  font-size: 0.8rem; font-weight: 600; transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
+.ms-tab:hover { color: var(--mp-text); border-color: rgba(255, 255, 255, 0.2); }
+.ms-tab.active { background: var(--mp-accent); border-color: var(--mp-accent); color: #04130a; font-weight: 800; }
+.ms-tab:focus-visible { outline: 2px solid var(--mp-accent); outline-offset: 2px; }
+
+/* Logout sits apart from the page links */
+.ms-item-logout { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--mp-line); }
+.ms-item-logout .ms-link { color: #fca5a5; }
+.ms-item-logout .ms-link:hover { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+
+.ms-foot { border-top: 1px solid var(--mp-line); padding: 0.7rem 1.1rem; font-size: 0.78rem; flex-shrink: 0; }
+.ms-foot a { color: var(--mp-text-muted); text-decoration: none; }
+.ms-foot a:hover { color: var(--mp-accent); }
+
+/* Mobile drawer backdrop */
+.ms-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 45; opacity: 1; transition: opacity 0.2s ease; }
+.ms-backdrop[hidden] { display: none; }
+
+@media (max-width: 900px) {
+  .ms-close { display: inline-block; }
+  .ms-sidebar { box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ms-link, .ms-tab, .ms-backdrop { transition: none !important; }
+}
+
+/* Sidebar footer: member name + red logout icon (replaces the old "Logout" menu row) */
+.ms-foot { display: grid; gap: 0.55rem; padding: 0.75rem 0.8rem; }
+.ms-user { display: flex; align-items: center; gap: 8px; }
+.ms-user-link { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 10px; text-decoration: none; color: var(--mp-text); }
+.ms-user-link:hover { background: rgba(255, 255, 255, 0.05); }
+.ms-user-link:focus-visible { outline: 2px solid var(--mp-accent); outline-offset: 1px; }
+.ms-user-av { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--mp-accent-soft); border: 1px solid var(--mp-accent-border); color: var(--mp-accent); font-weight: 800; font-size: 0.8rem; }
+.ms-user-meta { min-width: 0; display: grid; line-height: 1.25; }
+.ms-user-meta b { font-size: 0.86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ms-user-meta small { font-size: 0.64rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--mp-accent); }
+.ms-logout { flex-shrink: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+  background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 8px; color: #f87171;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease; }
+.ms-logout:hover { background: #ef4444; border-color: #ef4444; color: #fff; transform: scale(1.05); }
+.ms-logout:focus-visible { outline: 2px solid #f87171; outline-offset: 2px; }
+.ms-foot .ms-kiosk { font-size: 0.74rem; color: var(--mp-text-muted); text-decoration: none; padding-left: 8px; }
+.ms-foot .ms-kiosk:hover { color: var(--mp-accent); }

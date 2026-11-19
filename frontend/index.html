@@ -1,195 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="PulseCore Fitness AI Gym Receptionist Robot Platform - Member Kiosk and Staff Admin Portals.">
-  <title>PulseCore Fitness • AI Gym Receptionist Platform Gateway</title>
-  <link rel="stylesheet" href="css/portal.css">
+  <meta name="description"
+    content="Virtex Fitness: AI gym reception platform. Sign in to the Member Portal, Trainer Hub or Admin Console, or open the reception kiosk.">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Virtex Fitness · AI Gym Reception Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/home.css">
 </head>
-<body>
-  <div class="ambient-glow" aria-hidden="true"></div>
 
-  <div class="portal-wrapper">
-    <!-- Top Header Navigation -->
-    <header class="portal-nav" role="banner">
-      <div class="brand-wrapper">
-        <div class="brand-icon">
-          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="32" height="32" rx="8" fill="#12141a" stroke="#00e676" stroke-width="2"/>
-            <path d="M7 16H11L14 9L18 23L21 16H25" stroke="#00e676" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+<body class="vx-home">
+  <a class="vx-skip" href="#hero-title">Skip to main content</a>
+
+  <!-- ============ Top bar ============ -->
+  <header class="vx-nav">
+    <a class="vx-brand" href="/" aria-label="Virtex Fitness home">
+      <svg class="vx-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#0f131b" stroke="#00e676" stroke-width="1.6" />
+        <path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676" />
+        <path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee" />
+        <path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+      <span class="vx-wordmark">VIRTEX<small>FITNESS</small></span>
+    </a>
+  </header>
+
+  <main>
+    <!-- ============ Hero ============ -->
+    <section class="vx-hero" aria-labelledby="hero-title">
+      <div class="vx-hero-media" id="hero-bg-media" role="img" aria-label="Virtex Fitness facility"></div>
+      <div class="vx-hero-shade" aria-hidden="true"></div>
+
+      <div class="vx-hero-inner">
+        <span class="vx-eyebrow"><span class="vx-live-dot" aria-hidden="true"></span>AI reception · Member · Trainer ·
+          Admin</span>
+        <h1 id="hero-title">Never let the time<br>tell you to <span class="vx-grad">stop.</span></h1>
+        <p class="vx-lead">Touchless check-in, a multilingual AI receptionist and a waving reception robot, connected to
+          one
+          live system for members, trainers and the front desk.</p>
+        <div class="vx-hero-actions">
+          <a class="vx-btn vx-btn-green" href="/member-auth.html">Member Portal <span aria-hidden="true">→</span></a>
+          <a class="vx-btn vx-btn-cyan" href="/trainer-auth.html">Trainer Hub <span aria-hidden="true">→</span></a>
+          <a class="vx-btn vx-btn-indigo" href="/admin-auth.html">Admin Console <span aria-hidden="true">→</span></a>
         </div>
-        <div>
-          <h1 class="brand-title">PULSECORE <span class="text-green">FITNESS</span></h1>
-          <span class="brand-badge font-mono">AI RECEPTIONIST ROBOT PLATFORM</span>
-        </div>
-      </div>
-
-      <nav class="nav-actions" aria-label="Portal Shortcuts">
-        <a href="/kiosk.html" class="btn-nav btn-nav-outline">📱 Member Kiosk</a>
-        <a href="/admin" class="btn-nav btn-nav-outline">⚙️ Staff Console</a>
-      </nav>
-    </header>
-
-    <!-- Hero Gateway Section -->
-    <section class="hero-section">
-      <div class="hero-pill">
-        <span class="pulse-dot" aria-hidden="true"></span>
-        <span>DUAL-PORTAL SYSTEM ONLINE • HARDWARE READY</span>
-      </div>
-      <h2 class="hero-title">
-        Intelligent Gym Reception <br>
-        <span class="text-green">& Robotics Ecosystem</span>
-      </h2>
-      <p class="hero-subtitle">
-        Seamless touchless AI member check-ins powered by Google Gemini, synchronized in real time with an ESP32 microcontroller physical waving robot.
-      </p>
-    </section>
-
-    <!-- Dual Portal Dashboard Cards -->
-    <main class="portal-grid" id="portals">
-      <!-- PORTAL 1: MEMBER RECEPTION KIOSK -->
-      <article class="portal-card card-kiosk">
-        <div class="portal-card-header">
-          <div class="portal-icon-box" aria-hidden="true">🤖</div>
-          <span class="portal-badge badge-kiosk font-mono">Front-of-House Kiosk</span>
-        </div>
-
-        <h3 class="portal-card-title">Member Reception Kiosk</h3>
-        <p class="portal-card-desc">
-          Interactive voice and touch station placed at the gym entrance. Welcomes members, answers queries in 3 languages, and executes robotic greeting gestures upon check-in.
-        </p>
-
-        <ul class="features-list">
-          <li class="feature-item">
-            <span class="feature-check" aria-hidden="true">✓</span>
-            <span><strong>Multilingual Voice AI:</strong> English (en-IN), Kannada (kn-IN), and Hindi (hi-IN) with live speech waveform</span>
-          </li>
-          <li class="feature-item">
-            <span class="feature-check" aria-hidden="true">✓</span>
-            <span><strong>Member Fast Check-In:</strong> Instant check-in via Member ID or phone with personal voice greeting</span>
-          </li>
-          <li class="feature-item">
-            <span class="feature-check" aria-hidden="true">✓</span>
-            <span><strong>Interactive FitBot Avatar:</strong> Animated digital robot face synced with SG90 servo motor actions</span>
-          </li>
-          <li class="feature-item">
-            <span class="feature-check" aria-hidden="true">✓</span>
-            <span><strong>Grounded Gym Q&A:</strong> Live operating hours, membership pricing, and rules without hallucinations</span>
-          </li>
-          <li class="feature-item">
-            <span class="feature-check" aria-hidden="true">✓</span>
-            <span><strong>Membership Tier Showcase:</strong> Monthly, Quarterly, and Annual plans with instant enquiry form</span>
-          </li>
+        <ul class="vx-hero-facts" aria-label="Highlights">
+          <li><strong>3</strong><span>languages · EN · KN · HI</span></li>
+          <li><strong>3</strong><span>connected portals</span></li>
+          <li><strong>1</strong><span>shared live database</span></li>
         </ul>
-
-        <a href="/kiosk.html" class="portal-btn-launch btn-launch-green">
-          <span>Launch Member Kiosk</span>
-          <span aria-hidden="true">➔</span>
-        </a>
-      </article>
-
-      <!-- PORTAL 2: TRAINER & ADMIN STAFF CONSOLE -->
-      <article class="portal-card card-admin">
-        <div class="portal-card-header">
-          <div class="portal-icon-box" aria-hidden="true">⚙️</div>
-          <span class="portal-badge badge-admin font-mono">Back-of-House Staff</span>
-        </div>
-
-        <h3 class="portal-card-title">Trainer & Admin Console</h3>
-        <p class="portal-card-desc">
-          Administrative control center for gym managers and trainers. Manage floor shift availability, calibrate the 3-servo robot base, and review member interaction logs.
-        </p>
-
-        <ul class="features-list">
-          <li class="feature-item">
-            <span class="feature-check" aria-hidden="true">✓</span>
-            <span><strong>Physical Servo Controls:</strong> Test WAVE, NOD, SHAKE, or calibrate Head Pan, Tilt, and Arm sliders</span>
-          </li>
-          <li class="feature-item">
-            <span class="feature-check" aria-hidden="true">✓</span>
-            <span><strong>Trainer Shift Roster:</strong> Set floor trainer status (On Floor, In Session, Off Duty) announced by robot</span>
-          </li>
-          <li class="feature-item">
-            <span class="feature-check" aria-hidden="true">✓</span>
-            <span><strong>Plan & Pricing Editor:</strong> Add, edit, or archive gym membership packages and key perks</span>
-          </li>
-          <li class="feature-item">
-            <span class="feature-check" aria-hidden="true">✓</span>
-            <span><strong>Noticeboard Broadcasts:</strong> Post urgent notices, holiday schedules, and event announcements</span>
-          </li>
-          <li class="feature-item">
-            <span class="feature-check" aria-hidden="true">✓</span>
-            <span><strong>Live Interaction Audit Log:</strong> Inspect member queries, recognized intents, and robot response latency</span>
-          </li>
-        </ul>
-
-        <a href="/admin" class="portal-btn-launch btn-launch-purple">
-          <span>Open Staff Console</span>
-          <span aria-hidden="true">➔</span>
-        </a>
-      </article>
-    </main>
-
-    <!-- Real-Time Hardware & System Telemetry Strip -->
-    <section class="telemetry-strip" aria-label="System Telemetry">
-      <div class="telemetry-header">
-        <h4 class="telemetry-title font-mono">Live Ecosystem Telemetry & Health</h4>
-        <span class="font-mono text-xs text-dim">Auto-Refresh (4s)</span>
-      </div>
-
-      <div class="telemetry-grid">
-        <div class="telemetry-node">
-          <span class="node-label">Backend REST API</span>
-          <div id="stat-server" class="telemetry-badge badge-online">
-            <span class="status-indicator online"></span>Online (Port 3000)
-          </div>
-          <div class="node-detail">Express • Node.js v22</div>
-        </div>
-
-        <div class="telemetry-node">
-          <span class="node-label">Database Engine</span>
-          <div id="stat-db" class="telemetry-badge badge-online">
-            <span class="status-indicator online"></span>Connected (PostgreSQL 18)
-          </div>
-          <div class="node-detail">gym_robot_db • Local Port 5432</div>
-        </div>
-
-        <div class="telemetry-node">
-          <span class="node-label">ESP32 Hardware Base</span>
-          <div id="stat-robot" class="telemetry-badge badge-online">
-            <span class="status-indicator online"></span>ESP32 Base Standby
-          </div>
-          <div id="robot-servo-meta" class="node-detail">Awaiting Wi-Fi link</div>
-        </div>
-
-        <div class="telemetry-node">
-          <span class="node-label">AI Speech Engine</span>
-          <div class="telemetry-badge badge-online">
-            <span class="status-indicator online"></span>Gemini 1.5 Flash
-          </div>
-          <div class="node-detail">EN / KN / HI Grounded Voice</div>
-        </div>
       </div>
     </section>
-
-    <!-- Footer -->
-    <footer class="portal-footer" role="contentinfo">
-      <p>© 2026 PulseCore Fitness • AI Gym Receptionist Robot Platform</p>
-      <div class="footer-links font-mono">
-        <a href="/kiosk.html">Member Kiosk</a>
-        <span>•</span>
-        <a href="/admin">Staff Admin Console</a>
-        <span>•</span>
-        <a href="/api/v1/health">API Health Endpoint</a>
-      </div>
-    </footer>
-  </div>
-
-  <script src="js/portal.js"></script>
+  </main>
 </body>
+
 </html>

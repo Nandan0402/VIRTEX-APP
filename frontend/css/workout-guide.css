@@ -1,0 +1,78 @@
+/* Admin → Workouts: read-only workout guide (admin-workout-management.html) */
+.wg-wrap { max-width: 1280px; margin: 0 auto; padding: 1.5rem; display: grid; gap: 1.6rem; }
+.wg-wrap h2 { margin: 0; font-size: 1.15rem; color: #fff; }
+.wg-hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; }
+.wg-crumb { margin: 0 0 4px; font-size: 0.78rem; color: var(--text-dim); }
+.wg-hero h1 { margin: 0; font-size: 1.8rem; color: #fff; }
+.wg-lead { margin: 6px 0 0; color: var(--text-gray); max-width: 70ch; line-height: 1.5; }
+.wg-lead strong { color: #fff; }
+.wg-private { margin: 0; font-size: 0.8rem; color: #c4b5fd; background: rgba(167, 139, 250, 0.1); border: 1px solid rgba(167, 139, 250, 0.35); border-radius: 10px; padding: 0.5rem 0.75rem; max-width: 420px; }
+
+/* goal */
+.wg-goal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.1rem 1.2rem; display: grid; gap: 1rem; }
+.wg-goal-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.wg-seg { display: inline-flex; background: var(--bg-input, #090a0f); border: 1px solid var(--border); border-radius: 12px; padding: 3px; gap: 3px; flex-wrap: wrap; }
+.wg-seg button { border: 0; background: transparent; color: var(--text-gray); font: inherit; font-size: 0.86rem; font-weight: 700; padding: 0.5rem 0.9rem; border-radius: 9px; cursor: pointer; }
+.wg-seg button[aria-selected="true"] { background: rgba(34, 197, 94, 0.14); color: #4ade80; box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4); }
+.wg-seg button:focus-visible, .wg-chip:focus-visible { outline: 2px solid #4ade80; outline-offset: 2px; }
+.wg-goal-intro h3 { margin: 0 0 4px; color: #fff; font-size: 1rem; }
+.wg-goal-intro p { margin: 0; color: var(--text-gray); font-size: 0.88rem; }
+.wg-goal-grid { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+.wg-goal-grid > div { background: rgba(255, 255, 255, 0.025); border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem 0.75rem; }
+.wg-goal-grid dt { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); }
+.wg-goal-grid dd { margin: 3px 0 0; font-size: 0.86rem; color: #e5e7eb; line-height: 1.4; }
+
+/* muscles */
+.wg-section-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+.wg-tools { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+.wg-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.wg-chip { border: 1px solid var(--border); background: transparent; color: var(--text-gray); border-radius: 999px; padding: 0.35rem 0.75rem; font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+.wg-chip:hover { color: #fff; }
+.wg-chip.on { color: #fff; background: rgba(255, 255, 255, 0.07); border-color: rgba(255, 255, 255, 0.35); }
+.wg-search { background: var(--bg-input, #090a0f); border: 1px solid var(--border); color: #fff; border-radius: 10px; padding: 0.5rem 0.75rem; font: inherit; font-size: 0.85rem; min-width: 240px; }
+.wg-search:focus { outline: none; border-color: #4ade80; }
+.wg-group { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--wg-c); border-radius: 16px; padding: 1.1rem 1.2rem; margin-bottom: 1rem; }
+.wg-group > header h3 { margin: 0; font-size: 1.1rem; color: #fff; }
+.wg-group > header p { margin: 4px 0 0.9rem; color: var(--text-gray); font-size: 0.86rem; }
+.wg-parts { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.8rem; }
+.wg-part { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 12px; padding: 0.85rem 0.9rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.wg-part h4 { margin: 0; font-size: 0.98rem; color: var(--wg-c); }
+.wg-part h4 small { display: block; font-size: 0.72rem; font-weight: 600; color: var(--text-dim); margin-top: 2px; }
+.wg-does { margin: 0; font-size: 0.82rem; color: var(--text-gray); }
+.wg-ex { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.wg-ex li { background: rgba(0, 0, 0, 0.2); border-radius: 8px; padding: 0.45rem 0.55rem; }
+.wg-ex-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.wg-ex b { font-size: 0.84rem; color: #fff; }
+.wg-cue { display: block; font-size: 0.76rem; color: var(--text-dim); margin-top: 2px; line-height: 1.4; }
+.wg-dose { flex: none; font-size: 0.68rem; font-weight: 800; border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+.wg-dose.compound { color: #4ade80; background: rgba(34, 197, 94, 0.12); }
+.wg-dose.isolation { color: #93c5fd; background: rgba(59, 130, 246, 0.12); }
+.wg-mistake { margin: auto 0 0; font-size: 0.76rem; color: #fca5a5; background: rgba(239, 68, 68, 0.07); border-radius: 8px; padding: 0.4rem 0.55rem; }
+.wg-empty { color: var(--text-dim); text-align: center; padding: 2rem 0; }
+
+/* splits + rules */
+.wg-splits { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.9rem; }
+.wg-split { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1rem 1.1rem; }
+.wg-split header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.wg-split h3 { margin: 0; font-size: 1rem; color: #fff; }
+.wg-split header span { font-size: 0.75rem; color: var(--text-dim); }
+.wg-best { margin: 4px 0 0.6rem; font-size: 0.76rem; color: #4ade80; font-weight: 700; }
+.wg-split dl { margin: 0; display: grid; gap: 6px; }
+.wg-split dt { font-size: 0.8rem; font-weight: 800; color: #fff; }
+.wg-split dd { margin: 1px 0 0; font-size: 0.8rem; color: var(--text-gray); line-height: 1.4; }
+.wg-rules { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.8rem; }
+.wg-rule { display: flex; gap: 0.6rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 0.8rem; }
+.wg-rule > span { font-size: 1.3rem; }
+.wg-rule b { color: #fff; font-size: 0.86rem; }
+.wg-rule p { margin: 3px 0 0; font-size: 0.78rem; color: var(--text-gray); line-height: 1.45; }
+.wg-disclaimer { margin: 0.9rem 0 0; font-size: 0.74rem; color: var(--text-dim); }
+
+@media (max-width: 1100px) { .wg-goal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wg-rules { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wg-splits { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .wg-wrap { padding: 1rem; } .wg-goal-grid, .wg-rules { grid-template-columns: 1fr; } .wg-search { min-width: 0; width: 100%; } .wg-parts { grid-template-columns: 1fr; } }
+
+/* Same guide inside the Member Portal (member-workouts.html) */
+.wg-wrap.wg-embed { max-width: none; padding: 0; }
+.wg-shared { margin: 0; font-size: 0.82rem; color: #a7f3d0; background: rgba(0, 230, 118, 0.08); border: 1px solid rgba(0, 230, 118, 0.3); border-radius: 10px; padding: 0.55rem 0.8rem; }
+.mg-guide, .mg-plan-head { max-width: 1200px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 1.25rem 1.5rem 0; }
+.mg-plan-head { margin-top: 1.6rem; font-size: 1.15rem; color: #fff; padding-top: 1.4rem; border-top: 1px solid var(--border); }
+@media (max-width: 900px) { .mg-guide, .mg-plan-head { padding-left: 1rem; padding-right: 1rem; } }

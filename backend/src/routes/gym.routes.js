@@ -5,8 +5,9 @@ import { authenticateToken, requireRole } from '../middlewares/auth.js';
 
 const router = Router();
 
-// GET /api/gym/info
+// GET /api/gym/info and /api/gym/profile alias
 router.get('/info', gymController.getGymInfo);
+router.get('/profile', gymController.getGymInfo);
 
 // PUT /api/gym/info (Update facility settings: Owner, Manager)
 router.put('/info', authenticateToken, requireRole('owner', 'manager'), adminController.updateSettings);

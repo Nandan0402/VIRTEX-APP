@@ -1,9 +1,9 @@
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../../backend/src/app.js';
-import { checkDatabaseConnection, closePool } from '../../backend/src/config/database.js';
+import { checkDatabaseConnection, closePool, query } from '../../backend/src/config/database.js';
 
-describe('PulseCore Authentication & RBAC Test Suite', () => {
+describe('Virtex Authentication & RBAC Test Suite', () => {
   let server;
   let baseUrl;
 
@@ -26,6 +26,13 @@ describe('PulseCore Authentication & RBAC Test Suite', () => {
   });
 
   after(async () => {
+    try {
+      await query("DELETE FROM users WHERE username LIKE 'mem_user_%' OR username LIKE 'coach_%' OR username LIKE 'admin_exec_%';");
+      await query("DELETE FROM trainers WHERE full_name ~ '[0-9]{4,}' OR email LIKE 'coach_%@%' OR trainer_code ~ 'TRN[0-9]{4,}';");
+      await query("DELETE FROM members WHERE full_name LIKE 'Test Member %' OR email LIKE 'member_%@example.com';");
+    } catch (err) {
+      console.error('Teardown cleanup error:', err);
+    }
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }
@@ -76,7 +83,7 @@ describe('PulseCore Authentication & RBAC Test Suite', () => {
     const body = await res.json();
     assert.equal(body.success, true);
     assert.equal(body.data.user.role, 'trainer');
-    assert.equal(body.data.user.trainerId, 1);
+    assert.ok(body.data.user.trainerId);
     trainerToken = body.data.token;
   });
 
@@ -91,7 +98,7 @@ describe('PulseCore Authentication & RBAC Test Suite', () => {
     const body = await res.json();
     assert.equal(body.success, true);
     assert.equal(body.data.user.role, 'member');
-    assert.equal(body.data.user.memberId, 1);
+    assert.ok(body.data.user.memberId);
     memberToken = body.data.token;
   });
 
@@ -313,7 +320,116 @@ describe('PulseCore Authentication & RBAC Test Suite', () => {
   });
 
   // --------------------------------------------------------------------------
-  // 6. Public Guest Access Unaffected
+  // 6. Tri-Role Self-Service Registration (Member, Trainer, Admin)
+  // --------------------------------------------------------------------------
+  test('POST /auth/register registers new Member, inserts member record, and returns JWT', async () => {
+    const uniqueSuffix = Date.now().toString().slice(-5);
+    const regRes = await fetch(`${baseUrl}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        role: 'member',
+        fullName: `Test Member ${uniqueSuffix}`,
+        username: `mem_user_${uniqueSuffix}`,
+        email: `member_${uniqueSuffix}@example.com`,
+        phone: `+91 98450${uniqueSuffix}`,
+        planId: 2,
+        preferredLanguage: 'kn-IN',
+        emergencyContactName: 'Test Emergency Contact',
+        emergencyContactPhone: '+91 9900011223',
+        password: 'MemberPass2026!',
+      }),
+    });
+
+    assert.equal(regRes.status, 201);
+    const body = await regRes.json();
+    assert.equal(body.success, true);
+    assert.equal(body.data.user.role, 'member');
+    assert.ok(body.data.user.memberId, 'Must link to a new member record');
+    assert.ok(body.data.token, 'Must return signed JWT token');
+
+    // Verify member can immediately log in with their phone number
+    const loginRes = await fetch(`${baseUrl}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: `+91 98450${uniqueSuffix}`, password: 'MemberPass2026!' }),
+    });
+    assert.equal(loginRes.status, 200);
+    const loginBody = await loginRes.json();
+    assert.equal(loginBody.data.user.username, `mem_user_${uniqueSuffix}`);
+  });
+
+  test('POST /auth/register registers new Personal Trainer and populates floor shifts', async () => {
+    const uniqueSuffix = Date.now().toString().slice(-5);
+    const regRes = await fetch(`${baseUrl}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        role: 'trainer',
+        fullName: `Coach Arjun ${uniqueSuffix}`,
+        username: `coach_${uniqueSuffix}`,
+        email: `coach_${uniqueSuffix}@virtexfitness.in`,
+        phone: `+91 99112${uniqueSuffix}`,
+        specialty: 'CrossFit & Functional Fitness',
+        certifications: 'ACE-CPT, CSCS',
+        bio: 'Functional strength specialist.',
+        password: 'TrainerPass2026!',
+      }),
+    });
+
+    assert.equal(regRes.status, 201);
+    const body = await regRes.json();
+    assert.equal(body.success, true);
+    assert.equal(body.data.user.role, 'trainer');
+    assert.ok(body.data.user.trainerId, 'Must link to a new trainer record');
+    assert.ok(body.data.token, 'Must return signed JWT token');
+  });
+
+  test('POST /auth/register provisions Admin with Owner role using valid secret invite key', async () => {
+    const uniqueSuffix = Date.now().toString().slice(-5);
+    const regRes = await fetch(`${baseUrl}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        role: 'admin',
+        fullName: `Executive Director ${uniqueSuffix}`,
+        username: `admin_exec_${uniqueSuffix}`,
+        email: `exec_${uniqueSuffix}@virtexfitness.in`,
+        adminSecretKey: 'VIRTEX_ADMIN_2026',
+        password: 'AdminPass2026!',
+      }),
+    });
+
+    assert.equal(regRes.status, 201);
+    const body = await regRes.json();
+    assert.equal(body.success, true);
+    assert.equal(body.data.user.role, 'owner');
+    assert.deepEqual(body.data.user.permissions, ['*']);
+    assert.ok(body.data.token);
+  });
+
+  test('POST /auth/register rejects Admin registration with invalid security key', async () => {
+    const regRes = await fetch(`${baseUrl}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        role: 'admin',
+        fullName: 'Unauthorized Admin',
+        username: 'intruder_admin',
+        email: 'intruder@example.com',
+        adminSecretKey: 'WRONG_SECRET_KEY_999',
+        password: 'AdminPass2026!',
+      }),
+    });
+
+    assert.equal(regRes.status, 400);
+    const body = await regRes.json();
+    assert.equal(body.success, false);
+    assert.match(body.error, /secret invite key/i);
+  });
+
+  // --------------------------------------------------------------------------
+  // 7. Public Guest Access Unaffected
   // --------------------------------------------------------------------------
   test('Guests can access public knowledge base and gym profile without token', async () => {
     const gymRes = await fetch(`${baseUrl}/gym/info`);

@@ -26,14 +26,14 @@ describe('Gemini AI Service Unit & Mock-Based Tests', () => {
   // 1. Grounding Context & PII Stripping
   test('buildGroundingContext retrieves authoritative data from PostgreSQL without leaking trainer PII', async () => {
     const context = await buildGroundingContext('en-IN');
-    assert.ok(context.includes('PulseCore Fitness'), 'Contains gym name');
+    assert.ok(context.includes('Virtex Fitness'), 'Contains gym name');
     assert.ok(context.includes('Operating Hours'), 'Contains operating hours');
     assert.ok(context.includes('₹2,499') || context.includes('Silver Monthly'), 'Contains membership plan prices');
     assert.ok(context.includes('Arjun Reddy'), 'Contains trainer names');
     
     // Privacy Verification: Personal trainer phone numbers and emails must NOT be in grounding context!
     assert.ok(!context.includes('9876500001'), 'Must not leak trainer phone');
-    assert.ok(!context.includes('arjun@pulsecorefitness.in'), 'Must not leak trainer email');
+    assert.ok(!context.includes('arjun@virtexfitness.in'), 'Must not leak trainer email');
   });
 
   test('sanitizeMemberContext strips sensitive PII (passwords, phone numbers, payment details)', () => {

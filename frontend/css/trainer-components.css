@@ -1,0 +1,91 @@
+/* =====================================================================
+   Virtex Trainer Portal — shared components
+   ===================================================================== */
+
+/* ---------- Grids & stacks ---------- */
+.tp-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.tp-grid-2 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); }
+.tp-stack { display: flex; flex-direction: column; gap: var(--tp-gap); }
+
+/* ---------- Card headings ---------- */
+.tp-card-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.tp-card-title { margin: 0 0 0.8rem; color: var(--tp-text); font-size: 1rem; font-weight: 700; }
+.tp-section-title { color: var(--tp-text); margin: 1.2rem 0 0.5rem; font-size: 0.92rem; }
+
+/* ---------- Stat tiles ---------- */
+.tp-stat { background: var(--tp-surface); border: 1px solid var(--tp-line); border-radius: var(--tp-radius); padding: 1rem 1.1rem; }
+.tp-stat-label { font-size: 0.72rem; color: var(--tp-text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
+.tp-stat-value { font-size: 1.6rem; font-weight: 800; color: var(--tp-text); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+.tp-stat-sub { font-size: 0.75rem; color: var(--tp-text-dim); margin-top: 2px; }
+
+/* ---------- Toolbar ---------- */
+.tp-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.tp-toolbar .input-search { min-width: 220px; }
+.tp-toolbar .spacer { flex: 1; }
+.tp-search-sm { min-width: 180px !important; }
+.tp-client-select { min-width: 300px; }
+
+/* ---------- Lists / rows ---------- */
+.tp-list { display: flex; flex-direction: column; gap: 8px; }
+.tp-row {
+  display: flex; gap: 12px; align-items: center; padding: 10px 12px;
+  border: 1px solid var(--tp-line); border-radius: 10px; background: rgba(255, 255, 255, 0.015);
+}
+.tp-row-link { text-decoration: none; color: inherit; transition: border-color 0.15s ease, background 0.15s ease; }
+.tp-row-link:hover { border-color: var(--tp-accent-border); background: var(--tp-accent-soft); }
+.tp-row.tp-read { opacity: 0.65; }
+.tp-row-main { flex: 1; min-width: 0; }
+.tp-row-title { color: var(--tp-text); font-weight: 700; font-size: 0.9rem; }
+.tp-row-sub { color: var(--tp-text-muted); font-size: 0.78rem; margin-top: 2px; }
+
+/* ---------- Tables (on top of .admin-table) ---------- */
+.tp-strong { font-weight: 700; color: var(--tp-text); }
+.tp-nowrap { white-space: nowrap; }
+
+/* ---------- Pager ---------- */
+.tp-pager { display: flex; gap: 8px; align-items: center; justify-content: flex-end; font-size: 0.8rem; color: var(--tp-text-muted); margin-top: 0.8rem; }
+.tp-pager:empty { display: none; }
+
+/* ---------- Notices / empty states ---------- */
+.tp-notice {
+  display: flex; gap: 12px; align-items: flex-start; padding: 1rem 1.1rem; border-radius: 10px;
+  border: 1px dashed rgba(251, 191, 36, 0.4); background: rgba(251, 191, 36, 0.06); color: #fde68a; font-size: 0.88rem;
+}
+.tp-notice strong { color: var(--tp-text); }
+.tp-notice-text { margin-top: 3px; }
+.tp-error { border-color: rgba(248, 113, 113, 0.45); background: rgba(248, 113, 113, 0.06); color: #fecaca; }
+.tp-empty { padding: 2rem 1rem; text-align: center; }
+.tp-empty-title { font-weight: 700; color: var(--tp-text); margin-bottom: 4px; }
+
+/* ---------- Tabs ---------- */
+.tp-tabs { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--tp-line); padding-bottom: 2px; }
+.tp-tab {
+  background: transparent; border: none; color: var(--tp-text-muted); padding: 8px 14px; border-radius: 8px 8px 0 0;
+  cursor: pointer; font-weight: 600; font-size: 0.85rem; border-bottom: 2px solid transparent;
+}
+.tp-tab.active { color: var(--tp-accent); border-bottom-color: var(--tp-accent); background: var(--tp-accent-soft); }
+
+/* ---------- Key/value lists ---------- */
+.tp-kv { display: grid; grid-template-columns: 160px 1fr; gap: 6px 12px; font-size: 0.85rem; margin: 0; }
+.tp-kv dt { color: var(--tp-text-muted); }
+.tp-kv dd { margin: 0; color: var(--tp-text); min-width: 0; overflow-wrap: anywhere; }
+
+/* ---------- Text utilities ---------- */
+.tp-muted { color: var(--tp-text-dim); font-size: 0.8rem; }
+.tp-note { font-style: italic; }
+.tp-pre { white-space: pre-wrap; }
+.tp-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; border: 1px solid var(--tp-line); color: #cbd5e1; }
+.tp-mt-sm { margin-top: 0.6rem; }
+.tp-mt { margin-top: 0.8rem; }
+.tp-mt-lg { margin-top: var(--tp-gap); }
+.tp-mb { margin-bottom: 0.8rem; }
+
+/* ---------- Modal (on top of .modal-backdrop / .modal-card) ---------- */
+.tp-modal { max-width: 560px; width: calc(100% - 32px); max-height: 90vh; overflow: auto; box-sizing: border-box; }
+.tp-modal-wide { max-width: 820px; }
+.tp-modal-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 1rem; }
+.tp-modal-title { margin: 0; color: var(--tp-text); font-size: 1.05rem; }
+.tp-dialog-text { margin: 0; color: var(--tp-text-body); font-size: 0.9rem; line-height: 1.5; }
+
+/* ---------- Toast ---------- */
+.tp-toast { position: fixed; right: 20px; bottom: 20px; z-index: 200; max-width: 380px; }

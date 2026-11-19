@@ -1,6 +1,6 @@
-# 🛡️ Production-Readiness Review: PulseCore AI Gym Receptionist Robot
+# 🛡️ Production-Readiness Review: Virtex AI Gym Receptionist Robot
 
-**System Name:** PulseCore Fitness AI Gym Receptionist Robot  
+**System Name:** Virtex Fitness AI Gym Receptionist Robot  
 **Environment:** Node.js v22 (Express), PostgreSQL 18, Arduino C++ (ESP32 DevKit V1), Vanilla ES6 Modules  
 **Assessment Date:** November 2026  
 **Auditor Role:** Senior Full-Stack Security & Embedded Systems Engineer  

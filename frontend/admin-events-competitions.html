@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Events and Fitness Competitions</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/modules/admin-workouts.css">
+  <link rel="stylesheet" href="css/modules/admin-competitions.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation (Auto-rendered with 16 categories by adminSidebarNav.js) -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676"
+            stroke-width="1.6" />
+          <path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676" />
+          <path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee" />
+          <path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <!-- Rendered dynamically by adminSidebarNav.js -->
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Application Canvas -->
+    <div class="admin-main-wrap">
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-brand">
+            <span class="topbar-title">Events and Competitions</span>
+            <span class="badge badge-green font-mono text-xs">Athletic Contests</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group Mounted by topbarRoutineNav.js -->
+        </div>
+      </header>
+
+      <main class="admin-body">
+        <div class="admin-content-wrap" style="padding: 1.5rem; max-width: 1300px; margin: 0 auto;">
+          <!-- Breadcrumb & Header -->
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 4px;">
+                <a href="admin.html" style="color: var(--text-dim); text-decoration: none;">Virtex Admin</a> /
+                <span style="color: var(--text-gray);">Events & Competitions</span> /
+                <span style="color: var(--green);">Events and Competitions</span>
+              </div>
+              <h1
+                style="font-size: 1.6rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px;">
+                <span>🏆</span> Events &amp; Competitions
+              </h1>
+              <p style="font-size: 0.9rem; color: var(--text-gray); margin-top: 4px;">
+                Create competitions, register members, enter scores and give certificates — all in one place.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-green" id="btn-open-comp-modal">+ New competition</button>
+              <button class="btn btn-outline" id="btn-open-register-modal">👥 Register member</button>
+              <button class="btn btn-outline" id="btn-open-cert-modal">🎖️ Give certificate</button>
+            </div>
+          </div>
+
+          <!-- Quick stats: click to jump -->
+          <div class="ev-stats" role="group" aria-label="Quick stats">
+            <button type="button" class="ev-stat" data-ev-go="live"><span class="ev-stat-icon">⚡</span><span><b id="kpi-active-comps">0</b><small>Live now</small></span></button>
+            <button type="button" class="ev-stat" data-ev-go="all"><span class="ev-stat-icon">🏆</span><span><b id="kpi-total-comps">0</b><small>Competitions</small></span></button>
+            <button type="button" class="ev-stat" data-ev-go="participants"><span class="ev-stat-icon">👥</span><span><b id="kpi-total-participants">0</b><small>Registered</small></span></button>
+            <button type="button" class="ev-stat" data-ev-go="certificates"><span class="ev-stat-icon">🎖️</span><span><b id="kpi-total-certs">0</b><small>Certificates</small></span></button>
+          </div>
+
+          <!-- Navigation Tabs -->
+          <div class="comp-nav-tabs">
+            <button type="button" class="comp-tab-btn active" data-tab="competitions">
+              <span>🏆 Competitions</span>
+              <span class="comp-tab-badge" id="badge-comp-count">0</span>
+            </button>
+            <button type="button" class="comp-tab-btn" data-tab="participants">
+              <span>👥 Participants</span>
+              <span class="comp-tab-badge" id="badge-participants-count">0</span>
+            </button>
+            <button type="button" class="comp-tab-btn" data-tab="leaderboard">
+              <span>📊 Leaderboard</span>
+            </button>
+            <button type="button" class="comp-tab-btn" data-tab="certificates">
+              <span>🎖️ Certificates</span>
+              <span class="comp-tab-badge" id="badge-certs-count">0</span>
+            </button>
+            <button type="button" class="comp-tab-btn" data-tab="history">
+              <span>📜 Past events</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: Competitions Grid -->
+          <div id="tab-competitions" class="comp-tab-content">
+            <div class="ev-toolbar">
+              <div class="ev-chips" role="group" aria-label="Status" id="ev-status-chips">
+                <button type="button" class="ev-chip on" data-status="All" aria-pressed="true">All</button>
+                <button type="button" class="ev-chip" data-status="upcoming" aria-pressed="false">🗓️ Upcoming</button>
+                <button type="button" class="ev-chip" data-status="in_progress" aria-pressed="false">⚡ Live</button>
+                <button type="button" class="ev-chip" data-status="completed" aria-pressed="false">✅ Completed</button>
+                <button type="button" class="ev-chip" data-status="cancelled" aria-pressed="false">⛔ Cancelled</button>
+              </div>
+              <select id="filter-comp-status" hidden aria-hidden="true" tabindex="-1">
+                <option value="All">All</option><option value="upcoming">Upcoming</option><option value="in_progress">In progress</option>
+                <option value="completed">Completed</option><option value="cancelled">Cancelled</option>
+              </select>
+              <div class="ev-tools">
+                <input type="search" id="comp-search-input" class="workout-form-input ev-search" placeholder="🔍 Search competitions…" aria-label="Search competitions">
+                <select id="filter-comp-type" class="workout-form-select ev-select" aria-label="Type">
+                  <option value="All">All types</option>
+                </select>
+                <select id="ev-sort" class="workout-form-select ev-select" aria-label="Sort">
+                  <option value="start_desc">Newest first</option>
+                  <option value="start_asc">Soonest first</option>
+                  <option value="name">Name A–Z</option>
+                  <option value="participants">Most registered</option>
+                </select>
+                <div class="ev-view" role="group" aria-label="View">
+                  <button type="button" data-view="grid" aria-pressed="true" title="Cards">▦</button>
+                  <button type="button" data-view="list" aria-pressed="false" title="List">☰</button>
+                </div>
+              </div>
+            </div>
+            <div id="competitions-grid-container" class="comp-grid">
+              <!-- Rendered dynamically by competitionManagement.js -->
+            </div>
+          </div>
+
+          <!-- TAB 2: Participant Registrations -->
+          <div id="tab-participants" class="comp-tab-content" style="display: none;">
+            <div id="register"></div>
+            <div class="admin-card"
+              style="background: #11141e; border: 1px solid #1e2433; border-radius: 10px; padding: 18px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="color: #fff; font-size: 1.1rem; margin: 0;">Participants &amp; scores</h3>
+                <button class="btn btn-outline btn-xs" onclick="window.openRegisterModal(null)">+ Register member</button>
+              </div>
+
+              <div style="overflow-x: auto;">
+                <table class="exercise-table">
+                  <thead>
+                    <tr>
+                      <th>Competitor / Lifter</th>
+                      <th>Event & Division</th>
+                      <th>Enrollment Status</th>
+                      <th>Official Score / Result</th>
+                      <th>Verifying Judge / Coach</th>
+                      <th>Judge Notes</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="participants-table-body">
+                    <!-- Rendered dynamically by competitionManagement.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: Live Challenge Leaderboard -->
+          <div id="tab-leaderboard" class="comp-tab-content" style="display: none;">
+            <div id="brackets"></div>
+            <div class="admin-card"
+              style="background: #11141e; border: 1px solid #1e2433; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                <div>
+                  <h3 style="color: #fff; font-size: 1.15rem; margin: 0 0 4px 0;">Leaderboard</h3>
+                  <p style="font-size: 0.82rem; color: #94a3b8; margin: 0;">Ranks are worked out from the scores: 🥇 🥈 🥉 for the top three.</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="leaderboard-comp-select"
+                    style="font-size: 0.82rem; color: #cbd5e1; font-weight: 600;">Competition:</label>
+                  <select id="leaderboard-comp-select" class="workout-form-select"
+                    style="width: 280px; padding: 7px 12px; font-size: 0.85rem;">
+                    <!-- Filled dynamically -->
+                  </select>
+                </div>
+              </div>
+
+              <div style="overflow-x: auto;">
+                <table class="exercise-table leaderboard-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 70px; text-align: center;">Rank</th>
+                      <th>Athlete / Lifter</th>
+                      <th>Division</th>
+                      <th>Verified Score</th>
+                      <th>Official Comments</th>
+                    </tr>
+                  </thead>
+                  <tbody id="leaderboard-table-body">
+                    <!-- Rendered dynamically by competitionManagement.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: Award Certificates -->
+          <div id="tab-certificates" class="comp-tab-content" style="display: none;">
+            <div id="awards"></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+              <div>
+                <h3 style="color: #fff; font-size: 1.15rem; margin: 0 0 4px 0;">Certificates</h3>
+                <p style="font-size: 0.82rem; color: #94a3b8; margin: 0;">Each certificate has a unique code and shows your gym logo next to the VIRTEX logo.</p>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <span class="cls-tab-status" id="cls-tab-status"></span>
+                <button class="btn btn-outline btn-sm" type="button" data-cls-upload>🖼️ Gym logo</button>
+                <button class="btn btn-green btn-sm" id="btn-open-cert-modal-tab"
+                  onclick="document.getElementById('modal-issue-certificate').classList.add('active')">+ Issue New
+                  Certificate</button>
+              </div>
+            </div>
+
+            <div id="certificates-container"
+              style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;">
+              <!-- Rendered dynamically by competitionManagement.js -->
+            </div>
+          </div>
+
+          <!-- TAB 5: Previous Event History -->
+          <div id="tab-history" class="comp-tab-content" style="display: none;">
+            <div class="admin-card"
+              style="background: #11141e; border: 1px solid #1e2433; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+              <h3 style="color: #fff; font-size: 1.15rem; margin: 0 0 4px 0;">Archived Competitions & Winner Honor Rolls
+              </h3>
+              <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 16px;">Historical record of past athletic
+                meets, registered athletes, and verified champions.</p>
+
+              <div id="previous-events-container">
+                <!-- Rendered dynamically by competitionManagement.js -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: Delete competition -->
+  <div class="workout-modal-overlay" id="modal-delete-competition" role="dialog" aria-modal="true" aria-labelledby="del-comp-title">
+    <div class="workout-modal" style="max-width: 470px; border-color: rgba(239, 68, 68, 0.45);">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title" id="del-comp-title">🗑️ Delete competition</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-delete-competition">
+        <input type="hidden" id="del-comp-id">
+        <div class="workout-modal-body">
+          <p style="margin: 0 0 10px; color: #e2e8f0;">Delete <strong id="del-comp-name">-</strong>?</p>
+          <ul style="margin: 0 0 12px; padding-left: 1.1rem; color: #94a3b8; font-size: 0.85rem; line-height: 1.6;">
+            <li>Its <strong id="del-comp-participants">0 registrations</strong> and scores are deleted too.</li>
+            <li>Its <strong id="del-comp-certs">0 certificates</strong> are deleted too.</li>
+            <li>A copy of everything is saved in the admin audit log.</li>
+          </ul>
+          <label class="workout-form-label" for="del-comp-confirm">Type DELETE to confirm</label>
+          <input type="text" id="del-comp-confirm" class="workout-form-input" autocomplete="off" spellcheck="false" placeholder="DELETE">
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn" id="del-comp-btn" style="background: #ef4444; color: #fff; border: 1px solid #ef4444;" disabled>🗑️ Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Create New Competition -->
+  <div class="workout-modal-overlay" id="modal-new-competition">
+    <div class="workout-modal" style="max-width: 640px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title" id="comp-modal-title">🏆 Create Gym Competition / Challenge</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-new-competition">
+        <div class="workout-modal-body">
+          <!-- Icon shown on the competition card -->
+          <div class="ci-box" role="group" aria-labelledby="ci-label">
+            <div class="ci-head">
+              <span class="workout-form-label" id="ci-label" style="margin: 0;">Competition icon</span>
+              <span class="ci-preview" id="ci-preview" aria-live="polite">🏆</span>
+            </div>
+            <div class="ci-grid" id="ci-grid">
+                <button type="button" class="ci-opt ci-auto" data-icon="" aria-label="Automatic icon from the type" aria-pressed="true">Auto</button>
+                <button type="button" class="ci-opt" data-icon="🏆" aria-label="Icon 🏆" aria-pressed="false">🏆</button>
+                <button type="button" class="ci-opt" data-icon="🥇" aria-label="Icon 🥇" aria-pressed="false">🥇</button>
+                <button type="button" class="ci-opt" data-icon="🏋️" aria-label="Icon 🏋️" aria-pressed="false">🏋️</button>
+                <button type="button" class="ci-opt" data-icon="💪" aria-label="Icon 💪" aria-pressed="false">💪</button>
+                <button type="button" class="ci-opt" data-icon="🔥" aria-label="Icon 🔥" aria-pressed="false">🔥</button>
+                <button type="button" class="ci-opt" data-icon="🏃" aria-label="Icon 🏃" aria-pressed="false">🏃</button>
+                <button type="button" class="ci-opt" data-icon="⚽" aria-label="Icon ⚽" aria-pressed="false">⚽</button>
+                <button type="button" class="ci-opt" data-icon="🏏" aria-label="Icon 🏏" aria-pressed="false">🏏</button>
+                <button type="button" class="ci-opt" data-icon="🏸" aria-label="Icon 🏸" aria-pressed="false">🏸</button>
+                <button type="button" class="ci-opt" data-icon="🏀" aria-label="Icon 🏀" aria-pressed="false">🏀</button>
+                <button type="button" class="ci-opt" data-icon="🏐" aria-label="Icon 🏐" aria-pressed="false">🏐</button>
+                <button type="button" class="ci-opt" data-icon="🎾" aria-label="Icon 🎾" aria-pressed="false">🎾</button>
+                <button type="button" class="ci-opt" data-icon="🥊" aria-label="Icon 🥊" aria-pressed="false">🥊</button>
+                <button type="button" class="ci-opt" data-icon="🧘" aria-label="Icon 🧘" aria-pressed="false">🧘</button>
+                <button type="button" class="ci-opt" data-icon="🚴" aria-label="Icon 🚴" aria-pressed="false">🚴</button>
+                <button type="button" class="ci-opt" data-icon="🏊" aria-label="Icon 🏊" aria-pressed="false">🏊</button>
+                <button type="button" class="ci-opt" data-icon="🤸" aria-label="Icon 🤸" aria-pressed="false">🤸</button>
+                <button type="button" class="ci-opt" data-icon="🧗" aria-label="Icon 🧗" aria-pressed="false">🧗</button>
+                <button type="button" class="ci-opt" data-icon="⏱️" aria-label="Icon ⏱️" aria-pressed="false">⏱️</button>
+                <button type="button" class="ci-opt" data-icon="🎯" aria-label="Icon 🎯" aria-pressed="false">🎯</button>
+                <button type="button" class="ci-opt" data-icon="🦵" aria-label="Icon 🦵" aria-pressed="false">🦵</button>
+                <button type="button" class="ci-opt" data-icon="🥏" aria-label="Icon 🥏" aria-pressed="false">🥏</button>
+                <button type="button" class="ci-opt" data-icon="⭐" aria-label="Icon ⭐" aria-pressed="false">⭐</button>
+                <button type="button" class="ci-opt" data-icon="🎉" aria-label="Icon 🎉" aria-pressed="false">🎉</button>
+            </div>
+            <div class="ci-custom">
+              <label for="ci-custom-input">Or paste any emoji</label>
+              <input type="text" id="ci-custom-input" class="workout-form-input" maxlength="16" placeholder="e.g. 🛶" autocomplete="off">
+            </div>
+            <input type="hidden" id="new-comp-icon" value="">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Competition Title *</label>
+              <input type="text" id="new-comp-title" class="workout-form-input" required
+                placeholder="e.g. Virtex Spring Deadlift Open">
+            </div>
+            <div>
+              <label class="workout-form-label">Challenge Type *</label>
+              <select id="new-comp-type" class="workout-form-select" required>
+                <option value="Outdoor Games">⚽ Outdoor Games &amp; Sports</option>
+                <option value="Weightlifting">Weightlifting</option>
+                <option value="Push-Up Challenge">Push-Up Challenge</option>
+                <option value="Pull-Up Challenge">Pull-Up Challenge</option>
+                <option value="Squat Challenge">Squat Challenge</option>
+                <option value="Monthly Challenge">Monthly Challenge</option>
+                <option value="Transformation">Transformation</option>
+                <option value="General Event">General Event</option>
+                <option value="__custom">✏️ Other — type your own…</option>
+              </select>
+              <input type="text" id="new-comp-type-custom" class="workout-form-input comp-custom-input" maxlength="50"
+                placeholder="e.g. Plank Hold, Marathon, Yoga Challenge" aria-label="Your own competition type" hidden>
+            </div>
+          </div>
+
+          <!-- Outdoor Games & Sports Customization Section -->
+          <div id="comp-outdoor-custom-fields" class="outdoor-custom-card"
+            style="display: none; margin-bottom: 14px; background: rgba(0, 230, 118, 0.05); border: 1px solid rgba(0, 230, 118, 0.25); border-radius: 8px; padding: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.2rem;">⚽</span>
+                <div>
+                  <strong style="color: #00e676; font-size: 0.95rem;">Outdoor Games &amp; Sports Customization</strong>
+                  <div style="font-size: 0.78rem; color: #94a3b8;">Customize game type, ground venue, team format, gear,
+                    and field rules.</div>
+                </div>
+              </div>
+              <span class="badge badge-green font-mono text-xs">OUTDOOR SPORT</span>
+            </div>
+
+            <!-- Sport selection & Custom sport name & Venue -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+              <div>
+                <label class="workout-form-label" style="color: #cbd5e1;">Select Sport / Game *</label>
+                <select id="outdoor-sport-select" class="workout-form-select">
+                  <option value="Football / Soccer">⚽ Football / Soccer</option>
+                  <option value="Basketball">🏀 Basketball</option>
+                  <option value="Volleyball">🏐 Volleyball</option>
+                  <option value="Cricket">🏏 Cricket</option>
+                  <option value="Badminton">🏸 Badminton</option>
+                  <option value="Tug of War">🪢 Tug of War</option>
+                  <option value="Obstacle Course Race">🏃‍♂️ Obstacle Course Race</option>
+                  <option value="Ultimate Frisbee">🥏 Ultimate Frisbee</option>
+                  <option value="Dodgeball">🤾 Dodgeball</option>
+                  <option value="Custom Sport">🎯 Custom Outdoor Sport / Game...</option>
+                </select>
+              </div>
+              <div id="outdoor-venue-wrap">
+                <label class="workout-form-label" style="color: #cbd5e1;">Outdoor Ground / Venue *</label>
+                <input type="text" id="outdoor-venue" class="workout-form-input"
+                  placeholder="e.g. Main Turf A / Sand Pit / Park Ground">
+              </div>
+            </div>
+
+            <!-- Custom sport name if chosen -->
+            <div id="outdoor-custom-sport-wrap" style="display: none; margin-bottom: 10px;">
+              <label class="workout-form-label" style="color: #cbd5e1;">Custom Sport / Game Name *</label>
+              <input type="text" id="outdoor-custom-sport-name" class="workout-form-input"
+                placeholder="e.g. Flag Football / Sprint Relay / Pickleball">
+            </div>
+
+            <!-- Format & Capacity -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+              <div>
+                <label class="workout-form-label" style="color: #cbd5e1;">Match &amp; Team Format</label>
+                <select id="outdoor-team-format" class="workout-form-select">
+                  <option value="5v5 Squad">3v3 to 5v5 Squad</option>
+                  <option value="1v1 Individual">1v1 Individual</option>
+                  <option value="2v2 Doubles">2v2 Doubles</option>
+                  <option value="7v7 to 11v11 Full Team">7v7 to 11v11 Full Team</option>
+                  <option value="Open Roster">Open Roster / Free-for-all</option>
+                </select>
+              </div>
+              <div>
+                <label class="workout-form-label" style="color: #cbd5e1;">Max Teams Allowed</label>
+                <input type="number" id="outdoor-max-teams" class="workout-form-input" min="2" max="64" value="8"
+                  placeholder="e.g. 8">
+              </div>
+              <div>
+                <label class="workout-form-label" style="color: #cbd5e1;">Players per Team</label>
+                <input type="number" id="outdoor-players-per-team" class="workout-form-input" min="1" max="30" value="5"
+                  placeholder="e.g. 5">
+              </div>
+            </div>
+
+            <!-- Equipment & Weather plan -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label class="workout-form-label" style="color: #cbd5e1;">Equipment &amp; Gear Checklist</label>
+                <input type="text" id="outdoor-equipment" class="workout-form-input"
+                  placeholder="e.g. Cleats required, gym supplies match balls & bibs">
+              </div>
+              <div>
+                <label class="workout-form-label" style="color: #cbd5e1;">Weather Contingency Plan</label>
+                <input type="text" id="outdoor-weather-plan" class="workout-form-input"
+                  placeholder="e.g. Indoor hall backup in case of heavy rain">
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Description & Scope *</label>
+            <textarea id="new-comp-desc" class="workout-form-textarea" rows="2" required
+              placeholder="Outline event rules, judging criteria, and schedule..."></textarea>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Metric Type *</label>
+              <select id="new-comp-metric" class="workout-form-select" required>
+                <option value="Points">Points / Score</option>
+                <option value="Goals / Points">Goals / Points</option>
+                <option value="Match Score / Sets">Match Score / Sets</option>
+                <option value="Max Weight (kg)">Max Weight (kg)</option>
+                <option value="Total Reps">Total Reps</option>
+                <option value="Time / Speed (sec)">Time / Speed (sec)</option>
+                <option value="Recomposition %">Recomposition %</option>
+                <option value="__custom">✏️ Other — type your own…</option>
+              </select>
+              <input type="text" id="new-comp-metric-custom" class="workout-form-input comp-custom-input" maxlength="30"
+                placeholder="e.g. Distance (km), Hold time (sec)" aria-label="Your own metric" hidden>
+            </div>
+            <div>
+              <label class="workout-form-label" id="new-comp-coach-label">Lead Coach / Referee / Judge</label>
+              <select id="new-comp-trainer-select" class="workout-form-select">
+                <option value="">-- Choose Coach / Referee --</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Start Date *</label>
+              <input type="date" id="new-comp-start-date" class="workout-form-input" required>
+            </div>
+            <div>
+              <label class="workout-form-label">End Date *</label>
+              <input type="date" id="new-comp-end-date" class="workout-form-input" required>
+            </div>
+            <div>
+              <label class="workout-form-label">Reg. Deadline</label>
+              <input type="date" id="new-comp-deadline" class="workout-form-input">
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;" id="comp-status-wrap">
+            <label class="workout-form-label" for="new-comp-status">Status</label>
+            <select id="new-comp-status" class="workout-form-select">
+              <option value="upcoming">🗓️ Upcoming</option>
+              <option value="in_progress">⚡ In progress</option>
+              <option value="completed">✅ Completed</option>
+              <option value="cancelled">⛔ Cancelled</option>
+            </select>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Prize Pool / Awards</label>
+              <input type="text" id="new-comp-prize" class="workout-form-input"
+                placeholder="e.g. $500 Gym Voucher + Gold Trophy">
+            </div>
+            <div>
+              <label class="workout-form-label">Banner Image URL</label>
+              <input type="url" id="new-comp-banner" class="workout-form-input"
+                placeholder="https://images.unsplash.com/...">
+            </div>
+          </div>
+
+          <div style="margin-bottom: 10px;">
+            <label class="workout-form-label">Official Rules & Requirements</label>
+            <textarea id="new-comp-rules" class="workout-form-textarea" rows="2"
+              placeholder="Strict form lockouts, judge verification, weight class weigh-in rules..."></textarea>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green" id="comp-submit-btn">Launch Competition 🚀</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Register Participant -->
+  <div class="workout-modal-overlay" id="modal-register-participant">
+    <div class="workout-modal" style="max-width: 500px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">👥 Register Member for Challenge</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-register-participant">
+        <div class="workout-modal-body">
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Competition *</label>
+            <select id="reg-comp-select" class="workout-form-select" required>
+              <option value="">-- Choose Competition --</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Gym Member *</label>
+            <select id="reg-comp-member-select" class="workout-form-select" required>
+              <option value="">-- Choose Member --</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Division / Bracket</label>
+              <select id="reg-comp-division" class="workout-form-select">
+                <option value="Men's Open">Men's Open</option>
+                <option value="Women's Open">Women's Open</option>
+                <option value="Masters (40+)">Masters (40+)</option>
+                <option value="Novice Division">Novice Division</option>
+                <option value="Lightweight (<75kg)">Lightweight (&lt;75kg)</option>
+                <option value="Middleweight (75-90kg)">Middleweight (75-90kg)</option>
+                <option value="Heavyweight (90kg+)">Heavyweight (90kg+)</option>
+              </select>
+            </div>
+            <div>
+              <label class="workout-form-label">Scoring Unit</label>
+              <select id="reg-comp-unit" class="workout-form-select">
+                <option value="kg">Kilograms (kg)</option>
+                <option value="reps">Repetitions (reps)</option>
+                <option value="seconds">Seconds (s)</option>
+                <option value="points">Points (pts)</option>
+                <option value="goals">Goals</option>
+                <option value="%">Percent (%)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;" id="reg-comp-team-wrap">
+            <label class="workout-form-label">Team / Squad Name <span
+                style="font-size: 0.75rem; color: #94a3b8;">(Optional for Outdoor Team Games)</span></label>
+            <input type="text" id="reg-comp-team-name" class="workout-form-input"
+              placeholder="e.g. Red Tigers / Team Alpha">
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Enroll Competitor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Submit Verified Score -->
+  <div class="workout-modal-overlay" id="modal-submit-score">
+    <div class="workout-modal" style="max-width: 480px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">⏱️ Record Official Attempt</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-submit-score">
+        <div class="workout-modal-body">
+          <div
+            style="background: #0b0d14; padding: 12px; border-radius: 6px; border: 1px solid #1e2433; margin-bottom: 14px;">
+            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Competitor</div>
+            <div id="score-member-name" style="color: #ffd600; font-weight: 700; font-size: 1.1rem;">--</div>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label class="workout-form-label">Verified Score (<span id="score-unit-label">reps</span>) *</label>
+            <input type="number" step="0.1" id="score-input-value" class="workout-form-input" required
+              placeholder="e.g. 185.0">
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Trainer / Judge Verification Notes</label>
+            <textarea id="score-input-notes" class="workout-form-textarea" rows="2"
+              placeholder="Strict depth achieved, approved by coach..."></textarea>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Confirm Score & Re-rank 📊</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hidden file picker for the gym logo (used by every "Upload logo" button) -->
+  <input type="file" id="cert-logo-file" accept="image/png,image/jpeg,image/webp" hidden>
+
+  <!-- MODAL: Issue Award Certificate -->
+  <div class="workout-modal-overlay" id="modal-issue-certificate">
+    <div class="workout-modal" style="max-width: 500px;">
+      <div class="workout-modal-header">
+        <h3 class="workout-modal-title">🎖️ Give a certificate</h3>
+        <button type="button" class="workout-modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-issue-certificate">
+        <div class="workout-modal-body">
+          <div class="cls-box" aria-labelledby="cls-title">
+            <div class="cls-title" id="cls-title">Logos on the certificate</div>
+            <div class="cls-row">
+              <div class="cls-slot" data-cls-gym>
+                <div class="cls-preview"><span class="cls-empty">No gym logo yet</span></div>
+                <div class="cls-meta"><b>Your gym logo</b><small>PNG, JPG or WebP · up to 2 MB</small>
+                  <div class="cls-actions">
+                    <button type="button" class="btn btn-outline btn-xs" data-cls-upload>⬆️ Upload logo</button>
+                    <button type="button" class="btn btn-outline btn-xs cls-remove" data-cls-remove hidden>Remove</button>
+                  </div>
+                </div>
+              </div>
+              <div class="cls-slot cls-fixed">
+                <div class="cls-preview"><img src="/assets/brand/virtex-mark.svg" alt="VIRTEX logo"></div>
+                <div class="cls-meta"><b>VIRTEX logo</b><small>Always shown</small></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Competition *</label>
+            <select id="cert-comp-select" class="workout-form-select" required>
+              <option value="">-- Choose Competition --</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label class="workout-form-label">Award Winner (Member) *</label>
+            <select id="cert-member-select" class="workout-form-select" required>
+              <option value="">-- Choose Member --</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label class="workout-form-label">Award Title *</label>
+              <input type="text" id="cert-award-title" class="workout-form-input" required
+                placeholder="e.g. 1st Place - Heavyweight Champion">
+            </div>
+            <div>
+              <label class="workout-form-label">Rank Position</label>
+              <select id="cert-rank" class="workout-form-select">
+                <option value="1">🥇 1st Place</option>
+                <option value="2">🥈 2nd Place</option>
+                <option value="3">🥉 3rd Place</option>
+                <option value="4">4th Place</option>
+                <option value="5">5th Place</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="workout-modal-footer">
+          <button type="button" class="btn btn-outline btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-green">Create certificate 🎖️</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Component Scripts -->
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script src="js/admin/competitionManagement.js"></script>
+</body>
+
+</html>

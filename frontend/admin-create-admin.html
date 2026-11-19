@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Virtex Fitness: owner creates a new Admin Console login.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Create Admin Account · Virtex Fitness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin-auth.css">
+</head>
+<body class="aa-body">
+  <div class="aa-split">
+
+    <!-- ============ Brand panel ============ -->
+    <aside class="aa-brand-pane" aria-label="Virtex Admin Console">
+      <div class="aa-brand-media" aria-hidden="true"></div>
+      <div class="aa-brand-shade" aria-hidden="true"></div>
+      <a class="aa-logo" href="/admin.html#tab-overview" title="Back to Admin Console">
+        <svg class="aa-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#0f131b" stroke="#818cf8" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#818cf8"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#818cf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="aa-wordmark">VIRTEX<small>OPERATIONS</small></span>
+      </a>
+      <div class="aa-brand-copy">
+        <span class="aa-eyebrow">Owner only</span>
+        <h2>Add someone to<br>your <span class="aa-grad">admin team.</span></h2>
+        <ul class="aa-points">
+          <li><span class="aa-dot" aria-hidden="true"></span>Manager: runs members, trainers, payments and classes</li>
+          <li><span class="aa-dot" aria-hidden="true"></span>Owner: everything, including creating admins</li>
+          <li><span class="aa-dot" aria-hidden="true"></span>They sign in with this email and password</li>
+        </ul>
+      </div>
+      <p class="aa-brand-foot">Only the gym owner can create admin accounts. Every account created is recorded in the security log.</p>
+    </aside>
+
+    <!-- ============ Form panel ============ -->
+    <main class="aa-form-pane">
+      <div class="aa-form-wrap aa-wide">
+        <a class="aa-logo aa-logo-mobile" href="/admin.html#tab-overview" title="Back to Admin Console">
+          <svg class="aa-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#0f131b" stroke="#818cf8" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#818cf8"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#818cf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="aa-wordmark">VIRTEX<small>OPERATIONS</small></span>
+        </a>
+
+        <header class="aa-head">
+          <span class="aa-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/></svg><span id="owner-badge">Owner</span></span>
+          <h1>Create admin account</h1>
+          <p>Fill in the new admin's details. They will sign in on the Admin sign-in page with this email and password.</p>
+        </header>
+
+        <div id="auth-alert" class="aa-alert" role="alert" aria-live="polite" hidden></div>
+
+        <!-- Sign-up requests sent from the admin sign-in page (shown only when there are some) -->
+        <section class="aa-requests" id="signup-requests" hidden aria-labelledby="req-title">
+          <h2 id="req-title">Sign-up requests <span class="aa-opt" id="req-count"></span></h2>
+          <p>These people signed up on the Admin sign-in page. They can't sign in until you approve them.</p>
+          <div id="req-list"></div>
+        </section>
+
+        <!-- All fields start empty on purpose (no example values, no browser autofill). -->
+        <form id="create-admin-form" class="aa-form" novalidate autocomplete="off">
+          <div class="aa-row">
+            <div class="aa-field"><label for="ca-name">Full name</label>
+              <div class="aa-input-wrap aa-no-ico"><input type="text" id="ca-name" maxlength="100" autocomplete="off" required></div></div>
+            <div class="aa-field"><label for="ca-role">Role</label>
+              <select id="ca-role" class="aa-select" required>
+                <option value="" selected disabled></option>
+                <option value="manager">Manager (Admin)</option>
+                <option value="owner">Owner</option>
+              </select></div>
+          </div>
+          <div class="aa-row">
+            <div class="aa-field"><label for="ca-email">Email (used to sign in)</label>
+              <div class="aa-input-wrap aa-no-ico"><input type="email" id="ca-email" maxlength="150" autocomplete="off" autocapitalize="off" spellcheck="false" required></div></div>
+            <div class="aa-field"><label for="ca-phone">Phone <span class="aa-opt">optional</span></label>
+              <div class="aa-input-wrap aa-no-ico"><input type="tel" id="ca-phone" maxlength="20" autocomplete="off"></div></div>
+          </div>
+          <div class="aa-row">
+            <div class="aa-field"><label for="ca-pwd">Password <span class="aa-opt">min 8 characters</span></label>
+              <div class="aa-input-wrap aa-no-ico aa-has-eye"><input type="password" id="ca-pwd" maxlength="128" autocomplete="new-password" required><button type="button" class="aa-eye" data-eye="ca-pwd" aria-label="Show password" aria-pressed="false">Show</button></div></div>
+            <div class="aa-field"><label for="ca-pwd2">Confirm password</label>
+              <div class="aa-input-wrap aa-no-ico aa-has-eye"><input type="password" id="ca-pwd2" maxlength="128" autocomplete="new-password" required><button type="button" class="aa-eye" data-eye="ca-pwd2" aria-label="Show password" aria-pressed="false">Show</button></div></div>
+          </div>
+
+          <button type="submit" id="btn-submit" class="aa-submit">
+            <span class="aa-spinner" id="btn-spinner" hidden aria-hidden="true"></span>
+            <span id="btn-label">Create admin account</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        <div class="aa-help">
+          <p><strong>After creating:</strong> give the new admin their email and password in person. They sign in at
+            <a href="/admin-auth.html">Admin sign in</a>. <a href="/admin.html#tab-overview">Back to Admin Console</a></p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const $ = (id) => document.getElementById(id);
+      const TOKEN_KEY = 'virtex_admin_jwt_token';
+      const PROFILE_KEY = 'virtex_admin_user_profile';
+      const alertBox = $('auth-alert');
+      const form = $('create-admin-form');
+      const submitBtn = $('btn-submit');
+      const spinner = $('btn-spinner');
+      const btnLabel = $('btn-label');
+
+      const showAlert = (msg, type = 'error') => { alertBox.hidden = false; alertBox.className = `aa-alert aa-alert-${type}`; alertBox.textContent = String(msg); alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); };
+      const clearAlert = () => { alertBox.hidden = true; alertBox.textContent = ''; };
+      const setBusy = (busy) => { submitBtn.disabled = busy; spinner.hidden = !busy; btnLabel.textContent = busy ? 'Creating…' : 'Create admin account'; };
+      const toLogin = () => window.location.replace(`/admin-auth.html?${new URLSearchParams({ next: '/admin-create-admin.html' })}`);
+
+      // ---- Owner-only page (the server also enforces this: POST /admin/users is owner-only)
+      const token = localStorage.getItem(TOKEN_KEY);
+      let profile = null; try { profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null'); } catch { /* ignore */ }
+      const role = String(profile?.role || '').toLowerCase();
+      if (!token) { toLogin(); return; }
+      if (role !== 'owner' && role !== 'superadmin') {
+        form.hidden = true;
+        showAlert('Only the gym owner can create admin accounts. Sign in with the owner account to continue.');
+        return;
+      }
+      if (profile?.fullName) $('owner-badge').textContent = `Owner · ${profile.fullName}`;
+
+      // Make sure every field starts empty (some browsers restore values on back/forward).
+      const clearForm = () => { form.reset(); ['ca-name', 'ca-email', 'ca-phone', 'ca-pwd', 'ca-pwd2'].forEach((id) => { $(id).value = ''; }); $('ca-role').value = ''; };
+      clearForm();
+      window.addEventListener('pageshow', (e) => { if (e.persisted) clearForm(); });
+
+      document.querySelectorAll('[data-eye]').forEach((btn) => btn.addEventListener('click', () => {
+        const input = $(btn.dataset.eye); const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.textContent = show ? 'Hide' : 'Show';
+        btn.setAttribute('aria-pressed', String(show));
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      }));
+
+      // ---- Pending sign-up requests: approve as Manager / Owner, or reject (account stays off; history kept)
+      const reqBox = $('signup-requests');
+      const reqList = $('req-list');
+      async function loadRequests() {
+        try {
+          const res = await fetch('/api/v1/admin/admin-signups', { headers: { Authorization: `Bearer ${token}` } });
+          const data = await res.json().catch(() => ({}));
+          const rows = res.ok && Array.isArray(data.data) ? data.data : [];
+          reqBox.hidden = rows.length === 0;
+          $('req-count').textContent = rows.length ? `(${rows.length})` : '';
+          reqList.replaceChildren(...rows.map((r) => {
+            const row = document.createElement('div'); row.className = 'aa-req';
+            const who = document.createElement('div'); who.className = 'aa-req-who';
+            const n = document.createElement('strong'); n.textContent = r.full_name || r.username;
+            const m = document.createElement('span'); m.textContent = [r.email, r.phone].filter(Boolean).join(' · ');
+            const d = document.createElement('span'); d.textContent = `Requested ${new Date(r.requested_at).toLocaleString()}`;
+            who.append(n, m, d);
+            const act = document.createElement('div'); act.className = 'aa-req-actions';
+            const mk = (label, cls, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = `aa-mini ${cls}`; b.textContent = label; b.addEventListener('click', () => fn(b)); return b; };
+            const decide = async (btn, path, body) => {
+              act.querySelectorAll('button').forEach((x) => { x.disabled = true; });
+              try {
+                const res2 = await fetch(`/api/v1/admin/admin-signups/${r.user_id}/${path}`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+                const d2 = await res2.json().catch(() => ({}));
+                if (!res2.ok || !d2.success) throw new Error(d2.error || 'Could not update the request.');
+                showAlert(d2.message, 'success');
+              } catch (err) { showAlert(err.message); }
+              loadRequests();
+            };
+            act.append(
+              mk('Approve as Manager', 'aa-mini-ok', (b) => decide(b, 'approve', { role: 'manager' })),
+              mk('Approve as Owner', '', (b) => decide(b, 'approve', { role: 'owner' })),
+              mk('Reject', 'aa-mini-no', (b) => decide(b, 'reject')),
+            );
+            row.append(who, act);
+            return row;
+          }));
+        } catch { reqBox.hidden = true; }
+      }
+      loadRequests();
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearAlert();
+        const v = (id) => $(id).value.trim();
+        const fullName = v('ca-name'); const email = v('ca-email').toLowerCase(); const phone = v('ca-phone'); const role = $('ca-role').value;
+        const password = $('ca-pwd').value; const confirm = $('ca-pwd2').value;
+        const missing = [];
+        if (!fullName) missing.push('full name');
+        if (!role) missing.push('role');
+        if (!email) missing.push('email');
+        if (!password) missing.push('password');
+        if (missing.length) { showAlert(`Please fill in: ${missing.join(', ')}.`); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { showAlert('Please enter a valid email address.'); $('ca-email').focus(); return; }
+        if (password.length < 8) { showAlert('Password must be at least 8 characters.'); $('ca-pwd').focus(); return; }
+        if (password !== confirm) { showAlert('Passwords do not match.'); $('ca-pwd2').focus(); return; }
+
+        setBusy(true);
+        try {
+          const res = await fetch('/api/v1/admin/users', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullName, email, phone: phone || undefined, role, password }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 401) { toLogin(); return; }
+          if (res.status === 403) throw new Error('Only the gym owner can create admin accounts.');
+          if (!res.ok || !data.success) throw new Error(data.error || 'Could not create the account. Please try again.');
+          clearForm();
+          showAlert(`${data.message || 'Admin account created.'} Sign-in email: ${data.data?.email || email}.`, 'success');
+        } catch (err) {
+          showAlert(err.message || 'Could not create the account. Please try again.');
+        } finally { setBusy(false); }
+      });
+    })();
+  </script>
+</body>
+</html>

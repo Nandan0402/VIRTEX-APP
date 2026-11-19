@@ -5,11 +5,9 @@
 
 import { api } from './services/api.js';
 import { SpeechService } from './services/speech.js';
-import { RobotStatusComponent } from './components/robotStatus.js';
 import { VoiceVisualizerComponent } from './components/voiceVisualizer.js';
 import { ChatInterfaceComponent } from './components/chatInterface.js';
 import { MemberCardComponent } from './components/memberCard.js';
-import { RobotAvatarComponent } from './components/robotAvatar.js';
 import { MembershipSectionComponent } from './components/membershipSection.js';
 import { TrainerSectionComponent } from './components/trainerSection.js';
 import { AnnouncementsSectionComponent } from './components/announcementsSection.js';
@@ -24,10 +22,10 @@ class GymReceptionistApp {
     this.gymProfile = null;
 
     // Components
-    this.robotAvatar = new RobotAvatarComponent('robot-avatar-container');
-    this.robotStatus = new RobotStatusComponent('robot-status-container', (gesture) =>
-      this.handleTriggerGesture(gesture)
-    );
+    // Robot avatar, robot status and robot gestures are removed from the kiosk. These stand-ins keep the
+    // existing calls (setState / render) harmless without drawing or polling anything.
+    this.robotAvatar = { setState() {} };
+    this.robotStatus = { render() {} };
     this.voiceVisualizer = new VoiceVisualizerComponent('voice-visualizer-container');
 
     this.memberCard = new MemberCardComponent('member-card-container', {
@@ -73,7 +71,7 @@ class GymReceptionistApp {
   }
 
   async init() {
-    console.log('[App] Bootstrapping PulseCore FitBot Receptionist Kiosk...');
+    console.log('[App] Bootstrapping Virtex FitBot Receptionist Kiosk...');
 
     // 1. Initial State
     this.voiceVisualizer.setState('idle', LOCALIZED_CONTENT['en-IN'].idleText);
@@ -104,12 +102,10 @@ class GymReceptionistApp {
 
     // 4. Periodic Telemetry and Health Polls
     await this.refreshSystemHealth();
-    await this.refreshRobotStatus();
     await this.refreshRecentCheckIns();
 
-    // Server health every 5s, hardware every 3s, checkins every 10s
+    // Server health every 5s, checkins every 10s
     setInterval(() => this.refreshSystemHealth(), 5000);
-    setInterval(() => this.refreshRobotStatus(), 3000);
     setInterval(() => this.refreshRecentCheckIns(), 10000);
   }
 
@@ -136,7 +132,7 @@ class GymReceptionistApp {
         }
 
         if (footerCopy && res.data.gym_name) {
-          footerCopy.textContent = `© 2026 ${res.data.gym_name} • AI Gym Receptionist Robot Base (ESP32 DevKit V1 + 3x SG90 Servos)`;
+          footerCopy.textContent = `© 2026 ${res.data.gym_name}`;
         }
       }
     } catch (err) {
@@ -190,13 +186,6 @@ class GymReceptionistApp {
     this.realtime.on('FAQ_UPDATED', handleFaqChange);
     this.realtime.on('FAQ_DELETED', handleFaqChange);
 
-    // 6. Robot Hardware Telemetry & Command Dispatches
-    this.realtime.on('ROBOT_STATUS_CHANGED', (state) => {
-      if (state) {
-        this.robotStatus.render(state);
-      }
-    });
-
     // 7. Member Check-ins (Feed Update)
     this.realtime.on('MEMBER_CHECKED_IN', () => {
       this.refreshRecentCheckIns();
@@ -206,7 +195,6 @@ class GymReceptionistApp {
     this.realtime.on('RECONNECTED', () => {
       console.log('[Realtime] WebSocket reconnected. Re-synchronizing all state with PostgreSQL...');
       this.refreshSystemHealth();
-      this.refreshRobotStatus();
       this.refreshRecentCheckIns();
       this.membershipSection.loadData();
       this.trainerSection.loadTrainers();
@@ -475,15 +463,8 @@ class GymReceptionistApp {
     this.handleSendMessage(question);
   }
 
-  async handleTriggerGesture(gesture) {
-    try {
-      this.robotAvatar.setState('idle', gesture);
-      await api.triggerGesture(gesture);
-      await this.refreshRobotStatus();
-    } catch (err) {
-      console.error('[Gesture Trigger Error]', err);
-    }
-  }
+  // Robot gestures are removed from the kiosk: nothing is sent to the robot.
+  async handleTriggerGesture() {}
 
   speakAloud(text, lang = this.currentLanguage) {
     const localized = LOCALIZED_CONTENT[this.currentLanguage] || LOCALIZED_CONTENT['en-IN'];
@@ -540,17 +521,6 @@ class GymReceptionistApp {
     } catch {
       pill.className = 'health-pill health-pill-offline';
       text.textContent = 'Server Offline';
-    }
-  }
-
-  async refreshRobotStatus() {
-    try {
-      const res = await api.getRobotStatus();
-      if (res.success && res.data) {
-        this.robotStatus.render(res.data);
-      }
-    } catch (e) {
-      this.robotStatus.render({ online: false });
     }
   }
 

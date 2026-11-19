@@ -79,7 +79,7 @@ export class FaqSectionComponent {
         <div class="section-title-wrap">
           <span class="section-pill text-green font-mono">KNOWLEDGE BASE</span>
           <h2 class="section-heading">Frequently Asked Questions</h2>
-          <p class="section-sub">Browse answers instantly or tap any question to ask FitBot.</p>
+          <p class="section-sub">Browse answers instantly or tap any question to ask the receptionist.</p>
         </div>
 
         <!-- Search Toolbar & Category Pills -->
@@ -111,7 +111,7 @@ export class FaqSectionComponent {
             <div class="no-faqs-box">
               <p>No matching questions found in this category.</p>
               <button class="btn btn-green btn-ask-reception-fallback" style="margin-top: 10px;">
-                Ask FitBot Directly
+                Ask the Receptionist
               </button>
             </div>
           ` : this.faqs.map((f) => {
@@ -137,7 +137,7 @@ export class FaqSectionComponent {
                         🔊 Read Answer
                       </button>
                       <button class="btn btn-xs btn-green btn-send-to-chat" data-q="${encodeURIComponent(f.question)}">
-                        🤖 Ask FitBot Live
+                        💬 Ask the Receptionist
                       </button>
                     </div>
                   </div>

@@ -1,0 +1,49 @@
+/* =====================================================================
+   Virtex Member Portal — shared components
+   ===================================================================== */
+.mp-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.mp-grid-2 { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.mp-card-title { margin: 0 0 0.8rem; font-size: 1rem; font-weight: 700; color: var(--mp-text); }
+
+/* Stat tiles */
+.mp-stat { background: var(--mp-surface); border: 1px solid var(--mp-line); border-radius: var(--mp-radius); padding: 1rem 1.1rem; }
+.mp-stat-label { font-size: 0.72rem; color: var(--mp-text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
+.mp-stat-value { font-size: 1.6rem; font-weight: 800; margin-top: 4px; font-family: 'JetBrains Mono', monospace; color: var(--mp-accent); }
+.mp-stat-sub { font-size: 0.75rem; color: var(--mp-text-dim); margin-top: 2px; }
+
+/* Lists */
+.mp-list { display: flex; flex-direction: column; gap: 8px; }
+.mp-row { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--mp-line); border-radius: 10px; background: rgba(255, 255, 255, 0.015); }
+.mp-row-main { flex: 1; min-width: 0; }
+.mp-row-title { font-weight: 700; font-size: 0.9rem; }
+.mp-row-sub { color: var(--mp-text-muted); font-size: 0.78rem; margin-top: 2px; }
+
+/* Notices, empty and loading states */
+.mp-notice {
+  display: flex; gap: 12px; align-items: flex-start; padding: 1rem 1.1rem; border-radius: 10px;
+  border: 1px dashed rgba(251, 191, 36, 0.4); background: rgba(251, 191, 36, 0.06); color: #fde68a; font-size: 0.88rem;
+}
+.mp-notice strong { color: var(--mp-text); }
+.mp-notice-text { margin-top: 3px; }
+.mp-error { border-color: rgba(248, 113, 113, 0.45); background: rgba(248, 113, 113, 0.06); color: #fecaca; }
+.mp-empty { padding: 2rem 1rem; text-align: center; }
+.mp-empty-title { font-weight: 700; margin-bottom: 4px; }
+.mp-muted { color: var(--mp-text-dim); font-size: 0.8rem; }
+.mp-loading { animation: mp-pulse 1.4s ease-in-out infinite; }
+
+/* Key/value lists */
+.mp-kv { display: grid; grid-template-columns: 170px 1fr; gap: 6px 12px; font-size: 0.85rem; margin: 0; }
+.mp-kv dt { color: var(--mp-text-muted); }
+.mp-kv dd { margin: 0; overflow-wrap: anywhere; }
+
+/* Toast */
+.mp-toast { position: fixed; right: 20px; bottom: 20px; z-index: 200; max-width: 380px; }
+
+/* Motion (disabled for reduced motion) */
+@keyframes mp-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+@keyframes mp-fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.mp-content > * { animation: mp-fade-up 0.22s ease both; }
+@media (prefers-reduced-motion: reduce) {
+  .mp-content > *, .mp-loading { animation: none !important; }
+  .mp-sidebar { transition: none !important; }
+}

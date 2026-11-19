@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Browser-tab icon: same Virtex mark, slightly heavier strokes so it stays crisp at 16px. -->
+  <rect x="1" y="1" width="30" height="30" rx="8" fill="#0f131b" stroke="#00e676" stroke-width="2"/>
+  <path d="M6.8 6.4h4.9L16 17v5.2h-2.3z" fill="#00e676"/>
+  <path d="M16 17l4.3-10.6h4.9l-6.9 15.8H16z" fill="#22d3ee"/>
+  <path d="M6 25.8h5.5l1.3-2.4 1.7 4.1 1.4-1.7h10" stroke="#00e676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

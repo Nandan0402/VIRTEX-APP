@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Gym Members Directory</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root,
+    html {
+      color-scheme: dark !important;
+      --accent-green: #00e676;
+      --accent-green-dark: #00b050;
+      --accent-green-glow: rgba(0, 230, 118, 0.28);
+      --green: #00e676;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.18) #0e1017;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0e1017 !important;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18) !important;
+      border-radius: 4px !important;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00e676 !important;
+    }
+
+    .members-page-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    /* Metric Quick Stats */
+    .members-stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .member-stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .member-stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      background: rgba(0, 230, 118, 0.1);
+      color: var(--accent-green);
+    }
+
+    .member-stat-info h4 {
+      margin: 0;
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .member-stat-info .stat-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+    }
+
+    .status-active {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(0, 230, 118, 0.35);
+    }
+
+    .status-frozen {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    .status-expired {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    /* Actions buttons */
+    .btn-action-icon {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-gray);
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-action-icon:hover {
+      border-color: var(--accent-green);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-action-danger:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 7, 12, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      box-sizing: border-box;
+    }
+
+    .modal-dialog {
+      background: #11141d;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(0, 230, 118, 0.15);
+      animation: modalFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.96) translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #141824;
+      flex-shrink: 0;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-close-modal {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      color: #94a3b8;
+      width: 34px;
+      height: 34px;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .btn-close-modal:hover {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      transform: scale(1.05);
+    }
+
+    .modal-body {
+      padding: 1.5rem 1.75rem;
+      overflow-y: auto;
+      box-sizing: border-box;
+      flex: 1 1 auto;
+    }
+
+    .modal-footer {
+      padding: 1.15rem 1.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.85rem;
+      background: #141824;
+      flex-shrink: 0;
+    }
+
+    .member-code-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--accent-green);
+      background: rgba(0, 230, 118, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 230, 118, 0.25);
+      font-size: 0.76rem;
+    }
+    /* Personal / general training */
+    .training-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .training-chip { border: 1px solid var(--border); background: transparent; color: var(--text-gray); border-radius: 999px; padding: 5px 11px; font: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+    .training-chip:hover { color: #fff; }
+    .training-chip.on { color: #0b0d14; background: var(--accent-green); border-color: var(--accent-green); }
+    .training-chip:focus-visible { outline: 2px solid var(--accent-green); outline-offset: 2px; }
+    .training-tag { display: inline-block; font-size: 0.72rem; font-weight: 800; border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .training-tag.personal { color: #c4b5fd; background: rgba(167, 139, 250, 0.14); border: 1px solid rgba(167, 139, 250, 0.4); }
+    .training-tag.general { color: #93c5fd; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.35); }
+    /* Girl / Boy + fee row */
+    .gender-pick { display: flex; gap: .5rem; margin-top: .35rem; }
+    .gender-pick label { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 999px; padding: .4rem .9rem; cursor: pointer; font-size: .88rem; color: var(--text-gray); }
+    .gender-pick label:has(input:checked) { color: #fff; border-color: var(--accent-green); background: rgba(0,230,118,.1); }
+    .fee-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; align-items: end; background: rgba(255,255,255,.02); border: 1px dashed var(--border); border-radius: 10px; padding: .8rem 1rem; }
+    .fee-amt { font-size: 1.15rem; font-weight: 800; color: var(--accent-green); padding: .45rem 0; }
+    .g-tag { display: inline-block; font-size: .66rem; font-weight: 800; border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; border: 1px solid; }
+    .g-tag.female { color: #f9a8d4; border-color: rgba(244,114,182,.5); } .g-tag.male { color: #93c5fd; border-color: rgba(59,130,246,.5); }
+    @media (max-width: 640px) { .fee-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Admin Navigation">
+      <div class="sidebar-header">
+        <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="sidebar-brand">
+          <h2>VIRTEX</h2>
+          <span class="sidebar-brand-badge">TRAINER / ADMIN CONSOLE</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="admin.html#tab-overview" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📊</span> Overview & Stats
+        </a>
+        <a href="admin-members.html" class="nav-item-btn active" id="nav-item-members" aria-current="page"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👥</span> Members
+        </a>
+        <a href="admin-feessalert.html" class="nav-item-btn" id="nav-item-fees-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💰</span> Fees Alert
+        </a>
+        <a href="admin-birthdayalert.html" class="nav-item-btn" id="nav-item-birthday-alert"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🎂</span> Birthday Alert
+        </a>
+        <a href="admin-messages.html" class="nav-item-btn " id="nav-item-messages" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📩</span> Message
+        </a>
+        <a href="admin-notification.html" class="nav-item-btn " id="nav-item-notifications"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📢</span> Notification
+        </a>
+        <a href="admin-personaltraniner.html" class="nav-item-btn " id="nav-item-trainers"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏋️</span> Personal Trainer
+        </a>
+        <a href="admin-assign-membertoperonal traniner.html" class="nav-item-btn" id="nav-item-assign-trainer"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤝</span> Assign PT & Fees
+        </a>
+        <a href="admin-routine-tracker.html" class="nav-item-btn" id="nav-item-routine-tracker"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏱️</span> Routine Tracker
+        </a>
+        <a href="admin.html#tab-plans" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💳</span> Membership Plans
+        </a>
+        <a href="admin.html#tab-faqs" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">❓</span> FAQs / Knowledge Base
+        </a>
+        <a href="admin.html#tab-robot" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
+        </a>
+        <a href="admin.html#tab-profile" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile
+        </a>
+        <a href="admin-working-hours.html" class="nav-item-btn " id="nav-item-working-hours-link"
+          style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏰</span> Working Hours
+        </a>
+        <a href="admin-calander.html" class="nav-item-btn " id="nav-item-admin-calendar" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📅</span> Class & Shift Calendar
+        </a>
+        <a href="admin-profile.html" class="nav-item-btn " id="nav-item-admin-profile" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👤</span> Profile
+        </a>
+        <a href="admin.html#tab-settings" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⚙️</span> Language & Settings
+        </a>
+      </nav>
+
+      <!-- User Profile & Session Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" style="cursor: pointer;" title="Active Profile"
+          role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <img id="sidebar-user-photo" src="" alt="Avatar"
+              style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-row">
+              <span class="user-display-name" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+          </div>
+          <button class="btn-logout-sidebar" id="btn-logout" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main">
+      <!-- Topbar Header -->
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle navigation menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <div class="topbar-title-block">
+            <h1>👥 Gym Members Directory</h1>
+            <span class="topbar-subtitle">PostgreSQL Grounded • Biometric & Kiosk Voice Recognition</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group -->
+          <div class="topbar-routine-group" id="topbar-routine-group">
+            <a href="admin-routine-tracker.html" class="topbar-routine-badge status-out" id="topbar-routine-badge"
+              title="Click to view full Routine Tracker">
+              <span class="topbar-status-dot"></span>
+              <span id="topbar-routine-text">PUNCHED OUT</span>
+            </a>
+
+            <div class="topbar-punch-btns">
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-in" id="topbar-btn-punch-in"
+                title="Punch In (Start Daily Shift)">
+                <span>🟢</span>
+                <span class="topbar-btn-text">Punch In</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-break" id="topbar-btn-break"
+                title="Take or Resume Routine Break" disabled>
+                <span id="topbar-break-icon">☕</span>
+                <span class="topbar-btn-text" id="topbar-break-text">Break</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-out" id="topbar-btn-punch-out"
+                title="Punch Out (End Daily Shift)" disabled>
+                <span>⏹️</span>
+                <span class="topbar-btn-text">Punch Out</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="topbar-divider-vert"></div>
+
+          <!-- Message Link Icon -->
+          <a href="admin-messages.html" class="topbar-nav-icon-link" id="topbar-message-link"
+            title="Member Messages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="topbar-counter-badge" id="topbar-message-badge" style="display: none;">0</span>
+          </a>
+
+          <!-- Notification Link Icon -->
+          <a href="admin-notification.html" class="topbar-nav-icon-link" id="topbar-notification-link"
+            title="Notifications & System Announcements">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="topbar-counter-badge topbar-counter-red" id="topbar-notification-badge"
+              style="display: none;">0</span>
+          </a>
+
+          <div class="topbar-divider-vert"></div>
+
+          <span class="badge badge-green font-mono text-xs" id="topbar-db-status">● PostgreSQL Connected</span>
+          <button class="btn btn-green btn-sm" id="btn-top-add-member">
+            ➕ Register Member
+          </button>
+        </div>
+      </header>
+
+      <main class="admin-body" id="main-content" role="main">
+        <div id="toast-banner" class="toast-banner" role="alert" aria-live="polite"></div>
+
+        <div class="members-page-container">
+          <!-- Metric Quick Stats Row -->
+          <div class="members-stats-row">
+            <div class="member-stat-card">
+              <div class="member-stat-icon">👥</div>
+              <div class="member-stat-info">
+                <h4>Total Registered</h4>
+                <div class="stat-val" id="stat-total-members">--</div>
+              </div>
+            </div>
+
+            <div class="member-stat-card">
+              <div class="member-stat-icon">🟢</div>
+              <div class="member-stat-info">
+                <h4>Active Members</h4>
+                <div class="stat-val" id="stat-active-members">--</div>
+              </div>
+            </div>
+
+            <div class="member-stat-card">
+              <div class="member-stat-icon">❄️</div>
+              <div class="member-stat-info">
+                <h4>Frozen Accounts</h4>
+                <div class="stat-val" id="stat-frozen-members">--</div>
+              </div>
+            </div>
+
+            <div class="member-stat-card">
+              <div class="member-stat-icon">⏰</div>
+              <div class="member-stat-info">
+                <h4>Expired / Due</h4>
+                <div class="stat-val" id="stat-expired-members">--</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Members Table Card -->
+          <div class="card">
+            <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <h3 style="margin: 0; color: #fff;">Members Database</h3>
+                <p class="text-dim text-xs" style="margin: 4px 0 0 0;">
+                  Live sync with FitBot check-in kiosk and multilingual greeting engine.
+                </p>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline btn-sm" id="btn-refresh-list">🔄 Refresh</button>
+                <button class="btn btn-green btn-sm" id="btn-new-member">+ New Member</button>
+              </div>
+            </div>
+
+            <!-- Search, Filter & Actions Toolbar -->
+            <div class="table-toolbar">
+              <div class="table-toolbar-left" style="flex-wrap: wrap; gap: 8px;">
+                <input type="text" id="member-search" class="input-search"
+                  placeholder="🔍 Search name, member ID, phone, email..." style="min-width: 260px;" />
+                <div class="training-chips" id="training-chips" role="group" aria-label="Training type">
+                  <button type="button" class="training-chip on" data-training="" aria-pressed="true">All</button>
+                  <button type="button" class="training-chip" data-training="personal" aria-pressed="false">🤝 Personal training <span id="tc-personal"></span></button>
+                  <button type="button" class="training-chip" data-training="general" aria-pressed="false">🏋️ General training <span id="tc-general"></span></button>
+                </div>
+                <select id="filter-status" class="select-filter" style="font-size: 0.8rem; padding: 6px 12px;">
+                  <option value="all">🌟 All Statuses</option>
+                  <option value="active">🟢 Active Members</option>
+                  <option value="frozen">❄️ Frozen</option>
+                  <option value="expired">🔴 Expired</option>
+                </select>
+              </div>
+              <span class="text-dim text-xs font-mono" id="member-count-label">Loading members from PostgreSQL...</span>
+            </div>
+
+            <!-- Members Data Table -->
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Member ID</th>
+                    <th>Full Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Membership Plan</th>
+                    <th>Training</th>
+                    <th>Language</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="members-table-body">
+                  <tr>
+                    <td colspan="9" class="loading-indicator">Loading members from PostgreSQL...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="pagination-bar" id="member-pagination-bar"
+              style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-top: 1px solid var(--border);">
+              <span id="member-page-info" class="text-dim text-xs font-mono">Page 1 of 1</span>
+              <div class="pagination-buttons" style="display: flex; gap: 6px;">
+                <button class="btn btn-outline btn-sm" id="btn-prev-page" disabled>◀ Previous</button>
+                <button class="btn btn-outline btn-sm" id="btn-next-page" disabled>Next ▶</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attendance & Turnstile Access Log Card -->
+          <div class="card" id="attendance" style="margin-top: 1.5rem;">
+            <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <h3 style="margin: 0; color: #fff; display: flex; align-items: center; gap: 8px;">
+                  <span>🚪</span> Attendance & Turnstile Access Log
+                </h3>
+                <p class="text-dim text-xs" style="margin: 4px 0 0 0;">
+                  Live turnstile check-ins, RFID scans, and kiosk biometric validations from PostgreSQL.
+                </p>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <span class="badge badge-green font-mono text-xs">● Live Turnstile Online</span>
+                <button type="button" class="btn btn-outline btn-sm" id="btn-refresh-turnstile">🔄 Refresh Log</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Member ID</th>
+                    <th>Full Name</th>
+                    <th>Check-In Method</th>
+                    <th>Device / Door</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="turnstile-table-body">
+                  <tr>
+                    <td colspan="6" class="loading-indicator">Loading turnstile check-ins from PostgreSQL...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="modal-add"></div>
+  <!-- Modal: Create / Edit Member -->
+  <div class="modal-overlay" id="modal-member" role="dialog" aria-modal="true" aria-labelledby="modal-member-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-member-title">Register New Member</h3>
+        <button class="btn-close-modal" id="btn-close-member-modal" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-member">
+        <input type="hidden" id="edit-member-id" value="" />
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label class="form-label" for="inp-fullname">Full Name *</label>
+              <input type="text" id="inp-fullname" class="form-input" placeholder="e.g. Rahul Sharma" required />
+            </div>
+            <div>
+              <label class="form-label" for="inp-phone">Phone Number *</label>
+              <input type="tel" id="inp-phone" class="form-input" placeholder="+91 98765 43210" required />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label class="form-label" for="inp-email">Email Address (Login ID) <span class="req"
+                  style="color: var(--accent-green);">*</span></label>
+              <input type="email" id="inp-email" class="form-input" placeholder="member@example.com" required />
+            </div>
+            <div>
+              <label class="form-label" for="inp-plan">Fee plan *</label>
+              <select id="inp-plan" class="form-input" required>
+                <option value="">Loading fee plans…</option>
+              </select>
+              <small class="text-xs text-dim" id="inp-plan-hint">Plans and fees are set in <a href="admin.html#tab-plans" class="text-green">Fees &amp; Plans</a>.</small>
+            </div>
+          </div>
+
+          <div>
+            <span class="form-label" id="inp-gender-l">Girl or Boy *</span>
+            <div class="gender-pick" role="radiogroup" aria-labelledby="inp-gender-l">
+              <label><input type="radio" name="inp-gender" value="female" required> 👧 Girl</label>
+              <label><input type="radio" name="inp-gender" value="male"> 👦 Boy</label>
+            </div>
+          </div>
+
+          <div class="fee-row" id="inp-fee-row">
+            <div><span class="form-label">Fee</span><div class="fee-amt" id="inp-fee-amount">—</div></div>
+            <div><label class="form-label" for="inp-paid-now">Paid now (₹)</label>
+              <input type="number" id="inp-paid-now" class="form-input" min="0" step="1" value="0" /></div>
+            <div><label class="form-label" for="inp-fee-due">Fee due date</label>
+              <input type="date" id="inp-fee-due" class="form-input" /></div>
+            <small class="text-xs text-dim" style="grid-column: 1 / -1">The member sees a countdown 7 days before the due date. Record payments on <a href="admin-feessalert.html" class="text-green">Fees Due</a> — the alert disappears once paid.</small>
+          </div>
+
+          <!-- Member Login Credentials Provisioning Section -->
+          <div class="credentials-box-container"
+            style="background: rgba(0, 230, 118, 0.05); border: 1px solid rgba(0, 230, 118, 0.25); border-radius: 10px; padding: 1rem 1.15rem; display: flex; flex-direction: column; gap: 0.65rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <label class="form-label" for="inp-password"
+                style="margin: 0; display: flex; align-items: center; gap: 6px; font-weight: 700; color: #fff;">
+                <span>🔑</span>
+                <span>Member Login Password</span>
+                <span class="req" id="mem-password-req" style="color: var(--accent-green);">*</span>
+              </label>
+              <button type="button" id="btn-generate-member-pass" class="btn btn-outline"
+                style="font-size: 0.72rem; padding: 3px 8px; border-color: rgba(0, 230, 118, 0.4); color: var(--accent-green); cursor: pointer;">
+                ⚡ Auto-Generate Password
+              </button>
+            </div>
+
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="inp-password" class="form-input" placeholder="e.g. MemberPass2026!"
+                style="padding-right: 44px !important;" autocomplete="new-password" />
+              <button type="button" id="btn-toggle-mem-password"
+                style="position: absolute; right: 10px; background: transparent; border: none; color: #94a3b8; font-size: 1.1rem; cursor: pointer; padding: 4px;"
+                title="Show/Hide Password" aria-label="Toggle password visibility">
+                👁️
+              </button>
+            </div>
+
+            <div
+              style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; line-height: 1.4;">
+              <span id="mem-password-hint">🔑 Admin can set login email & password to give to the member for Member
+                Portal login (/member-auth.html).</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label class="form-label" for="inp-lang">Preferred Language (FitBot Voice)</label>
+              <select id="inp-lang" class="form-input">
+                <option value="en-IN">English (India)</option>
+                <option value="kn-IN">Kannada (ಕನ್ನಡ)</option>
+                <option value="hi-IN">Hindi (हिन्दी)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="inp-status">Account Status *</label>
+              <select id="inp-status" class="form-input" required>
+                <option value="active">Active</option>
+                <option value="frozen">Frozen</option>
+                <option value="expired">Expired</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label class="form-label" for="inp-emergency">Emergency Contact</label>
+              <input type="text" id="inp-emergency" class="form-input" placeholder="Name & Phone" />
+            </div>
+            <div>
+              <label class="form-label" for="inp-rfid">Biometric / RFID Card ID</label>
+              <input type="text" id="inp-rfid" class="form-input" placeholder="e.g. RFID-88219" />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancel-member-modal">Cancel</button>
+          <button type="submit" class="btn btn-green" id="btn-save-member">Save Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Give Credentials to Gym Member (Post-Save & Copy Card) -->
+  <div class="modal-overlay" id="modal-credentials-share" role="dialog" aria-modal="true" style="z-index: 2600;">
+    <div class="modal-dialog"
+      style="max-width: 520px; border: 1px solid rgba(0, 230, 118, 0.35); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95); padding: 1.75rem;">
+      <div style="text-align: center; margin-bottom: 1.25rem;">
+        <div style="font-size: 3rem; line-height: 1; margin-bottom: 0.5rem;" id="cred-share-icon">🎉</div>
+        <h3 style="margin: 0 0 0.4rem 0; font-size: 1.35rem; color: #fff; font-weight: 700;" id="cred-share-title">
+          Member Account Provisioned!</h3>
+        <p style="margin: 0; color: #94a3b8; font-size: 0.88rem; line-height: 1.5;" id="cred-share-subtitle">
+          Copy and give these login credentials to the gym member:
+        </p>
+      </div>
+
+      <!-- Credentials Preview Card -->
+      <div
+        style="background: #090a0f; border: 1px solid rgba(0, 230, 118, 0.25); border-radius: 10px; padding: 1.15rem; margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+        <div
+          style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
+          <span style="color: #6b7280;">Member Name:</span>
+          <strong style="color: #fff;" id="cred-member-name">Rahul Sharma</strong>
+        </div>
+        <div
+          style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
+          <span style="color: #6b7280;">Login Email:</span>
+          <strong style="color: #00e676;" id="cred-member-email">member@example.com</strong>
+        </div>
+        <div
+          style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem; align-items: center;">
+          <span style="color: #6b7280;">Password:</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong style="color: #f59e0b;" id="cred-member-password">••••••••</strong>
+            <button type="button" id="btn-toggle-cred-pass"
+              style="background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 1rem; padding: 2px;"
+              title="Show/Hide Password">👁️</button>
+          </div>
+        </div>
+        <div
+          style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.5rem;">
+          <span style="color: #6b7280;">Assigned Role:</span>
+          <span style="color: #38bdf8; font-weight: 700;">Gym Member</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #6b7280;">Login Portal:</span>
+          <a href="member-auth.html" target="_blank"
+            style="color: #00e676; text-decoration: underline; font-weight: 600;">member-auth.html</a>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button type="button" class="btn btn-green" id="btn-copy-member-credentials"
+          style="width: 100%; justify-content: center; font-size: 0.95rem; font-weight: 700; padding: 11px;">
+          📋 Copy Credentials for Member
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <a href="member-auth.html" target="_blank" class="btn btn-outline"
+            style="flex: 1; text-align: center; text-decoration: none; justify-content: center; display: inline-flex; align-items: center;">
+            🚀 Open Member Portal
+          </a>
+          <button type="button" class="btn btn-outline" id="btn-close-member-credentials"
+            style="flex: 1; justify-content: center;">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Direct Give / Reset Member Credentials Modal -->
+  <div class="modal-overlay" id="modal-give-credentials-direct" role="dialog" aria-modal="true" style="z-index: 2600;">
+    <div class="modal-dialog"
+      style="max-width: 480px; border: 1px solid rgba(0, 230, 118, 0.3); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95); padding: 1.75rem;">
+      <div class="modal-header"
+        style="background: transparent; padding: 0 0 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <h3 style="margin: 0; font-size: 1.2rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+          <span>🔑</span>
+          <span id="direct-cred-title">Give Credentials to Member</span>
+        </h3>
+        <button class="btn-close-modal" id="btn-close-direct-cred">&times;</button>
+      </div>
+      <div style="padding: 1rem 0; display: flex; flex-direction: column; gap: 1rem;">
+        <input type="hidden" id="direct-cred-member-id" value="" />
+        <div>
+          <label class="form-label" for="direct-cred-email">Member Email (Login ID) <span class="req"
+              style="color: var(--accent-green);">*</span></label>
+          <input type="email" id="direct-cred-email" class="form-input" placeholder="member@example.com" required />
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label class="form-label" for="direct-cred-password" style="margin: 0;">New Login Password <span class="req"
+                style="color: var(--accent-green);">*</span></label>
+            <button type="button" id="btn-direct-gen-pass" class="btn btn-outline"
+              style="font-size: 0.72rem; padding: 2px 7px; color: var(--accent-green); border-color: rgba(0,230,118,0.4); cursor: pointer;">
+              ⚡ Auto-Generate
+            </button>
+          </div>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="text" id="direct-cred-password" class="form-input" placeholder="e.g. MemberPass2026!"
+              style="padding-right: 44px !important;" required />
+            <button type="button" id="btn-toggle-direct-pass"
+              style="position: absolute; right: 10px; background: transparent; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; padding: 4px;"
+              title="Show/Hide">
+              👁️
+            </button>
+          </div>
+          <small style="color: #94a3b8; font-size: 0.75rem; margin-top: 3px; display: block;">
+            This will update the member's password and generate a copyable credentials card.
+          </small>
+        </div>
+      </div>
+      <div class="modal-footer"
+        style="background: transparent; padding: 1rem 0 0 0; border-top: 1px solid rgba(255,255,255,0.08);">
+        <button type="button" class="btn btn-outline" id="btn-cancel-direct-cred">Cancel</button>
+        <button type="button" class="btn btn-green" id="btn-save-direct-cred">Save & Give Credentials</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Member Details & Visit History Drawer -->
+  <div class="modal-overlay" id="modal-member-detail" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="detail-member-name">Member Profile</h3>
+        <button class="btn-close-modal" id="btn-close-detail-modal">&times;</button>
+      </div>
+      <div class="modal-body" id="detail-member-body" style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- Filled dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="btn-dismiss-detail">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmation Dialog (Centered) -->
+  <div class="modal-overlay" id="modal-confirm" role="dialog" aria-modal="true" style="z-index: 2500;">
+    <div class="modal-dialog"
+      style="max-width: 440px; text-align: center; border: 1px solid rgba(239, 68, 68, 0.4); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95); padding: 2rem 1.75rem;">
+      <div style="font-size: 3rem; line-height: 1; margin-bottom: 0.85rem;" id="modal-confirm-icon">🗑️</div>
+      <h3 id="modal-confirm-title" style="margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 700; color: #fff;">
+        Delete Member</h3>
+      <p id="modal-confirm-message"
+        style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 1.75rem; line-height: 1.5;">
+        Are you sure you want to delete this member? This action cannot be undone.
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button type="button" class="btn btn-outline" id="modal-confirm-cancel-btn"
+          style="flex: 1; padding: 0.75rem 1rem; font-weight: 600;">Cancel</button>
+        <button type="button" class="btn btn-action-danger" id="modal-confirm-ok-btn"
+          style="flex: 1; padding: 0.75rem 1rem; font-weight: 700; background: #ef4444; color: #fff; border: 1px solid #ef4444; border-radius: var(--radius-md); cursor: pointer;">Delete
+          Member</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Controller Script -->
+  <script type="module">
+    import { adminApi } from './js/admin/adminApi.js';
+
+    const state = {
+      members: [],
+      filteredMembers: [],
+      searchQuery: '',
+      statusFilter: 'all',
+      trainingFilter: '',
+      currentPage: 1,
+      pageSize: 10,
+      totalPages: 1,
+      totalCount: 0,
+      isLoading: false,
+    };
+
+    function showToast(msg, isErr = false) {
+      const banner = document.getElementById('toast-banner');
+      if (!banner) return;
+      banner.textContent = msg;
+      banner.className = `toast-banner show ${isErr ? 'toast-error' : 'toast-success'}`;
+      clearTimeout(banner._timer);
+      banner._timer = setTimeout(() => {
+        banner.className = 'toast-banner';
+      }, 3500);
+    }
+
+    // Hydrate User Session
+    async function hydrateUser() {
+      try {
+        let user = adminApi.getStoredUser();
+        let token = adminApi.getToken();
+        if (!user || !token) {
+          const loginRes = await adminApi.redirectToLogin().catch(() => null);
+          if (loginRes && loginRes.success) {
+            user = loginRes.data?.user || user;
+          }
+        }
+        let userRes = await adminApi.getCurrentUser();
+        if (!userRes.success) {
+          const loginRes = await adminApi.redirectToLogin().catch(() => null);
+          if (loginRes && loginRes.success) {
+            userRes = await adminApi.getCurrentUser();
+          }
+        }
+        if (userRes.success && userRes.data) {
+          const u = userRes.data;
+          const fullName = u.fullName || u.full_name || u.username || 'Nandan.B';
+          const username = u.username || 'nandanb449';
+          const role = (u.role || 'owner').toUpperCase();
+
+          document.getElementById('sidebar-user-fullname').textContent = fullName;
+          document.getElementById('sidebar-user-handle').textContent = `@${username}`;
+
+          const pill = document.getElementById('sidebar-role-pill');
+          if (pill) {
+            pill.textContent = role;
+            pill.className = `role-badge-pill role-${role.toLowerCase()}`;
+          }
+
+          const photoEl = document.getElementById('sidebar-user-photo');
+          const initialsEl = document.getElementById('sidebar-user-initials');
+          if (u.avatar_url || u.avatarUrl) {
+            if (photoEl) {
+              photoEl.src = u.avatar_url || u.avatarUrl;
+              photoEl.style.display = 'block';
+            }
+            if (initialsEl) initialsEl.style.display = 'none';
+          } else {
+            if (photoEl) photoEl.style.display = 'none';
+            if (initialsEl) {
+              initialsEl.textContent = fullName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
+              initialsEl.style.display = 'inline';
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Members] Auth hydration notice:', err.message);
+      }
+    }
+
+    // Load Members from PostgreSQL
+    async function loadMembers() {
+      state.isLoading = true;
+      const tbody = document.getElementById('members-table-body');
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="9" class="loading-indicator">Loading members from PostgreSQL...</td></tr>`;
+      }
+
+      try {
+        const res = await adminApi.getMembers({
+          search: state.searchQuery,
+          status: state.statusFilter,
+          training: state.trainingFilter,
+          page: state.currentPage,
+          limit: state.pageSize,
+        });
+
+        if (res.success) {
+          state.members = res.data || [];
+          state.totalCount = res.pagination?.total || state.members.length;
+          state.totalPages = res.pagination?.pages || Math.ceil(state.totalCount / state.pageSize) || 1;
+          const tc = res.trainingCounts;
+          if (tc) {
+            document.getElementById('tc-personal').textContent = `(${tc.personal})`;
+            document.getElementById('tc-general').textContent = `(${tc.general})`;
+          }
+          renderMembersTable();
+          updateMetrics();
+        } else {
+          showToast(res.error || 'Failed to load members.', true);
+          if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--danger); padding: 2rem;">Error: ${res.error || 'Could not fetch members.'}</td></tr>`;
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Error connecting to backend: ' + err.message, true);
+      } finally {
+        state.isLoading = false;
+      }
+    }
+
+    // Render Members Table Rows
+    function renderMembersTable() {
+      const tbody = document.getElementById('members-table-body');
+      const countLabel = document.getElementById('member-count-label');
+      const pageInfo = document.getElementById('member-page-info');
+      const prevBtn = document.getElementById('btn-prev-page');
+      const nextBtn = document.getElementById('btn-next-page');
+
+      if (!tbody) return;
+
+      if (state.members.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 3rem 1rem; color: var(--text-dim);">
+              <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔍</div>
+              <strong style="color: #fff;">No Members Found</strong>
+              <p class="text-xs" style="margin: 4px 0 0 0;">Try adjusting your search query or filter status.</p>
+            </td>
+          </tr>
+        `;
+        if (countLabel) countLabel.textContent = `0 members found`;
+        if (pageInfo) pageInfo.textContent = `Page 1 of 1`;
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
+        return;
+      }
+
+      tbody.innerHTML = state.members.map((m) => {
+        const st = (m.status || 'active').toLowerCase();
+        let badgeClass = 'status-active';
+        let badgeText = 'Active';
+        if (st === 'frozen') {
+          badgeClass = 'status-frozen';
+          badgeText = 'Frozen';
+        } else if (st === 'expired') {
+          badgeClass = 'status-expired';
+          badgeText = 'Expired';
+        }
+
+        const memberCode = m.member_code || `MEM-${m.id}`;
+        const planName = m.plan_name || m.membership_plan || 'Standard Plan';
+        const langDisplay = m.preferred_language === 'kn-IN' ? 'ಕನ್ನಡ' : (m.preferred_language === 'hi-IN' ? 'हिन्दी' : 'English');
+
+        return `
+          <tr data-id="${m.id}">
+            <td><span class="member-code-tag">${escapeHtml(memberCode)}</span></td>
+            <td>
+              <div style="font-weight: 700; color: #fff;">${escapeHtml(m.full_name)}${m.gender === 'female' ? '<span class="g-tag female">👧 Girl</span>' : m.gender === 'male' ? '<span class="g-tag male">👦 Boy</span>' : ''}</div>
+              ${m.emergency_contact ? `<div class="text-xs text-dim">ICE: ${escapeHtml(m.emergency_contact)}</div>` : ''}
+            </td>
+            <td><span class="font-mono text-xs">${escapeHtml(m.phone || '—')}</span></td>
+            <td><span class="text-xs">${escapeHtml(m.email || '—')}</span></td>
+            <td><span class="badge badge-outline text-xs">${escapeHtml(planName)}</span></td>
+            <td>${m.training_type === 'personal'
+              ? `<span class="training-tag personal" title="Personal training${m.pt_status === 'paused' ? ' (paused)' : ''}">🤝 Personal</span><div class="text-xs text-dim">${escapeHtml(m.pt_trainer_name || '')}${m.pt_status === 'paused' ? ' · paused' : ''}</div>`
+              : '<span class="training-tag general" title="General training (no personal trainer)">🏋️ General</span>'}</td>
+            <td><span class="text-xs text-dim">${langDisplay}</span></td>
+            <td><span class="status-badge ${badgeClass}">${badgeText}</span></td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button class="btn-action-icon btn-give-member-credentials" data-id="${m.id}" title="Give / Reset Login Credentials for Member" style="color: var(--accent-green); border-color: rgba(0, 230, 118, 0.4);">🔑 Credentials</button>
+              <button class="btn-action-icon btn-view-member" data-id="${m.id}" title="View Visit History">📋 History</button>
+              <button class="btn-action-icon btn-edit-member" data-id="${m.id}" title="Edit Member">✏️ Edit</button>
+              <button class="btn-action-icon btn-action-danger btn-delete-member" data-id="${m.id}" title="Delete Member">🗑️</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (countLabel) countLabel.textContent = `Showing ${state.members.length} of ${state.totalCount} members`;
+      if (pageInfo) pageInfo.textContent = `Page ${state.currentPage} of ${state.totalPages}`;
+      if (prevBtn) prevBtn.disabled = state.currentPage <= 1;
+      if (nextBtn) nextBtn.disabled = state.currentPage >= state.totalPages;
+
+      // Attach row event listeners
+      tbody.querySelectorAll('.btn-give-member-credentials').forEach((btn) => {
+        btn.addEventListener('click', () => openDirectCredentialsModal(btn.dataset.id));
+      });
+      tbody.querySelectorAll('.btn-view-member').forEach((btn) => {
+        btn.addEventListener('click', () => openMemberDetail(btn.dataset.id));
+      });
+      tbody.querySelectorAll('.btn-edit-member').forEach((btn) => {
+        btn.addEventListener('click', () => openEditMemberModal(btn.dataset.id));
+      });
+      tbody.querySelectorAll('.btn-delete-member').forEach((btn) => {
+        btn.addEventListener('click', () => deleteMember(btn.dataset.id));
+      });
+    }
+
+    // Update Overview Metric Cards
+    function updateMetrics() {
+      let active = 0;
+      let frozen = 0;
+      let expired = 0;
+
+      state.members.forEach((m) => {
+        const s = (m.status || '').toLowerCase();
+        if (s === 'frozen') frozen++;
+        else if (s === 'expired') expired++;
+        else active++;
+      });
+
+      const totalEl = document.getElementById('stat-total-members');
+      const activeEl = document.getElementById('stat-active-members');
+      const frozenEl = document.getElementById('stat-frozen-members');
+      const expiredEl = document.getElementById('stat-expired-members');
+
+      if (totalEl) totalEl.textContent = state.totalCount;
+      if (activeEl) activeEl.textContent = active;
+      if (frozenEl) frozenEl.textContent = frozen;
+      if (expiredEl) expiredEl.textContent = expired;
+    }
+
+    // Open Member Detail / Visit History Modal
+    async function openMemberDetail(memberId) {
+      const modal = document.getElementById('modal-member-detail');
+      const title = document.getElementById('detail-member-name');
+      const body = document.getElementById('detail-member-body');
+      if (!modal || !body) return;
+
+      const member = state.members.find((m) => String(m.id) === String(memberId));
+      if (!member) return;
+
+      title.textContent = `${member.full_name} (${member.member_code || 'ID:' + member.id})`;
+      body.innerHTML = `<div class="loading-indicator">Loading visit history from PostgreSQL...</div>`;
+      modal.style.display = 'flex';
+
+      try {
+        const historyRes = await adminApi.getMemberHistory(memberId);
+        const visits = (historyRes.success && Array.isArray(historyRes.data)) ? historyRes.data : [];
+
+        body.innerHTML = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+            <div>
+              <div class="text-xs text-dim">PHONE</div>
+              <div style="font-weight: 700; color: #fff;">${escapeHtml(member.phone || '—')}</div>
+            </div>
+            <div>
+              <div class="text-xs text-dim">EMAIL</div>
+              <div style="font-weight: 700; color: #fff;">${escapeHtml(member.email || '—')}</div>
+            </div>
+            <div>
+              <div class="text-xs text-dim">MEMBERSHIP PLAN</div>
+              <div style="font-weight: 700; color: var(--accent-green);">${escapeHtml(member.plan_name || 'Standard')}</div>
+            </div>
+            <div>
+              <div class="text-xs text-dim">STATUS</div>
+              <div style="font-weight: 700; color: #fff; text-transform: uppercase;">${escapeHtml(member.status || 'Active')}</div>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="margin: 0 0 0.5rem 0; color: #fff; font-size: 0.95rem;">Recent Kiosk Check-In Visits</h4>
+            ${visits.length === 0 ? `
+              <div style="text-align: center; padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px dashed var(--border);">
+                <span class="text-dim text-xs">No recent visits recorded for this member yet.</span>
+              </div>
+            ` : `
+              <div style="max-height: 200px; overflow-y: auto;">
+                <table class="admin-table" style="font-size: 0.8rem;">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Method</th>
+                      <th>Greeting Language</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${visits.map((v) => `
+                      <tr>
+                        <td>${new Date(v.check_in_time || v.created_at).toLocaleString()}</td>
+                        <td><span class="badge badge-outline text-xs">${v.method || 'Biometric/RFID'}</span></td>
+                        <td>${v.language || 'en-IN'}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `}
+          </div>
+        `;
+      } catch (err) {
+        body.innerHTML = `<div style="color: var(--danger); padding: 1rem;">Failed to load visit history.</div>`;
+      }
+    }
+
+    // Helper: Password Generation
+    function generateStrongPassword() {
+      const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+      const lower = 'abcdefghijkmnopqrstuvwxyz';
+      const nums = '23456789';
+      const symbols = '!@#$%^&*';
+      const all = upper + lower + nums + symbols;
+
+      let pass = '';
+      pass += upper[Math.floor(Math.random() * upper.length)];
+      pass += lower[Math.floor(Math.random() * lower.length)];
+      pass += nums[Math.floor(Math.random() * nums.length)];
+      pass += symbols[Math.floor(Math.random() * symbols.length)];
+
+      for (let i = 0; i < 8; i++) {
+        pass += all[Math.floor(Math.random() * all.length)];
+      }
+
+      return pass.split('').sort(() => 0.5 - Math.random()).join('');
+    }
+
+    // Helper: Clipboard Copy
+    async function copyToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (_) { }
+      }
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        textArea.remove();
+        return true;
+      } catch (err) {
+        textArea.remove();
+        return false;
+      }
+    }
+
+    let currentMemberCredsToShare = { fullName: '', email: '', password: '' };
+
+    function showMemberCredentialsReadyModal({ fullName, email, password, isUpdated = false }) {
+      currentMemberCredsToShare = {
+        fullName: fullName || 'Gym Member',
+        email: email || '',
+        password: password || '',
+      };
+
+      const titleEl = document.getElementById('cred-share-title');
+      const subEl = document.getElementById('cred-share-subtitle');
+      if (titleEl) {
+        titleEl.textContent = isUpdated ? 'Member Credentials Updated!' : 'Member Account Provisioned!';
+      }
+      if (subEl) {
+        subEl.textContent = isUpdated
+          ? 'Login credentials updated. Copy and give these to the gym member:'
+          : 'New member account created. Copy and give these credentials to the gym member:';
+      }
+
+      document.getElementById('cred-member-name').textContent = fullName || 'Gym Member';
+      document.getElementById('cred-member-email').textContent = email || '—';
+
+      const passEl = document.getElementById('cred-member-password');
+      if (passEl) {
+        passEl.textContent = password || '••••••••';
+        passEl.dataset.plain = password || '';
+      }
+
+      const copyBtn = document.getElementById('btn-copy-member-credentials');
+      if (copyBtn) {
+        copyBtn.textContent = '📋 Copy Credentials for Member';
+        copyBtn.style.background = '#00e676';
+        copyBtn.style.color = '#000';
+      }
+
+      document.getElementById('modal-credentials-share').style.display = 'flex';
+    }
+
+    function openDirectCredentialsModal(memberId) {
+      const member = state.members.find((m) => String(m.id) === String(memberId));
+      if (!member) return;
+
+      document.getElementById('direct-cred-member-id').value = member.id;
+      document.getElementById('direct-cred-title').textContent = `Give Credentials to ${member.full_name}`;
+      document.getElementById('direct-cred-email').value = member.email || '';
+
+      const passInput = document.getElementById('direct-cred-password');
+      if (passInput) {
+        passInput.value = generateStrongPassword();
+        passInput.type = 'text';
+      }
+
+      document.getElementById('modal-give-credentials-direct').style.display = 'flex';
+    }
+
+    // Modal Create / Edit
+    // ---- Fee plans from PostgreSQL (Fees & Plans tab), filtered by Girl / Boy
+    let feePlans = null;
+    async function loadFeePlans() {
+      if (feePlans) return feePlans;
+      try { const r = await adminApi.getPlans(false); feePlans = (r?.data || []).filter((p) => p.is_active !== false); }
+      catch { feePlans = []; }
+      return feePlans;
+    }
+    const AUD_LABEL = { girls: ' · Girls', boys: ' · Boys', all: '' };
+    async function fillPlanSelect(selectedName) {
+      const sel = document.getElementById('inp-plan');
+      const plans = await loadFeePlans();
+      const g = document.querySelector('input[name="inp-gender"]:checked')?.value;
+      const fits = (p) => !g || !p.audience || p.audience === 'all' || (p.audience === 'girls') === (g === 'female');
+      const list = plans.filter((p) => fits(p) || p.name === selectedName);
+      const keep = selectedName && !list.some((p) => p.name === selectedName) ? `<option value="${escapeHtml(selectedName)}">${escapeHtml(selectedName)} (current)</option>` : '';
+      sel.innerHTML = (list.length || keep ? '<option value="">Choose a fee plan…</option>' : '<option value="">No fee plans yet — create one in Fees & Plans</option>') + keep
+        + list.map((p) => `<option value="${escapeHtml(p.name)}" data-id="${p.id}" data-price="${Number(p.price_inr)}">${escapeHtml(p.name)} — ₹${Number(p.price_inr).toLocaleString('en-IN')} / ${p.duration_months} mo${AUD_LABEL[p.audience || 'all']}</option>`).join('');
+      if (selectedName) sel.value = selectedName;
+      showPlanFee();
+    }
+    function showPlanFee() {
+      const opt = document.getElementById('inp-plan').selectedOptions[0];
+      const price = Number(opt?.dataset.price);
+      document.getElementById('inp-fee-amount').textContent = Number.isFinite(price) && opt?.dataset.price ? `₹${price.toLocaleString('en-IN')}` : '—';
+      const paid = document.getElementById('inp-paid-now');
+      if (Number.isFinite(price)) paid.max = String(price);
+    }
+    document.getElementById('inp-plan')?.addEventListener('change', showPlanFee);
+    document.querySelectorAll('input[name="inp-gender"]').forEach((r) => r.addEventListener('change', () => fillPlanSelect(document.getElementById('inp-plan').value || null)));
+
+    function openCreateMemberModal() {
+      document.getElementById('form-member').reset();
+      document.getElementById('edit-member-id').value = '';
+      document.getElementById('modal-member-title').textContent = 'Register New Member';
+      document.getElementById('inp-fee-row').style.display = '';
+      const due = new Date(Date.now() + 7 * 86400000);
+      document.getElementById('inp-fee-due').value = `${due.getFullYear()}-${String(due.getMonth() + 1).padStart(2, '0')}-${String(due.getDate()).padStart(2, '0')}`;
+      document.getElementById('inp-paid-now').value = '0';
+      fillPlanSelect(null);
+
+      const reqPass = document.getElementById('mem-password-req');
+      if (reqPass) reqPass.style.display = 'inline';
+
+      const passInput = document.getElementById('inp-password');
+      if (passInput) {
+        passInput.value = generateStrongPassword();
+        passInput.type = 'text';
+        passInput.required = true;
+        passInput.placeholder = 'e.g. MemberPass2026!';
+      }
+
+      const toggleBtn = document.getElementById('btn-toggle-mem-password');
+      if (toggleBtn) toggleBtn.textContent = '🙈';
+
+      const hintEl = document.getElementById('mem-password-hint');
+      if (hintEl) hintEl.innerHTML = '🔑 Admin can set login email & password to give to the member for Member Portal login (/member-auth.html).';
+
+      document.getElementById('modal-member').style.display = 'flex';
+    }
+
+    function openEditMemberModal(memberId) {
+      const member = state.members.find((m) => String(m.id) === String(memberId));
+      if (!member) return;
+
+      document.getElementById('edit-member-id').value = member.id;
+      document.getElementById('modal-member-title').textContent = `Edit Member • ${member.full_name}`;
+      document.getElementById('inp-fullname').value = member.full_name || '';
+      document.getElementById('inp-phone').value = member.phone || '';
+      document.getElementById('inp-email').value = member.email || '';
+      document.getElementById('inp-fee-row').style.display = 'none';
+      document.querySelectorAll('input[name="inp-gender"]').forEach((r) => { r.checked = r.value === member.gender; });
+      fillPlanSelect(member.plan_name || null);
+      document.getElementById('inp-lang').value = member.preferred_language || 'en-IN';
+      document.getElementById('inp-status').value = (member.status || 'active').toLowerCase();
+      document.getElementById('inp-emergency').value = member.emergency_contact || '';
+      document.getElementById('inp-rfid').value = member.rfid_tag || '';
+
+      const reqPass = document.getElementById('mem-password-req');
+      if (reqPass) reqPass.style.display = 'none';
+
+      const passInput = document.getElementById('inp-password');
+      if (passInput) {
+        passInput.value = '';
+        passInput.type = 'password';
+        passInput.required = false;
+        passInput.placeholder = 'Leave blank to keep existing password';
+      }
+
+      const toggleBtn = document.getElementById('btn-toggle-mem-password');
+      if (toggleBtn) toggleBtn.textContent = '👁️';
+
+      const hintEl = document.getElementById('mem-password-hint');
+      if (hintEl) hintEl.innerHTML = 'Enter a new password if you want to reset credentials for this member.';
+
+      document.getElementById('modal-member').style.display = 'flex';
+    }
+
+    // Centered Custom Confirmation Modal
+    function confirmCenter({
+      title = 'Confirm Action',
+      message = 'Are you sure you want to proceed?',
+      targetName = '',
+      icon = '🗑️',
+      confirmText = 'Confirm',
+      confirmClass = 'btn-action-danger',
+      cancelText = 'Cancel',
+    } = {}) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('modal-confirm');
+        const titleEl = document.getElementById('modal-confirm-title');
+        const msgEl = document.getElementById('modal-confirm-message');
+        const iconEl = document.getElementById('modal-confirm-icon');
+        const okBtn = document.getElementById('modal-confirm-ok-btn');
+        const cancelBtn = document.getElementById('modal-confirm-cancel-btn');
+
+        if (!modal || !okBtn || !cancelBtn) {
+          resolve(window.confirm(message));
+          return;
+        }
+
+        if (titleEl) titleEl.textContent = title;
+        if (iconEl) iconEl.textContent = icon;
+        if (msgEl) {
+          if (targetName) {
+            msgEl.innerHTML = `Are you sure you want to delete <strong style="color: #fff;">${escapeHtml(targetName)}</strong>? This action cannot be undone.`;
+          } else {
+            msgEl.textContent = message;
+          }
+        }
+        if (okBtn) {
+          okBtn.textContent = confirmText;
+          if (confirmClass === 'btn-action-danger') {
+            okBtn.style.background = '#ef4444';
+            okBtn.style.borderColor = '#ef4444';
+            okBtn.style.color = '#ffffff';
+          } else {
+            okBtn.style.background = '#00e676';
+            okBtn.style.borderColor = '#00e676';
+            okBtn.style.color = '#000000';
+          }
+        }
+        if (cancelBtn) {
+          cancelBtn.textContent = cancelText;
+        }
+
+        modal.style.display = 'flex';
+
+        let resolved = false;
+        const cleanup = (val) => {
+          if (resolved) return;
+          resolved = true;
+          modal.style.display = 'none';
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          window.removeEventListener('keydown', onKey);
+          modal.removeEventListener('click', onBackdrop);
+          resolve(val);
+        };
+
+        const onOk = (e) => { e.preventDefault(); cleanup(true); };
+        const onCancel = (e) => { e.preventDefault(); cleanup(false); };
+        const onKey = (e) => {
+          if (e.key === 'Escape') cleanup(false);
+          else if (e.key === 'Enter') cleanup(true);
+        };
+        const onBackdrop = (e) => {
+          if (e.target === modal) cleanup(false);
+        };
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        window.addEventListener('keydown', onKey);
+        modal.addEventListener('click', onBackdrop);
+      });
+    }
+
+    // Delete Member
+    async function deleteMember(memberId) {
+      const member = state.members.find((m) => String(m.id) === String(memberId));
+      const name = member ? member.full_name : 'this member';
+      const confirmed = await confirmCenter({
+        title: 'Archive Member',
+        targetName: name,
+        icon: '🗑️',
+        confirmText: 'Archive Member',
+        confirmClass: 'btn-action-danger',
+      });
+      if (!confirmed) return;
+
+      try {
+        const res = await adminApi.deleteMember(memberId);
+        if (res.success) {
+          showToast(`🗄️ Member "${name}" archived — marked inactive, login disabled, all history kept.`);
+          await loadMembers();
+        } else {
+          showToast(res.error || 'Failed to delete member.', true);
+        }
+      } catch (err) {
+        showToast('Error deleting member: ' + err.message, true);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Setup Event Listeners
+    function setupListeners() {
+      // Top Add Member
+      document.getElementById('btn-top-add-member')?.addEventListener('click', openCreateMemberModal);
+      document.getElementById('btn-new-member')?.addEventListener('click', openCreateMemberModal);
+
+      // Close Modals
+      document.getElementById('btn-close-member-modal')?.addEventListener('click', () => {
+        document.getElementById('modal-member').style.display = 'none';
+      });
+      document.getElementById('btn-cancel-member-modal')?.addEventListener('click', () => {
+        document.getElementById('modal-member').style.display = 'none';
+      });
+      document.getElementById('btn-close-detail-modal')?.addEventListener('click', () => {
+        document.getElementById('modal-member-detail').style.display = 'none';
+      });
+      document.getElementById('btn-dismiss-detail')?.addEventListener('click', () => {
+        document.getElementById('modal-member-detail').style.display = 'none';
+      });
+
+      // Member Form Password Controls
+      document.getElementById('btn-generate-member-pass')?.addEventListener('click', () => {
+        const input = document.getElementById('inp-password');
+        if (!input) return;
+        const pass = generateStrongPassword();
+        input.value = pass;
+        input.type = 'text';
+        const toggleBtn = document.getElementById('btn-toggle-mem-password');
+        if (toggleBtn) toggleBtn.textContent = '🙈';
+        showToast('⚡ Strong password generated for member!');
+      });
+
+      document.getElementById('btn-toggle-mem-password')?.addEventListener('click', () => {
+        const input = document.getElementById('inp-password');
+        const toggleBtn = document.getElementById('btn-toggle-mem-password');
+        if (!input) return;
+        const isPass = input.type === 'password';
+        input.type = isPass ? 'text' : 'password';
+        if (toggleBtn) toggleBtn.textContent = isPass ? '🙈' : '👁️';
+      });
+
+      // Direct Credentials Modal Controls
+      document.getElementById('btn-direct-gen-pass')?.addEventListener('click', () => {
+        const passInput = document.getElementById('direct-cred-password');
+        if (!passInput) return;
+        passInput.value = generateStrongPassword();
+        passInput.type = 'text';
+        showToast('⚡ New member password generated!');
+      });
+
+      document.getElementById('btn-toggle-direct-pass')?.addEventListener('click', () => {
+        const passInput = document.getElementById('direct-cred-password');
+        if (!passInput) return;
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';
+      });
+
+      document.getElementById('btn-close-direct-cred')?.addEventListener('click', () => {
+        document.getElementById('modal-give-credentials-direct').style.display = 'none';
+      });
+      document.getElementById('btn-cancel-direct-cred')?.addEventListener('click', () => {
+        document.getElementById('modal-give-credentials-direct').style.display = 'none';
+      });
+
+      document.getElementById('btn-save-direct-cred')?.addEventListener('click', async () => {
+        const memberId = document.getElementById('direct-cred-member-id').value;
+        const email = document.getElementById('direct-cred-email').value.trim();
+        const password = document.getElementById('direct-cred-password').value.trim();
+
+        if (!email) {
+          showToast('Please enter an email address for the member.', true);
+          return;
+        }
+        if (!password) {
+          showToast('Please enter or generate a password.', true);
+          return;
+        }
+
+        const member = state.members.find((m) => String(m.id) === String(memberId));
+        const fullName = member ? member.full_name : 'Gym Member';
+
+        try {
+          const res = await adminApi.updateMember(memberId, { email, password });
+          if (res.success) {
+            document.getElementById('modal-give-credentials-direct').style.display = 'none';
+            await loadMembers();
+            showMemberCredentialsReadyModal({
+              fullName,
+              email,
+              password,
+              isUpdated: true,
+            });
+            showToast('✅ Member login credentials saved successfully!');
+          } else {
+            showToast(res.error || 'Failed to update member credentials.', true);
+          }
+        } catch (err) {
+          showToast('Error saving credentials: ' + err.message, true);
+        }
+      });
+
+      // Credentials Card Modal Controls
+      document.getElementById('btn-toggle-cred-pass')?.addEventListener('click', () => {
+        const passEl = document.getElementById('cred-member-password');
+        if (!passEl) return;
+        const plain = passEl.dataset.plain || currentMemberCredsToShare.password;
+        if (passEl.textContent === '••••••••') {
+          passEl.textContent = plain;
+        } else {
+          passEl.textContent = '••••••••';
+        }
+      });
+
+      document.getElementById('btn-copy-member-credentials')?.addEventListener('click', async () => {
+        const textToCopy = `==============================================
+VIRTEX FITNESS - MEMBER LOGIN CREDENTIALS
+==============================================
+Member Name:  ${currentMemberCredsToShare.fullName}
+Login Portal: ${window.location.origin}/member-auth.html
+Login Email:  ${currentMemberCredsToShare.email}
+Password:     ${currentMemberCredsToShare.password}
+Role:         Gym Member
+==============================================
+Instructions:
+1. Navigate to: ${window.location.origin}/member-auth.html
+2. Enter your email and password to access your member dashboard.
+3. Track your workouts, visits, and membership benefits.`;
+
+        const ok = await copyToClipboard(textToCopy);
+        const copyBtn = document.getElementById('btn-copy-member-credentials');
+        if (ok) {
+          showToast('📋 Member login credentials copied to clipboard!');
+          if (copyBtn) {
+            copyBtn.textContent = '✅ Copied to Clipboard!';
+            copyBtn.style.background = '#22c55e';
+            copyBtn.style.color = '#fff';
+            setTimeout(() => {
+              if (copyBtn) {
+                copyBtn.textContent = '📋 Copy Credentials for Member';
+                copyBtn.style.background = '#00e676';
+                copyBtn.style.color = '#000';
+              }
+            }, 3000);
+          }
+        } else {
+          showToast('Failed to copy to clipboard. Please copy manually.', true);
+        }
+      });
+
+      document.getElementById('btn-close-member-credentials')?.addEventListener('click', () => {
+        document.getElementById('modal-credentials-share').style.display = 'none';
+      });
+
+      // Close modals on clicking overlay backdrop
+      ['modal-member', 'modal-member-detail', 'modal-credentials-share', 'modal-give-credentials-direct'].forEach((modalId) => {
+        const el = document.getElementById(modalId);
+        el?.addEventListener('click', (e) => {
+          if (e.target === el) el.style.display = 'none';
+        });
+      });
+
+      // Form Submit (Create or Update)
+      document.getElementById('form-member')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const editId = document.getElementById('edit-member-id').value;
+        const passVal = document.getElementById('inp-password')?.value.trim();
+        const emailVal = document.getElementById('inp-email').value.trim();
+
+        if (!editId && !passVal) {
+          showToast('Please set or generate a login password for the member.', true);
+          return;
+        }
+
+        const payload = {
+          fullName: document.getElementById('inp-fullname').value.trim(),
+          phone: document.getElementById('inp-phone').value.trim(),
+          email: emailVal,
+          planName: document.getElementById('inp-plan').value,
+          planId: Number(document.getElementById('inp-plan').selectedOptions[0]?.dataset.id) || undefined,
+          gender: document.querySelector('input[name="inp-gender"]:checked')?.value || undefined,
+          preferredLanguage: document.getElementById('inp-lang').value,
+          status: document.getElementById('inp-status').value,
+          emergencyContact: document.getElementById('inp-emergency').value.trim(),
+          rfidTag: document.getElementById('inp-rfid').value.trim(),
+        };
+
+        if (passVal) {
+          payload.password = passVal;
+        }
+        if (!payload.gender) { showToast('Choose Girl or Boy.', true); return; }
+        if (!editId) {
+          payload.paidNow = Number(document.getElementById('inp-paid-now').value) || 0;
+          payload.feeDueDate = document.getElementById('inp-fee-due').value || undefined;
+        } else {
+          delete payload.planId; // changing plan on edit keeps the current fee; fees are managed on Fees Due
+        }
+
+        const btnSave = document.getElementById('btn-save-member');
+        if (btnSave) btnSave.textContent = 'Saving...';
+
+        try {
+          let res;
+          if (editId) {
+            res = await adminApi.updateMember(editId, payload);
+          } else {
+            res = await adminApi.createMember(payload);
+          }
+
+          if (res.success) {
+            showToast(`✅ Member "${payload.fullName}" saved successfully!`);
+            document.getElementById('modal-member').style.display = 'none';
+            await loadMembers();
+
+            if (passVal) {
+              showMemberCredentialsReadyModal({
+                fullName: payload.fullName,
+                email: payload.email,
+                password: passVal,
+                isUpdated: !!editId,
+              });
+            }
+          } else {
+            showToast(res.error || 'Failed to save member.', true);
+          }
+        } catch (err) {
+          showToast('Error saving member: ' + err.message, true);
+        } finally {
+          if (btnSave) btnSave.textContent = 'Save Member';
+        }
+      });
+
+      // Search debounce
+      let searchTimer = null;
+      document.getElementById('member-search')?.addEventListener('input', (e) => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+          state.searchQuery = e.target.value.trim();
+          state.currentPage = 1;
+          loadMembers();
+        }, 300);
+      });
+
+      // Status Filter
+      document.getElementById('training-chips')?.addEventListener('click', (e) => {
+        const chip = e.target.closest('[data-training]'); if (!chip) return;
+        state.trainingFilter = chip.dataset.training;
+        document.querySelectorAll('#training-chips [data-training]').forEach((c) => { const on = c === chip; c.classList.toggle('on', on); c.setAttribute('aria-pressed', String(on)); });
+        state.currentPage = 1;
+        loadMembers();
+      });
+      document.getElementById('filter-status')?.addEventListener('change', (e) => {
+        state.statusFilter = e.target.value;
+        state.currentPage = 1;
+        loadMembers();
+      });
+
+      // Refresh Button
+      document.getElementById('btn-refresh-list')?.addEventListener('click', loadMembers);
+
+      // Pagination
+      document.getElementById('btn-prev-page')?.addEventListener('click', () => {
+        if (state.currentPage > 1) {
+          state.currentPage--;
+          loadMembers();
+        }
+      });
+
+      document.getElementById('btn-next-page')?.addEventListener('click', () => {
+        if (state.currentPage < state.totalPages) {
+          state.currentPage++;
+          loadMembers();
+        }
+      });
+
+      // Mobile Sidebar Toggle
+      document.getElementById('btn-sidebar-toggle')?.addEventListener('click', () => {
+        document.getElementById('admin-sidebar')?.classList.toggle('open');
+      });
+
+      // Logout handler
+      document.getElementById('btn-logout')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const confirmed = await confirmCenter({
+          title: 'Sign Out',
+          message: 'Are you sure you want to log out of Virtex Admin Console?',
+          icon: '🚪',
+          confirmText: 'Sign Out',
+          confirmClass: 'btn-action-primary',
+        });
+        if (confirmed) {
+          await adminApi.logout();
+          window.location.href = 'index.html';
+        }
+      });
+
+      // Refresh turnstile logs button
+      document.getElementById('btn-refresh-turnstile')?.addEventListener('click', loadTurnstileLogs);
+    }
+
+    async function loadTurnstileLogs() {
+      const tbody = document.getElementById('turnstile-table-body');
+      if (!tbody) return;
+      try {
+        const res = await adminApi.getRecentCheckIns(20).catch(() => null);
+        const checkins = res?.data || res?.checkins || [];
+        if (checkins.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-dim); padding: 1.5rem;">No recent turnstile logs found in PostgreSQL.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = checkins.map(c => `
+          <tr>
+            <td class="font-mono text-xs">${new Date(c.check_in_time || c.created_at).toLocaleString()}</td>
+            <td class="font-mono text-xs">#${c.member_id || 'GUEST'}</td>
+            <td style="font-weight: 600; color: #fff;">${escapeHtml(c.full_name || c.member_name || 'Active Member')}</td>
+            <td><span class="badge badge-outline text-xs">${c.check_in_method || 'Biometric/RFID'}</span></td>
+            <td class="font-mono text-xs text-dim">${c.device_id ? 'Turnstile Gate #' + c.device_id : 'Main Turnstile'}</td>
+            <td><span class="badge badge-green text-xs">Access Granted</span></td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #f87171; padding: 1.5rem;">Failed to load turnstile logs.</td></tr>';
+      }
+    }
+
+    function handleMemberHash() {
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#modal-add') {
+        setTimeout(openCreateMemberModal, 150);
+      } else if (hash === '#attendance') {
+        setTimeout(() => {
+          document.getElementById('attendance')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
+      }
+    }
+
+    // Initialization
+    async function init() {
+      await hydrateUser();
+      setupListeners();
+      await loadMembers();
+      await loadTurnstileLogs();
+      handleMemberHash();
+      window.addEventListener('hashchange', handleMemberHash);
+    }
+
+    init();
+  </script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+</body>
+
+</html>

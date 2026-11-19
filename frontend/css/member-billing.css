@@ -1,0 +1,109 @@
+/* =====================================================================
+   Virtex Member Portal — Membership, Payments, Invoices
+   (member-membership.html, member-payments.html, member-invoices.html)
+   ===================================================================== */
+
+.bl-cols { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+.bl-section { padding: 1.1rem 1.25rem; min-width: 0; }
+.bl-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 0.9rem; }
+.bl-head h2 { margin: 0; font-size: 1rem; font-weight: 700; }
+.bl-none { color: var(--mp-text-dim); font-style: italic; font-weight: 400; }
+.bl-note { font-size: 0.8rem; color: var(--mp-text-muted); margin: 0.9rem 0 0; line-height: 1.5; }
+.bl-warn-text { color: #f59e0b; }
+.bl-mono { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+.bl-num { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bl-sub { font-size: 0.72rem; color: var(--mp-text-muted); margin-top: 3px; }
+
+/* Status pill: stored label + tone */
+.bl-pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; border: 1px solid; white-space: nowrap; }
+.bl-pill-ok { color: #00e676; border-color: rgba(0, 230, 118, 0.45); background: rgba(0, 230, 118, 0.1); }
+.bl-pill-warn { color: #f59e0b; border-color: rgba(245, 158, 11, 0.45); background: rgba(245, 158, 11, 0.1); }
+.bl-pill-bad { color: #f87171; border-color: rgba(239, 68, 68, 0.5); background: rgba(239, 68, 68, 0.1); }
+.bl-pill-dim { color: #94a3b8; border-color: rgba(148, 163, 184, 0.35); background: rgba(148, 163, 184, 0.08); }
+
+/* Membership: current plan */
+.bl-current { background: linear-gradient(120deg, var(--mp-accent-soft), transparent 60%), var(--mp-surface); border-color: var(--mp-accent-border); }
+.bl-current.is-warn { border-color: rgba(245, 158, 11, 0.5); }
+.bl-current.is-bad { border-color: rgba(239, 68, 68, 0.55); }
+.bl-plan-name { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.9rem; }
+.bl-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; }
+.bl-facts > div > span, .bl-tile > span, .bl-receipt-grid > div > span { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--mp-text-muted); font-weight: 700; }
+.bl-facts b { display: block; margin-top: 3px; font-size: 0.95rem; }
+.bl-facts small { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--mp-text-muted); }
+.bl-kv { display: grid; grid-template-columns: 150px 1fr; gap: 8px 14px; margin: 0; font-size: 0.88rem; }
+.bl-kv dt { color: var(--mp-text-muted); }
+.bl-kv dd { margin: 0; }
+.bl-desk { margin-top: 1rem; padding: 0.7rem 0.9rem; border-radius: 9px; border: 1px dashed rgba(148, 163, 184, 0.35); font-size: 0.82rem; color: var(--mp-text-body); }
+.bl-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.9rem; }
+
+/* Membership: plan catalog */
+.bl-plans { display: grid; gap: 0.85rem; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.bl-plan { border: 1px solid var(--mp-line); border-radius: var(--mp-radius); padding: 1rem; background: rgba(255, 255, 255, 0.015); }
+.bl-plan.is-featured { border-color: rgba(245, 158, 11, 0.4); }
+.bl-plan.is-current { border-color: var(--mp-accent); box-shadow: inset 0 0 0 1px var(--mp-accent); }
+.bl-plan-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.bl-plan h3 { margin: 0; font-size: 0.98rem; }
+.bl-tag { font-size: 0.66rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--mp-accent-soft); color: var(--mp-accent); white-space: nowrap; }
+.bl-tag-dim { background: rgba(255, 255, 255, 0.06); color: #cbd5e1; }
+.bl-price { font-size: 1.3rem; font-weight: 800; margin: 0.5rem 0; font-variant-numeric: tabular-nums; }
+.bl-price small { font-size: 0.75rem; font-weight: 500; color: var(--mp-text-muted); }
+.bl-perks { margin: 0; padding-left: 1.1rem; font-size: 0.8rem; color: var(--mp-text-body); display: grid; gap: 3px; }
+
+/* Payments: totals */
+.bl-tiles { display: grid; gap: 0.85rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.bl-tile { background: var(--mp-surface); border: 1px solid var(--mp-line); border-radius: var(--mp-radius); padding: 0.95rem 1rem; }
+.bl-tile b { display: block; font-size: 1.35rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.bl-tile small { font-size: 0.72rem; color: var(--mp-text-dim); }
+.bl-table td { vertical-align: top; }
+.bl-pager { display: flex; gap: 8px; align-items: center; justify-content: flex-end; font-size: 0.8rem; color: var(--mp-text-muted); margin-top: 0.8rem; }
+.bl-pager:empty { display: none; }
+
+/* Invoices */
+.bl-inv-row.is-selected td { background: var(--mp-accent-soft); }
+.bl-detail:empty { display: none; }
+.bl-detail-actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.bl-invoice { background: #ffffff; color: #111827; border-radius: 12px; padding: 1.75rem; font-size: 0.86rem; line-height: 1.5; }
+.bl-invoice .bl-none { color: #6b7280; }
+.bl-inv-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-bottom: 2px solid #111827; padding-bottom: 1rem; }
+.bl-inv-gym { font-size: 1.2rem; font-weight: 800; }
+.bl-inv-title { text-align: right; }
+.bl-inv-title h2 { margin: 0; font-size: 1.15rem; letter-spacing: 1px; text-transform: uppercase; }
+.bl-inv-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+.bl-inv-parties h3, .bl-receipt h3 { margin: 0 0 4px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.8px; color: #4b5563; }
+.bl-inv-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.bl-inv-table th, .bl-inv-table td { padding: 8px 6px; border-bottom: 1px solid #e5e7eb; text-align: right; }
+.bl-inv-table th:first-child, .bl-inv-table td:first-child { text-align: left; }
+.bl-inv-table th { font-size: 0.72rem; text-transform: uppercase; color: #4b5563; }
+.bl-inv-table tfoot td { border-bottom: none; font-size: 1rem; }
+.bl-invoice .bl-pill { border-width: 1px; }
+.bl-invoice .bl-pill-ok { color: #047857; background: #ecfdf5; border-color: #6ee7b7; }
+.bl-invoice .bl-pill-warn { color: #b45309; background: #fffbeb; border-color: #fcd34d; }
+.bl-invoice .bl-pill-bad { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; }
+.bl-invoice .bl-pill-dim { color: #374151; background: #f3f4f6; border-color: #d1d5db; }
+.bl-receipt { margin-top: 1.25rem; padding: 0.9rem 1rem; border-radius: 10px; border: 1px solid #a7f3d0; background: #f0fdf4; }
+.bl-receipt-none { border-color: #e5e7eb; background: #f9fafb; }
+.bl-receipt-none p { margin: 0; }
+.bl-receipt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.6rem; }
+.bl-receipt-grid > div > span { color: #4b5563; }
+.bl-receipt-grid b { display: block; margin-top: 2px; }
+.bl-inv-foot { margin-top: 1.25rem; font-size: 0.72rem; color: #6b7280; text-align: center; }
+
+@media (max-width: 1000px) { .bl-cols { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .bl-facts, .bl-inv-parties { grid-template-columns: 1fr; }
+  .bl-kv { grid-template-columns: 1fr; gap: 2px; }
+  .bl-kv dd { margin-bottom: 8px; }
+  .bl-invoice { padding: 1rem; font-size: 0.8rem; }
+  .bl-inv-title { text-align: left; }
+  .bl-inv-table { display: block; overflow-x: auto; }
+}
+
+/* Print / "Download PDF": only the invoice, black on white */
+@media print {
+  body.mp-body { background: #fff !important; }
+  .mp-sidebar, .ms-backdrop, .mp-topbar, .mp-page-header, .mp-skip, .no-print, .mp-toast { display: none !important; }
+  .mp-main { margin: 0 !important; }
+  .mp-content { padding: 0 !important; max-width: none !important; }
+  .mp-content > * { animation: none !important; }
+  .bl-invoice { border-radius: 0; padding: 0; box-shadow: none; }
+}

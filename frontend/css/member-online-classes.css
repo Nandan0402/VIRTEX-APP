@@ -1,0 +1,33 @@
+/* =====================================================================
+   Virtex Member Portal — Online Classes (member-online-classes.html)
+   Builds on member-classes.css (cards, chips, flash).
+   ===================================================================== */
+.oc-live { color: #fff; background: #ef4444; border-color: #ef4444; }
+.oc-note { display: block; font-size: 0.74rem; color: var(--mp-text-dim); max-width: 220px; }
+.cl-act a.btn { text-align: center; text-decoration: none; padding: 6px 14px; font-size: 0.8rem; white-space: nowrap; }
+
+.oc-grid { display: grid; gap: 0.8rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.oc-vod { display: flex; flex-direction: column; gap: 4px; padding: 0.9rem; border: 1px solid var(--mp-line); border-radius: 12px; min-width: 0; }
+.oc-vod-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.oc-vod-top small { font-size: 0.72rem; color: var(--mp-text-dim); }
+.oc-vod h3 { margin: 2px 0; font-size: 0.95rem; }
+.oc-vod-act { margin-top: auto; padding-top: 8px; }
+.oc-vod-act a.btn { display: inline-block; text-decoration: none; padding: 6px 14px; font-size: 0.8rem; }
+
+.oc-course { padding: 0.8rem 0; border-top: 1px solid var(--mp-line); }
+.oc-course:first-of-type { border-top: 0; padding-top: 0.2rem; }
+.oc-course h3 { margin: 0; font-size: 0.95rem; }
+.oc-lessons { list-style: none; margin: 0.5rem 0 0; padding: 0; display: grid; gap: 6px; }
+.oc-lessons li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--mp-line); border-radius: 10px; }
+.oc-lessons b { display: block; font-size: 0.85rem; }
+.oc-lessons small { font-size: 0.72rem; color: var(--mp-text-dim); }
+.oc-lessons a.btn { text-decoration: none; padding: 4px 12px; font-size: 0.78rem; }
+.oc-l-num { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.06); font-size: 0.75rem; font-weight: 700; }
+
+.pg-scroll { overflow-x: auto; max-width: 100%; }
+.oc-tbl { width: 100%; font-size: 0.8rem; }
+.oc-tbl td, .oc-tbl th { white-space: nowrap; }
+.oc-out { font-size: 0.72rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--mp-line); }
+.oc-out-ok { color: var(--mp-accent); border-color: var(--mp-accent-border); }
+.oc-out-no { color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+.oc-out-na { color: var(--mp-text-muted); }

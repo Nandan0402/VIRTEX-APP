@@ -1,0 +1,477 @@
+/**
+ * Virtex Admin - Member Retention and Communication Stylesheet
+ * Integrates email templates, push notification campaigns, announcements,
+ * automated renewal reminders, dormant member win-back, feedback (NPS),
+ * complaint tickets, communication history, and campaign analytics.
+ */
+
+:root {
+  --ret-accent: #00e676;
+  --ret-blue: #00b0ff;
+  --ret-purple: #b388ff;
+  --ret-amber: #ffab00;
+  --ret-red: #ff5252;
+  --ret-pink: #ff4081;
+  --ret-card-bg: #11141e;
+  --ret-border: #1e2433;
+}
+
+/* Tab Navigation */
+.ret-nav-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--ret-border);
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.ret-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim, #94a3b8);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+}
+
+.ret-tab-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ret-tab-btn.active {
+  color: var(--ret-accent);
+  background: rgba(0, 230, 118, 0.08);
+  border-bottom-color: var(--ret-accent);
+}
+
+.ret-tab-badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 7px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ret-tab-btn.active .ret-tab-badge {
+  background: rgba(0, 230, 118, 0.2);
+  color: #00e676;
+}
+
+/* KPI Summary Deck */
+.ret-kpi-deck {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.ret-kpi-card {
+  background: var(--ret-card-bg);
+  border: 1px solid var(--ret-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ret-kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.ret-kpi-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.ret-kpi-val {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.ret-kpi-label {
+  font-size: 0.75rem;
+  color: var(--text-dim, #94a3b8);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Filter Controls Bar */
+.ret-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ret-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.ret-search-input {
+  background: #0d1017;
+  border: 1px solid var(--ret-border);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  min-width: 250px;
+}
+
+.ret-select {
+  background: #0d1017;
+  border: 1px solid var(--ret-border);
+  color: #cbd5e1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+/* Campaign Cards */
+.camp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.camp-card {
+  background: var(--ret-card-bg);
+  border: 1px solid var(--ret-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.camp-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.camp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.camp-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+}
+
+.camp-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  background: #090c12;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 12px 0;
+  text-align: center;
+}
+
+.camp-metric-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.camp-metric-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.camp-metric-label {
+  font-size: 0.68rem;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Tables */
+.ret-table-wrap {
+  background: var(--ret-card-bg);
+  border: 1px solid var(--ret-border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.ret-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.ret-table th {
+  background: #0d1017;
+  color: var(--text-dim, #94a3b8);
+  padding: 12px 16px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--ret-border);
+}
+
+.ret-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #161a26;
+  color: #cbd5e1;
+  vertical-align: middle;
+}
+
+.ret-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Status & Sentiment Badges */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.sentiment-positive {
+  background: rgba(0, 230, 118, 0.15);
+  color: #00e676;
+}
+
+.sentiment-neutral {
+  background: rgba(0, 176, 255, 0.15);
+  color: #00b0ff;
+}
+
+.sentiment-negative {
+  background: rgba(255, 82, 82, 0.15);
+  color: #ff5252;
+}
+
+.priority-urgent {
+  background: rgba(255, 82, 82, 0.2);
+  color: #ff5252;
+  font-weight: 800;
+}
+
+.priority-high {
+  background: rgba(255, 171, 0, 0.2);
+  color: #ffab00;
+}
+
+.priority-medium {
+  background: rgba(0, 176, 255, 0.15);
+  color: #00b0ff;
+}
+
+.priority-low {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+/* Modals */
+.ret-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  padding: 1rem;
+}
+
+.ret-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ret-modal {
+  background: #131722;
+  border: 1px solid var(--ret-border);
+  border-radius: 12px;
+  max-width: 650px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  transform: translateY(20px);
+  transition: transform 0.2s ease;
+}
+
+.ret-modal-overlay.active .ret-modal {
+  transform: translateY(0);
+}
+
+.ret-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--ret-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ret-modal-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ret-modal-body {
+  padding: 1.5rem;
+}
+
+.ret-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--ret-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #0d1017;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.form-control {
+  width: 100%;
+  background: #0d1017;
+  border: 1px solid var(--ret-border);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-family: inherit;
+}
+
+.form-control:focus {
+  border-color: var(--ret-accent);
+  outline: none;
+}
+
+.form-control[readonly] {
+  background: #181c28;
+  color: #94a3b8;
+}
+
+/* Template Code Preview */
+.template-preview-box {
+  background: #090c12;
+  border: 1px dashed var(--ret-border);
+  border-radius: 6px;
+  padding: 12px;
+  max-height: 220px;
+  overflow-y: auto;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  margin-top: 8px;
+}
+
+/* NPS Gauge and Meter */
+.nps-gauge-card {
+  background: var(--ret-card-bg);
+  border: 1px solid var(--ret-border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.nps-score-big {
+  font-size: 3.5rem;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+  margin: 10px 0;
+}
+
+.nps-score-green {
+  color: #00e676;
+}
+
+.nps-breakdown-bar {
+  display: flex;
+  width: 100%;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 14px 0 8px;
+}
+
+.nps-bar-promoter {
+  background: #00e676;
+}
+
+.nps-bar-passive {
+  background: #00b0ff;
+}
+
+.nps-bar-detractor {
+  background: #ff5252;
+}
+

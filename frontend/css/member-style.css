@@ -1,0 +1,119 @@
+/* =====================================================================
+   Virtex Member Portal — base: tokens, page shell, sidebar, topbar
+   Load order: admin.css → member-style → member-components → member-forms
+               → member-<page> (when needed) → member-responsive
+   Reuses admin.css tokens (--green, --bg-card, --border …) and components
+   (.card .btn .badge .admin-table .form-group .toast-banner).
+   ===================================================================== */
+:root {
+  --mp-accent: var(--green, #00e676);
+  --mp-accent-soft: rgba(0, 230, 118, 0.12);
+  --mp-accent-border: rgba(0, 230, 118, 0.35);
+  --mp-text: #ffffff;
+  --mp-text-body: #e5e7eb;
+  --mp-text-muted: #94a3b8;
+  --mp-text-dim: #64748b;
+  --mp-danger: #f87171;
+  --mp-surface: var(--bg-card, #13161f);
+  --mp-line: var(--border, #242731);
+  --mp-radius: 12px;
+  --mp-radius-sm: 8px;
+  --mp-gap: 1.25rem;
+  --mp-sidebar-w: 250px;
+}
+
+body.mp-body { margin: 0; background: var(--bg-admin-base, #08090d); color: var(--mp-text); }
+.mp-shell { display: flex; min-height: 100vh; }
+
+/* ---------- Sidebar ---------- */
+.mp-sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--mp-sidebar-w); background: var(--bg-sidebar, #0e1017);
+  border-right: 1px solid var(--mp-line); display: flex; flex-direction: column; z-index: 50; overflow-y: auto;
+  transition: transform 0.2s ease;
+}
+.mp-brand { display: flex; align-items: center; gap: 10px; padding: 1.1rem; border-bottom: 1px solid var(--mp-line); }
+.mp-brand-logo { width: 32px; height: 32px; flex-shrink: 0; }
+.mp-brand h2 { margin: 0; font-size: 1rem; font-weight: 800; color: var(--mp-text); }
+.mp-brand span { display: block; font-size: 0.66rem; font-family: 'JetBrains Mono', monospace; color: var(--mp-accent); letter-spacing: 1px; }
+.mp-sidebar-close { display: none; margin-left: auto; background: transparent; border: 1px solid var(--mp-line); color: var(--mp-text-muted); border-radius: 7px; padding: 4px 8px; cursor: pointer; }
+
+.mp-nav { flex: 1; padding: 0.6rem 0.6rem 1rem; }
+.mp-nav-group { margin-top: 0.7rem; }
+.mp-nav-title { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 1px; color: var(--mp-text-dim); padding: 0 0.6rem 0.3rem; font-weight: 700; }
+.mp-nav a { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 7px; color: #a3aab8; text-decoration: none; font-size: 0.85rem; font-weight: 500; }
+.mp-nav a .mp-ico { width: 18px; text-align: center; flex-shrink: 0; }
+.mp-nav a:hover { background: rgba(255, 255, 255, 0.05); color: var(--mp-text); }
+.mp-nav a.active { background: var(--mp-accent-soft); color: var(--mp-accent); font-weight: 700; }
+.mp-nav a:focus-visible { outline: 2px solid var(--mp-accent); outline-offset: 1px; }
+
+.mp-sidebar-foot { border-top: 1px solid var(--mp-line); padding: 0.75rem 1.1rem; font-size: 0.8rem; }
+.mp-sidebar-foot a { color: var(--mp-text-muted); text-decoration: none; }
+.mp-sidebar-foot a:hover { color: var(--mp-accent); }
+.mp-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 45; }
+
+.mp-skip { position: absolute; left: -9999px; top: 8px; z-index: 100; background: var(--mp-accent); color: #000; padding: 6px 12px; border-radius: 6px; font-weight: 700; }
+.mp-skip:focus { left: 8px; }
+
+/* ---------- Main column + top bar ---------- */
+.mp-main { margin-left: var(--mp-sidebar-w); flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mp-topbar {
+  position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 12px; padding: 0.6rem 1.5rem; min-height: 56px;
+  box-sizing: border-box; background: rgba(8, 9, 13, 0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--mp-line);
+}
+.mp-menu-btn { display: none; background: transparent; border: 1px solid var(--mp-line); color: var(--mp-text); border-radius: 7px; padding: 5px 9px; cursor: pointer; font-size: 1rem; }
+.mp-topbar-brand { display: none; align-items: center; gap: 8px; font-weight: 800; font-size: 0.95rem; }
+.mp-topbar-brand .mp-brand-logo { width: 26px; height: 26px; }
+
+/* ---------- Profile dropdown ---------- */
+.mp-profile { position: relative; margin-left: auto; }
+.mp-profile-btn {
+  display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--mp-line);
+  border-radius: 9999px; padding: 3px 10px 3px 3px; color: var(--mp-text); cursor: pointer; font-family: inherit; max-width: 240px;
+}
+.mp-profile-btn:hover, .mp-profile-btn[aria-expanded="true"] { border-color: var(--mp-accent-border); background: var(--mp-accent-soft); }
+.mp-avatar { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; background: var(--mp-accent-soft); color: var(--mp-accent); font-weight: 800; font-size: 0.8rem; }
+.mp-profile-meta { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; line-height: 1.2; }
+.mp-user-name { font-weight: 700; font-size: 0.8rem; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mp-user-role { color: var(--mp-text-dim); font-size: 0.64rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+.mp-caret { color: var(--mp-text-muted); font-size: 0.7rem; }
+.mp-profile-menu {
+  position: absolute; right: 0; top: calc(100% + 6px); min-width: 200px; z-index: 60; padding: 6px; background: var(--mp-surface);
+  border: 1px solid var(--mp-line); border-radius: var(--mp-radius-sm); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+}
+.mp-profile-menu[hidden] { display: none; }
+.mp-profile-menu a, .mp-profile-menu button {
+  display: block; width: 100%; text-align: left; padding: 8px 10px; border-radius: 6px; border: none; background: transparent;
+  color: var(--mp-text-body); font-size: 0.84rem; text-decoration: none; cursor: pointer; font-family: inherit; box-sizing: border-box;
+}
+.mp-profile-menu a:hover, .mp-profile-menu button:hover { background: rgba(255, 255, 255, 0.06); color: var(--mp-text); }
+.mp-profile-menu hr { border: none; border-top: 1px solid var(--mp-line); margin: 4px 0; }
+.mp-profile-menu .mp-menu-danger { color: var(--mp-danger); }
+
+/* ---------- Page header + breadcrumbs ---------- */
+.mp-page-header { padding: 1.25rem 1.5rem 0; max-width: 1200px; width: 100%; box-sizing: border-box; margin: 0 auto; }
+.mp-breadcrumbs ol { list-style: none; margin: 0 0 6px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.75rem; color: var(--mp-text-dim); }
+.mp-breadcrumbs li + li::before { content: '›'; margin-right: 4px; }
+.mp-breadcrumbs a { color: var(--mp-text-muted); text-decoration: none; }
+.mp-breadcrumbs a:hover { color: var(--mp-accent); }
+.mp-breadcrumbs [aria-current="page"] { color: var(--mp-accent); font-weight: 600; }
+.mp-page-header-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.mp-page-heading h1 { margin: 0; font-size: 1.4rem; font-weight: 800; }
+.mp-page-heading p { margin: 3px 0 0; font-size: 0.84rem; color: var(--mp-text-muted); }
+.mp-page-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+.mp-content {
+  padding: 1.25rem 1.5rem 1.5rem; max-width: 1200px; width: 100%; box-sizing: border-box; margin: 0 auto;
+  display: flex; flex-direction: column; gap: var(--mp-gap); outline: none;
+}
+
+/* Member Punch In / Punch Out (member-punch.js) */
+.mp-punch { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.mp-punch:empty { display: none; }
+.mp-punch:not(:empty) + .mp-profile { margin-left: 10px; }
+.mp-punch-btn { border-radius: 999px; padding: 6px 14px; font: inherit; font-size: .8rem; font-weight: 800; cursor: pointer; border: 1px solid; }
+.mp-punch-btn.in { background: #00e676; border-color: #00e676; color: #04130a; }
+.mp-punch-btn.out { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.5); color: #fca5a5; }
+.mp-punch-btn.out:hover { background: #ef4444; color: #fff; }
+.mp-punch-btn:disabled { opacity: .6; cursor: wait; }
+.mp-punch-state { font-size: .78rem; font-weight: 700; color: #6ee7b7; white-space: nowrap; }
+@media (max-width: 640px) { .mp-punch-state { display: none; } .mp-punch-btn { padding: 5px 10px; font-size: .74rem; } }

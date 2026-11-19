@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="Virtex">
+  <title>Virtex</title>
+  <!-- Virtex mark: two-tone geometric V over a heartbeat baseline (fitness + intelligent tech). -->
+  <rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#0f131b" stroke="#00e676" stroke-width="1.6"/>
+  <path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/>
+  <path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/>
+  <path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

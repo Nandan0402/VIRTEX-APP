@@ -1,0 +1,31 @@
+/* =====================================================================
+   Virtex Trainer Portal — motion (subtle; disabled for reduced motion)
+   ===================================================================== */
+
+@keyframes tp-fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes tp-pop { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes tp-toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes tp-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+
+/* Page content and cards ease in when a page renders */
+.tp-content > * { animation: tp-fade-up 0.22s ease both; }
+.tp-content > *:nth-child(2) { animation-delay: 0.03s; }
+.tp-content > *:nth-child(3) { animation-delay: 0.06s; }
+.tp-content > *:nth-child(4) { animation-delay: 0.09s; }
+
+.tp-modal { animation: tp-pop 0.16s ease both; }
+.tp-toast { animation: tp-toast-in 0.2s ease both; }
+
+/* "Loading…" placeholders pulse gently */
+.tp-loading { animation: tp-pulse 1.4s ease-in-out infinite; }
+
+.tp-stat, .tp-row, .card { transition: border-color 0.15s ease, background-color 0.15s ease; }
+.tp-stat:hover { border-color: var(--tp-accent-border); }
+
+/* Mobile sidebar slide */
+.tp-sidebar { transition: transform 0.2s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-content > *, .tp-modal, .tp-toast, .tp-loading { animation: none !important; }
+  .tp-sidebar, .tp-stat, .tp-row, .card { transition: none !important; }
+}

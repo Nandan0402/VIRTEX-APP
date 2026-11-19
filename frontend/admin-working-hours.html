@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/virtex-favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtex Admin • Weekly Operating Hours & Custom Schedules</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root, html {
+      color-scheme: dark !important;
+      --accent-green: #00e676;
+      --accent-green-dark: #00b050;
+      --accent-green-glow: rgba(0, 230, 118, 0.28);
+      --green: #00e676;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.18) #0e1017;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0e1017 !important;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18) !important;
+      border-radius: 4px !important;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00e676 !important;
+    }
+
+    /* Dedicated Working Hours Manager Layout */
+    .hours-page-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .hours-hero-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hours-hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-green) 0%, #00b0ff 50%, #7c4dff 100%);
+    }
+
+    .hours-hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .hours-hero-title h2 {
+      margin: 0 0 6px 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hours-hero-title p {
+      margin: 0;
+      color: var(--text-dim);
+      font-size: 0.88rem;
+      max-width: 750px;
+      line-height: 1.45;
+    }
+
+    .hours-hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Live stats metrics banner */
+    .hours-metrics-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .hours-metric-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      min-height: 84px;
+      min-width: 0;
+    }
+
+    .hours-metric-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: rgba(0, 230, 118, 0.1);
+      color: var(--accent-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+    }
+
+    .hours-metric-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .hours-metric-info h5 {
+      margin: 0 0 3px 0;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hours-metric-info .val {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      white-space: normal;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    /* Save floating footer */
+    .save-bar-footer {
+      position: sticky;
+      bottom: 1.5rem;
+      z-index: 50;
+      background: rgba(18, 24, 32, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 230, 118, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .save-bar-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .save-bar-info .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    /* =============================================================== */
+    /* ENHANCED TIME INPUTS & UI/UX REFINEMENTS                        */
+    /* =============================================================== */
+
+    /* Universal Dark Time Input (eliminates blinding white boxes) */
+    .schedule-slot-row input[type="time"],
+    .input-time {
+      background: #141c26 !important;
+      color: #00e676 !important;
+      border: 1px solid rgba(0, 230, 118, 0.32) !important;
+      border-radius: 6px !important;
+      padding: 6px 10px !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 0.86rem !important;
+      font-weight: 700 !important;
+      outline: none !important;
+      transition: all 0.2s ease !important;
+      color-scheme: dark !important;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .schedule-slot-row input[type="time"]:focus,
+    .input-time:focus {
+      border-color: #00e676 !important;
+      box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.25), inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+      background: #1a2533 !important;
+    }
+
+    .schedule-slot-row input[type="time"]:disabled,
+    .input-time:disabled {
+      opacity: 0.4;
+      background: #0b0f15 !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      color: #64748b !important;
+      cursor: not-allowed !important;
+    }
+
+    /* Cyber Green Clock Picker Icon for WebKit / Chromium */
+    .schedule-slot-row input[type="time"]::-webkit-calendar-picker-indicator,
+    .input-time::-webkit-calendar-picker-indicator {
+      filter: invert(68%) sepia(87%) saturate(2250%) hue-rotate(97deg) brightness(101%) contrast(106%);
+      cursor: pointer;
+      opacity: 0.92;
+      transition: transform 0.2s ease;
+    }
+
+    .schedule-slot-row input[type="time"]::-webkit-calendar-picker-indicator:hover,
+    .input-time::-webkit-calendar-picker-indicator:hover {
+      transform: scale(1.18);
+      opacity: 1;
+    }
+
+    /* Day Card Visual Enhancements */
+    .schedule-day-card {
+      background: #121822 !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-radius: 12px !important;
+      padding: 1.15rem 1.35rem !important;
+      margin-bottom: 0.85rem !important;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+    }
+
+    .schedule-day-card:hover {
+      border-color: rgba(0, 230, 118, 0.3) !important;
+      background: #151c27 !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    .schedule-day-card.is-closed {
+      opacity: 0.65;
+      background: rgba(239, 68, 68, 0.03) !important;
+      border-color: rgba(239, 68, 68, 0.2) !important;
+    }
+
+    .schedule-day-main-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .day-badge {
+      font-size: 1.05rem !important;
+      font-weight: 800 !important;
+      color: #fff !important;
+      letter-spacing: 0.3px;
+    }
+
+    /* Toggle Button */
+    .btn-day-toggle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-day-toggle.open {
+      background: rgba(0, 230, 118, 0.12);
+      color: #00e676;
+      border: 1px solid rgba(0, 230, 118, 0.45);
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.15);
+    }
+
+    .btn-day-toggle.open:hover {
+      background: rgba(0, 230, 118, 0.22);
+      border-color: #00e676;
+      box-shadow: 0 0 14px rgba(0, 230, 118, 0.3);
+    }
+
+    .btn-day-toggle.closed {
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-day-toggle.closed:hover {
+      background: rgba(239, 68, 68, 0.22);
+      border-color: #ef4444;
+    }
+
+    /* Slot Row Styling */
+    .schedule-slot-row {
+      background: #0f151e !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-radius: 8px !important;
+      padding: 0.75rem 1rem !important;
+      margin-bottom: 0.5rem !important;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      transition: all 0.2s ease;
+    }
+
+    .schedule-slot-row:hover {
+      background: #141c26 !important;
+      border-color: rgba(0, 230, 118, 0.25) !important;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .schedule-slot-row .slot-badge {
+      color: var(--accent-green) !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-weight: 800 !important;
+      font-size: 0.82rem !important;
+      min-width: 76px;
+    }
+
+    .schedule-slot-row .time-sep {
+      color: #94a3b8 !important;
+      font-size: 0.76rem !important;
+      font-weight: 700 !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      text-transform: uppercase;
+      padding: 0 4px;
+    }
+
+    .schedule-slot-row .select-class-type {
+      background: #141c26 !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      border-radius: 6px !important;
+      padding: 6px 12px !important;
+      font-size: 0.82rem !important;
+      font-weight: 600 !important;
+      outline: none;
+      cursor: pointer;
+      color-scheme: dark !important;
+      transition: all 0.2s ease;
+    }
+
+    .schedule-slot-row .select-class-type:focus {
+      border-color: #00e676 !important;
+      box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.2);
+    }
+
+    .schedule-slot-row .input-note {
+      background: #141c26 !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      border-radius: 6px !important;
+      padding: 6px 12px !important;
+      font-size: 0.82rem !important;
+      flex: 1;
+      min-width: 220px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .schedule-slot-row .input-note:focus {
+      border-color: #00e676 !important;
+      box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.2);
+      background: #1a2533 !important;
+    }
+
+    .schedule-slot-row .btn-slot-remove {
+      background: rgba(239, 68, 68, 0.12) !important;
+      border: 1px solid rgba(239, 68, 68, 0.35) !important;
+      color: #f87171 !important;
+      border-radius: 6px !important;
+      width: 34px !important;
+      height: 34px !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .schedule-slot-row .btn-slot-remove:hover {
+      background: rgba(239, 68, 68, 0.28) !important;
+      border-color: #ef4444 !important;
+      color: #fff !important;
+      transform: scale(1.08);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="admin-layout">
+    <!-- =============================================================== -->
+    <!-- SIDEBAR NAVIGATION -->
+    <!-- =============================================================== -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="sidebar-brand">
+        <a href="admin.html#tab-overview" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
+          <div class="brand-logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+          </div>
+          <div>
+            <h2>VIRTEX</h2>
+            <p>TRAINER / ADMIN CONSOLE</p>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="admin.html#tab-overview" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📊</span> Overview & Stats
+        </a>
+        <a href="admin-members.html" class="nav-item-btn " id="nav-item-members"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👥</span> Members
+        </a>
+        <a href="admin-feessalert.html" class="nav-item-btn" id="nav-item-fees-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💰</span> Fees Alert
+        </a>
+        <a href="admin-birthdayalert.html" class="nav-item-btn" id="nav-item-birthday-alert" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🎂</span> Birthday Alert
+        </a>
+        <a href="admin-messages.html" class="nav-item-btn " id="nav-item-messages"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📩</span> Message
+        </a>
+        <a href="admin-notification.html" class="nav-item-btn " id="nav-item-notifications"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📢</span> Notification
+        </a>
+        <a href="admin-personaltraniner.html" class="nav-item-btn " id="nav-item-trainers"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏋️</span> Personal Trainer
+        </a>
+        <a href="admin-assign-membertoperonal traniner.html" class="nav-item-btn" id="nav-item-assign-trainer" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤝</span> Assign PT & Fees
+        </a>
+        <a href="admin-routine-tracker.html" class="nav-item-btn" id="nav-item-routine-tracker" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏱️</span> Routine Tracker
+        </a>
+        <a href="admin.html#tab-plans" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">💳</span> Membership Plans
+        </a>
+        <a href="admin.html#tab-faqs" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">❓</span> FAQs / Knowledge Base
+        </a>
+        <a href="admin.html#tab-robot" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🤖</span> Robot Telemetry & Controls
+        </a>
+        <a href="admin.html#tab-profile" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">🏢</span> Gym Profile
+        </a>
+        <a href="admin-working-hours.html" class="nav-item-btn active" id="nav-item-working-hours-link" aria-current="page" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⏰</span> Working Hours
+        </a>
+        <a href="admin-calander.html" class="nav-item-btn " id="nav-item-admin-calendar"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">📅</span> Class & Shift Calendar
+        </a>
+        <a href="admin-profile.html" class="nav-item-btn " id="nav-item-admin-profile"  style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">👤</span> Profile
+        </a>
+        <a href="admin.html#tab-settings" class="nav-item-btn" style="text-decoration: none;">
+          <span class="nav-icon" aria-hidden="true">⚙️</span> Language & Settings
+        </a>
+      </nav>
+
+      <!-- User Profile & Session Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="sidebar-user-card" style="cursor: pointer;" title="Active Profile" role="button" tabindex="0">
+          <div class="user-avatar avatar-owner" id="sidebar-user-avatar">
+            <img id="sidebar-user-photo" src="" alt="Avatar" style="display: none; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+            <span id="sidebar-user-initials">NB</span>
+          </div>
+          <div class="user-details">
+            <div class="user-name-line">
+              <span class="user-fullname" id="sidebar-user-fullname">Nandan.B</span>
+              <span class="role-badge-pill role-owner" id="sidebar-role-pill">OWNER</span>
+            </div>
+            <div class="user-handle-line">
+              <span class="user-handle" id="sidebar-user-handle">@nandanb449</span>
+            </div>
+          </div>
+          <button class="btn-user-action" id="btn-logout" title="Sign Out">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- =============================================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- =============================================================== -->
+    <main class="admin-main">
+      <!-- Top Bar -->
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Toggle Sidebar">☰</button>
+          <div class="topbar-breadcrumb">
+            <span>Console</span>
+            <span class="separator">/</span>
+            <span>Facility & Operations</span>
+            <span class="separator">/</span>
+            <span class="current">Working Hours & Schedules</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Routine Quick Punch Group -->
+          <div class="topbar-routine-group" id="topbar-routine-group">
+            <a href="admin-routine-tracker.html" class="topbar-routine-badge status-out" id="topbar-routine-badge" title="Click to view full Routine Tracker">
+              <span class="topbar-status-dot"></span>
+              <span id="topbar-routine-text">PUNCHED OUT</span>
+            </a>
+
+            <div class="topbar-punch-btns">
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-in" id="topbar-btn-punch-in" title="Punch In (Start Daily Shift)">
+                <span>🟢</span>
+                <span class="topbar-btn-text">Punch In</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-break" id="topbar-btn-break" title="Take or Resume Routine Break" disabled>
+                <span id="topbar-break-icon">☕</span>
+                <span class="topbar-btn-text" id="topbar-break-text">Break</span>
+              </button>
+
+              <button type="button" class="topbar-icon-btn btn-topbar-punch-out" id="topbar-btn-punch-out" title="Punch Out (End Daily Shift)" disabled>
+                <span>⏹️</span>
+                <span class="topbar-btn-text">Punch Out</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="topbar-divider-vert"></div>
+
+          <!-- Message Link Icon -->
+          <a href="admin-messages.html" class="topbar-nav-icon-link" id="topbar-message-link" title="Member Messages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="topbar-counter-badge" id="topbar-message-badge" style="display: none;">0</span>
+          </a>
+
+          <!-- Notification Link Icon -->
+          <a href="admin-notification.html" class="topbar-nav-icon-link" id="topbar-notification-link" title="Notifications & System Announcements">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="topbar-counter-badge topbar-counter-red" id="topbar-notification-badge" style="display: none;">0</span>
+          </a>
+
+          <div class="topbar-divider-vert"></div>
+
+          <button type="button" class="btn btn-green btn-sm" id="btn-top-save">
+            💾 Save Changes
+          </button>
+        </div>
+      </header>
+
+      <!-- Page Container -->
+      <div class="admin-content-inner">
+        <div class="hours-page-container">
+
+          <!-- Hero & Metrics Header -->
+          <div class="hours-hero-card">
+            <div class="hours-hero-top">
+              <div class="hours-hero-title">
+                <h2>⏰ Weekly Operating Hours & Custom Schedules</h2>
+                <p>
+                  Customize operating hours for individual days of the week, 24/7 access, split morning/evening shifts, and specific class activities (Zumba, Yoga, HIIT, CrossFit). All changes are instantly synchronized with the AI Receptionist and Member Check-In Kiosk.
+                </p>
+              </div>
+              <div class="hours-hero-actions">
+                <a href="admin-rush-hours.html" class="btn btn-outline btn-xs" id="btn-jump-rush-hours" style="text-decoration: none;">
+                  🔥 Rush-Hour Heatmap
+                </a>
+                <span class="badge badge-outline text-xs font-mono" style="color: var(--accent-green); border-color: rgba(0, 230, 118, 0.4); background: rgba(0, 230, 118, 0.08);">
+                  ● PostgreSQL Grounded
+                </span>
+                <span class="badge badge-outline text-xs font-mono" style="color: #60a5fa; border-color: rgba(96, 165, 250, 0.4); background: rgba(96, 165, 250, 0.08);">
+                  🤖 AI Receptionist Synced
+                </span>
+              </div>
+            </div>
+
+            <!-- Metrics Row -->
+            <div class="hours-metrics-row">
+              <div class="hours-metric-card">
+                <div class="hours-metric-icon">⏰</div>
+                <div class="hours-metric-info">
+                  <h5>Live Schedule Today</h5>
+                  <div class="val" id="metric-today-hours">06:00 – 21:00</div>
+                </div>
+              </div>
+
+              <div class="hours-metric-card">
+                <div class="hours-metric-icon">💃</div>
+                <div class="hours-metric-info">
+                  <h5>Dual Batch Classes</h5>
+                  <div class="val" id="metric-dual-status">Zumba & Yoga Active</div>
+                </div>
+              </div>
+
+              <div class="hours-metric-card">
+                <div class="hours-metric-icon">📋</div>
+                <div class="hours-metric-info">
+                  <h5>Weekly Class Slots</h5>
+                  <div class="val" id="metric-total-slots">13 Scheduled Slots</div>
+                </div>
+              </div>
+
+              <div class="hours-metric-card">
+                <div class="hours-metric-icon">⚡</div>
+                <div class="hours-metric-info">
+                  <h5>Operational Days</h5>
+                  <div class="val" id="metric-open-days">7 / 7 Days Active</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schedule Editor Card -->
+          <div class="card" style="padding: 1.5rem;">
+            <!-- Presets Toolbar -->
+            <div class="schedule-preset-bar" style="margin-bottom: 1.5rem;">
+              <span class="text-xs text-dim font-mono" style="font-weight: 700; text-transform: uppercase;">Quick Presets:</span>
+              <button type="button" class="btn btn-outline btn-xs" id="btn-preset-dual-classes">💃 Morning Zumba & 🧘 Evening Yoga (Dual Batches)</button>
+              <button type="button" class="btn btn-outline btn-xs" id="btn-preset-standard">⚡ Standard Gym (6AM-10PM)</button>
+              <button type="button" class="btn btn-outline btn-xs" id="btn-preset-group-classes">👥 Gym + Group Classes (AM Gym / PM Group)</button>
+              <button type="button" class="btn btn-outline btn-xs" id="btn-preset-247">⚡ 24/7 Open All Week</button>
+              <button type="button" class="btn btn-outline btn-xs" id="btn-preset-weekdays-only">⚡ Weekdays Only (Sun Closed)</button>
+              <button type="button" class="btn btn-outline btn-xs" id="btn-toggle-day-mode" style="margin-left: auto;">📁 Group Weekdays (Optional)</button>
+            </div>
+
+            <!-- 7-Day Interactive Customization List (Rendered Separately) -->
+            <div class="schedule-days-container" id="schedule-days-container">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </div>
+
+
+          <!-- Sticky Bottom Save Bar -->
+          <div class="save-bar-footer">
+            <div class="save-bar-info">
+              <div class="status-dot"></div>
+              <div>
+                <strong style="color: #fff; font-size: 0.95rem;">Unsaved Schedule Changes?</strong>
+                <p class="text-dim text-xs" style="margin: 2px 0 0 0;">
+                  Click Save to synchronize changes with PostgreSQL, the AI Voice Receptionist, and the Kiosk.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <a href="admin.html#tab-profile" class="btn btn-outline btn-sm">
+                🏢 Back to Gym Profile
+              </a>
+              <button type="button" class="btn btn-green" id="btn-bottom-save">
+                💾 Save Operating Hours & Schedules
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Modal: Confirmation Dialog (Centered) -->
+  <div class="modal-backdrop" id="modal-confirm" aria-hidden="true" role="dialog" aria-modal="true" style="z-index: 2500;">
+    <div class="modal-card" style="max-width: 440px; text-align: center; border: 1px solid rgba(239, 68, 68, 0.4); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95); padding: 2rem 1.75rem;">
+      <div style="font-size: 3rem; line-height: 1; margin-bottom: 0.85rem;" id="modal-confirm-icon">🚪</div>
+      <h3 id="modal-confirm-title" style="margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 700; color: #fff;">Sign Out</h3>
+      <p id="modal-confirm-message" style="color: #94a3b8; font-size: 0.92rem; margin-bottom: 1.75rem; line-height: 1.5;">
+        Are you sure you want to log out of Virtex Admin Console?
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button type="button" class="btn btn-outline" id="modal-confirm-cancel-btn" style="flex: 1; padding: 0.75rem 1rem; font-weight: 600;">Cancel</button>
+        <button type="button" class="btn btn-green" id="modal-confirm-ok-btn" style="flex: 1; padding: 0.75rem 1rem; font-weight: 700;">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JavaScript Module -->
+  <script>
+    // The Rush-Hour Traffic Heatmap moved to its own page; old #rush-hours links open it.
+    (function () { const go = () => { if (location.hash.toLowerCase() === '#rush-hours') location.replace('admin-rush-hours.html'); }; go(); window.addEventListener('hashchange', go); })();
+  </script>
+  <script type="module">
+    import { adminApi } from './js/admin/adminApi.js';
+
+    // State
+    const state = {
+      operatingHours: [],
+      scheduleViewMode: 'expanded', // Separate 7 days by default: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
+      isSaving: false,
+    };
+
+    const classOptions = [
+      { val: 'Zumba & Aerobics', label: '💃 Zumba & Aerobics' },
+      { val: 'Yoga & Pilates', label: '🧘 Yoga & Pilates' },
+      { val: 'General Gym', label: '🏋️ General Gym (Floor)' },
+      { val: 'Group Classes', label: '👥 Group Classes (All Batches)' },
+      { val: 'Gym & Group Classes', label: '🏋️+👥 Gym & Group Classes' },
+      { val: 'HIIT & CrossFit', label: '🔥 HIIT & CrossFit' },
+      { val: 'Boxing & MMA', label: '🥊 Boxing & MMA' },
+      { val: 'Personal Training', label: '⚡ Personal Training' },
+      { val: 'Open Gym / 24/7', label: '🕒 Open Gym / 24/7' },
+      { val: 'Custom', label: '✏️ Custom Class...' },
+    ];
+
+    // Toast Utility
+    function showToast(message, isError = false) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast ${isError ? 'toast-error' : 'toast-success'}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Hydrate User Session
+    async function hydrateUser() {
+      try {
+        const userRes = await adminApi.getCurrentUser();
+        const u = userRes.user || userRes.data;
+        if (userRes.success && u) {
+          const fullName = u.fullName || u.full_name || u.username || 'Nandan.B';
+          const username = u.username || 'nandanb449';
+          const role = (u.role || 'owner').toUpperCase();
+
+          document.getElementById('sidebar-user-fullname').textContent = fullName;
+          document.getElementById('sidebar-user-handle').textContent = `@${username}`;
+
+          const pill = document.getElementById('sidebar-role-pill');
+          if (pill) {
+            pill.textContent = role;
+            pill.className = `role-badge-pill role-${role.toLowerCase()}`;
+          }
+
+          const photoEl = document.getElementById('sidebar-user-photo');
+          const initialsEl = document.getElementById('sidebar-user-initials');
+          if (u.avatar_url || u.avatarUrl) {
+            if (photoEl) {
+              photoEl.src = u.avatar_url || u.avatarUrl;
+              photoEl.style.display = 'block';
+            }
+            if (initialsEl) initialsEl.style.display = 'none';
+          } else {
+            if (photoEl) photoEl.style.display = 'none';
+            if (initialsEl) {
+              initialsEl.textContent = fullName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
+              initialsEl.style.display = 'inline';
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[WorkingHours] Auth hydration notice:', err.message);
+      }
+    }
+
+    // Load Operating Hours from PostgreSQL
+    async function loadOperatingHours() {
+      try {
+        const res = await adminApi.getGymProfile();
+        const profile = res.data || res.profile;
+        if (res.success && profile) {
+          state.operatingHours = profile.operating_hours || profile.hours || [];
+          renderOperatingHours(state.operatingHours);
+        } else {
+          renderOperatingHours([]);
+        }
+      } catch (err) {
+        console.error('Failed to load operating hours from PostgreSQL:', err);
+        renderOperatingHours([]);
+      }
+    }
+
+    // Render Operating Hours Cards
+    function renderOperatingHours(storedHours = []) {
+      const container = document.getElementById('schedule-days-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      // Index stored hours by day name
+      const hoursMap = {};
+      if (Array.isArray(storedHours)) {
+        storedHours.forEach((h) => {
+          if (h && h.day) {
+            hoursMap[h.day.toLowerCase()] = h;
+          } else if (h && h.days) {
+            const lower = h.days.toLowerCase();
+            if (lower.includes('friday') || lower.includes('weekday') || lower.includes('mon-fri') || lower.includes('mon – fri')) {
+              ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].forEach((d) => (hoursMap[d] = h));
+            } else if (lower.includes('saturday')) {
+              hoursMap['saturday'] = h;
+            } else if (lower.includes('sunday')) {
+              hoursMap['sunday'] = h;
+            }
+          }
+        });
+      }
+
+      // Update the Toggle button in the preset bar
+      const toggleModeBtn = document.getElementById('btn-toggle-day-mode');
+      if (toggleModeBtn) {
+        if (state.scheduleViewMode === 'grouped') {
+          toggleModeBtn.innerHTML = '📋 Separate All 7 Days';
+          toggleModeBtn.title = 'Switch to day-by-day separate view for individual customization';
+        } else {
+          toggleModeBtn.innerHTML = '📁 Group Weekdays (Optional)';
+          toggleModeBtn.title = 'Optionally group Monday to Friday into a single row';
+        }
+      }
+
+      // 7 Separate Days by default
+      const scheduleItems = state.scheduleViewMode === 'grouped' ? [
+        {
+          dayKey: 'mon-fri',
+          label: 'Monday – Friday',
+          badge: '📅 Monday – Friday',
+          subBadge: '<span class="badge badge-outline text-xs" style="font-size: 0.68rem; padding: 2px 7px; color: var(--accent-green); border-color: rgba(0, 230, 153, 0.35); background: rgba(0, 230, 153, 0.08);">Weekdays Unified</span>',
+          days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+          isGroup: true,
+        },
+        { dayKey: 'saturday', label: 'Saturday', badge: '📅 Saturday', subBadge: '', days: ['saturday'], isGroup: false },
+        { dayKey: 'sunday', label: 'Sunday', badge: '📅 Sunday', subBadge: '', days: ['sunday'], isGroup: false },
+      ] : [
+        { dayKey: 'monday', label: 'Monday', badge: '📅 Monday', subBadge: '', days: ['monday'], isGroup: false },
+        { dayKey: 'tuesday', label: 'Tuesday', badge: '📅 Tuesday', subBadge: '', days: ['tuesday'], isGroup: false },
+        { dayKey: 'wednesday', label: 'Wednesday', badge: '📅 Wednesday', subBadge: '', days: ['wednesday'], isGroup: false },
+        { dayKey: 'thursday', label: 'Thursday', badge: '📅 Thursday', subBadge: '', days: ['thursday'], isGroup: false },
+        { dayKey: 'friday', label: 'Friday', badge: '📅 Friday', subBadge: '', days: ['friday'], isGroup: false },
+        { dayKey: 'saturday', label: 'Saturday', badge: '📅 Saturday', subBadge: '', days: ['saturday'], isGroup: false },
+        { dayKey: 'sunday', label: 'Sunday', badge: '📅 Sunday', subBadge: '', days: ['sunday'], isGroup: false },
+      ];
+
+      scheduleItems.forEach((item) => {
+        const primaryKey = item.days[0];
+        const existing = hoursMap[primaryKey] || {};
+        const isClosed = Boolean(existing.is_closed || (existing.status && existing.status.toLowerCase() === 'closed'));
+
+        let initialSlots = [];
+        if (Array.isArray(existing.shifts) && existing.shifts.length > 0) {
+          initialSlots = existing.shifts.map((s) => ({
+            open: s.open || '06:00',
+            close: s.close || '22:00',
+            class_type: s.class_type || 'General Gym',
+            note: s.note || '',
+            is24h: s.open === '00:00' && s.close === '23:59',
+          }));
+        } else {
+          const openTime = existing.open || (item.dayKey === 'sunday' ? '07:00' : '06:00');
+          const closeTime = existing.close || (item.dayKey === 'sunday' ? '13:00' : (item.dayKey === 'saturday' ? '21:00' : '22:00'));
+          const is24h = openTime === '00:00' && closeTime === '23:59';
+          const defaultClass = is24h ? 'Open Gym / 24/7' : (item.dayKey === 'sunday' ? 'General Gym' : 'Gym & Group Classes');
+          const classType = existing.class_type || defaultClass;
+          const note = existing.note || (item.dayKey === 'sunday' && closeTime === '13:00' ? 'Half Day' : '');
+
+          initialSlots.push({ open: openTime, close: closeTime, class_type: classType, note, is24h });
+
+          if (existing.shift2_open && existing.shift2_close) {
+            initialSlots.push({
+              open: existing.shift2_open,
+              close: existing.shift2_close,
+              class_type: existing.shift2_class_type || 'Yoga & Pilates',
+              note: existing.shift2_note || '',
+              is24h: false,
+            });
+          }
+        }
+
+        const card = document.createElement('div');
+        card.className = `schedule-day-card ${isClosed ? 'is-closed' : ''}`;
+        card.dataset.day = item.label;
+        card.dataset.groupKey = item.dayKey;
+        if (item.isGroup) card.dataset.isGroup = 'true';
+
+        card.innerHTML = `
+          <div class="schedule-day-main-row">
+            <div class="schedule-day-meta">
+              <span class="day-badge">${item.badge}</span>
+              ${item.subBadge || ''}
+              <button type="button" class="btn-day-toggle ${isClosed ? 'closed' : 'open'}" data-action="toggle-status">
+                ${isClosed ? '🔴 CLOSED' : '🟢 OPEN'}
+              </button>
+            </div>
+
+            <div class="schedule-day-actions" style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" class="btn btn-outline btn-xs btn-add-slot" data-action="add-slot" ${isClosed ? 'disabled' : ''} style="color: var(--accent-green); border-color: rgba(0, 230, 153, 0.4); font-size: 0.74rem; padding: 3px 9px;">
+                ➕ Add Time / Class Slot
+              </button>
+              ${!item.isGroup && item.label === 'Monday' ? `<button type="button" class="btn btn-outline btn-xs" data-action="copy-weekdays" title="Copy Monday schedule to Tue-Fri" style="font-size: 0.68rem; padding: 2px 8px;">📋 Copy to Weekdays</button>` : ''}
+            </div>
+          </div>
+
+          <div class="schedule-slots-container">
+            <!-- Rendered dynamically -->
+          </div>
+        `;
+
+        // Render slots
+        renderCardSlots(card, initialSlots, isClosed);
+
+        // Toggle OPEN / CLOSED
+        const toggleBtn = card.querySelector('[data-action="toggle-status"]');
+        const addSlotBtn = card.querySelector('[data-action="add-slot"]');
+
+        toggleBtn?.addEventListener('click', () => {
+          const willBeClosed = !card.classList.contains('is-closed');
+          if (willBeClosed) {
+            card.classList.add('is-closed');
+            toggleBtn.className = 'btn-day-toggle closed';
+            toggleBtn.textContent = '🔴 CLOSED';
+            if (addSlotBtn) addSlotBtn.disabled = true;
+          } else {
+            card.classList.remove('is-closed');
+            toggleBtn.className = 'btn-day-toggle open';
+            toggleBtn.textContent = '🟢 OPEN';
+            if (addSlotBtn) addSlotBtn.disabled = false;
+          }
+          const currentSlots = getCardSlots(card);
+          renderCardSlots(card, currentSlots, willBeClosed);
+          updateLiveHoursPill();
+          updateMetrics();
+        });
+
+        // Add Slot
+        addSlotBtn?.addEventListener('click', () => {
+          if (card.classList.contains('is-closed')) return;
+          const currentSlots = getCardSlots(card);
+          let newSlot = { open: '17:30', close: '19:30', class_type: 'Yoga & Pilates', note: 'Evening Yoga Batch', is24h: false };
+          if (currentSlots.length === 0) {
+            newSlot = { open: '06:00', close: '08:30', class_type: 'Zumba & Aerobics', note: 'Morning Zumba Batch', is24h: false };
+          } else if (currentSlots.length >= 2) {
+            newSlot = { open: '19:30', close: '21:00', class_type: 'HIIT & CrossFit', note: 'Night HIIT Batch', is24h: false };
+          }
+          currentSlots.push(newSlot);
+          renderCardSlots(card, currentSlots, card.classList.contains('is-closed'));
+          updateLiveHoursPill();
+          updateMetrics();
+          showToast('➕ Added new time & class slot!');
+        });
+
+        // Copy Monday to Weekdays
+        if (!item.isGroup && item.label === 'Monday') {
+          const copyBtn = card.querySelector('[data-action="copy-weekdays"]');
+          copyBtn?.addEventListener('click', () => {
+            const mSlots = getCardSlots(card);
+            const mClosed = card.classList.contains('is-closed');
+
+            ['Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach((tDay) => {
+              const targetCard = container.querySelector(`[data-day="${tDay}"]`);
+              if (!targetCard) return;
+              const tToggle = targetCard.querySelector('[data-action="toggle-status"]');
+              const tAddBtn = targetCard.querySelector('[data-action="add-slot"]');
+
+              if (mClosed) {
+                targetCard.classList.add('is-closed');
+                if (tToggle) {
+                  tToggle.className = 'btn-day-toggle closed';
+                  tToggle.textContent = '🔴 CLOSED';
+                }
+                if (tAddBtn) tAddBtn.disabled = true;
+              } else {
+                targetCard.classList.remove('is-closed');
+                if (tToggle) {
+                  tToggle.className = 'btn-day-toggle open';
+                  tToggle.textContent = '🟢 OPEN';
+                }
+                if (tAddBtn) tAddBtn.disabled = false;
+              }
+
+              renderCardSlots(targetCard, mSlots, mClosed);
+            });
+
+            showToast('📋 Copied Monday slots and classes to Tuesday through Friday!');
+            updateLiveHoursPill();
+            updateMetrics();
+          });
+        }
+
+        container.appendChild(card);
+      });
+
+      updateLiveHoursPill();
+      updateMetrics();
+    }
+
+    // Helper: Render all slots inside a card
+    function renderCardSlots(card, slots = [], isClosed = false) {
+      const slotsContainer = card.querySelector('.schedule-slots-container');
+      if (!slotsContainer) return;
+      slotsContainer.innerHTML = '';
+
+      if (slots.length === 0 && !isClosed) {
+        slotsContainer.innerHTML = `
+          <div style="padding: 10px; font-size: 0.8rem; color: var(--text-dim); font-style: italic;">
+            No sessions scheduled for this day. Click <strong>➕ Add Time / Class Slot</strong> above to schedule a class or floor session.
+          </div>
+        `;
+        return;
+      }
+
+      slots.forEach((slot, index) => {
+        const slotRow = document.createElement('div');
+        slotRow.className = 'schedule-slot-row';
+        slotRow.dataset.slotIndex = index;
+
+        const is24h = Boolean(slot.is24h || (slot.open === '00:00' && slot.close === '23:59'));
+        const currentClass = slot.class_type || 'General Gym';
+        const isCustom = !classOptions.some((opt) => opt.val === currentClass);
+
+        const optionsHtml = classOptions
+          .map((opt) => `<option value="${opt.val}" ${opt.val === currentClass || (opt.val === 'Custom' && isCustom) ? 'selected' : ''}>${opt.label}</option>`)
+          .join('');
+
+        slotRow.innerHTML = `
+          <span class="slot-badge">⏰ Slot ${index + 1}:</span>
+          <input type="time" class="input-time input-time-open" value="${slot.open || '06:00'}" ${is24h || isClosed ? 'disabled' : ''} />
+          <span class="time-sep">to</span>
+          <input type="time" class="input-time input-time-close" value="${slot.close || '22:00'}" ${is24h || isClosed ? 'disabled' : ''} />
+
+          <label class="checkbox-24h" title="Open 24 Hours / Full Day">
+            <input type="checkbox" class="check-24h" ${is24h ? 'checked' : ''} ${isClosed ? 'disabled' : ''} />
+            <span>24h</span>
+          </label>
+
+          <div class="slot-class-picker" style="display: flex; align-items: center; gap: 6px;">
+            <label style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; font-family: 'JetBrains Mono', monospace;">Class:</label>
+            <select class="select-class-type" ${isClosed ? 'disabled' : ''}>
+              ${optionsHtml}
+            </select>
+          </div>
+
+          <input type="text" class="input-note" placeholder="Session label / notes (e.g. Morning Zumba)" value="${slot.note || ''}" ${isClosed ? 'disabled' : ''} />
+
+          ${slots.length > 1 ? `
+            <button type="button" class="btn-slot-remove" title="Remove this time slot" ${isClosed ? 'disabled' : ''}>
+              🗑️
+            </button>
+          ` : ''}
+        `;
+
+        // 24h toggle
+        const check24 = slotRow.querySelector('.check-24h');
+        const openInput = slotRow.querySelector('.input-time-open');
+        const closeInput = slotRow.querySelector('.input-time-close');
+        const classSelect = slotRow.querySelector('.select-class-type');
+
+        check24?.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            openInput.value = '00:00';
+            closeInput.value = '23:59';
+            openInput.disabled = true;
+            closeInput.disabled = true;
+            classSelect.value = 'Open Gym / 24/7';
+          } else {
+            openInput.value = '06:00';
+            closeInput.value = '22:00';
+            openInput.disabled = isClosed;
+            closeInput.disabled = isClosed;
+            classSelect.value = 'General Gym';
+          }
+          updateLiveHoursPill();
+          updateMetrics();
+        });
+
+        // Class type change
+        classSelect?.addEventListener('change', (e) => {
+          const noteInput = slotRow.querySelector('.input-note');
+          if (e.target.value === 'Custom') {
+            const customName = prompt('Enter custom class activity name (e.g. Pilates Bootcamp, Kickboxing):', noteInput.value || '');
+            if (customName && customName.trim()) {
+              noteInput.value = customName.trim();
+            }
+          } else if (e.target.value === 'Zumba & Aerobics' && !noteInput.value) {
+            noteInput.value = 'Morning Zumba Batch';
+          } else if (e.target.value === 'Yoga & Pilates' && !noteInput.value) {
+            noteInput.value = 'Evening Yoga Batch';
+          }
+          updateLiveHoursPill();
+          updateMetrics();
+        });
+
+        // Time / note changes
+        openInput?.addEventListener('change', () => { updateLiveHoursPill(); updateMetrics(); });
+        closeInput?.addEventListener('change', () => { updateLiveHoursPill(); updateMetrics(); });
+        slotRow.querySelector('.input-note')?.addEventListener('input', () => { updateMetrics(); });
+
+        // Remove slot
+        const removeBtn = slotRow.querySelector('.btn-slot-remove');
+        removeBtn?.addEventListener('click', () => {
+          const remaining = getCardSlots(card).filter((_, i) => i !== index);
+          renderCardSlots(card, remaining, isClosed);
+          updateLiveHoursPill();
+          updateMetrics();
+          showToast('🗑️ Removed time slot.');
+        });
+
+        slotsContainer.appendChild(slotRow);
+      });
+    }
+
+    // Helper: Collect current slots from a card's DOM
+    function getCardSlots(card) {
+      const rows = card.querySelectorAll('.schedule-slot-row');
+      const slots = [];
+      rows.forEach((row) => {
+        const is24h = row.querySelector('.check-24h')?.checked || false;
+        const open = is24h ? '00:00' : (row.querySelector('.input-time-open')?.value || '06:00');
+        const close = is24h ? '23:59' : (row.querySelector('.input-time-close')?.value || '22:00');
+        const classSelect = row.querySelector('.select-class-type');
+        let class_type = classSelect ? classSelect.value : 'General Gym';
+        const note = row.querySelector('.input-note')?.value.trim() || '';
+        if (class_type === 'Custom' && note) {
+          class_type = note;
+        }
+        slots.push({ open, close, class_type, note, is24h });
+      });
+      return slots;
+    }
+
+    // Helper: Set a day card's state programmatically
+    function setDayCard(dayName, { is_closed = false, slots = null }) {
+      let card = document.querySelector(`.schedule-day-card[data-day="${dayName}"]`);
+      if (!card) {
+        const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        if (weekdays.includes(dayName)) {
+          card = document.querySelector('.schedule-day-card[data-group-key="mon-fri"]') ||
+                 document.querySelector('.schedule-day-card[data-is-group="true"]') ||
+                 document.querySelector('.schedule-day-card[data-day*="Monday"]');
+        }
+      }
+      if (!card) return;
+
+      const toggle = card.querySelector('[data-action="toggle-status"]');
+      const addSlotBtn = card.querySelector('[data-action="add-slot"]');
+
+      if (is_closed) {
+        card.classList.add('is-closed');
+        if (toggle) {
+          toggle.className = 'btn-day-toggle closed';
+          toggle.textContent = '🔴 CLOSED';
+        }
+        if (addSlotBtn) addSlotBtn.disabled = true;
+      } else {
+        card.classList.remove('is-closed');
+        if (toggle) {
+          toggle.className = 'btn-day-toggle open';
+          toggle.textContent = '🟢 OPEN';
+        }
+        if (addSlotBtn) addSlotBtn.disabled = false;
+      }
+
+      const targetSlots = slots || [{ open: '06:00', close: '22:00', class_type: 'General Gym', note: '', is24h: false }];
+      renderCardSlots(card, targetSlots, is_closed);
+    }
+
+    // Collect full weekly operating hours payload for API
+    function collectOperatingHours() {
+      const cards = document.querySelectorAll('.schedule-day-card');
+      const list = [];
+      cards.forEach((card) => {
+        const day = card.dataset.day || '';
+        const isGroup = card.dataset.isGroup === 'true' || day.includes('–') || day.includes('-') || day.toLowerCase().includes('weekdays');
+        const isClosed = card.classList.contains('is-closed');
+        const slots = getCardSlots(card);
+
+        const makeItem = (dayName) => {
+          const primary = slots[0] || { open: '06:00', close: '22:00', class_type: 'General Gym', note: '' };
+          const item = {
+            day: dayName,
+            open: primary.open,
+            close: primary.close,
+            is_closed: isClosed,
+            class_type: primary.class_type,
+            shifts: slots.map((s) => ({
+              open: s.open,
+              close: s.close,
+              class_type: s.class_type,
+              note: s.note,
+            })),
+          };
+          if (primary.note) item.note = primary.note;
+          if (slots.length > 1) {
+            item.shift2_open = slots[1].open;
+            item.shift2_close = slots[1].close;
+            item.shift2_class_type = slots[1].class_type;
+            if (slots[1].note) item.shift2_note = slots[1].note;
+          }
+          return item;
+        };
+
+        if (isGroup) {
+          ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach((weekday) => {
+            list.push(makeItem(weekday));
+          });
+        } else {
+          list.push(makeItem(day));
+        }
+      });
+      return list;
+    }
+
+    // Update Live Status Pill
+    function updateLiveHoursPill() {
+      const pill = document.getElementById('topbar-live-pill');
+      const metricEl = document.getElementById('metric-today-hours');
+      const now = new Date();
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const currentDay = dayNames[now.getDay()];
+
+      let card = document.querySelector(`.schedule-day-card[data-day="${currentDay}"]`);
+      if (!card) {
+        const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        if (weekdays.includes(currentDay)) {
+          card = document.querySelector('.schedule-day-card[data-group-key="mon-fri"]') ||
+                 document.querySelector('.schedule-day-card[data-is-group="true"]') ||
+                 document.querySelector('.schedule-day-card[data-day*="Monday"]');
+        }
+      }
+      if (!card) return;
+
+      if (card.classList.contains('is-closed')) {
+        const closedText = `● Live Today (${currentDay}): CLOSED`;
+        if (pill) {
+          pill.className = 'badge badge-warning font-mono text-xs';
+          pill.textContent = closedText;
+        }
+        if (metricEl) metricEl.textContent = 'Closed (Rest Day)';
+        return;
+      }
+
+      const slots = getCardSlots(card);
+      let displayStr = '';
+      if (slots.length === 1) {
+        displayStr = `${slots[0].open} – ${slots[0].close} • ${slots[0].class_type}`;
+      } else if (slots.length === 2) {
+        displayStr = `${slots[0].open}–${slots[0].close} (${slots[0].class_type}) & ${slots[1].open}–${slots[1].close} (${slots[1].class_type})`;
+      } else {
+        displayStr = `${slots.length} Classes: ${slots.map((s) => `${s.open} ${s.class_type}`).join(', ')}`;
+      }
+
+      if (pill) {
+        pill.className = 'badge badge-green font-mono text-xs';
+        pill.textContent = `● Live Today (${currentDay}): ${displayStr}`;
+      }
+      if (metricEl) {
+        if (slots.length === 2) {
+          metricEl.innerHTML = `<span style="font-size: 0.92rem; font-weight: 700; color: #00e676;">${slots[0].open}–${slots[0].close}</span> <span style="font-size: 0.74rem; color: #94a3b8;">(${slots[0].class_type.split('&')[0].trim()})</span><br/><span style="font-size: 0.92rem; font-weight: 700; color: #00e676;">${slots[1].open}–${slots[1].close}</span> <span style="font-size: 0.74rem; color: #94a3b8;">(${slots[1].class_type.split('&')[0].trim()})</span>`;
+        } else if (slots.length === 1) {
+          metricEl.innerHTML = `<span style="font-size: 0.95rem; font-weight: 700; color: #00e676;">${slots[0].open} – ${slots[0].close}</span><br/><span style="font-size: 0.76rem; color: #94a3b8; font-weight: 500;">${slots[0].class_type}</span>`;
+        } else {
+          metricEl.textContent = displayStr;
+        }
+        metricEl.title = displayStr;
+      }
+    }
+
+    // Update Overview Metrics
+    function updateMetrics() {
+      const hours = collectOperatingHours();
+      let totalSlots = 0;
+      let openCount = 0;
+      let hasZumba = false;
+      let hasYoga = false;
+
+      hours.forEach((h) => {
+        if (!h.is_closed) {
+          openCount++;
+          if (Array.isArray(h.shifts)) {
+            totalSlots += h.shifts.length;
+            h.shifts.forEach((s) => {
+              const cls = (s.class_type || '').toLowerCase();
+              if (cls.includes('zumba')) hasZumba = true;
+              if (cls.includes('yoga')) hasYoga = true;
+            });
+          } else {
+            totalSlots += 1;
+          }
+        }
+      });
+
+      const slotEl = document.getElementById('metric-total-slots');
+      if (slotEl) slotEl.textContent = `${totalSlots} Scheduled Slots`;
+
+      const openEl = document.getElementById('metric-open-days');
+      if (openEl) openEl.textContent = `${openCount} / 7 Days Active`;
+
+      const dualEl = document.getElementById('metric-dual-status');
+      if (dualEl) {
+        if (hasZumba && hasYoga) {
+          dualEl.textContent = 'Zumba & Yoga Active';
+        } else if (hasZumba) {
+          dualEl.textContent = 'Zumba Active';
+        } else if (hasYoga) {
+          dualEl.textContent = 'Yoga Active';
+        } else {
+          dualEl.textContent = 'General Schedules';
+        }
+      }
+    }
+
+    // Save Operating Hours to PostgreSQL
+    async function saveHours() {
+      if (state.isSaving) return;
+      state.isSaving = true;
+
+      const btnTop = document.getElementById('btn-top-save');
+      const btnBottom = document.getElementById('btn-bottom-save');
+      if (btnTop) btnTop.textContent = '💾 Saving...';
+      if (btnBottom) btnBottom.textContent = '💾 Saving...';
+
+      const operatingHours = collectOperatingHours();
+
+      try {
+        const res = await adminApi.updateGymSettings({ operatingHours });
+        if (res.success) {
+          showToast('✅ Weekly operating hours & class sessions saved successfully to PostgreSQL!');
+          updateLiveHoursPill();
+          updateMetrics();
+        } else {
+          showToast(res.error || 'Failed to save operating hours.', true);
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Error saving operating hours: ' + err.message, true);
+      } finally {
+        state.isSaving = false;
+        if (btnTop) btnTop.textContent = '💾 Save Changes';
+        if (btnBottom) btnBottom.textContent = '💾 Save Operating Hours & Schedules';
+      }
+    }
+
+    // Setup Quick Presets & Listeners
+    function setupListeners() {
+      // Top & Bottom Save Buttons
+      document.getElementById('btn-top-save')?.addEventListener('click', saveHours);
+      document.getElementById('btn-bottom-save')?.addEventListener('click', saveHours);
+
+      // Toggle Day Mode (Separate 7 Days vs Grouped Weekdays)
+      const toggleModeBtn = document.getElementById('btn-toggle-day-mode');
+      toggleModeBtn?.addEventListener('click', () => {
+        const currentHours = collectOperatingHours();
+        state.scheduleViewMode = state.scheduleViewMode === 'grouped' ? 'expanded' : 'grouped';
+        renderOperatingHours(currentHours);
+        showToast(
+          state.scheduleViewMode === 'grouped'
+            ? '📁 Grouped weekdays: Monday–Friday merged into a single row.'
+            : '📋 Separate 7 days: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.'
+        );
+      });
+
+      // Preset 1: Dual Batches - Morning Zumba & Evening Yoga
+      document.getElementById('btn-preset-dual-classes')?.addEventListener('click', () => {
+        const weekdaySlots = [
+          { open: '06:00', close: '08:30', class_type: 'Zumba & Aerobics', note: 'Morning Zumba Batch', is24h: false },
+          { open: '17:30', close: '19:30', class_type: 'Yoga & Pilates', note: 'Evening Yoga Batch', is24h: false },
+        ];
+        const satSlots = [
+          { open: '06:00', close: '09:00', class_type: 'HIIT & CrossFit', note: 'Morning Weekend HIIT', is24h: false },
+          { open: '17:00', close: '19:00', class_type: 'Yoga & Pilates', note: 'Sunset Yoga', is24h: false },
+        ];
+        const sunSlots = [
+          { open: '07:00', close: '12:00', class_type: 'General Gym', note: 'Open Gym (Half Day Recovery)', is24h: false },
+        ];
+
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach((d) => {
+          setDayCard(d, { is_closed: false, slots: weekdaySlots });
+        });
+        setDayCard('Saturday', { is_closed: false, slots: satSlots });
+        setDayCard('Sunday', { is_closed: false, slots: sunSlots });
+        showToast('💃 Applied Dual Timings: Morning Zumba & Evening Yoga!');
+        updateLiveHoursPill();
+        updateMetrics();
+      });
+
+      // Preset 2: Standard Gym Timings
+      document.getElementById('btn-preset-standard')?.addEventListener('click', () => {
+        const standardSlots = [
+          { open: '06:00', close: '22:00', class_type: 'Gym & Group Classes', note: 'General Gym & Scheduled Classes', is24h: false },
+        ];
+        const satSlots = [
+          { open: '06:00', close: '21:00', class_type: 'Gym & Group Classes', note: 'Weekend Floor & Classes', is24h: false },
+        ];
+        const sunSlots = [
+          { open: '07:00', close: '13:00', class_type: 'General Gym', note: 'Half Day Recovery', is24h: false },
+        ];
+
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach((d) => {
+          setDayCard(d, { is_closed: false, slots: standardSlots });
+        });
+        setDayCard('Saturday', { is_closed: false, slots: satSlots });
+        setDayCard('Sunday', { is_closed: false, slots: sunSlots });
+        showToast('⚡ Applied Standard Gym Timings (Mon-Sat 6 AM - 10 PM, Sun 7 AM - 1 PM)');
+        updateLiveHoursPill();
+        updateMetrics();
+      });
+
+      // Preset 3: Gym + Group Classes (AM Gym / PM Group Classes)
+      document.getElementById('btn-preset-group-classes')?.addEventListener('click', () => {
+        const weekdaySlots = [
+          { open: '06:00', close: '11:00', class_type: 'General Gym', note: 'Morning Weights & Cardio Floor', is24h: false },
+          { open: '17:00', close: '21:30', class_type: 'Group Classes', note: 'Zumba, Yoga & HIIT Batches', is24h: false },
+        ];
+        const satSlots = [
+          { open: '06:00', close: '12:00', class_type: 'Gym & Group Classes', note: 'Weekend Bootcamp & Floor', is24h: false },
+          { open: '16:00', close: '20:00', class_type: 'Yoga & Pilates', note: 'Evening Yoga & Stretch', is24h: false },
+        ];
+        const sunSlots = [
+          { open: '07:00', close: '13:00', class_type: 'General Gym', note: 'Open Gym Recovery (Half Day)', is24h: false },
+        ];
+
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach((d) => {
+          setDayCard(d, { is_closed: false, slots: weekdaySlots });
+        });
+        setDayCard('Saturday', { is_closed: false, slots: satSlots });
+        setDayCard('Sunday', { is_closed: false, slots: sunSlots });
+        showToast('👥 Applied Gym + Group Classes Schedule (Morning Gym / Evening Group Classes)');
+        updateLiveHoursPill();
+        updateMetrics();
+      });
+
+      // Preset 4: 24/7 Access
+      document.getElementById('btn-preset-247')?.addEventListener('click', () => {
+        const full24hSlots = [
+          { open: '00:00', close: '23:59', class_type: 'Open Gym / 24/7', note: '24/7 Continuous Access', is24h: true },
+        ];
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].forEach((d) => {
+          setDayCard(d, { is_closed: false, slots: full24hSlots });
+        });
+        showToast('⚡ Applied 24/7 Open Schedule Across All Days');
+        updateLiveHoursPill();
+        updateMetrics();
+      });
+
+      // Preset 5: Weekdays Only (Sun Closed)
+      document.getElementById('btn-preset-weekdays-only')?.addEventListener('click', () => {
+        const standardSlots = [
+          { open: '06:00', close: '22:00', class_type: 'Gym & Group Classes', note: 'General Gym & Scheduled Classes', is24h: false },
+        ];
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach((d) => {
+          setDayCard(d, { is_closed: false, slots: standardSlots });
+        });
+        setDayCard('Saturday', {
+          is_closed: false,
+          slots: [{ open: '06:00', close: '20:00', class_type: 'General Gym', note: 'Saturday Session', is24h: false }],
+        });
+        setDayCard('Sunday', {
+          is_closed: true,
+          slots: [{ open: '07:00', close: '13:00', class_type: 'General Gym', note: 'Sunday Closed', is24h: false }],
+        });
+        showToast('⚡ Applied Weekdays Only (Sunday Closed)');
+        updateLiveHoursPill();
+        updateMetrics();
+      });
+
+      // Mobile Sidebar Toggle
+      document.getElementById('btn-sidebar-toggle')?.addEventListener('click', () => {
+        document.getElementById('admin-sidebar')?.classList.toggle('open');
+      });
+
+      // Centered Custom Confirmation Modal
+    function confirmCenter({
+      title = 'Confirm Action',
+      message = 'Are you sure you want to proceed?',
+      icon = '🚪',
+      confirmText = 'Sign Out',
+      confirmClass = 'btn-green',
+      cancelText = 'Cancel',
+    } = {}) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('modal-confirm');
+        const titleEl = document.getElementById('modal-confirm-title');
+        const msgEl = document.getElementById('modal-confirm-message');
+        const iconEl = document.getElementById('modal-confirm-icon');
+        const okBtn = document.getElementById('modal-confirm-ok-btn');
+        const cancelBtn = document.getElementById('modal-confirm-cancel-btn');
+
+        if (!modal || !okBtn || !cancelBtn) {
+          resolve(window.confirm(message));
+          return;
+        }
+
+        if (titleEl) titleEl.textContent = title;
+        if (iconEl) iconEl.textContent = icon;
+        if (msgEl) msgEl.textContent = message;
+        if (okBtn) okBtn.textContent = confirmText;
+        if (cancelBtn) cancelBtn.textContent = cancelText;
+
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+
+        let resolved = false;
+        const cleanup = (val) => {
+          if (resolved) return;
+          resolved = true;
+          modal.classList.remove('active');
+          modal.setAttribute('aria-hidden', 'true');
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          window.removeEventListener('keydown', onKey);
+          modal.removeEventListener('click', onBackdrop);
+          resolve(val);
+        };
+
+        const onOk = (e) => { e.preventDefault(); cleanup(true); };
+        const onCancel = (e) => { e.preventDefault(); cleanup(false); };
+        const onKey = (e) => {
+          if (e.key === 'Escape') cleanup(false);
+          else if (e.key === 'Enter') cleanup(true);
+        };
+        const onBackdrop = (e) => {
+          if (e.target === modal) cleanup(false);
+        };
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        window.addEventListener('keydown', onKey);
+        modal.addEventListener('click', onBackdrop);
+      });
+    }
+
+    // User card click -> Profile
+      document.getElementById('sidebar-user-card')?.addEventListener('click', (e) => {
+        if (e.target.closest('#btn-logout')) return;
+        window.location.href = 'admin-profile.html';
+      });
+
+      // Logout handler
+      document.getElementById('btn-logout')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const confirmed = await confirmCenter({
+          title: 'Sign Out',
+          message: 'Are you sure you want to log out of Virtex Admin Console?',
+          icon: '🚪',
+          confirmText: 'Sign Out',
+        });
+        if (confirmed) {
+          await adminApi.logout();
+          window.location.href = 'index.html';
+        }
+      });
+    }
+
+
+    // Initialization
+    async function init() {
+      await hydrateUser();
+      setupListeners();
+      await loadOperatingHours();
+    }
+
+    init();
+  </script>
+  <script type="module" src="js/components/topbarRoutineNav.js"></script>
+  <script type="module" src="js/components/adminSidebarNav.js"></script>
+</body>
+
+</html>
+

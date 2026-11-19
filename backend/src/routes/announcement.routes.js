@@ -9,6 +9,7 @@ router.get('/', announcementController.getAnnouncements);
 
 // RBAC Protected (Owner, Manager)
 router.post('/', authenticateToken, requireRole('owner', 'manager'), announcementController.createAnnouncement);
+router.get('/:id/poll', authenticateToken, requireRole('owner', 'manager'), announcementController.getPollVoters);
 router.put('/:id', authenticateToken, requireRole('owner', 'manager'), announcementController.updateAnnouncement);
 router.delete('/:id', authenticateToken, requireRole('owner', 'manager'), announcementController.deleteAnnouncement);
 

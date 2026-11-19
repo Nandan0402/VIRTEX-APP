@@ -1,14 +1,20 @@
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../../backend/src/app.js';
-import { checkDatabaseConnection, closePool } from '../../backend/src/config/database.js';
+import { checkDatabaseConnection, closePool, query } from '../../backend/src/config/database.js';
 
-describe('PulseCore Member Reception Kiosk Full Backend Integration Suite', () => {
+describe('Virtex Member Reception Kiosk Full Backend Integration Suite', () => {
   let server;
   let baseUrl;
 
   before(async () => {
     await checkDatabaseConnection();
+    // Ensure test expired member GYM005 exists for Feature 4 check
+    await query(`
+      INSERT INTO members (member_code, full_name, phone, email, plan_id, plan_name, status, preferred_language)
+      VALUES ('GYM005', 'Vikram Singh', '9876543214', 'vikram.singh@example.com', 1, 'Silver Monthly', 'expired', 'hi-IN')
+      ON CONFLICT (member_code) DO UPDATE SET status = 'expired';
+    `);
     const app = createApp();
     await new Promise((resolve) => {
       server = app.listen(0, '127.0.0.1', () => {
@@ -20,6 +26,11 @@ describe('PulseCore Member Reception Kiosk Full Backend Integration Suite', () =
   });
 
   after(async () => {
+    try {
+      await query("DELETE FROM member_enquiries WHERE full_name = 'Kiosk Visitor';");
+      await query("DELETE FROM interaction_logs WHERE user_query IN ('What are your gym operating hours?', 'ಜಿಮ್ ತೆರೆಯುವ ಸಮಯ ಎಷ್ಟು?');");
+      await query("DELETE FROM members WHERE member_code = 'GYM005';");
+    } catch (_) {}
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }

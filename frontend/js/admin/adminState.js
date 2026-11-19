@@ -1,18 +1,38 @@
 /**
- * adminState.js - Reactive State Store & Validation for PulseCore Admin Console
+ * adminState.js - Reactive State Store & Validation for Virtex Admin Console
  * Manages active database records, pagination, filters, and role-based permissions.
  */
+
+function getInitialStoredUser() {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const stored = localStorage.getItem('virtex_admin_user_profile');
+      if (stored) {
+        const u = JSON.parse(stored);
+        if (u && typeof u === 'object') {
+          let fullName = u.fullName || u.full_name || u.name || u.username;
+          if (fullName === 'Manju Owner') fullName = 'Nandan.B';
+          return {
+            ...u,
+            fullName,
+          };
+        }
+      }
+    }
+  } catch { }
+  return {
+    id: 29,
+    username: 'nandanb449@gmail.com',
+    role: 'owner',
+    fullName: 'Nandan.B',
+    permissions: ['*'],
+  };
+}
 
 export class AdminStateStore {
   constructor() {
     this.state = {
-      user: {
-        id: 7,
-        username: 'owner_manju',
-        role: 'owner',
-        fullName: 'Manjunath Gowda',
-        permissions: ['*'],
-      },
+      user: getInitialStoredUser(),
       stats: {
         dailyCheckIns: 0,
         totalMembers: 0,
@@ -64,10 +84,10 @@ export class AdminStateStore {
         currentGesture: 'IDLE',
       },
       gymProfile: {
-        name: 'PulseCore Fitness',
+        name: 'Virtex Fitness',
         tagline: 'AI-Powered Smart Fitness Reception',
         phone: '+91 98765 43210',
-        email: 'reception@pulsecorefitness.in',
+        email: 'reception@virtexfitness.in',
         address: '42, 100 Feet Road, Indiranagar, Bengaluru, Karnataka 560038',
         hours: [
           { days: 'Monday – Friday', open: '06:00', close: '22:00', status: 'Open' },
