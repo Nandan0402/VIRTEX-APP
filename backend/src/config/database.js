@@ -10,17 +10,27 @@ let isConnected = false;
  * Creates and initializes the PostgreSQL connection pool using environment credentials
  */
 function createPool() {
-  const p = new Pool({
-    host: config.database.host,
-    port: config.database.port,
-    database: config.database.database,
-    user: config.database.user,
-    password: config.database.password,
-    ssl: config.database.ssl,
-    max: config.database.max,
-    idleTimeoutMillis: config.database.idleTimeoutMillis,
-    connectionTimeoutMillis: config.database.connectionTimeoutMillis,
-  });
+  const poolConfig = config.database.connectionString
+    ? {
+        connectionString: config.database.connectionString,
+        ssl: config.database.ssl,
+        max: config.database.max,
+        idleTimeoutMillis: config.database.idleTimeoutMillis,
+        connectionTimeoutMillis: config.database.connectionTimeoutMillis,
+      }
+    : {
+        host: config.database.host,
+        port: config.database.port,
+        database: config.database.database,
+        user: config.database.user,
+        password: config.database.password,
+        ssl: config.database.ssl,
+        max: config.database.max,
+        idleTimeoutMillis: config.database.idleTimeoutMillis,
+        connectionTimeoutMillis: config.database.connectionTimeoutMillis,
+      };
+
+  const p = new Pool(poolConfig);
 
   p.on('connect', () => {
     isConnected = true;

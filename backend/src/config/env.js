@@ -30,12 +30,17 @@ export const config = {
 
   // PostgreSQL Database
   database: {
+    connectionString: process.env.DATABASE_URL || null,
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT, 10) || 5432,
     database: process.env.DB_NAME || 'gym_robot_db',
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
-    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+    ssl: process.env.DB_SSL === 'false' 
+      ? false 
+      : (process.env.DB_SSL === 'true' || (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('sslmode=disable'))
+          ? { rejectUnauthorized: false }
+          : false),
     max: parseInt(process.env.DB_POOL_MAX, 10) || 20,
     idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT_MILLIS, 10) || 30000,
     connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT_MILLIS, 10) || 5000,
