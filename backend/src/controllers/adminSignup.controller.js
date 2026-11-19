@@ -48,16 +48,35 @@ export async function requestAdminSignup(req, res, next) {
       if (!taken.rowCount) break;
       username = `${base.slice(0, 40)}_${Math.floor(100 + Math.random() * 900)}`;
     }
+    // First-user bootstrap: ONLY on a brand-new gym with no logins at all does the first sign-up become the Owner.
+    // (Not "no active owner": a running gym whose owner is switched off must never be claimable by a stranger.)
+    const userCheck = await query('SELECT COUNT(*)::int AS n FROM users');
+    const isFirstOwner = (userCheck.rows[0]?.n ?? 1) === 0;
+    const initialRole = isFirstOwner ? 'owner' : 'manager';
+    const initialActive = isFirstOwner;
+
     const ins = await query(
       `INSERT INTO users (username, email, password_hash, full_name, role, phone, is_active)
-       VALUES ($1, $2, $3, $4, 'manager', $5, FALSE) RETURNING id, username`,
-      [username, email, bcrypt.hashSync(password, 10), fullName, phone]
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, username`,
+      [username, email, bcrypt.hashSync(password, 10), fullName, initialRole, phone, initialActive]
     );
     await userRepository.recordAuthAudit({
-      userId: ins.rows[0].id, username: ins.rows[0].username, eventType: 'ADMIN_SIGNUP_REQUESTED', role: 'manager',
-      ipAddress: req.ip || null, userAgent: String(req.headers['user-agent'] || '').slice(0, 300),
-      details: { userId: String(ins.rows[0].id), fullName, email },
+      userId: ins.rows[0].id,
+      username: ins.rows[0].username,
+      eventType: isFirstOwner ? 'OWNER_ACCOUNT_CREATED' : 'ADMIN_SIGNUP_REQUESTED',
+      role: initialRole,
+      ipAddress: req.ip || null,
+      userAgent: String(req.headers['user-agent'] || '').slice(0, 300),
+      details: { userId: String(ins.rows[0].id), fullName, email, isFirstOwner },
     });
+
+    if (isFirstOwner) {
+      return res.status(201).json({
+        success: true,
+        message: 'Owner account created successfully! You can now sign in with your credentials.',
+      });
+    }
+
     res.status(202).json({ success: true, message: SENT });
   } catch (err) {
     if (err.code === '23505') return res.status(202).json({ success: true, message: SENT });

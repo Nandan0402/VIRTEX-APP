@@ -1,6 +1,7 @@
 import { createApp } from './app.js';
 import { config } from './config/env.js';
 import { checkDatabaseConnection, closePool } from './config/database.js';
+import { bootstrapEmptyDatabase } from './config/bootstrapSchema.js';
 import { initRealtime, closeRealtime } from './services/realtime.service.js';
 import { startBirthdayScheduler, stopBirthdayScheduler } from './services/birthdayWishes.service.js';
 
@@ -14,6 +15,13 @@ async function bootstrap() {
     console.log(
       `[Bootstrap] PostgreSQL connection verified successfully (${dbHealth.pgVersion}, latency: ${dbHealth.latencyMs}ms).`
     );
+    // Brand-new EMPTY database (e.g. fresh hosting): create all tables once. Never touches a database with tables.
+    try {
+      const boot = await bootstrapEmptyDatabase();
+      if (boot.ran) console.log(`[Bootstrap] Empty database: created ${boot.tables} tables. The first admin sign-up becomes the Owner.`);
+    } catch (err) {
+      console.error('[Bootstrap] Could not create the database tables:', err.message);
+    }
   } else {
     console.warn(
       `[Bootstrap] PostgreSQL not reachable (${dbHealth.error}). Operating in development mock fallback mode.`
