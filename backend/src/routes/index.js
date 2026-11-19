@@ -29,8 +29,10 @@ const router = Router();
 async function schemaInfo() {
   try {
     const r = (await query(`SELECT (SELECT COUNT(*)::int FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE') AS tables,
-                                   has_schema_privilege('public', 'CREATE') AS can_create`)).rows[0];
-    return { tables: r.tables, canCreateTables: r.can_create, setup: bootstrapStatus };
+                                   has_schema_privilege('public', 'CREATE') AS can_create,
+                                   current_setting('search_path') AS search_path,
+                                   to_regclass('gym_settings') IS NOT NULL AS tables_visible`)).rows[0];
+    return { tables: r.tables, tablesVisible: r.tables_visible, searchPath: r.search_path, canCreateTables: r.can_create, setup: bootstrapStatus };
   } catch (err) {
     return { error: err.message, setup: bootstrapStatus };
   }

@@ -7,6 +7,18 @@ let internalPool = null;
 let isConnected = false;
 
 /**
+ * Every new connection looks up tables in the "public" schema, where all Virtex tables live.
+ * Some hosted databases (e.g. shared hosting) give the database user a default search_path without
+ * "public", which makes every unqualified query fail with 'relation "…" does not exist'.
+ * node-pg runs this before any query handed to the new client.
+ */
+export function applySessionDefaults(client) {
+  client.query('SET search_path TO public').catch((err) => {
+    console.error('[PostgreSQL] Could not set search_path to public:', err.message);
+  });
+}
+
+/**
  * Creates and initializes the PostgreSQL connection pool using environment credentials
  */
 function createPool() {
@@ -32,7 +44,8 @@ function createPool() {
 
   const p = new Pool(poolConfig);
 
-  p.on('connect', () => {
+  p.on('connect', (client) => {
+    applySessionDefaults(client);
     isConnected = true;
     if (config.env === 'development' && process.env.LOG_SQL_POOL === 'true') {
       console.log('[PostgreSQL] Connected new client to database pool.');

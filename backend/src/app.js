@@ -20,6 +20,8 @@ export function createApp() {
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     res.setHeader('X-XSS-Protection', '0');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    // Lets the Google sign-in popup report back to this page (otherwise: "Cross-Origin-Opener-Policy would block window.postMessage").
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(self), geolocation=()');
     // Exercise media (Member Portal): YouTube still frames + privacy-enhanced embeds only.
     res.setHeader(
