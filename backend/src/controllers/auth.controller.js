@@ -19,7 +19,7 @@ export async function login(req, res, next) {
       data: authResult,
     });
   } catch (err) {
-    res.status(err.code === 'ACCOUNT_FROZEN' ? 403 : 401).json({
+    res.status(err.code === 'ACCOUNT_FROZEN' ? 403 : err.status === 503 ? 503 : 401).json({
       success: false,
       error: err.message,
       ...(err.code ? { code: err.code } : {}),

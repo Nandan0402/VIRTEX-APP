@@ -40,8 +40,11 @@ function createPool() {
   });
 
   p.on('error', (err) => {
+    // An idle client dropping (PostgreSQL restart, network blip) does not mean the database is gone.
+    // Re-probe shortly so the flag heals itself instead of staying "disconnected" forever.
     isConnected = false;
     console.error('[PostgreSQL] Unexpected error on idle database client:', err.message);
+    setTimeout(() => { checkDatabaseConnection().catch(() => { }); }, 1000).unref?.();
   });
 
   return p;
@@ -287,7 +290,20 @@ export async function checkDatabaseConnection() {
  * @returns {boolean}
  */
 export function isDatabaseConnected() {
+  // Self-heal: while marked disconnected, re-probe in the background (at most every 3 s).
+  if (!isConnected && Date.now() >= nextReprobeAt) {
+    nextReprobeAt = Date.now() + 3000;
+    checkDatabaseConnection().catch(() => { });
+  }
   return isConnected;
+}
+let nextReprobeAt = 0;
+
+/** Like isDatabaseConnected(), but when the flag says "down" it checks the database live before answering. */
+export async function ensureDatabaseConnected() {
+  if (isConnected) return true;
+  nextReprobeAt = Date.now() + 3000;
+  return (await checkDatabaseConnection()).ok;
 }
 
 /**

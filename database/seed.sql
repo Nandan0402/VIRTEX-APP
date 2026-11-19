@@ -136,7 +136,7 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- 10. GYM FAQS & FAQS (Multilingual Knowledge Base)
-INSERT INTO gym_faqs (id, question, answer, language, category, suggested_gesture, keywords, display_order)
+INSERT INTO gym_faqs (question, answer, language, category, suggested_gesture, keywords, display_order)
 VALUES
     ('What are your gym operating hours?', 'We are open Monday through Saturday from 6:00 AM to 10:00 PM, and Sundays from 7:00 AM to 1:00 PM.', 'en-IN', 'timings', 'NOD_YES', ARRAY['hours', 'timing', 'open', 'close', 'schedule'], 1),
     ('How much are the membership plans?', 'We offer Silver Monthly at ₹2,499, Gold Quarterly at ₹5,999, and Platinum Annual at ₹18,999 with 24/7 access.', 'en-IN', 'pricing', 'NOD_YES', ARRAY['membership', 'price', 'fee', 'cost', 'plans'], 2),

@@ -7,7 +7,7 @@
  * Events are written to auth_audit_logs: ADMIN_SIGNUP_REQUESTED / ADMIN_SIGNUP_APPROVED / ADMIN_SIGNUP_REJECTED.
  */
 import bcrypt from 'bcryptjs';
-import { query, isDatabaseConnected } from '../config/database.js';
+import { query, isDatabaseConnected, ensureDatabaseConnected } from '../config/database.js';
 import * as userRepository from '../repositories/user.repository.js';
 
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
@@ -35,7 +35,7 @@ export async function requestAdminSignup(req, res, next) {
     if (phone && !PHONE_RE.test(phone)) problems.push('Enter a valid phone number or leave it empty.');
     if (password.length < 8 || password.length > 128) problems.push('Password must be 8–128 characters.');
     if (problems.length) return res.status(400).json({ success: false, error: problems.join(' ') });
-    if (!isDatabaseConnected()) return res.status(503).json({ success: false, error: 'Sign-up is unavailable right now. Please try again later.' });
+    if (!(await ensureDatabaseConnected())) return res.status(503).json({ success: false, error: 'Sign-up is unavailable right now. Please try again later.' });
 
     // Same answer whether or not the email exists, so this form cannot be used to discover staff emails.
     const dupe = await query('SELECT 1 FROM users WHERE LOWER(email) = $1 LIMIT 1', [email]);

@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { OAuth2Client } from 'google-auth-library';
-import { query, isDatabaseConnected } from '../config/database.js';
+import { query, isDatabaseConnected, ensureDatabaseConnected } from '../config/database.js';
 import { config } from '../config/env.js';
 import * as userRepository from '../repositories/user.repository.js';
 
@@ -167,7 +167,9 @@ export async function loginUser(username, password, meta = {}, opts = {}) {
 
   // 3c. Members and trainers: 2-step sign-in. Step 1 = email/username + password (done above).
   //     Step 2 = their linked Google account (first sign-in links it). See completeTwoStepWithGoogle().
-  if (!opts.skipTwoStep && isDatabaseConnected() && TWO_STEP_ROLES.has(String(user.role || '').toLowerCase())) {
+  if (!opts.skipTwoStep && TWO_STEP_ROLES.has(String(user.role || '').toLowerCase())) {
+    // Fail closed: a member / trainer never gets a session without step 2.
+    if (!(await ensureDatabaseConnected())) throw Object.assign(new Error('Sign-in is unavailable right now. Please try again in a moment.'), { status: 503 });
     const linked = !!(await query('SELECT google_id FROM users WHERE id = $1', [user.id])).rows[0]?.google_id;
     const challenge = jwt.sign({ purpose: '2fa', uid: user.id, mode: linked ? 'verify' : 'link', jti: crypto.randomUUID() }, config.jwt.secret, { expiresIn: '10m' });
     userRepository.recordAuthAudit({
