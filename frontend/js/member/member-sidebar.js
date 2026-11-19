@@ -67,7 +67,7 @@ export function findPage(pageId) {
   return { item: null, parent: null };
 }
 
-const LOGO = '<svg class="ms-logo" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const LOGO = '<img class="ms-logo" src="/assets/brand/virtex-icon-128.png" alt="" aria-hidden="true" decoding="async">';
 
 function itemHtml(item, pageId) {
   const gap = item.gap ? ' ms-gap' : '';

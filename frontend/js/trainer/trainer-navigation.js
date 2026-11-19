@@ -294,7 +294,7 @@ export function breadcrumbs(page, title) {
 
 // ------------------------------------------------------------------ layout: markup
 
-const LOGO = '<svg class="tp-brand-logo" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="1.25" y="1.25" width="29.5" height="29.5" rx="9" fill="#13161f" stroke="#00e676" stroke-width="1.6"/><path d="M7.2 6.8h4.6L16 17.2V22h-2.1z" fill="#00e676"/><path d="M16 17.2l4.2-10.4h4.6L18.1 22H16z" fill="#22d3ee"/><path d="M6.2 25.6h5.4l1.3-2.3 1.7 4 1.4-1.7h9.8" stroke="#00e676" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const LOGO = '<img class="tp-brand-logo" src="/assets/brand/virtex-icon-128.png" alt="" aria-hidden="true" decoding="async">';
 const BELL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
 
 const LOGOUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
